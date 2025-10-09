@@ -16,7 +16,8 @@ This document explains how the marquee library builds seamless loops with GSAP, 
   - Vertical helper changes:
     - Recalculates `startY` on refresh and measures `spaceBefore[]` from geometry.
     - Uses an internal `ResizeObserver` to call `refresh(true)` on container size changes.
-    - Dynamically derives `paddingBottom` from the median inter-item gap when not provided, stabilizing the seam immediately after resizes.
+    - Re-derives `paddingBottom` from the median inter-item gap on every refresh when not explicitly provided, stabilizing the seam across breakpoint changes.
+    - Adds a `window.resize` listener so breakpoint-driven CSS gap changes trigger a refresh even when the container height does not change.
 - diagnostics.js
   - Non-invasive measurement utilities to log the real layout metrics and detect mismatches early.
 
@@ -36,11 +37,12 @@ This document explains how the marquee library builds seamless loops with GSAP, 
 - The seam gap (the gap when the last item loops back before the first) must match the typical inter-item spacing or the seam will look wrong.
 - Horizontal approach in this codebase:
   - The helper measures geometry and derives `paddingRight` (median inter-item gap) when not explicitly provided, matching seam to real spacing.
-  - Timing and spacing refresh automatically via a rAF-coalesced `ResizeObserver`.
+  - Timing and spacing refresh automatically via a rAF-coalesced `ResizeObserver` and a `window.resize` listener.
   - Align loop jump with the visible clip edge via `spaceBeforeX[0]` in `distanceToStart`.
 - Vertical approach:
   - Helper derives seam padding at refresh-time from measured median gaps when no explicit `paddingBottom` is passed.
   - This makes the seam update instantly after layout shifts (e.g., wrapping, font swaps) without rebuilding timelines.
+  - Refresh triggers: container `ResizeObserver` and `window.resize`.
 
 ## Why item margins can cause early teleport
 

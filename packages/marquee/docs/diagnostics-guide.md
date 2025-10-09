@@ -49,7 +49,7 @@ MarqueeDiagnostics.run('#test1');
 - Seam gap mismatch
 
   - Symptom: The seam visually looks wider/narrower than normal gaps.
-  - Fix: Prefer container `gap` for spacing. Seam padding is automatically set from the measured median gap inside the helpers at refresh-time.
+  - Fix: Prefer container `gap` for spacing. Seam padding is automatically set from the measured median gap inside the helpers at refresh-time and after breakpoint changes.
 
 - Early teleport (items disappear before fully exiting)
   - Symptom: runHorizontalExit shows wasFullyOut = false and overhangPx > 0.
@@ -86,6 +86,6 @@ MarqueeDiagnostics.run('#test1');
 ## Troubleshooting
 
 - Numbers look huge or negative: freeze transforms (see freeze snippet above) and re-run.
-- Vertical marquee not looping: ensure any custom `paddingBottom` is numeric if supplied; otherwise the helper derives it automatically on refresh.
+- Vertical marquee not looping: ensure any custom `paddingBottom` is numeric if supplied; otherwise the helper derives it automatically on each refresh and on window resize.
 - Mixed spacing (some items have different gaps): consider the median as the seam value or switch to a consistent container gap.
 - Large seamSpacingImpliedByHelper: expected (clone distance). Use exit check and visual seam as truth.

@@ -281,6 +281,11 @@ function verticalLoop(items, config) {
           ? items[0].parentNode
           : gsap.utils.toArray(center)[0] || items[0].parentNode,
       totalHeight,
+      // Detect if the user explicitly provided paddingBottom so that auto-derivation
+      // does not overwrite the author's intent on refresh.
+      userSpecifiedPaddingBottom =
+        Object.prototype.hasOwnProperty.call(config, 'paddingBottom') &&
+        !isNaN(parseFloat(config.paddingBottom)),
       getTotalHeight = () =>
         items[length - 1].offsetTop +
         (yPercents[length - 1] / 100) * heights[length - 1] -
@@ -307,22 +312,21 @@ function verticalLoop(items, config) {
           b1 = b2;
         });
         // Determine a seam gap from inter-item geometry (median of gaps), so the wrap includes
-        // a stable visual spacing that matches layout. Only set if user didn't provide paddingBottom.
-        if (
-          config.paddingBottom == null ||
-          isNaN(parseFloat(config.paddingBottom))
-        ) {
-          const gaps = spaceBefore.slice(1); // gaps between consecutive items
-          const positiveGaps = gaps.filter(
-            (g) => typeof g === 'number' && isFinite(g)
+        // a stable visual spacing that matches layout. If the user did not explicitly provide
+        // paddingBottom, always re-derive it on each refresh so breakpoint-driven CSS gap changes
+        // are reflected immediately even when the container's height is unchanged.
+        if (!userSpecifiedPaddingBottom) {
+          const gaps = spaceBefore.slice(1);
+          const numericGaps = gaps.filter(
+            (gapValue) => typeof gapValue === 'number' && isFinite(gapValue)
           );
-          if (positiveGaps.length > 0) {
-            const sorted = positiveGaps.slice().sort((a, b) => a - b);
-            const mid = Math.floor(sorted.length / 2);
+          if (numericGaps.length > 0) {
+            const sorted = numericGaps.slice().sort((a, b) => a - b);
+            const midpointIndex = Math.floor(sorted.length / 2);
             const median =
               sorted.length % 2 === 0
-                ? (sorted[mid - 1] + sorted[mid]) / 2
-                : sorted[mid];
+                ? (sorted[midpointIndex - 1] + sorted[midpointIndex]) / 2
+                : sorted[midpointIndex];
             config.paddingBottom = median > 0 ? median : 0;
           } else {
             config.paddingBottom = 0;
@@ -424,7 +428,8 @@ function verticalLoop(items, config) {
         });
       },
       proxy,
-      internalResizeObserver;
+      internalResizeObserver,
+      _vWindowResizeHandler;
     gsap.set(items, { y: 0 });
     populateHeights();
     populateTimeline();
@@ -434,6 +439,10 @@ function verticalLoop(items, config) {
       internalResizeObserver = new ResizeObserver(() => _vScheduleRefresh());
       internalResizeObserver.observe(container);
     }
+    // Also listen to window resize so that breakpoint-driven CSS gap changes trigger a refresh
+    // even when the container's own box size doesn't change.
+    _vWindowResizeHandler = () => _vScheduleRefresh();
+    window.addEventListener('resize', _vWindowResizeHandler, { passive: true });
     function toIndex(index, vars) {
       vars = vars || {};
       Math.abs(index - curIndex) > length / 2 &&
@@ -545,6 +554,12 @@ function verticalLoop(items, config) {
           internalResizeObserver.disconnect();
         } catch (e) {}
         internalResizeObserver = null;
+      }
+      if (_vWindowResizeHandler) {
+        try {
+          window.removeEventListener('resize', _vWindowResizeHandler);
+        } catch (e) {}
+        _vWindowResizeHandler = null;
       }
     };
     timeline = tl;

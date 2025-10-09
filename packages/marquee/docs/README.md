@@ -8,7 +8,7 @@ A lightweight, powerful JavaScript library for creating infinite scrolling marqu
 - **Automatic cloning** - Intelligently clones items 3 times by default to fill the container for seamless looping
 - **Handles variable dimensions** - Works with items of different sizes automatically
 - **Responsive** - Uses percentage-based transforms that adapt to window resizing; helpers re-measure on container and window resize
-- **Horizontal and vertical** - Support for both scroll directions; seam gap stabilizes dynamically after layout changes (both orientations)
+- **Horizontal and vertical** - Support for both scroll directions; seam gap stabilizes dynamically after layout and breakpoint changes (both orientations)
 - **Smooth pause/slow on hover** - Built-in interaction that eases speed changes
 - **Accessibility-friendly** - Respects `prefers-reduced-motion` settings, clones are hidden from screen readers
 - **Manual control** - Full JavaScript API for programmatic control
@@ -51,7 +51,7 @@ The library automatically applies `flex-shrink: 0` to items.
 
 Important spacing tip:
 
-- Prefer container `gap` for spacing. Avoid using margins on items. Margins can make items appear to “teleport” before they fully leave the container because the loop boundary is computed differently. Using `gap` avoids that issue and matches the loop seam spacing automatically. Seam gaps are derived from measured geometry after resizes by the helpers (no wrapper configuration needed).
+- Prefer container `gap` for spacing. Avoid using margins on items. Margins can make items appear to “teleport” before they fully leave the container because the loop boundary is computed differently. Using `gap` avoids that issue and matches the loop seam spacing automatically. Seam gaps are derived from measured geometry after resizes and breakpoint changes by the helpers (no wrapper configuration needed).
 
 ## How It Works
 
@@ -469,7 +469,7 @@ Use CSS media queries with inline styles:
 </div>
 ```
 
-The helpers now auto-refresh on container/window resize, so manual adjustments are rarely needed.
+The helpers now auto-refresh on container/window resize, so manual adjustments are rarely needed. Vertical marquees also re-derive seam padding on each refresh unless an explicit `paddingBottom` is provided.
 
 ## Performance Tips
 
