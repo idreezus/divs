@@ -1,0 +1,23 @@
+{
+  "name": "marquee",
+  "version": "1.0.0-beta",
+  "description": "A seamless marquee animation library powered by GSAP",
+  "main": "marquee.js",
+  "type": "module",
+  "scripts": {
+    "build": "rollup -c",
+    "build:watch": "rollup -c --watch",
+    "release": "BUILD_MODE=release rollup -c"
+  },
+  "keywords": [
+    "marquee",
+    "animation",
+    "gsap",
+    "scroll"
+  ],
+  "author": "Idrees Isse (https://github.com/idreezus)",
+  "license": "Apache-2.0",
+  "peerDependencies": {
+    "gsap": "^3.0.0"
+  }
+}

@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GSAP Marquee Library - Test Page</title>
+
+    <!-- Load GSAP from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+
+    <!-- Load marquee library as ES6 module -->
+    <script type="module" src="./src/marquee.js"></script>
+
+    <!-- Load diagnostics (non-module for easy global access) -->
+    <script src="./src/diagnostics.js"></script>
+
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+          Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        padding: 40px;
+        background: #0f0f0f;
+        color: #ffffff;
+      }
+
+      h1 {
+        margin-bottom: 10px;
+        font-size: 32px;
+      }
+
+      .intro {
+        margin-bottom: 40px;
+        color: #a0a0a0;
+        max-width: 800px;
+      }
+
+      .test-section {
+        margin-bottom: 60px;
+        min-height: 30rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .test-section h2 {
+        margin-bottom: 10px;
+        font-size: 20px;
+        color: #ffffff;
+      }
+
+      .test-section p {
+        margin-bottom: 20px;
+        color: #a0a0a0;
+        font-size: 14px;
+      }
+
+      /* Marquee containers - required styles */
+      [data-marquee] {
+        display: flex;
+        overflow: hidden;
+        border: 2px dashed #333;
+        padding: 20px;
+        gap: 20px; /* Use container gap for spacing instead of item margins */
+        background: #1a1a1a;
+        border-radius: 8px;
+      }
+
+      [data-marquee='vertical'] {
+        flex-direction: column;
+        height: 400px;
+      }
+
+      /* Marquee items - example styling */
+      [data-marquee-item] {
+        padding: 20px 30px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 8px;
+        font-size: 18px;
+        font-weight: 600;
+        /* white-space: nowrap; */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      }
+
+      /* Alternative gradient styles for variety */
+      .gradient-orange {
+        background: linear-gradient(
+          135deg,
+          #f093fb 0%,
+          #f5576c 100%
+        ) !important;
+      }
+
+      .gradient-green {
+        background: linear-gradient(
+          135deg,
+          #4facfe 0%,
+          #00f2fe 100%
+        ) !important;
+      }
+
+      .gradient-yellow {
+        background: linear-gradient(
+          135deg,
+          #fa709a 0%,
+          #fee140 100%
+        ) !important;
+      }
+
+      /* Variable width items for testing */
+      .item-small {
+        padding: 20px 20px !important;
+        font-size: 14px !important;
+      }
+
+      .item-large {
+        padding: 20px 60px !important;
+        font-size: 24px !important;
+      }
+
+      /* Control buttons for manual testing */
+      .controls {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+      }
+
+      .controls button {
+        padding: 10px 20px;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: background 0.2s;
+      }
+
+      .controls button:hover {
+        background: #5568d3;
+      }
+
+      .controls button:active {
+        background: #4451a8;
+      }
+
+      code {
+        background: #2a2a2a;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: 'Courier New', monospace;
+        font-size: 13px;
+        color: #4facfe;
+      }
+
+      /* Test-specific overrides */
+      /* Allow wrapping for vertical stress test H */
+      #testH [data-marquee-item] {
+        white-space: normal;
+      }
+
+      .control-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+
+      .control-row label {
+        font-size: 13px;
+        color: #bbb;
+      }
+
+      .narrow {
+        width: 320px;
+      }
+
+      /* Font swap simulation */
+      .alt-font body,
+      body.alt-font {
+        font-family: Georgia, 'Times New Roman', serif;
+      }
+      body.alt-font [data-marquee-item] {
+        letter-spacing: 0.8px;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>GSAP Marquee Library - Test Page</h1>
+    <p class="intro">
+      This page tests all features of the marquee library. Open the browser
+      console to test manual controls using
+      <code>window.Marquee.get(element)</code>.
+    </p>
+
+    <!-- New Test A: Effect=pause with smooth ramp (defaults) -->
+    <div class="test-section">
+      <h2>Test A: Pause Effect (Smooth Ramp to Pause)</h2>
+      <p>
+        data-marquee-effect="pause". Ramps down, then pauses. Defaults used
+        (ramp-ratio≈0.1, total pause ramp≈0.4s).
+      </p>
+
+      <div data-marquee="true" data-marquee-effect="pause" id="testA">
+        <div data-marquee-item="true">Pause A1</div>
+        <div data-marquee-item="true" class="gradient-orange">Pause A2</div>
+        <div data-marquee-item="true" class="gradient-green">Pause A3</div>
+        <div data-marquee-item="true" class="gradient-yellow">Pause A4</div>
+      </div>
+    </div>
+
+    <!-- Test H: Vertical Stress (wrapping, gap, width, font-size) -->
+    <div class="test-section">
+      <h2>Test H: Vertical Stress (Wrapping + Gap + Width + Font Size)</h2>
+      <p>
+        Allows line wrapping (white-space: normal), adjustable container width
+        and gap, and dynamic font size. Stresses vertical seam correction on
+        resize.
+      </p>
+
+      <div data-marquee="vertical" id="testH" style="width: 520px">
+        <div data-marquee-item="true">
+          This is a medium sentence that may wrap when narrow.
+        </div>
+        <div data-marquee-item="true" class="gradient-orange">
+          A longer piece of content that should definitely wrap at smaller
+          widths.
+        </div>
+        <div data-marquee-item="true" class="gradient-green">Short</div>
+        <div data-marquee-item="true" class="gradient-yellow">
+          Another medium length line to create variety in heights.
+        </div>
+        <div data-marquee-item="true">Tiny</div>
+      </div>
+
+      <div class="control-row">
+        <label for="testH-width">Width:</label>
+        <input
+          id="testH-width"
+          type="range"
+          min="240"
+          max="900"
+          step="10"
+          value="520"
+        />
+        <span id="testH-width-val">520px</span>
+
+        <label for="testH-gap">Gap:</label>
+        <input
+          id="testH-gap"
+          type="range"
+          min="0"
+          max="80"
+          step="2"
+          value="20"
+        />
+        <span id="testH-gap-val">20px</span>
+
+        <label for="testH-font">Font size:</label>
+        <input
+          id="testH-font"
+          type="range"
+          min="12"
+          max="48"
+          step="1"
+          value="18"
+        />
+        <span id="testH-font-val">18px</span>
+      </div>
+    </div>
+
+    <!-- Test I: Horizontal Gap Hot-Swap (observe seam behavior) -->
+    <div class="test-section">
+      <h2>Test I: Horizontal Gap Hot-Swap</h2>
+      <p>
+        Adjusts container gap at runtime to stress seam behavior. Seam padding
+        for horizontal is measured at init, so changes may not fully sync at the
+        seam.
+      </p>
+
+      <div data-marquee="true" id="testI">
+        <div data-marquee-item="true">Gap 1</div>
+        <div data-marquee-item="true" class="gradient-orange">Gap 2</div>
+        <div data-marquee-item="true" class="gradient-green">Gap 3</div>
+        <div data-marquee-item="true" class="gradient-yellow">Gap 4</div>
+        <div data-marquee-item="true">Gap 5</div>
+      </div>
+
+      <div class="control-row">
+        <label for="testI-gap">Gap:</label>
+        <input
+          id="testI-gap"
+          type="range"
+          min="0"
+          max="100"
+          step="2"
+          value="20"
+        />
+        <span id="testI-gap-val">20px</span>
+      </div>
+    </div>
+
+    <!-- Test J: Font Swap Simulation (metrics change) -->
+    <div class="test-section">
+      <h2>Test J: Font Swap Simulation</h2>
+      <p>
+        Toggles a drastically different font and letter-spacing to simulate late
+        font load metric changes. Useful to observe immediate seam updates,
+        especially on vertical.
+      </p>
+
+      <div data-marquee="vertical" id="testJ">
+        <div data-marquee-item="true">Font Swap J1 medium text</div>
+        <div data-marquee-item="true" class="gradient-orange">
+          Font Swap J2 longer sample
+        </div>
+        <div data-marquee-item="true" class="gradient-green">J3 short</div>
+        <div data-marquee-item="true" class="gradient-yellow">
+          J4 medium length line here
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="toggle-font">Toggle Font Swap</button>
+      </div>
+    </div>
+
+    <!-- Test K: Vertical Content Mutation (height changes) -->
+    <div class="test-section">
+      <h2>Test K: Vertical Content Mutation</h2>
+      <p>
+        Randomly mutates item text content to change heights over time. Vertical
+        helper should refresh and keep seam stable.
+      </p>
+
+      <div data-marquee="vertical" id="testK">
+        <div data-marquee-item="true">Mutable K1</div>
+        <div data-marquee-item="true" class="gradient-orange">Mutable K2</div>
+        <div data-marquee-item="true" class="gradient-green">Mutable K3</div>
+        <div data-marquee-item="true" class="gradient-yellow">Mutable K4</div>
+      </div>
+
+      <div class="controls">
+        <button id="k-start">Start Mutation</button>
+        <button id="k-stop">Stop Mutation</button>
+      </div>
+    </div>
+
+    <!-- Test L: Padding Toggle (container padding changes) -->
+    <div class="test-section">
+      <h2>Test L: Container Padding Toggle</h2>
+      <p>
+        Toggles container padding to stress geometry changes at the clip edge.
+      </p>
+
+      <div data-marquee="true" id="testL1">
+        <div data-marquee-item="true">Padding L1</div>
+        <div data-marquee-item="true" class="gradient-orange">Padding L2</div>
+        <div data-marquee-item="true" class="gradient-green">Padding L3</div>
+      </div>
+      <div data-marquee="vertical" id="testL2">
+        <div data-marquee-item="true">Padding L4</div>
+        <div data-marquee-item="true" class="gradient-orange">Padding L5</div>
+        <div data-marquee-item="true" class="gradient-green">Padding L6</div>
+      </div>
+
+      <div class="controls">
+        <button id="toggle-padding">Toggle Padding (both)</button>
+      </div>
+    </div>
+
+    <!-- Test M: High Speed Stress -->
+    <div class="test-section">
+      <h2>Test M: High Speed Stress</h2>
+      <p>Very high speeds to stress reposition timing.</p>
+
+      <div data-marquee="true" data-marquee-speed="6" id="testM1">
+        <div data-marquee-item="true">Speed M1</div>
+        <div data-marquee-item="true" class="gradient-orange">Speed M2</div>
+        <div data-marquee-item="true" class="gradient-green">Speed M3</div>
+      </div>
+      <div data-marquee="vertical" data-marquee-speed="4" id="testM2">
+        <div data-marquee-item="true">Speed M4</div>
+        <div data-marquee-item="true" class="gradient-orange">Speed M5</div>
+        <div data-marquee-item="true" class="gradient-green">Speed M6</div>
+      </div>
+    </div>
+
+    <!-- Test N: Single Item Horizontal (force cloning) -->
+    <div class="test-section">
+      <h2>Test N: Single Item Horizontal</h2>
+      <p>
+        Single item triggers cloning; verifies seamlessness with minimal
+        content.
+      </p>
+
+      <div data-marquee="true" id="testN">
+        <div data-marquee-item="true" class="item-large gradient-yellow">
+          Only One
+        </div>
+      </div>
+    </div>
+
+    <!-- New Test B: Effect=pause with custom ramp duration and mid-ratio -->
+    <div class="test-section">
+      <h2>Test B: Pause Effect (Custom Ramp)</h2>
+      <p>
+        Custom total pause duration and mid-ramp ratio before pausing.
+        <code>data-marquee-pause-duration="0.8"</code>,
+        <code>data-marquee-ramp-ratio="0.15"</code>
+      </p>
+
+      <div
+        data-marquee="true"
+        data-marquee-effect="pause"
+        data-marquee-pause-duration="0.8"
+        data-marquee-ramp-ratio="0.15"
+        id="testB"
+      >
+        <div data-marquee-item="true">Pause B1</div>
+        <div data-marquee-item="true" class="gradient-orange">Pause B2</div>
+        <div data-marquee-item="true" class="gradient-green">Pause B3</div>
+        <div data-marquee-item="true" class="gradient-yellow">Pause B4</div>
+      </div>
+    </div>
+
+    <!-- New Test C: Effect=slow (container trigger) -->
+    <div class="test-section">
+      <h2>Test C: Slow Effect (Container Trigger)</h2>
+      <p>
+        data-marquee-effect="slow" with
+        <code>data-marquee-ramp-ratio="0.25"</code>. Uses default ramp
+        durations/eases.
+      </p>
+
+      <div
+        data-marquee="true"
+        data-marquee-effect="slow"
+        data-marquee-ramp-ratio="0.25"
+        id="testC"
+      >
+        <div data-marquee-item="true">Slow C1</div>
+        <div data-marquee-item="true" class="gradient-orange">Slow C2</div>
+        <div data-marquee-item="true" class="gradient-green">Slow C3</div>
+        <div data-marquee-item="true" class="gradient-yellow">Slow C4</div>
+      </div>
+    </div>
+
+    <!-- New Test D: Slow Effect (items trigger) with custom in/out durations -->
+    <div class="test-section">
+      <h2>Test D: Slow Effect (Items Trigger, Custom Durations)</h2>
+      <p>
+        Only slows when hovering an item. Custom ramp in/out durations.
+        <code>data-marquee-effect-trigger="items"</code>,
+        <code>data-marquee-slow-duration-in="0.5"</code>,
+        <code>data-marquee-slow-duration-out="0.25"</code>
+      </p>
+
+      <div
+        data-marquee="true"
+        data-marquee-effect="slow"
+        data-marquee-effect-trigger="items"
+        data-marquee-ramp-ratio="0.2"
+        data-marquee-slow-duration-in="0.5"
+        data-marquee-slow-duration-out="0.25"
+        id="testD"
+      >
+        <div data-marquee-item="true">Slow D1</div>
+        <div data-marquee-item="true" class="gradient-orange">Slow D2</div>
+        <div data-marquee-item="true" class="gradient-green">Slow D3</div>
+        <div data-marquee-item="true" class="gradient-yellow">Slow D4</div>
+      </div>
+    </div>
+
+    <!-- New Test E: Vertical + Pause Effect -->
+    <div class="test-section">
+      <h2>Test E: Vertical + Pause Effect</h2>
+      <p>
+        Vertical marquee that ramps to a pause on hover. Custom total pause ramp
+        <code>data-marquee-pause-duration="0.6"</code>.
+      </p>
+
+      <div
+        data-marquee="vertical"
+        data-marquee-effect="pause"
+        data-marquee-pause-duration="0.6"
+        id="testE"
+      >
+        <div data-marquee-item="true">Vertical Pause E1</div>
+        <div data-marquee-item="true" class="gradient-orange">
+          Vertical Pause E2
+        </div>
+        <div data-marquee-item="true" class="gradient-green">
+          Vertical Pause E3
+        </div>
+        <div data-marquee-item="true" class="gradient-yellow">
+          Vertical Pause E4
+        </div>
+        <div data-marquee-item="true">Vertical Pause E5</div>
+      </div>
+    </div>
+
+    <!-- New Test F: Reversed + Slow Effect -->
+    <div class="test-section">
+      <h2>Test F: Reversed + Slow Effect</h2>
+      <p>
+        Reversed direction with slow effect on container hover.
+        <code>data-marquee-ramp-ratio="0.2"</code>.
+      </p>
+
+      <div
+        data-marquee="true"
+        data-marquee-reverse
+        data-marquee-effect="slow"
+        data-marquee-ramp-ratio="0.2"
+        data-marquee-slow-duration-in="0.4"
+        data-marquee-slow-duration-out="0.4"
+        id="testF"
+      >
+        <div data-marquee-item="true">Reversed Slow F1</div>
+        <div data-marquee-item="true" class="gradient-orange">
+          Reversed Slow F2
+        </div>
+        <div data-marquee-item="true" class="gradient-green">
+          Reversed Slow F3
+        </div>
+        <div data-marquee-item="true" class="gradient-yellow">
+          Reversed Slow F4
+        </div>
+      </div>
+    </div>
+
+    <!-- New Test G: Controlled Pause (simulate enter/leave) -->
+    <div class="test-section">
+      <h2>Test G: Controlled Pause (Simulated Hover)</h2>
+      <p>
+        Buttons simulate enter/leave to test mid-ramp behavior. Total pause ramp
+        <code>data-marquee-pause-duration="1.2"</code>, mid-ratio
+        <code>data-marquee-ramp-ratio="0.05"</code>.
+      </p>
+
+      <div
+        data-marquee="true"
+        data-marquee-effect="pause"
+        data-marquee-pause-duration="1.2"
+        data-marquee-ramp-ratio="0.05"
+        id="testG"
+      >
+        <div data-marquee-item="true">Controlled G1</div>
+        <div data-marquee-item="true" class="gradient-orange">
+          Controlled G2
+        </div>
+        <div data-marquee-item="true" class="gradient-green">Controlled G3</div>
+        <div data-marquee-item="true" class="gradient-yellow">
+          Controlled G4
+        </div>
+      </div>
+
+      <div class="controls">
+        <button
+          onclick="document.getElementById('testG').dispatchEvent(new Event('mouseenter'))"
+        >
+          Simulate Enter
+        </button>
+        <button
+          onclick="document.getElementById('testG').dispatchEvent(new Event('mouseleave'))"
+        >
+          Simulate Leave
+        </button>
+      </div>
+    </div>
+
+    <!-- Test 1: Basic Horizontal Marquee -->
+    <div class="test-section">
+      <h2>Test 1: Basic Horizontal Marquee</h2>
+      <p>Default settings: speed = 1, infinite loop, left-to-right direction</p>
+
+      <div data-marquee="true" id="test1">
+        <div data-marquee-item="true">Logo 1</div>
+        <div data-marquee-item="true" class="gradient-orange">Logo 2</div>
+        <div data-marquee-item="true" class="gradient-green">Logo 3</div>
+        <div data-marquee-item="true" class="gradient-yellow">Logo 4</div>
+        <div data-marquee-item="true">Logo 5</div>
+      </div>
+    </div>
+
+    <!-- Test 2: Fast Horizontal Marquee -->
+    <div class="test-section">
+      <h2>Test 2: Fast Horizontal Marquee</h2>
+      <p>Speed set to 3x the default (approximately 300 pixels per second)</p>
+
+      <div data-marquee="true" data-marquee-speed="3" id="test2">
+        <div data-marquee-item="true">Fast Item 1</div>
+        <div data-marquee-item="true" class="gradient-orange">Fast Item 2</div>
+        <div data-marquee-item="true" class="gradient-green">Fast Item 3</div>
+        <div data-marquee-item="true" class="gradient-yellow">Fast Item 4</div>
+        <div data-marquee-item="true">Fast Item 5</div>
+      </div>
+    </div>
+
+    <!-- Test 3: Reversed Horizontal Marquee -->
+    <div class="test-section">
+      <h2>Test 3: Reversed Horizontal Marquee</h2>
+      <p>
+        Direction reversed using <code>data-marquee-reverse</code> attribute
+      </p>
+
+      <div data-marquee="true" data-marquee-reverse id="test3">
+        <div data-marquee-item="true">Reversed 1</div>
+        <div data-marquee-item="true" class="gradient-orange">Reversed 2</div>
+        <div data-marquee-item="true" class="gradient-green">Reversed 3</div>
+        <div data-marquee-item="true" class="gradient-yellow">Reversed 4</div>
+        <div data-marquee-item="true">Reversed 5</div>
+      </div>
+    </div>
+
+    <!-- Test 5: Variable Width Items -->
+    <div class="test-section">
+      <h2>Test 5: Variable Width Items</h2>
+      <p>
+        Tests animation with items of different sizes. The library should handle
+        this smoothly.
+      </p>
+
+      <div data-marquee="true" data-marquee-speed="1.5" id="test5">
+        <div data-marquee-item="true" class="item-small">Small</div>
+        <div data-marquee-item="true" class="item-large gradient-orange">
+          Large Item
+        </div>
+        <div data-marquee-item="true">Normal</div>
+        <div data-marquee-item="true" class="item-large gradient-green">
+          Another Large
+        </div>
+        <div data-marquee-item="true" class="item-small gradient-yellow">
+          Tiny
+        </div>
+        <div data-marquee-item="true">Regular</div>
+        <div data-marquee-item="true" class="item-large">Big One</div>
+      </div>
+    </div>
+
+    <!-- Test 6: Vertical Marquee -->
+    <div class="test-section">
+      <h2>Test 6: Vertical Marquee</h2>
+      <p>
+        Vertical scrolling marquee using <code>data-marquee="vertical"</code>
+      </p>
+
+      <div data-marquee="vertical" data-marquee-speed="1.5" id="test6">
+        <div data-marquee-item="true">Vertical Item 1</div>
+        <div data-marquee-item="true" class="gradient-orange">
+          Vertical Item 2
+        </div>
+        <div data-marquee-item="true" class="gradient-green">
+          Vertical Item 3
+        </div>
+        <div data-marquee-item="true" class="gradient-yellow">
+          Vertical Item 4
+        </div>
+        <div data-marquee-item="true">Vertical Item 5</div>
+        <div data-marquee-item="true" class="gradient-orange">
+          Vertical Item 6
+        </div>
+        <div data-marquee-item="true" class="gradient-green">
+          Vertical Item 7
+        </div>
+      </div>
+    </div>
+
+    <!-- Test 7: Multiple Marquees on Same Page -->
+    <div class="test-section">
+      <h2>Test 7: Multiple Marquees</h2>
+      <p>
+        Two independent marquees running simultaneously with different speeds
+      </p>
+
+      <div
+        data-marquee="true"
+        data-marquee-speed="2"
+        id="test7a"
+        style="margin-bottom: 20px"
+      >
+        <div data-marquee-item="true">Multi A1</div>
+        <div data-marquee-item="true" class="gradient-orange">Multi A2</div>
+        <div data-marquee-item="true" class="gradient-green">Multi A3</div>
+        <div data-marquee-item="true" class="gradient-yellow">Multi A4</div>
+      </div>
+
+      <div
+        data-marquee="true"
+        data-marquee-speed="0.5"
+        data-marquee-reverse
+        id="test7b"
+      >
+        <div data-marquee-item="true">Multi B1</div>
+        <div data-marquee-item="true" class="gradient-yellow">Multi B2</div>
+        <div data-marquee-item="true" class="gradient-green">Multi B3</div>
+        <div data-marquee-item="true" class="gradient-orange">Multi B4</div>
+      </div>
+    </div>
+
+    <!-- Test 8: Manual Control via JavaScript -->
+    <div class="test-section">
+      <h2>Test 8: Manual Control</h2>
+      <p>
+        Use the buttons below or open the console and try:
+        <code
+          >window.Marquee.get(document.getElementById('test8')).pause()</code
+        >
+      </p>
+
+      <div data-marquee="true" id="test8">
+        <div data-marquee-item="true">Controllable 1</div>
+        <div data-marquee-item="true" class="gradient-orange">
+          Controllable 2
+        </div>
+        <div data-marquee-item="true" class="gradient-green">
+          Controllable 3
+        </div>
+        <div data-marquee-item="true" class="gradient-yellow">
+          Controllable 4
+        </div>
+        <div data-marquee-item="true">Controllable 5</div>
+      </div>
+
+      <div class="controls">
+        <button
+          onclick="window.Marquee.get(document.getElementById('test8')).play()"
+        >
+          Play
+        </button>
+        <button
+          onclick="window.Marquee.get(document.getElementById('test8')).pause()"
+        >
+          Pause
+        </button>
+      </div>
+    </div>
+
+    <script>
+      // Log initialization confirmation to console
+      console.log(
+        '%cGSAP Marquee Library Test Page',
+        'font-size: 20px; color: #667eea; font-weight: bold;'
+      );
+      console.log('All marquees initialized. Try these commands:');
+      console.log(
+        '  window.Marquee.get(document.getElementById("test1")).pause()'
+      );
+      console.log(
+        '  window.Marquee.get(document.getElementById("test1")).play()'
+      );
+      console.log('  window.Marquee.init() // Re-initialize all marquees');
+      console.log('Diagnostics ready. Try:');
+      console.log('  MarqueeDiagnostics.runAll()');
+      console.log('  MarqueeDiagnostics.run("#test1")');
+
+      // Test H controls
+      const hContainer = document.getElementById('testH');
+      const hWidth = document.getElementById('testH-width');
+      const hWidthVal = document.getElementById('testH-width-val');
+      const hGap = document.getElementById('testH-gap');
+      const hGapVal = document.getElementById('testH-gap-val');
+      const hFont = document.getElementById('testH-font');
+      const hFontVal = document.getElementById('testH-font-val');
+      if (hContainer) {
+        hWidth.addEventListener('input', () => {
+          hContainer.style.width = hWidth.value + 'px';
+          hWidthVal.textContent = hContainer.style.width;
+        });
+        hGap.addEventListener('input', () => {
+          hContainer.style.gap = hGap.value + 'px';
+          hGapVal.textContent = hGap.value + 'px';
+        });
+        hFont.addEventListener('input', () => {
+          const size = hFont.value + 'px';
+          hFontVal.textContent = size;
+          Array.from(
+            hContainer.querySelectorAll('[data-marquee-item]')
+          ).forEach((el) => (el.style.fontSize = size));
+        });
+      }
+
+      // Test I controls (horizontal gap hot-swap)
+      const iContainer = document.getElementById('testI');
+      const iGap = document.getElementById('testI-gap');
+      const iGapVal = document.getElementById('testI-gap-val');
+      if (iContainer) {
+        iGap.addEventListener('input', () => {
+          iContainer.style.gap = iGap.value + 'px';
+          iGapVal.textContent = iGap.value + 'px';
+        });
+      }
+
+      // Test J: font swap toggle
+      const toggleFontBtn = document.getElementById('toggle-font');
+      if (toggleFontBtn) {
+        toggleFontBtn.addEventListener('click', () => {
+          document.body.classList.toggle('alt-font');
+        });
+      }
+
+      // Test K: content mutation for vertical
+      const kContainer = document.getElementById('testK');
+      const kStart = document.getElementById('k-start');
+      const kStop = document.getElementById('k-stop');
+      let kTimer = null;
+      const randomText = () => {
+        const base = [
+          'short',
+          'a bit longer text sample',
+          'this is a considerably longer line that should change height',
+          'tiny',
+          'medium length content',
+        ];
+        return base[Math.floor(Math.random() * base.length)];
+      };
+      if (kContainer && kStart && kStop) {
+        kStart.addEventListener('click', () => {
+          if (kTimer) return;
+          kTimer = setInterval(() => {
+            const items = Array.from(
+              kContainer.querySelectorAll('[data-marquee-item]')
+            );
+            const pick = items[Math.floor(Math.random() * items.length)];
+            if (pick) {
+              pick.textContent = 'Mutable ' + randomText();
+            }
+          }, 1200);
+        });
+        kStop.addEventListener('click', () => {
+          if (kTimer) {
+            clearInterval(kTimer);
+            kTimer = null;
+          }
+        });
+      }
+
+      // Test L: toggle container padding for both containers
+      const l1 = document.getElementById('testL1');
+      const l2 = document.getElementById('testL2');
+      const togglePaddingBtn = document.getElementById('toggle-padding');
+      let padded = true;
+      const applyPadding = (el, on) => {
+        if (!el) return;
+        el.style.padding = on ? '20px' : '0px';
+      };
+      if (togglePaddingBtn) {
+        togglePaddingBtn.addEventListener('click', () => {
+          padded = !padded;
+          applyPadding(l1, padded);
+          applyPadding(l2, padded);
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "name": "divs",
+  "version": "1.0.0",
+  "description": "A collection of platform-agnostic component libraries for modern web development",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r build",
+    "build:marquee": "pnpm --filter marquee build",
+    "dev:marquee": "pnpm --filter marquee build:watch",
+    "release": "pnpm -r release",
+    "release:marquee": "pnpm --filter marquee release"
+  },
+  "keywords": [
+    "components",
+    "library",
+    "cdn",
+    "webflow"
+  ],
+  "author": "Idrees Isse (https://github.com/idreezus)",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@rollup/plugin-terser": "^0.4.4",
+    "rollup": "^4.9.6"
+  }
+}
