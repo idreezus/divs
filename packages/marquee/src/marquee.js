@@ -90,7 +90,7 @@ class MarqueeInstance {
       return;
     }
 
-    // Get number of times to clone (default is 3)
+    // Determines how many sets of items are cloned to ensure a seamless loop
     const cloneCountAttribute = this.container.getAttribute(
       CONFIG.cloning.attributes.cloneCount
     );
@@ -572,8 +572,10 @@ class MarqueeInstance {
 
 // Finds and initializes all marquees on the page
 function initMarquees() {
-  // Query all elements with data-marquee attribute (matches both "true" and "vertical")
-  const containers = document.querySelectorAll('[data-marquee]');
+  // Query only elements explicitly marked as horizontal or vertical
+  const containers = document.querySelectorAll(
+    '[data-marquee-direction="horizontal"], [data-marquee-direction="vertical"]'
+  );
 
   containers.forEach((container) => {
     // Skip if this container already has an instance

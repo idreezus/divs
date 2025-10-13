@@ -61,7 +61,7 @@
       }
 
       /* Marquee containers - required styles */
-      [data-marquee] {
+      [data-marquee-direction] {
         display: flex;
         overflow: hidden;
         border: 2px dashed #333;
@@ -71,7 +71,7 @@
         border-radius: 8px;
       }
 
-      [data-marquee='vertical'] {
+      [data-marquee-direction='vertical'] {
         flex-direction: column;
         height: 400px;
       }
@@ -210,7 +210,11 @@
         (ramp-ratio≈0.1, total pause ramp≈0.4s).
       </p>
 
-      <div data-marquee="true" data-marquee-effect="pause" id="testA">
+      <div
+        data-marquee-direction="horizontal"
+        data-marquee-effect="pause"
+        id="testA"
+      >
         <div data-marquee-item="true">Pause A1</div>
         <div data-marquee-item="true" class="gradient-orange">Pause A2</div>
         <div data-marquee-item="true" class="gradient-green">Pause A3</div>
@@ -227,7 +231,7 @@
         resize.
       </p>
 
-      <div data-marquee="vertical" id="testH" style="width: 520px">
+      <div data-marquee-direction="vertical" id="testH" style="width: 520px">
         <div data-marquee-item="true">
           This is a medium sentence that may wrap when narrow.
         </div>
@@ -287,7 +291,7 @@
         seam.
       </p>
 
-      <div data-marquee="true" id="testI">
+      <div data-marquee-direction="horizontal" id="testI">
         <div data-marquee-item="true">Gap 1</div>
         <div data-marquee-item="true" class="gradient-orange">Gap 2</div>
         <div data-marquee-item="true" class="gradient-green">Gap 3</div>
@@ -318,7 +322,7 @@
         especially on vertical.
       </p>
 
-      <div data-marquee="vertical" id="testJ">
+      <div data-marquee-direction="vertical" id="testJ">
         <div data-marquee-item="true">Font Swap J1 medium text</div>
         <div data-marquee-item="true" class="gradient-orange">
           Font Swap J2 longer sample
@@ -342,7 +346,7 @@
         helper should refresh and keep seam stable.
       </p>
 
-      <div data-marquee="vertical" id="testK">
+      <div data-marquee-direction="vertical" id="testK">
         <div data-marquee-item="true">Mutable K1</div>
         <div data-marquee-item="true" class="gradient-orange">Mutable K2</div>
         <div data-marquee-item="true" class="gradient-green">Mutable K3</div>
@@ -362,12 +366,12 @@
         Toggles container padding to stress geometry changes at the clip edge.
       </p>
 
-      <div data-marquee="true" id="testL1">
+      <div data-marquee-direction="horizontal" id="testL1">
         <div data-marquee-item="true">Padding L1</div>
         <div data-marquee-item="true" class="gradient-orange">Padding L2</div>
         <div data-marquee-item="true" class="gradient-green">Padding L3</div>
       </div>
-      <div data-marquee="vertical" id="testL2">
+      <div data-marquee-direction="vertical" id="testL2">
         <div data-marquee-item="true">Padding L4</div>
         <div data-marquee-item="true" class="gradient-orange">Padding L5</div>
         <div data-marquee-item="true" class="gradient-green">Padding L6</div>
@@ -383,12 +387,16 @@
       <h2>Test M: High Speed Stress</h2>
       <p>Very high speeds to stress reposition timing.</p>
 
-      <div data-marquee="true" data-marquee-speed="6" id="testM1">
+      <div
+        data-marquee-direction="horizontal"
+        data-marquee-speed="6"
+        id="testM1"
+      >
         <div data-marquee-item="true">Speed M1</div>
         <div data-marquee-item="true" class="gradient-orange">Speed M2</div>
         <div data-marquee-item="true" class="gradient-green">Speed M3</div>
       </div>
-      <div data-marquee="vertical" data-marquee-speed="4" id="testM2">
+      <div data-marquee-direction="vertical" data-marquee-speed="4" id="testM2">
         <div data-marquee-item="true">Speed M4</div>
         <div data-marquee-item="true" class="gradient-orange">Speed M5</div>
         <div data-marquee-item="true" class="gradient-green">Speed M6</div>
@@ -403,7 +411,7 @@
         content.
       </p>
 
-      <div data-marquee="true" id="testN">
+      <div data-marquee-direction="horizontal" id="testN">
         <div data-marquee-item="true" class="item-large gradient-yellow">
           Only One
         </div>
@@ -416,14 +424,14 @@
       <p>
         Custom total pause duration and mid-ramp ratio before pausing.
         <code>data-marquee-pause-duration="0.8"</code>,
-        <code>data-marquee-ramp-ratio="0.15"</code>
+        <code>data-marquee-speed-ramp-ratio="0.15"</code>
       </p>
 
       <div
-        data-marquee="true"
+        data-marquee-direction="horizontal"
         data-marquee-effect="pause"
         data-marquee-pause-duration="0.8"
-        data-marquee-ramp-ratio="0.15"
+        data-marquee-speed-ramp-ratio="0.15"
         id="testB"
       >
         <div data-marquee-item="true">Pause B1</div>
@@ -438,14 +446,14 @@
       <h2>Test C: Slow Effect (Container Trigger)</h2>
       <p>
         data-marquee-effect="slow" with
-        <code>data-marquee-ramp-ratio="0.25"</code>. Uses default ramp
+        <code>data-marquee-speed-ramp-ratio="0.25"</code>. Uses default ramp
         durations/eases.
       </p>
 
       <div
-        data-marquee="true"
+        data-marquee-direction="horizontal"
         data-marquee-effect="slow"
-        data-marquee-ramp-ratio="0.25"
+        data-marquee-speed-ramp-ratio="0.25"
         id="testC"
       >
         <div data-marquee-item="true">Slow C1</div>
@@ -466,10 +474,10 @@
       </p>
 
       <div
-        data-marquee="true"
+        data-marquee-direction="horizontal"
         data-marquee-effect="slow"
         data-marquee-effect-trigger="items"
-        data-marquee-ramp-ratio="0.2"
+        data-marquee-speed-ramp-ratio="0.2"
         data-marquee-slow-duration-in="0.5"
         data-marquee-slow-duration-out="0.25"
         id="testD"
@@ -490,7 +498,7 @@
       </p>
 
       <div
-        data-marquee="vertical"
+        data-marquee-direction="vertical"
         data-marquee-effect="pause"
         data-marquee-pause-duration="0.6"
         id="testE"
@@ -514,14 +522,14 @@
       <h2>Test F: Reversed + Slow Effect</h2>
       <p>
         Reversed direction with slow effect on container hover.
-        <code>data-marquee-ramp-ratio="0.2"</code>.
+        <code>data-marquee-speed-ramp-ratio="0.2"</code>.
       </p>
 
       <div
-        data-marquee="true"
-        data-marquee-reverse
+        data-marquee-direction="horizontal"
+        data-marquee-reverse="true"
         data-marquee-effect="slow"
-        data-marquee-ramp-ratio="0.2"
+        data-marquee-speed-ramp-ratio="0.2"
         data-marquee-slow-duration-in="0.4"
         data-marquee-slow-duration-out="0.4"
         id="testF"
@@ -545,14 +553,14 @@
       <p>
         Buttons simulate enter/leave to test mid-ramp behavior. Total pause ramp
         <code>data-marquee-pause-duration="1.2"</code>, mid-ratio
-        <code>data-marquee-ramp-ratio="0.05"</code>.
+        <code>data-marquee-speed-ramp-ratio="0.05"</code>.
       </p>
 
       <div
-        data-marquee="true"
+        data-marquee-direction="horizontal"
         data-marquee-effect="pause"
         data-marquee-pause-duration="1.2"
-        data-marquee-ramp-ratio="0.05"
+        data-marquee-speed-ramp-ratio="0.05"
         id="testG"
       >
         <div data-marquee-item="true">Controlled G1</div>
@@ -582,9 +590,11 @@
     <!-- Test 1: Basic Horizontal Marquee -->
     <div class="test-section">
       <h2>Test 1: Basic Horizontal Marquee</h2>
-      <p>Default settings: speed = 1, infinite loop, left-to-right direction</p>
+      <p>
+        Default settings: speed ≈ 0.7, infinite loop, left-to-right direction
+      </p>
 
-      <div data-marquee="true" id="test1">
+      <div data-marquee-direction="horizontal" id="test1">
         <div data-marquee-item="true">Logo 1</div>
         <div data-marquee-item="true" class="gradient-orange">Logo 2</div>
         <div data-marquee-item="true" class="gradient-green">Logo 3</div>
@@ -596,9 +606,13 @@
     <!-- Test 2: Fast Horizontal Marquee -->
     <div class="test-section">
       <h2>Test 2: Fast Horizontal Marquee</h2>
-      <p>Speed set to 3x the default (approximately 300 pixels per second)</p>
+      <p>Speed set to 3x the default</p>
 
-      <div data-marquee="true" data-marquee-speed="3" id="test2">
+      <div
+        data-marquee-direction="horizontal"
+        data-marquee-speed="3"
+        id="test2"
+      >
         <div data-marquee-item="true">Fast Item 1</div>
         <div data-marquee-item="true" class="gradient-orange">Fast Item 2</div>
         <div data-marquee-item="true" class="gradient-green">Fast Item 3</div>
@@ -614,7 +628,11 @@
         Direction reversed using <code>data-marquee-reverse</code> attribute
       </p>
 
-      <div data-marquee="true" data-marquee-reverse id="test3">
+      <div
+        data-marquee-direction="horizontal"
+        data-marquee-reverse="true"
+        id="test3"
+      >
         <div data-marquee-item="true">Reversed 1</div>
         <div data-marquee-item="true" class="gradient-orange">Reversed 2</div>
         <div data-marquee-item="true" class="gradient-green">Reversed 3</div>
@@ -631,7 +649,11 @@
         this smoothly.
       </p>
 
-      <div data-marquee="true" data-marquee-speed="1.5" id="test5">
+      <div
+        data-marquee-direction="horizontal"
+        data-marquee-speed="1.5"
+        id="test5"
+      >
         <div data-marquee-item="true" class="item-small">Small</div>
         <div data-marquee-item="true" class="item-large gradient-orange">
           Large Item
@@ -652,10 +674,15 @@
     <div class="test-section">
       <h2>Test 6: Vertical Marquee</h2>
       <p>
-        Vertical scrolling marquee using <code>data-marquee="vertical"</code>
+        Vertical scrolling marquee using
+        <code>data-marquee-direction="vertical"</code>
       </p>
 
-      <div data-marquee="vertical" data-marquee-speed="1.5" id="test6">
+      <div
+        data-marquee-direction="vertical"
+        data-marquee-speed="1.5"
+        id="test6"
+      >
         <div data-marquee-item="true">Vertical Item 1</div>
         <div data-marquee-item="true" class="gradient-orange">
           Vertical Item 2
@@ -684,7 +711,7 @@
       </p>
 
       <div
-        data-marquee="true"
+        data-marquee-direction="horizontal"
         data-marquee-speed="2"
         id="test7a"
         style="margin-bottom: 20px"
@@ -696,7 +723,7 @@
       </div>
 
       <div
-        data-marquee="true"
+        data-marquee-direction="horizontal"
         data-marquee-speed="0.5"
         data-marquee-reverse
         id="test7b"
@@ -718,7 +745,7 @@
         >
       </p>
 
-      <div data-marquee="true" id="test8">
+      <div data-marquee-direction="horizontal" id="test8">
         <div data-marquee-item="true">Controllable 1</div>
         <div data-marquee-item="true" class="gradient-orange">
           Controllable 2

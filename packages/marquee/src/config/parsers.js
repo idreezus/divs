@@ -52,9 +52,11 @@ export function parseCoreConfig(element) {
   return {
     direction: parseDirection(element),
     speed: parseFloatAttribute(element, attributes.speed, defaults.speed, 0),
-    repeat: parseIntAttribute(element, attributes.repeat, defaults.repeat),
+    // Repeat is intentionally fixed to infinite for simplicity of public API
+    repeat: defaults.repeat,
     paused: defaults.paused,
-    reversed: element.hasAttribute(attributes.reverse),
+    // Reverse now requires explicit value "true" to activate
+    reversed: element.getAttribute(attributes.reverse) === 'true',
   };
 }
 

@@ -59,13 +59,13 @@ MarqueeDiagnostics.run('#test1');
 ## Recommended CSS
 
 ```css
-[data-marquee] {
+[data-marquee-direction] {
   display: flex;
   overflow: hidden;
   gap: 20px; /* spacing */
 }
 
-[data-marquee='vertical'] {
+[data-marquee-direction='vertical'] {
   flex-direction: column;
   height: 400px; /* set as needed */
 }

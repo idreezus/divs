@@ -33,7 +33,7 @@ Add these scripts to your HTML file:
 Add this CSS to ensure marquees display correctly:
 
 ```css
-[data-marquee] {
+[data-marquee-direction] {
   display: flex;
   overflow: hidden;
   /* Use container gap for spacing between items */
@@ -41,7 +41,7 @@ Add this CSS to ensure marquees display correctly:
 }
 
 /* For vertical marquees */
-[data-marquee='vertical'] {
+[data-marquee-direction='vertical'] {
   flex-direction: column;
   height: 400px; /* Set your desired height */
 }
@@ -72,7 +72,7 @@ You don't need to worry about any of this - just add your items and the library 
 ### Basic Horizontal Marquee
 
 ```html
-<div data-marquee="true">
+<div data-marquee-direction="horizontal">
   <div data-marquee-item="true">Logo 1</div>
   <div data-marquee-item="true">Logo 2</div>
   <div data-marquee-item="true">Logo 3</div>
@@ -84,7 +84,7 @@ You don't need to worry about any of this - just add your items and the library 
 ### Vertical Marquee
 
 ```html
-<div data-marquee="vertical">
+<div data-marquee-direction="vertical">
   <div data-marquee-item="true">Testimonial 1</div>
   <div data-marquee-item="true">Testimonial 2</div>
   <div data-marquee-item="true">Testimonial 3</div>
@@ -95,7 +95,7 @@ You don't need to worry about any of this - just add your items and the library 
 
 ```html
 <div
-  data-marquee="true"
+  data-marquee-direction="horizontal"
   data-marquee-speed="2"
   data-marquee-reverse
   data-marquee-effect="pause"
@@ -110,15 +110,15 @@ You don't need to worry about any of this - just add your items and the library 
 
 All options are set using data attributes on the container element.
 
-### `data-marquee`
+### `data-marquee-direction`
 
-- **Values:** `"true"` or `"vertical"`
+- **Values:** `"horizontal"` or `"vertical"`
 - **Required:** Yes
-- **Description:** Initializes the marquee. Use `"true"` for horizontal scrolling or `"vertical"` for vertical scrolling.
+- **Description:** Initializes the marquee. Use `"horizontal"` for horizontal scrolling or `"vertical"` for vertical scrolling.
 
 ```html
-<div data-marquee="true">...</div>
-<div data-marquee="vertical">...</div>
+<div data-marquee-direction="horizontal">...</div>
+<div data-marquee-direction="vertical">...</div>
 ```
 
 ### `data-marquee-item`
@@ -138,17 +138,17 @@ All options are set using data attributes on the container element.
 - **Description:** Speed multiplier where 1 equals approximately 100 pixels per second. Use `2` for double speed, `0.5` for half speed, etc.
 
 ```html
-<div data-marquee="true" data-marquee-speed="2">...</div>
+<div data-marquee-direction="horizontal" data-marquee-speed="2">...</div>
 ```
 
 ### `data-marquee-reverse`
 
-- **Values:** Boolean (attribute presence)
+- **Values:** "true" to enable
 - **Default:** `false`
 - **Description:** Reverses the scroll direction. For horizontal: right-to-left instead of left-to-right. For vertical: bottom-to-top instead of top-to-bottom.
 
 ```html
-<div data-marquee="true" data-marquee-reverse>...</div>
+<div data-marquee-direction="horizontal" data-marquee-reverse="true">...</div>
 ```
 
 ### Interaction on Hover
@@ -167,7 +167,7 @@ Enable smooth pause or slow when hovering. Nothing happens by default unless an 
 - **Default:** `"container"`
 - **Description:** Where hovering applies. `container` means anywhere over the marquee. `items` means only when hovering an item.
 
-#### `data-marquee-ramp-ratio`
+#### `data-marquee-speed-ramp-ratio`
 
 - **Values:** number ≥ 0 (fraction of normal speed)
 - **Defaults:** pause → `0.1`, slow → `0.25`
@@ -211,7 +211,7 @@ Notes:
 - **Description:** Number of times to repeat the animation. Use `-1` for infinite looping, or a positive number for a specific count.
 
 ```html
-<div data-marquee="true" data-marquee-repeat="3">...</div>
+<!-- Repeat is always infinite; attribute removed -->
 ```
 
 ### `data-marquee-auto-clone`
@@ -222,7 +222,9 @@ Notes:
 
 ```html
 <!-- Disable auto-cloning -->
-<div data-marquee="true" data-marquee-auto-clone="false">...</div>
+<div data-marquee-direction="horizontal" data-marquee-auto-clone="false">
+  ...
+</div>
 ```
 
 ### `data-marquee-clone-count`
@@ -233,7 +235,7 @@ Notes:
 
 ```html
 <!-- Clone each item 5 times instead of 3 -->
-<div data-marquee="true" data-marquee-clone-count="5">...</div>
+<div data-marquee-direction="horizontal" data-marquee-clone-count="5">...</div>
 ```
 
 ## Manual Control via JavaScript
@@ -287,7 +289,7 @@ window.Marquee.init();
     <script type="module" src="path/to/marquee.js"></script>
 
     <style>
-      [data-marquee] {
+      [data-marquee-direction] {
         display: flex;
         overflow: hidden;
         padding: 20px;
@@ -306,7 +308,7 @@ window.Marquee.init();
   </head>
   <body>
     <div
-      data-marquee="true"
+      data-marquee-direction="horizontal"
       data-marquee-speed="1.5"
       data-marquee-effect="pause"
       id="logo-marquee"
@@ -453,7 +455,7 @@ window.Marquee.init();
 ### Custom Styling for Hover State
 
 ```css
-[data-marquee][data-marquee-effect]:hover {
+[data-marquee-direction][data-marquee-effect]:hover {
   cursor: pointer;
   opacity: 0.9;
 }
@@ -464,7 +466,11 @@ window.Marquee.init();
 Use CSS media queries with inline styles:
 
 ```html
-<div data-marquee="true" data-marquee-speed="2" style="--marquee-speed: 2">
+<div
+  data-marquee-direction="horizontal"
+  data-marquee-speed="2"
+  style="--marquee-speed: 2"
+>
   ...
 </div>
 ```

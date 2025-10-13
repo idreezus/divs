@@ -5,15 +5,14 @@
 export const CONFIG = {
   core: {
     attributes: {
-      direction: 'data-marquee',
+      direction: 'data-marquee-direction',
       item: 'data-marquee-item',
       speed: 'data-marquee-speed',
-      repeat: 'data-marquee-repeat',
       reverse: 'data-marquee-reverse',
     },
     defaults: {
-      // Default speed multiplier (1 ≈ 100 pixels/second in helpers)
-      speed: 1,
+      // Default speed multiplier used by loop helpers
+      speed: 0.7,
       // Default to infinite repeat
       repeat: -1,
       // Start playing by default
@@ -32,7 +31,7 @@ export const CONFIG = {
       // Auto-clone enabled by default for seamless looping
       autoClone: true,
       // Number of clone sets to append by default
-      cloneCount: 3,
+      cloneCount: 2,
     },
   },
 
@@ -40,7 +39,7 @@ export const CONFIG = {
     attributes: {
       effect: 'data-marquee-effect',
       effectTrigger: 'data-marquee-effect-trigger',
-      rampRatio: 'data-marquee-ramp-ratio',
+      rampRatio: 'data-marquee-speed-ramp-ratio',
       pauseDuration: 'data-marquee-pause-duration',
       slowDurationIn: 'data-marquee-slow-duration-in',
       slowDurationOut: 'data-marquee-slow-duration-out',
@@ -54,12 +53,12 @@ export const CONFIG = {
       triggerArea: 'container',
       // Fractional target speeds and durations for ramps
       rampRatioWhileHoveringForPause: 0.1,
-      rampRatioWhileHoveringForSlow: 0.25,
+      rampRatioWhileHoveringForSlow: 0.3,
       totalPauseRampDuration: 0.4,
-      slowRampInDuration: 0.4,
-      slowRampOutDuration: 0.3,
-      slowRampInEase: 'power2.out',
-      slowRampOutEase: 'power2.inOut',
+      slowRampInDuration: 0.7,
+      slowRampOutDuration: 0.25,
+      slowRampInEase: 'power1.out',
+      slowRampOutEase: 'power1.out',
     },
   },
 };
