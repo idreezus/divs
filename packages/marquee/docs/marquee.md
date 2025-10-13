@@ -95,7 +95,7 @@ Speeds can be adjusted with `data-marquee-speed`. Higher numbers make the marque
 
 ### Hover Effects
 
-Hover effects can be enabled with `data-marquee-effect`. Set it to `pause` to ramp smoothly to a stop when hovering, or `slow` to reduce speed while maintaining motion. By default, hovering the container triggers the effect, but you can set `data-marquee-effect-trigger="items"` to only activate when hovering individual items.
+Hover effects can be enabled with `data-marquee-hover`. Set it to `pause` to ramp smoothly to a stop when hovering, or `slow` to reduce speed while maintaining motion. By default, hovering the container triggers the effect, but you can set `data-marquee-hover-trigger="items"` to only activate when hovering individual items.
 
 ### Fine-Tuning Hover Behavior
 
@@ -103,15 +103,15 @@ When using hover effects, you can control how the transition feels with these at
 
 **For pause effects:**
 
-- `data-marquee-speed-ramp-ratio` - Sets the intermediate speed before reaching a full stop (default: `0.1`)
-- `data-marquee-pause-duration` - Controls how long the entire ramp-down takes (default: `0.4` seconds)
+- `data-marquee-hover-speed-ratio` - Sets the intermediate speed before reaching a full stop (default: `0.1`)
+- `data-marquee-hover-pause-duration` - Controls how long the entire ramp-down takes (default: `0.4` seconds)
 
 **For slow effects:**
 
-- `data-marquee-speed-ramp-ratio` - Sets the sustained slower speed while hovering (default: `0.3`)
-- `data-marquee-slow-duration-in` - Ramp-in timing when entering hover (default: `0.7` seconds)
-- `data-marquee-slow-duration-out` - Ramp-out timing when leaving hover (default: `0.25` seconds)
-- `data-marquee-slow-ease-in` and `data-marquee-slow-ease-out` - GSAP easing functions for smoother transitions (default: `power1.out`)
+- `data-marquee-hover-speed-ratio` - Sets the sustained slower speed while hovering (default: `0.3`)
+- `data-marquee-hover-duration-in` - Ramp-in timing when entering hover (default: `0.7` seconds)
+- `data-marquee-hover-duration-out` - Ramp-out timing when leaving hover (default: `0.25` seconds)
+- `data-marquee-hover-ease-in` and `data-marquee-hover-ease-out` - GSAP easing functions for smoother transitions (default: `power1.out`)
 
 ### Disabling Auto-Cloning
 
@@ -145,14 +145,14 @@ Most attributes are optional. You only need `data-marquee-direction` on the cont
 
 | Attribute                        | Values                | Default                   | Description                                                                |
 | -------------------------------- | --------------------- | ------------------------- | -------------------------------------------------------------------------- |
-| `data-marquee-effect`            | `pause`, `slow`, omit | omit                      | Enables a hover effect: ramp to pause, or slow down.                       |
-| `data-marquee-effect-trigger`    | `container`, `items`  | `container`               | Where the hover effect is triggered.                                       |
-| `data-marquee-speed-ramp-ratio`  | A number ≥ 0          | pause: `0.1`, slow: `0.3` | For pause: mid-ramp speed before pausing. For slow: sustained hover speed. |
-| `data-marquee-pause-duration`    | A number ≥ 0          | `0.4`                     | Total ramp time into a pause (seconds).                                    |
-| `data-marquee-slow-duration-in`  | A number ≥ 0          | `0.7`                     | Ramp-in duration when slowing on hover (seconds).                          |
-| `data-marquee-slow-duration-out` | A number ≥ 0          | `0.25`                    | Ramp-out duration when leaving hover (seconds).                            |
-| `data-marquee-slow-ease-in`      | any GSAP ease         | `power1.out`              | Ease for ramping into slow.                                                |
-| `data-marquee-slow-ease-out`     | any GSAP ease         | `power1.out`              | Ease for ramping out of slow or into pause completion.                     |
+| `data-marquee-hover`            | `pause`, `slow`, omit | omit                      | Enables a hover effect: ramp to pause, or slow down.                       |
+| `data-marquee-hover-trigger`    | `container`, `items`  | `container`               | Where the hover effect is triggered.                                       |
+| `data-marquee-hover-speed-ratio`  | A number ≥ 0          | pause: `0.1`, slow: `0.3` | For pause: mid-ramp speed before pausing. For slow: sustained hover speed. |
+| `data-marquee-hover-pause-duration`    | A number ≥ 0          | `0.4`                     | Total ramp time into a pause (seconds).                                    |
+| `data-marquee-hover-duration-in`  | A number ≥ 0          | `0.7`                     | Ramp-in duration when slowing on hover (seconds).                          |
+| `data-marquee-hover-duration-out` | A number ≥ 0          | `0.25`                    | Ramp-out duration when leaving hover (seconds).                            |
+| `data-marquee-hover-ease-in`      | any GSAP ease         | `power1.out`              | Ease for ramping into slow.                                                |
+| `data-marquee-hover-ease-out`     | any GSAP ease         | `power1.out`              | Ease for ramping out of slow or into pause completion.                     |
 
 ## JavaScript API
 
@@ -182,6 +182,11 @@ Most of the time, the marquee just works with attributes. Use the JavaScript API
   marquee.play();
 </script>
 ````
+
+## Accessibility
+
+- For those using screen readers, all cloned elements have an `aria-hidden="true"` attribute to prevent duplicate content from being read aloud.
+- If a user has `prefers-reduced-motion` enabled in their system preferences, it'll respect their preferences by slowing down the marquee significantly to reduce motion intensity while keeping the visual effect functional.
 
 ## FAQ
 

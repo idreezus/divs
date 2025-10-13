@@ -37,14 +37,14 @@ export const CONFIG = {
 
   interaction: {
     attributes: {
-      effect: 'data-marquee-effect',
-      effectTrigger: 'data-marquee-effect-trigger',
-      rampRatio: 'data-marquee-speed-ramp-ratio',
-      pauseDuration: 'data-marquee-pause-duration',
-      slowDurationIn: 'data-marquee-slow-duration-in',
-      slowDurationOut: 'data-marquee-slow-duration-out',
-      slowEaseIn: 'data-marquee-slow-ease-in',
-      slowEaseOut: 'data-marquee-slow-ease-out',
+      effect: 'data-marquee-hover',
+      effectTrigger: 'data-marquee-hover-trigger',
+      rampRatio: 'data-marquee-hover-speed-ratio',
+      pauseDuration: 'data-marquee-hover-pause-duration',
+      slowDurationIn: 'data-marquee-hover-duration-in',
+      slowDurationOut: 'data-marquee-hover-duration-out',
+      slowEaseIn: 'data-marquee-hover-ease-in',
+      slowEaseOut: 'data-marquee-hover-ease-out',
     },
     defaults: {
       // No effect by default; valid values: "pause" | "slow" | null

@@ -206,13 +206,13 @@
     <div class="test-section">
       <h2>Test A: Pause Effect (Smooth Ramp to Pause)</h2>
       <p>
-        data-marquee-effect="pause". Ramps down, then pauses. Defaults used
+        data-marquee-hover="pause". Ramps down, then pauses. Defaults used
         (ramp-ratio≈0.1, total pause ramp≈0.4s).
       </p>
 
       <div
         data-marquee-direction="horizontal"
-        data-marquee-effect="pause"
+        data-marquee-hover="pause"
         id="testA"
       >
         <div data-marquee-item="true">Pause A1</div>
@@ -423,15 +423,15 @@
       <h2>Test B: Pause Effect (Custom Ramp)</h2>
       <p>
         Custom total pause duration and mid-ramp ratio before pausing.
-        <code>data-marquee-pause-duration="0.8"</code>,
-        <code>data-marquee-speed-ramp-ratio="0.15"</code>
+        <code>data-marquee-hover-pause-duration="0.8"</code>,
+        <code>data-marquee-hover-speed-ratio="0.15"</code>
       </p>
 
       <div
         data-marquee-direction="horizontal"
-        data-marquee-effect="pause"
-        data-marquee-pause-duration="0.8"
-        data-marquee-speed-ramp-ratio="0.15"
+        data-marquee-hover="pause"
+        data-marquee-hover-pause-duration="0.8"
+        data-marquee-hover-speed-ratio="0.15"
         id="testB"
       >
         <div data-marquee-item="true">Pause B1</div>
@@ -445,15 +445,15 @@
     <div class="test-section">
       <h2>Test C: Slow Effect (Container Trigger)</h2>
       <p>
-        data-marquee-effect="slow" with
-        <code>data-marquee-speed-ramp-ratio="0.25"</code>. Uses default ramp
+        data-marquee-hover="slow" with
+        <code>data-marquee-hover-speed-ratio="0.25"</code>. Uses default ramp
         durations/eases.
       </p>
 
       <div
         data-marquee-direction="horizontal"
-        data-marquee-effect="slow"
-        data-marquee-speed-ramp-ratio="0.25"
+        data-marquee-hover="slow"
+        data-marquee-hover-speed-ratio="0.25"
         id="testC"
       >
         <div data-marquee-item="true">Slow C1</div>
@@ -468,18 +468,18 @@
       <h2>Test D: Slow Effect (Items Trigger, Custom Durations)</h2>
       <p>
         Only slows when hovering an item. Custom ramp in/out durations.
-        <code>data-marquee-effect-trigger="items"</code>,
-        <code>data-marquee-slow-duration-in="0.5"</code>,
-        <code>data-marquee-slow-duration-out="0.25"</code>
+        <code>data-marquee-hover-trigger="items"</code>,
+        <code>data-marquee-hover-duration-in="0.5"</code>,
+        <code>data-marquee-hover-duration-out="0.25"</code>
       </p>
 
       <div
         data-marquee-direction="horizontal"
-        data-marquee-effect="slow"
-        data-marquee-effect-trigger="items"
-        data-marquee-speed-ramp-ratio="0.2"
-        data-marquee-slow-duration-in="0.5"
-        data-marquee-slow-duration-out="0.25"
+        data-marquee-hover="slow"
+        data-marquee-hover-trigger="items"
+        data-marquee-hover-speed-ratio="0.2"
+        data-marquee-hover-duration-in="0.5"
+        data-marquee-hover-duration-out="0.25"
         id="testD"
       >
         <div data-marquee-item="true">Slow D1</div>
@@ -494,13 +494,13 @@
       <h2>Test E: Vertical + Pause Effect</h2>
       <p>
         Vertical marquee that ramps to a pause on hover. Custom total pause ramp
-        <code>data-marquee-pause-duration="0.6"</code>.
+        <code>data-marquee-hover-pause-duration="0.6"</code>.
       </p>
 
       <div
         data-marquee-direction="vertical"
-        data-marquee-effect="pause"
-        data-marquee-pause-duration="0.6"
+        data-marquee-hover="pause"
+        data-marquee-hover-pause-duration="0.6"
         id="testE"
       >
         <div data-marquee-item="true">Vertical Pause E1</div>
@@ -522,16 +522,16 @@
       <h2>Test F: Reversed + Slow Effect</h2>
       <p>
         Reversed direction with slow effect on container hover.
-        <code>data-marquee-speed-ramp-ratio="0.2"</code>.
+        <code>data-marquee-hover-speed-ratio="0.2"</code>.
       </p>
 
       <div
         data-marquee-direction="horizontal"
         data-marquee-reverse="true"
-        data-marquee-effect="slow"
-        data-marquee-speed-ramp-ratio="0.2"
-        data-marquee-slow-duration-in="0.4"
-        data-marquee-slow-duration-out="0.4"
+        data-marquee-hover="slow"
+        data-marquee-hover-speed-ratio="0.2"
+        data-marquee-hover-duration-in="0.4"
+        data-marquee-hover-duration-out="0.4"
         id="testF"
       >
         <div data-marquee-item="true">Reversed Slow F1</div>
@@ -552,15 +552,15 @@
       <h2>Test G: Controlled Pause (Simulated Hover)</h2>
       <p>
         Buttons simulate enter/leave to test mid-ramp behavior. Total pause ramp
-        <code>data-marquee-pause-duration="1.2"</code>, mid-ratio
-        <code>data-marquee-speed-ramp-ratio="0.05"</code>.
+        <code>data-marquee-hover-pause-duration="1.2"</code>, mid-ratio
+        <code>data-marquee-hover-speed-ratio="0.05"</code>.
       </p>
 
       <div
         data-marquee-direction="horizontal"
-        data-marquee-effect="pause"
-        data-marquee-pause-duration="1.2"
-        data-marquee-speed-ramp-ratio="0.05"
+        data-marquee-hover="pause"
+        data-marquee-hover-pause-duration="1.2"
+        data-marquee-hover-speed-ratio="0.05"
         id="testG"
       >
         <div data-marquee-item="true">Controlled G1</div>

@@ -98,7 +98,7 @@ You don't need to worry about any of this - just add your items and the library 
   data-marquee-direction="horizontal"
   data-marquee-speed="2"
   data-marquee-reverse
-  data-marquee-effect="pause"
+  data-marquee-hover="pause"
 >
   <div data-marquee-item="true">Item 1</div>
   <div data-marquee-item="true">Item 2</div>
@@ -155,43 +155,43 @@ All options are set using data attributes on the container element.
 
 Enable smooth pause or slow when hovering. Nothing happens by default unless an effect is set.
 
-#### `data-marquee-effect`
+#### `data-marquee-hover`
 
 - **Values:** `"pause"` | `"slow"`
 - **Default:** not set (no hover effect)
 - **Description:** Selects what happens when hovering the marquee.
 
-#### `data-marquee-effect-trigger`
+#### `data-marquee-hover-trigger`
 
 - **Values:** `"container"` | `"items"`
 - **Default:** `"container"`
 - **Description:** Where hovering applies. `container` means anywhere over the marquee. `items` means only when hovering an item.
 
-#### `data-marquee-speed-ramp-ratio`
+#### `data-marquee-hover-speed-ratio`
 
 - **Values:** number ≥ 0 (fraction of normal speed)
 - **Defaults:** pause → `0.1`, slow → `0.25`
 - **Description:** Target speed fraction during hover. In `pause` mode, this is a mid-ramp target before fully pausing.
 
-#### `data-marquee-pause-duration`
+#### `data-marquee-hover-pause-duration`
 
 - **Values:** seconds (number ≥ 0)
 - **Default:** `0.4`
 - **Description:** Total time to reach a full pause after hover begins. If a mid-ramp is used, it occurs within this time.
 
-#### `data-marquee-slow-duration-in`
+#### `data-marquee-hover-duration-in`
 
 - **Values:** seconds (number ≥ 0)
 - **Default:** `0.4`
 - **Description:** Time to ease into the slow speed on hover.
 
-#### `data-marquee-slow-duration-out`
+#### `data-marquee-hover-duration-out`
 
 - **Values:** seconds (number ≥ 0)
 - **Default:** `0.3`
 - **Description:** Time to ease back to normal when leaving hover.
 
-#### `data-marquee-slow-ease-in` / `data-marquee-slow-ease-out`
+#### `data-marquee-hover-ease-in` / `data-marquee-hover-ease-out`
 
 - **Values:** GSAP ease names (e.g., `power2.out`)
 - **Defaults:** `power2.out` (in), `power2.inOut` (out)
@@ -310,7 +310,7 @@ window.Marquee.init();
     <div
       data-marquee-direction="horizontal"
       data-marquee-speed="1.5"
-      data-marquee-effect="pause"
+      data-marquee-hover="pause"
       id="logo-marquee"
     >
       <div data-marquee-item="true">
@@ -388,7 +388,7 @@ Add additional attributes to the container:
 
 - `data-marquee-speed` = `2`
 - `data-marquee-reverse` (just the name, no value)
-- `data-marquee-effect="pause"` or `data-marquee-effect="slow"`
+- `data-marquee-hover="pause"` or `data-marquee-hover="slow"`
 
 ### Step 5: Publish
 
@@ -455,7 +455,7 @@ window.Marquee.init();
 ### Custom Styling for Hover State
 
 ```css
-[data-marquee-direction][data-marquee-effect]:hover {
+[data-marquee-direction][data-marquee-hover]:hover {
   cursor: pointer;
   opacity: 0.9;
 }
