@@ -1,146 +1,98 @@
 # divs
 
-A collection of platform-agnostic component libraries designed for modern web development, particularly useful for Webflow users and other no-code platforms.
+Component libraries for modern web development. Built for Webflow and other no-code platforms.
 
-## Monorepo Structure
+## What is this?
 
-This is a pnpm workspace monorepo. Each component lives in its own package under `packages/`:
+This is a monorepo containing multiple components. Each component:
 
-```
-divs/
-├── packages/
-│   ├── marquee/          - Seamless marquee animation library
-│   └── [future components...]
-└── dist/
-    ├── marquee/          - Built files for CDN delivery
-    │   ├── latest/       - Development builds (for testing)
-    │   └── v1.0.0-beta/  - Release builds (for users)
-    └── [future components...]
-```
+- Lives in `packages/`
+- Builds to `dist/` for CDN hosting
+- Versions independently
 
-## Getting Started
+**Current components:**
 
-### Prerequisites
+- **marquee** - Seamless infinite scrolling
 
-- Node.js (v16 or higher)
-- pnpm (install with `npm install -g pnpm`)
+## Quick Start
 
-### Installation
+### Install dependencies
 
 ```bash
 pnpm install
 ```
 
-This installs all dependencies and links the workspace packages.
+If you don't have pnpm: `npm install -g pnpm`
 
-## Building Components
+## Build commands
 
-### Development Builds (Daily Work)
-
-Use these commands while developing and testing:
+### While developing
 
 ```bash
-# Build marquee (updates latest/ folder only)
-pnpm build:marquee
-
-# Watch mode - auto-rebuilds on file changes
+# Watch mode - auto-rebuilds on save
 pnpm dev:marquee
 
-# Build all components
-pnpm build
+# Single build
+pnpm build:marquee
 ```
 
-These update only the `latest/` folder - perfect for rapid iteration and testing.
+This updates `dist/marquee/latest/` for testing.
 
-### Release Builds (Publishing to Users)
+### When publishing
 
-When you're ready to publish a stable version:
-
-1. Update the version in `packages/marquee/package.json`
-2. Run the release command:
+1. Update version in `packages/marquee/package.json`
+2. Run release:
 
 ```bash
-# Release marquee (creates versioned folder + updates latest/)
 pnpm release:marquee
-
-# Release all components
-pnpm release
 ```
 
-This creates a versioned folder (like `v1.0.1/`) that users can safely load.
+This creates `dist/marquee/v1.0.1/` for users.
 
-**See [VERSIONING.md](./VERSIONING.md) for detailed versioning workflow and best practices.**
+See [VERSIONING.md](./VERSIONING.md) for the full workflow.
 
 ## Components
 
 ### Marquee
 
-A seamless marquee animation library powered by GSAP. See `packages/marquee/docs/` for documentation.
+Seamless infinite scrolling. Powered by GSAP. Docs in `packages/marquee/docs/`.
 
-**Development URL (testing only):**
-
-```html
-<script src="https://divs-cdn.idreezus.com/marquee/latest/marquee.min.js"></script>
-```
-
-**Production URL (for users):**
+**How users load it:**
 
 ```html
 <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
 <script src="https://divs-cdn.idreezus.com/marquee/v1.0.0-beta/marquee.min.js"></script>
 ```
 
-## Adding New Components
+## Key concepts
 
-1. Create a new package directory:
+- `latest/` - Development builds, for testing only
+- `v1.0.0/` - Release builds, frozen and stable for users
+- Each component versions independently
 
-   ```bash
-   mkdir -p packages/your-component
-   ```
+## Adding new components
 
-2. Copy the structure from marquee (package.json, rollup.config.js, src/)
+1. Copy `packages/marquee/` structure to `packages/your-component/`
+2. Update `package.json` with new component name
+3. Add build scripts to root `package.json`:
 
-3. Update the component name in package.json
+```json
+"build:your-component": "pnpm --filter your-component build",
+"dev:your-component": "pnpm --filter your-component build:watch",
+"release:your-component": "pnpm --filter your-component release"
+```
 
-4. Add build scripts to root `package.json`:
+4. Build: `pnpm dev:your-component`
 
-   ```json
-   "build:your-component": "pnpm --filter your-component build",
-   "dev:your-component": "pnpm --filter your-component build:watch",
-   "release:your-component": "pnpm --filter your-component release"
-   ```
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for deployment steps.
 
-5. Build and release:
-   ```bash
-   pnpm build:your-component     # Development
-   pnpm release:your-component   # Production
-   ```
+## More docs
 
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for deployment instructions.
-
-## Key Concepts
-
-- **latest/ folder** - For testing and development, changes frequently
-- **Versioned folders (v1.0.0/)** - For users, frozen and stable
-- **Development builds** - Fast, only update latest/
-- **Release builds** - Create versioned folders for users
-
-Read [VERSIONING.md](./VERSIONING.md) to understand the versioning workflow.
-
-## Deployment
-
-Built files in `dist/` are ready for CDN deployment. See [DEPLOYMENT.md](./DEPLOYMENT.md) for complete deployment instructions.
-
-## Documentation
-
-- [VERSIONING.md](./VERSIONING.md) - How versioning and releases work
-- [DEPLOYMENT.md](./DEPLOYMENT.md) - How to deploy to CDN
-- Component-specific docs are in `packages/{component}/docs/`
+- [GETTING-STARTED.md](./GETTING-STARTED.md) - First-time setup guide
+- [QUICK-REFERENCE.md](./QUICK-REFERENCE.md) - Command cheat sheet
+- [VERSIONING.md](./VERSIONING.md) - Versioning workflow
+- [DEPLOYMENT.md](./DEPLOYMENT.md) - Deploy to CDN
 
 ## License
 
 Apache-2.0
-
-## Author
-
-Idrees Isse (https://github.com/idreezus)

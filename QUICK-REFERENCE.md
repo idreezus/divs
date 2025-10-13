@@ -1,139 +1,95 @@
-# Quick Reference Card
+# Quick Reference
 
-Keep this handy for daily development.
+Command cheat sheet for daily work.
 
-## Daily Commands
+## Commands
 
-### Working on Marquee
+### Development
 
 ```bash
-# Start development (watch mode - auto-rebuilds)
-pnpm dev:marquee
-
-# Single build
-pnpm build:marquee
-
-# Test at: dist/marquee/latest/
+pnpm dev:marquee        # Watch mode
+pnpm build:marquee      # Single build
 ```
 
-### When Ready to Release
+Test at: `dist/marquee/latest/`
+
+### Release
 
 ```bash
-# 1. Edit packages/marquee/package.json - update version number
-# 2. Build the release
+# 1. Update version in packages/marquee/package.json
+# 2. Build release
 pnpm release:marquee
-
-# 3. Deploy dist/ folder to CDN
+# 3. Deploy dist/ to CDN
 ```
 
-## Key Concepts
+## Key terms
 
-| Term      | Meaning                  | For                 |
-| --------- | ------------------------ | ------------------- |
-| `latest/` | Development builds       | Your testing        |
-| `v1.0.0/` | Stable releases          | Users in production |
-| `build`   | Updates latest/ only     | Daily development   |
-| `release` | Creates versioned folder | Publishing to users |
+| Term      | What it is               | For          |
+| --------- | ------------------------ | ------------ |
+| `latest/` | Development builds       | Testing      |
+| `v1.0.0/` | Release builds           | Users        |
+| `build`   | Updates `latest/` only   | Daily coding |
+| `release` | Creates versioned folder | Publishing   |
 
-## Folder Structure
+## Folders
 
 ```
-packages/marquee/       # Source code (edit here)
-  ├── src/              # Your component code
-  ├── package.json      # Update version here before release
-  └── rollup.config.js  # Build configuration
-
-dist/marquee/           # Built files (auto-generated)
-  ├── latest/           # For testing
-  └── v1.0.0-beta/      # For users
+packages/marquee/src/     # Edit here
+dist/marquee/latest/      # Development builds
+dist/marquee/v1.0.0/      # Release builds
 ```
 
-## Build Modes
+## URLs
 
-| Mode    | Command                | Updates                   | Use When            |
-| ------- | ---------------------- | ------------------------- | ------------------- |
-| Dev     | `pnpm build:marquee`   | `latest/`                 | Testing changes     |
-| Watch   | `pnpm dev:marquee`     | `latest/`                 | Active coding       |
-| Release | `pnpm release:marquee` | `v{version}/` + `latest/` | Publishing to users |
-
-## URLs for Users
-
-**Development (testing only):**
-
-```html
-<script src="https://divs-cdn.idreezus.com/marquee/latest/marquee.min.js"></script>
-```
-
-**Production (stable):**
+**Production:**
 
 ```html
 <script src="https://divs-cdn.idreezus.com/marquee/v1.0.0-beta/marquee.min.js"></script>
 ```
 
-## Versioning Quick Guide
+**Testing only:**
 
-1. Make changes in `packages/marquee/src/`
-2. Test with `pnpm dev:marquee` (loads from latest/)
-3. When ready: update version in `packages/marquee/package.json`
-4. Release with `pnpm release:marquee`
-5. Deploy `dist/` to CDN
-
-## Common Workflows
-
-### Adding a Feature
-
-```bash
-# Edit code in packages/marquee/src/
-pnpm dev:marquee           # Auto-rebuilds on save
-# Test in browser using latest/
-# When satisfied, create release (see below)
+```html
+<script src="https://divs-cdn.idreezus.com/marquee/latest/marquee.min.js"></script>
 ```
 
-### Fixing a Bug
+## Workflows
+
+### Add a feature
 
 ```bash
-# Fix code in packages/marquee/src/
-pnpm build:marquee         # Test the fix
-# If good, bump version and release
+pnpm dev:marquee          # Auto-rebuilds
+# Edit packages/marquee/src/
+# Test using latest/
+# When done, release (see below)
 ```
 
-### Creating a Release
+### Release
 
 ```bash
-# 1. Open packages/marquee/package.json
-#    Change: "version": "1.0.0-beta"
-#    To:     "version": "1.0.1"
-
-pnpm release:marquee       # Creates dist/marquee/v1.0.1/
-
-# 2. Deploy dist/ folder to your CDN
+# 1. Update version in packages/marquee/package.json
+pnpm release:marquee      # Creates dist/marquee/v1.0.1/
+# 2. Deploy dist/ to CDN
 ```
 
-## Multiple Components
+## Multiple components
 
 ```bash
-# Build all
-pnpm build
-
-# Release all
-pnpm release
-
-# Specific component
-pnpm build:marquee
-pnpm release:accordion
+pnpm build                # Build all
+pnpm release              # Release all
+pnpm build:marquee        # Build one
 ```
 
-## Remember
+## Rules
 
 - ✅ Test in `latest/` before releasing
-- ✅ Update version in package.json before release
-- ✅ Users load from versioned URLs
-- ❌ Never edit dist/ files directly
-- ❌ Never delete version folders
-- ❌ Never use latest/ in production
+- ✅ Update version before release
+- ❌ Don't edit `dist/` directly
+- ❌ Don't delete version folders
+- ❌ Don't use `latest/` in production
 
-## Need Help?
+## More docs
 
-- [VERSIONING.md](./VERSIONING.md) - Complete versioning guide
-- [DEPLOYMENT.md](./DEPLOYMENT.md) - Deployment instructions
-- [README.md](./README.md) - Project overview
+- [VERSIONING.md](./VERSIONING.md) - Version workflow
+- [DEPLOYMENT.md](./DEPLOYMENT.md) - Deploy to CDN
+- [GETTING-STARTED.md](./GETTING-STARTED.md) - First-time setup

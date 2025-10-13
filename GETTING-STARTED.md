@@ -1,163 +1,117 @@
-# Getting Started with divs
+# Getting Started
 
-Welcome! This is a quick guide to get you up and running with the divs monorepo.
+Quick setup guide for the divs monorepo.
 
-## What Just Happened?
+## What is this?
 
-Your project has been set up as a monorepo with independent versioning for each component. Here's what that means in simple terms:
+This project holds multiple components in one repo. Each component:
 
-- **Monorepo** = Multiple components (marquee, future accordion, etc.) in one project
-- **Independent versioning** = Each component can have different version numbers
-- **Two build modes** = Development (for testing) and Release (for users)
+- Has its own version number
+- Builds separately
+- Ships independently
 
-## Your First Steps
+**Two build types:**
 
-### 1. Install Dependencies (Already Done!)
+- **Development** (`latest/`) - For testing while you code
+- **Release** (`v1.0.0/`) - For users in production
+
+## First steps
+
+### 1. Install
 
 ```bash
 pnpm install
 ```
 
-This is already complete. You're ready to go!
-
-### 2. Start Developing
+### 2. Start coding
 
 ```bash
 pnpm dev:marquee
 ```
 
-This starts "watch mode" - it automatically rebuilds whenever you edit files in `packages/marquee/src/`.
+Watch mode rebuilds automatically when you edit files in `packages/marquee/src/`.
 
-### 3. Test Your Changes
+### 3. Test
 
-The built files are in `dist/marquee/latest/`. Open `packages/marquee/test.html` in your browser to test.
+Built files land in `dist/marquee/latest/`. Test using `packages/marquee/test.html`.
 
-## Two Build Modes Explained Simply
+## How builds work
 
 Think of it like saving a document:
 
-### Development Mode (Auto-save while working)
+**Development builds** = Hitting "Save" on a draft
 
 ```bash
-pnpm build:marquee
-# or
-pnpm dev:marquee  # watch mode
+pnpm dev:marquee
 ```
 
 - Updates `dist/marquee/latest/`
-- Changes every time you build
 - For testing only
-- Like hitting "Save" while working on a draft
+- Changes constantly
 
-### Release Mode (Final published version)
+**Release builds** = Hitting "Publish"
 
 ```bash
 pnpm release:marquee
 ```
 
-- Creates `dist/marquee/v1.0.0-beta/` (reads version from package.json)
-- Also updates `latest/`
-- Frozen and stable
-- Like hitting "Publish" on a blog post
+- Creates `dist/marquee/v1.0.0/` (reads version from package.json)
+- Frozen forever
+- Safe for users
 
-## Daily Workflow
+## Daily workflow
 
-### When You're Coding
+### While coding
 
-1. Open your editor
-2. Run `pnpm dev:marquee` (auto-rebuilds on save)
-3. Edit files in `packages/marquee/src/`
-4. Test in your browser using `dist/marquee/latest/`
-5. Repeat until satisfied
+1. Run `pnpm dev:marquee`
+2. Edit files in `packages/marquee/src/`
+3. Test in browser using `dist/marquee/latest/`
+4. Repeat
 
-### When You're Ready to Publish
+### When publishing
 
-1. Open `packages/marquee/package.json`
-2. Change the version number (e.g., from `"1.0.0-beta"` to `"1.0.1"`)
-3. Run `pnpm release:marquee`
-4. Upload `dist/` folder to your CDN
-5. Done! Users can now load `v1.0.1`
+1. Update version in `packages/marquee/package.json`
+2. Run `pnpm release:marquee`
+3. Upload `dist/` to CDN
+4. Done
 
-## File Structure
+## Folder structure
 
 ```
-divs/
-├── packages/
-│   └── marquee/
-│       ├── src/              ← Edit your code here
-│       │   ├── marquee.js
-│       │   └── ...
-│       ├── package.json      ← Update version here before releasing
-│       └── test.html         ← Test your component here
-│
-└── dist/                     ← Built files (auto-generated)
-    └── marquee/
-        ├── latest/           ← Development builds (for your testing)
-        └── v1.0.0-beta/      ← Release builds (for users)
+packages/marquee/src/     ← Edit here
+packages/marquee/test.html ← Test here
+dist/marquee/latest/      ← Development builds
+dist/marquee/v1.0.0/      ← Release builds
 ```
 
-## Important Rules
+## Rules
 
-1. **Edit files in `packages/marquee/src/`** - Never edit files in `dist/`
-2. **Test in `latest/`** - Make sure everything works before releasing
-3. **Release for users** - Only run `pnpm release:marquee` when ready to publish
-4. **Users load from versioned URLs** - Never tell users to load from `latest/`
+- Edit in `packages/`, never in `dist/`
+- Test in `latest/` before releasing
+- Users load from versioned URLs only (`v1.0.0/`), never `latest/`
 
-## Next Steps
+## Try it
 
-### Learn More
-
-- **[QUICK-REFERENCE.md](./QUICK-REFERENCE.md)** - Quick command reference (keep this handy!)
-- **[VERSIONING.md](./VERSIONING.md)** - Complete guide to versioning and releases
-- **[DEPLOYMENT.md](./DEPLOYMENT.md)** - How to deploy to Cloudflare Pages
-- **[README.md](./README.md)** - Project overview
-
-### Try It Out
-
-1. Make a small change to `packages/marquee/src/marquee.js` (add a comment)
+1. Edit `packages/marquee/src/marquee.js` (add a comment)
 2. Run `pnpm dev:marquee`
-3. Check that `dist/marquee/latest/marquee.js` has your change
-4. That's it! You're building successfully.
+3. Check `dist/marquee/latest/marquee.js` has your change
 
-### When You Add a New Component
+## Common questions
 
-1. Copy the `packages/marquee/` structure
-2. Rename to your new component name
-3. Update package.json with the new name
-4. Add scripts to root package.json (see DEPLOYMENT.md)
-5. Build with `pnpm build:component-name`
+**When to use `build` vs `release`?**
+Use `build` for testing. Use `release` for publishing.
 
-## Common Questions
+**Can I delete `latest/`?**
+No. But users shouldn't load from it.
 
-**Q: When should I use `build` vs `release`?**
-A: Use `build` while developing/testing. Use `release` when ready to publish to users.
+**Forgot to update version before releasing?**
+Update `package.json` and release again.
 
-**Q: Can I delete the `latest/` folder?**
-A: No, it's where development builds go. But users should never load from it.
+**Should I commit `dist/` to git?**
+No, it's in `.gitignore`.
 
-**Q: What if I forget to update the version before releasing?**
-A: The release will use the old version number. Just update package.json and run release again.
+## More help
 
-**Q: Can components have different version numbers?**
-A: Yes! That's the whole point. Marquee might be v1.5.0 while accordion is v3.2.1.
-
-**Q: Should I commit the `dist/` folder to git?**
-A: No, it's in .gitignore. You'll rebuild it when deploying.
-
-## Getting Help
-
-If you're confused about something:
-
-1. Check [QUICK-REFERENCE.md](./QUICK-REFERENCE.md) for commands
-2. Read [VERSIONING.md](./VERSIONING.md) for workflow details
-3. Look at [DEPLOYMENT.md](./DEPLOYMENT.md) for deployment help
-
-## You're Ready!
-
-Start developing with:
-
-```bash
-pnpm dev:marquee
-```
-
-Happy coding!
+- [QUICK-REFERENCE.md](./QUICK-REFERENCE.md) - Command cheat sheet
+- [VERSIONING.md](./VERSIONING.md) - Version workflow
+- [DEPLOYMENT.md](./DEPLOYMENT.md) - Deploy to CDN

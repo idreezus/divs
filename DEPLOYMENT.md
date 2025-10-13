@@ -1,346 +1,250 @@
 # Deployment Guide
 
-This document explains how to build and deploy the divs component library to CDN hosting (e.g., Cloudflare Pages).
+How to deploy components to CDN.
 
-## Monorepo Structure
+## Quick overview
 
-This is a pnpm workspace monorepo containing multiple component libraries. Each component lives in `packages/{component-name}/` and builds to `dist/{component-name}/`.
+Components build from `packages/` to `dist/`, then deploy to CDN.
 
-Current components:
+**Current components:**
 
-- **marquee** - Seamless marquee animation library
+- **marquee** - Infinite scrolling
 
-## Understanding Build Modes
+## Build types
 
-There are two types of builds:
-
-### 1. Development Builds (Testing Only)
+### Development (testing only)
 
 ```bash
 pnpm build:marquee
 ```
 
-- Updates only `dist/marquee/latest/`
-- For rapid iteration and testing
-- Use this during daily development
-- Users should NOT load from `latest/` in production
+- Updates `dist/marquee/latest/` only
+- Not for users
 
-### 2. Release Builds (For Users)
+### Release (for users)
 
 ```bash
 pnpm release:marquee
 ```
 
-- Creates/updates `dist/marquee/v{version}/` (reads version from package.json)
-- Also updates `dist/marquee/latest/`
-- Use this when ready to publish to users
-- Creates a stable, frozen version that users can depend on
+- Creates `dist/marquee/v{version}/`
+- Reads version from `package.json`
+- Frozen and stable
 
-**For detailed versioning workflow, see [VERSIONING.md](./VERSIONING.md)**
+See [VERSIONING.md](./VERSIONING.md) for full workflow.
 
-## What Gets Built
+## What gets built
 
-Each component creates 4 files per version:
+Each component creates 4 files:
 
-### Main Library Bundle
+- `{name}.js` - Unminified
+- `{name}.min.js` - Minified (production)
+- `{name}-diagnostics.js` - Debug tool (unminified)
+- `{name}-diagnostics.min.js` - Debug tool (minified)
 
-- **{component-name}.js** - Unminified version for debugging
-- **{component-name}.min.js** - Production-ready minified version
-
-### Diagnostics Bundle (Optional)
-
-- **{component-name}-diagnostics.js** - Developer debugging tool (unminified)
-- **{component-name}-diagnostics.min.js** - Minified version
-
-### Example: Marquee Output
+**Example:**
 
 ```
-dist/
-└── marquee/
-    ├── latest/              # Development builds
-    │   ├── marquee.js
-    │   ├── marquee.min.js
-    │   ├── marquee-diagnostics.js
-    │   └── marquee-diagnostics.min.js
-    ├── v1.0.0-beta/         # Stable release
-    │   └── (same files)
-    └── v1.0.1/              # New stable release
-        └── (same files)
+dist/marquee/
+├── latest/                 # Development
+│   ├── marquee.js
+│   ├── marquee.min.js
+│   ├── marquee-diagnostics.js
+│   └── marquee-diagnostics.min.js
+├── v1.0.0-beta/           # Release
+└── v1.0.1/                # Another release
 ```
 
-## Development Workflow
-
-### Daily Development
+## Development workflow
 
 ```bash
-# Start watch mode (rebuilds on file changes)
-pnpm dev:marquee
-
-# Test your changes by loading from latest/
-# File: packages/marquee/test.html
-# URL: ../../../dist/marquee/latest/marquee.min.js
+pnpm dev:marquee           # Watch mode
 ```
 
-The `latest/` folder updates automatically with each build. Test thoroughly here before releasing.
+Test at `packages/marquee/test.html` which loads from `dist/marquee/latest/`.
 
-### Testing Before Release
+Before releasing:
 
-Before creating a release, ensure:
+1. Test in `latest/`
+2. Check for console errors
+3. Test multiple browsers (optional)
 
-1. All features work correctly in `latest/`
-2. No console errors
-3. Test in multiple browsers if possible
-4. Run diagnostics if available
+## Release workflow
 
-## Release Workflow
-
-### Creating a New Release
-
-Follow these steps when ready to publish a new version:
-
-#### 1. Update Version Number
+### 1. Update version
 
 Edit `packages/marquee/package.json`:
 
 ```json
 {
-  "name": "marquee",
-  "version": "1.0.1",  // Change this
-  ...
+  "version": "1.0.1"
 }
 ```
 
-#### 2. Run Release Build
+### 2. Build
 
 ```bash
 pnpm release:marquee
 ```
 
-This creates `dist/marquee/v1.0.1/` with all 4 files.
+Creates `dist/marquee/v1.0.1/`.
 
-#### 3. Deploy to CDN
+### 3. Deploy
 
-Upload the entire `dist/` folder to your CDN provider (see options below).
+Upload `dist/` to CDN (see options below).
 
-#### 4. Announce to Users
+### 4. Done
 
-Users can now load the new version:
+Users load it:
 
 ```html
 <script src="https://divs-cdn.idreezus.com/marquee/v1.0.1/marquee.min.js"></script>
 ```
 
-## How Users Load Your Libraries
+## How users load components
 
-Users add script tags to their HTML. Example for marquee:
+Example for marquee:
 
 ```html
-<!-- Load GSAP first (required dependency) -->
+<!-- Dependencies first -->
 <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
 
-<!-- Load marquee library from your CDN -->
+<!-- Component -->
 <script src="https://divs-cdn.idreezus.com/marquee/v1.0.0-beta/marquee.min.js"></script>
 
-<!-- Optional: Load diagnostics for debugging -->
+<!-- Optional: Diagnostics -->
 <script src="https://divs-cdn.idreezus.com/marquee/v1.0.0-beta/marquee-diagnostics.min.js"></script>
 ```
 
-The library is available as `window.Marquee` with these methods:
+Available as `window.Marquee` with:
 
-- `Marquee.init()` - Initialize all marquees
-- `Marquee.get(element)` - Get a specific marquee instance
+- `Marquee.init()` - Initialize all
+- `Marquee.get(element)` - Get instance
 
-## CDN URL Structure
-
-Components follow this URL pattern:
+## CDN URL pattern
 
 ```
-https://divs-cdn.idreezus.com/{component-name}/{version}/{component-name}.min.js
+https://divs-cdn.idreezus.com/{component}/{version}/{component}.min.js
 ```
 
-Examples:
+**Examples:**
 
-- `https://divs-cdn.idreezus.com/marquee/v1.0.0-beta/marquee.min.js` - Stable release
-- `https://divs-cdn.idreezus.com/marquee/latest/marquee.min.js` - For testing only
-- `https://divs-cdn.idreezus.com/accordion/v1.0.0/accordion.min.js` - Different component
+- `/marquee/v1.0.0-beta/marquee.min.js` - Production
+- `/marquee/latest/marquee.min.js` - Testing only
+- `/accordion/v1.0.0/accordion.min.js` - Different component
 
-**Important:** Users should always load from versioned URLs (like `v1.0.0`), never from `latest/`.
+Users should always use versioned URLs, never `latest/`.
 
 ## Deploying to Cloudflare Pages
 
-### Option 1: Manual Upload
+### Option 1: Manual
 
-1. Build releases:
+1. Run `pnpm release`
+2. Upload `dist/` to Cloudflare Pages
 
-   ```bash
-   pnpm release
-   ```
+### Option 2: Automated (recommended)
 
-2. Upload the `dist/` directory to Cloudflare Pages manually
+1. Connect GitHub repo to Cloudflare Pages
 
-3. Files are available at: `https://divs-cdn.idreezus.com/{component}/{version}/{file}`
-
-### Option 2: Automated Deployment (Recommended)
-
-1. Connect your GitHub repository to Cloudflare Pages
-
-2. Configure build settings:
+2. Build settings:
 
    - **Build command:** `pnpm install && pnpm release`
    - **Output directory:** `dist`
-   - **Root directory:** `/` (leave empty)
 
-3. Set environment variables (if needed):
+3. Set `NODE_VERSION` to `18` or higher
 
-   - `NODE_VERSION`: `18` or higher
+4. Cloudflare rebuilds on each push
 
-4. Cloudflare automatically rebuilds on each push to main branch
+5. Old version folders persist automatically
 
-5. Version folders persist across deployments (Cloudflare Pages doesn't delete old files by default)
+**Benefits:**
 
-### Cloudflare Pages Benefits
-
-- Automatic HTTPS
-- Global CDN distribution
-- Unlimited bandwidth (on paid plans)
+- Auto HTTPS
+- Global CDN
 - Git integration
 - Custom domains
 
-## Versioning Strategy
+## Versioning
 
-Each component maintains independent versions:
-
-- **Specific versions** (`v1.0.0-beta/`, `v1.0.1/`) - Frozen, safe for production
-- **Latest version** (`latest/`) - Always changing, for testing only
-
-Users who want stability use specific version URLs. These never change, even when you continue developing.
-
-**See [VERSIONING.md](./VERSIONING.md) for complete versioning workflow.**
-
-## Independent Component Versioning
-
-Components version independently. This is normal:
+Components version independently:
 
 ```
 dist/
-├── marquee/
-│   ├── v1.2.5/          # Marquee at version 1.2.5
-│   └── latest/
-└── accordion/
-    ├── v3.0.0/          # Accordion at version 3.0.0
-    └── latest/
+├── marquee/v1.2.5/
+└── accordion/v3.0.0/
 ```
 
-Each component evolves at its own pace.
+- **Versioned folders** (`v1.0.0/`) - Frozen, for users
+- **Latest folder** (`latest/`) - Changing, for testing
 
-## Adding New Components
+See [VERSIONING.md](./VERSIONING.md) for full workflow.
 
-To add a new component to the monorepo:
+## Adding new components
 
-1. Create `packages/{component-name}/` directory
+1. Copy `packages/marquee/` to `packages/new-component/`
+2. Update `package.json` with new name
+3. Add scripts to root `package.json`:
 
-2. Copy structure from an existing component (like marquee)
-
-3. Update component name in package.json
-
-4. Configure rollup.config.js (should read version dynamically like marquee does)
-
-5. Add scripts to root `package.json`:
-
-   ```json
-   {
-     "scripts": {
-       "build:component-name": "pnpm --filter component-name build",
-       "dev:component-name": "pnpm --filter component-name build:watch",
-       "release:component-name": "pnpm --filter component-name release"
-     }
-   }
-   ```
-
-6. Develop with `pnpm dev:component-name`
-
-7. Release with `pnpm release:component-name`
-
-Your component will be available at:
-
-```
-https://divs-cdn.idreezus.com/{component-name}/v1.0.0/{component-name}.min.js
+```json
+{
+  "build:new-component": "pnpm --filter new-component build",
+  "dev:new-component": "pnpm --filter new-component build:watch",
+  "release:new-component": "pnpm --filter new-component release"
+}
 ```
 
-## Build All Components
+4. Build: `pnpm dev:new-component`
+5. Release: `pnpm release:new-component`
 
-To build or release multiple components at once:
+Available at:
+
+```
+https://divs-cdn.idreezus.com/new-component/v1.0.0/new-component.min.js
+```
+
+## Build all components
 
 ```bash
-# Development builds (updates all latest/ folders)
-pnpm build
-
-# Release builds (creates versioned folders for all components)
-pnpm release
+pnpm build        # Updates all latest/
+pnpm release      # Releases all
 ```
 
-This is useful when you've updated multiple components and want to deploy them together.
+## Important notes
 
-## File Sizes
+- Dependencies (like GSAP) must be loaded globally
+- Modern JavaScript (ES6+), no IE11
+- Components auto-initialize on page load
+- Use `pnpm`, not `npm`
+- Never delete old version folders
 
-Current sizes (marquee v1.0.0-beta):
+## Quick commands
 
-- Main library minified: ~16KB
-- Diagnostics minified: ~7KB
-- Total (with diagnostics): ~23KB
-
-These are reasonable sizes for marketing websites, especially since GSAP is loaded separately.
-
-## Important Notes
-
-1. **External dependencies** - Components expect dependencies (like GSAP) to be loaded globally
-2. **No transpilation** - Code uses modern JavaScript (ES6+)
-3. **Browser support** - Works in all modern browsers (no IE11)
-4. **Auto-initialization** - Components typically initialize automatically on page load
-5. **Diagnostics are optional** - Only include if users need debugging tools
-6. **Workspace commands** - Use `pnpm` not `npm` for all operations
-7. **Version folders persist** - Never delete old version folders, users depend on them
-
-## Quick Command Reference
-
-| Command                | Purpose                | Updates                         |
-| ---------------------- | ---------------------- | ------------------------------- |
-| `pnpm build:marquee`   | Development build      | `latest/` only                  |
-| `pnpm dev:marquee`     | Watch mode             | `latest/` only                  |
-| `pnpm release:marquee` | Release build          | `v{version}/` + `latest/`       |
-| `pnpm build`           | Build all components   | All `latest/` folders           |
-| `pnpm release`         | Release all components | All version folders + `latest/` |
+| Command                | What it does      |
+| ---------------------- | ----------------- |
+| `pnpm dev:marquee`     | Watch mode        |
+| `pnpm build:marquee`   | Development build |
+| `pnpm release:marquee` | Release build     |
+| `pnpm build`           | Build all         |
+| `pnpm release`         | Release all       |
 
 ## Troubleshooting
 
-### Build fails with "Cannot find module"
+**Build fails:**
+Run `pnpm install`.
 
-- Run `pnpm install` to ensure all dependencies are installed
+**Version folder not created:**
+Check version in `package.json`.
 
-### Version folder not created after release
+**Users see old code:**
+CDN cache takes time. Hard refresh (Ctrl+F5).
 
-- Check that you updated the version in `packages/{component}/package.json`
-- Ensure BUILD_MODE environment variable is being set correctly
+**Watch mode not detecting changes:**
+Edit files in `packages/{component}/src/` only.
 
-### Users see old code after deployment
+## After deployment
 
-- CDN cache may need time to clear
-- Tell users to hard refresh (Ctrl+F5 or Cmd+Shift+R)
-- Some CDNs have cache purge options
+1. Test CDN URLs in incognito
+2. Update docs with new URLs
+3. Notify users if breaking changes
 
-### Rollup watch mode not detecting changes
-
-- Ensure you're editing files in `packages/{component}/src/`
-- Check that the path in rollup.config.js input is correct
-
-## Next Steps
-
-After deployment:
-
-1. Test the CDN URLs in a clean browser (incognito mode)
-2. Update documentation with the correct CDN URLs
-3. Notify users of the new version (if breaking changes)
-4. Monitor for any issues
-5. Continue development using `pnpm dev:marquee`
-
-See [VERSIONING.md](./VERSIONING.md) for long-term versioning strategy and best practices.
+See [VERSIONING.md](./VERSIONING.md) for more.
