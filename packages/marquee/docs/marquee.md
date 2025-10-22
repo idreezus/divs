@@ -95,7 +95,7 @@ Speeds can be adjusted with `data-marquee-speed`. Higher numbers make the marque
 
 ### Hover Effects
 
-Hover effects can be enabled with `data-marquee-hover`. Set it to `pause` to ramp smoothly to a stop when hovering, or `slow` to reduce speed while maintaining motion. By default, hovering the container triggers the effect, but you can set `data-marquee-hover-trigger="items"` to only activate when hovering individual items.
+Hover effects can be enabled with `data-marquee-hover-effect`. Set it to `pause` to ramp smoothly to a stop when hovering, or `slow` to reduce speed while maintaining motion. By default, hovering the container triggers the effect, but you can set `data-marquee-hover-trigger="items"` to only activate when hovering individual items.
 
 ### Fine-Tuning Hover Behavior
 
@@ -145,7 +145,7 @@ Most attributes are optional. You only need `data-marquee-direction` on the cont
 
 | Attribute                        | Values                | Default                   | Description                                                                |
 | -------------------------------- | --------------------- | ------------------------- | -------------------------------------------------------------------------- |
-| `data-marquee-hover`            | `pause`, `slow`, omit | omit                      | Enables a hover effect: ramp to pause, or slow down.                       |
+| `data-marquee-hover-effect`            | `pause`, `slow`, omit | omit                      | Enables a hover effect: ramp to pause, or slow down.                       |
 | `data-marquee-hover-trigger`    | `container`, `items`  | `container`               | Where the hover effect is triggered.                                       |
 | `data-marquee-hover-speed-ratio`  | A number ≥ 0          | pause: `0.1`, slow: `0.3` | For pause: mid-ramp speed before pausing. For slow: sustained hover speed. |
 | `data-marquee-hover-pause-duration`    | A number ≥ 0          | `0.4`                     | Total ramp time into a pause (seconds).                                    |
@@ -192,6 +192,14 @@ Most of the time, the marquee just works with attributes. Use the JavaScript API
 
 <Accordion title="Why are my items overflowing outside the container?">
   You forgot to add `overflow: hidden` to your marquee container. Without it, items will be visible outside the bounds as they animate. This is the most common mistake when setting up the component. Just add `overflow: hidden` to your container's CSS and it'll clip everything properly.
+</Accordion>
+
+<Accordion title="How can I remove the fade effect at the edges?">
+TODO: Finish this.
+</Accordion>
+
+<Accordion title="Can I start my items from the center?">
+TODO: No.
 </Accordion>
 
 <Accordion title="My vertical marquee isn't working. What's wrong?">

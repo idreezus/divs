@@ -98,7 +98,7 @@ You don't need to worry about any of this - just add your items and the library 
   data-marquee-direction="horizontal"
   data-marquee-speed="2"
   data-marquee-reverse
-  data-marquee-hover="pause"
+  data-marquee-hover-effect="pause"
 >
   <div data-marquee-item="true">Item 1</div>
   <div data-marquee-item="true">Item 2</div>
@@ -155,7 +155,7 @@ All options are set using data attributes on the container element.
 
 Enable smooth pause or slow when hovering. Nothing happens by default unless an effect is set.
 
-#### `data-marquee-hover`
+#### `data-marquee-hover-effect`
 
 - **Values:** `"pause"` | `"slow"`
 - **Default:** not set (no hover effect)
@@ -310,7 +310,7 @@ window.Marquee.init();
     <div
       data-marquee-direction="horizontal"
       data-marquee-speed="1.5"
-      data-marquee-hover="pause"
+      data-marquee-hover-effect="pause"
       id="logo-marquee"
     >
       <div data-marquee-item="true">
@@ -388,7 +388,7 @@ Add additional attributes to the container:
 
 - `data-marquee-speed` = `2`
 - `data-marquee-reverse` (just the name, no value)
-- `data-marquee-hover="pause"` or `data-marquee-hover="slow"`
+- `data-marquee-hover-effect="pause"` or `data-marquee-hover-effect="slow"`
 
 ### Step 5: Publish
 
@@ -455,7 +455,7 @@ window.Marquee.init();
 ### Custom Styling for Hover State
 
 ```css
-[data-marquee-direction][data-marquee-hover]:hover {
+[data-marquee-direction][data-marquee-hover-effect]:hover {
   cursor: pointer;
   opacity: 0.9;
 }

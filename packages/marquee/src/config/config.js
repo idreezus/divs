@@ -37,7 +37,7 @@ export const CONFIG = {
 
   interaction: {
     attributes: {
-      effect: 'data-marquee-hover',
+      effect: 'data-marquee-hover-effect',
       effectTrigger: 'data-marquee-hover-trigger',
       rampRatio: 'data-marquee-hover-speed-ratio',
       pauseDuration: 'data-marquee-hover-pause-duration',
