@@ -4,7 +4,6 @@ export function computeMedianGap(containerElement, itemElements, isVertical) {
     return 0;
   }
 
-  const containerRect = containerElement.getBoundingClientRect();
   const itemRects = itemElements.map((element) => element.getBoundingClientRect());
 
   const spacings = [];

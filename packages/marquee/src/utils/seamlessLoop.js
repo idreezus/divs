@@ -18,27 +18,27 @@ function horizontalLoop(items, config) {
   config = config || {};
   gsap.context(() => {
     // use a context so resize listeners/observers can be cleaned up automatically
-    let tl = gsap.timeline({
+    const tl = gsap.timeline({
         repeat: config.repeat,
         paused: config.paused,
         defaults: { ease: 'none' },
         onReverseComplete: () =>
           tl.totalTime(tl.rawTime() + tl.duration() * 100),
-      }),
-      length = items.length,
-      startX = items[0].offsetLeft,
-      times = [],
-      widths = [],
-      // MODIFIED FROM ORIGINAL: track horizontal space before each item using geometry
-      spaceBeforeX = [],
-      xPercents = [],
-      curIndex = 0,
-      pixelsPerSecond = (config.speed || 1) * 100,
-      snap =
-        config.snap === false ? (v) => v : gsap.utils.snap(config.snap || 1),
-      totalWidth,
-      container = items[0].parentNode,
-      internalResizeObserver;
+      });
+    const length = items.length;
+    let startX = items[0].offsetLeft;
+    const times = [];
+    const widths = [];
+    // MODIFIED FROM ORIGINAL: track horizontal space before each item using geometry
+    const spaceBeforeX = [];
+    const xPercents = [];
+    let curIndex = 0;
+    const pixelsPerSecond = (config.speed || 1) * 100;
+    const snap =
+        config.snap === false ? (v) => v : gsap.utils.snap(config.snap || 1);
+    let totalWidth;
+    const container = items[0].parentNode;
+    let internalResizeObserver;
 
     // set initial transform basis
     gsap.set(items, { x: 0 });
@@ -189,8 +189,8 @@ function horizontalLoop(items, config) {
       vars = vars || {};
       Math.abs(index - curIndex) > length / 2 &&
         (index += index > curIndex ? -length : length); // always go in the shortest direction
-      let newIndex = gsap.utils.wrap(0, length, index),
-        time = times[newIndex];
+      const newIndex = gsap.utils.wrap(0, length, index);
+      let time = times[newIndex];
       if (time > tl.time() !== index > curIndex) {
         // if playhead wraps, adjust target time accordingly
         vars.modifiers = { time: gsap.utils.wrap(0, tl.duration()) };
@@ -247,14 +247,14 @@ function verticalLoop(items, config) {
   config = config || {};
   gsap.context(() => {
     // use a context so that if this is called from within another context or a gsap.matchMedia(), we can perform proper cleanup like the "resize" event handler on the window
-    let onChange = config.onChange,
-      lastIndex = 0,
-      tl = gsap.timeline({
+    const onChange = config.onChange;
+    let lastIndex = 0;
+    const tl = gsap.timeline({
         repeat: config.repeat,
         onUpdate:
           onChange &&
           function () {
-            let i = tl.closestIndex();
+            const i = tl.closestIndex();
             if (lastIndex !== i) {
               lastIndex = i;
               onChange(items[i], i);
@@ -264,31 +264,31 @@ function verticalLoop(items, config) {
         defaults: { ease: 'none' },
         onReverseComplete: () =>
           tl.totalTime(tl.rawTime() + tl.duration() * 100),
-      }),
-      length = items.length,
-      startY = items[0].offsetTop,
-      times = [],
-      heights = [],
-      spaceBefore = [],
-      yPercents = [],
-      curIndex = 0,
-      indexIsDirty = false,
-      center = config.center,
-      pixelsPerSecond = (config.speed || 1) * 100,
-      snap =
-        config.snap === false ? (v) => v : gsap.utils.snap(config.snap || 1), // some browsers shift by a pixel to accommodate flex layouts, so for example if height is 20% the first element's height might be 242px, and the next 243px, alternating back and forth. So we snap to 5 percentage points to make things look more natural
-      timeOffset = 0,
-      container =
+      });
+    const length = items.length;
+    let startY = items[0].offsetTop;
+    const times = [];
+    const heights = [];
+    const spaceBefore = [];
+    const yPercents = [];
+    let curIndex = 0;
+    let indexIsDirty = false;
+    const center = config.center;
+    const pixelsPerSecond = (config.speed || 1) * 100;
+    const snap =
+        config.snap === false ? (v) => v : gsap.utils.snap(config.snap || 1); // some browsers shift by a pixel to accommodate flex layouts, so for example if height is 20% the first element's height might be 242px, and the next 243px, alternating back and forth. So we snap to 5 percentage points to make things look more natural
+    let timeOffset = 0;
+    const container =
         center === true
           ? items[0].parentNode
-          : gsap.utils.toArray(center)[0] || items[0].parentNode,
-      totalHeight,
-      // Detect if the user explicitly provided paddingBottom so that auto-derivation
-      // does not overwrite the author's intent on refresh.
-      userSpecifiedPaddingBottom =
+          : gsap.utils.toArray(center)[0] || items[0].parentNode;
+    let totalHeight;
+    // Detect if the user explicitly provided paddingBottom so that auto-derivation
+    // does not overwrite the author's intent on refresh.
+    const userSpecifiedPaddingBottom =
         Object.prototype.hasOwnProperty.call(config, 'paddingBottom') &&
-        !isNaN(parseFloat(config.paddingBottom)),
-      getTotalHeight = () =>
+        !isNaN(parseFloat(config.paddingBottom));
+    const getTotalHeight = () =>
         items[length - 1].offsetTop +
         (yPercents[length - 1] / 100) * heights[length - 1] -
         startY +
@@ -296,13 +296,13 @@ function verticalLoop(items, config) {
         // so that seam spacing is controlled explicitly via paddingBottom
         items[length - 1].offsetHeight *
           gsap.getProperty(items[length - 1], 'scaleY') +
-        (parseFloat(config.paddingBottom) || 0),
-      populateHeights = () => {
+        (parseFloat(config.paddingBottom) || 0);
+    const populateHeights = () => {
         // Recalculate the starting offset on each refresh to account for layout shifts
         // caused by text wrapping, font loading, or container reflow. This keeps loop points aligned.
         startY = items[0].offsetTop;
-        let b1 = container.getBoundingClientRect(),
-          b2;
+        let b1 = container.getBoundingClientRect();
+        let b2;
         items.forEach((el, i) => {
           heights[i] = parseFloat(gsap.getProperty(el, 'height', 'px'));
           yPercents[i] = snap(
@@ -339,9 +339,9 @@ function verticalLoop(items, config) {
           yPercent: (i) => yPercents[i],
         });
         totalHeight = getTotalHeight();
-      },
-      timeWrap,
-      populateOffsets = () => {
+      };
+    let timeWrap;
+    const populateOffsets = () => {
         timeOffset = center
           ? (tl.duration() * (container.offsetHeight / 2)) / totalHeight
           : 0;
@@ -353,12 +353,12 @@ function verticalLoop(items, config) {
                 timeOffset
             );
           });
-      },
-      getClosest = (values, value, wrap) => {
-        let i = values.length,
-          closest = 1e10,
-          index = 0,
-          d;
+      };
+    const getClosest = (values, value, wrap) => {
+        let i = values.length;
+        let closest = 1e10;
+        let index = 0;
+        let d;
         while (i--) {
           d = Math.abs(values[i] - value);
           if (d > wrap / 2) {
@@ -370,9 +370,13 @@ function verticalLoop(items, config) {
           }
         }
         return index;
-      },
-      populateTimeline = () => {
-        let i, item, curY, distanceToStart, distanceToLoop;
+      };
+    const populateTimeline = () => {
+        let i;
+        let item;
+        let curY;
+        let distanceToStart;
+        let distanceToLoop;
         tl.clear();
         for (i = 0; i < length; i++) {
           item = items[i];
@@ -408,9 +412,9 @@ function verticalLoop(items, config) {
           times[i] = distanceToStart / pixelsPerSecond;
         }
         timeWrap = gsap.utils.wrap(0, tl.duration());
-      },
-      refresh = (deep) => {
-        let progress = tl.progress();
+      };
+    const refresh = (deep) => {
+        const progress = tl.progress();
         tl.progress(0, true);
         populateHeights();
         deep && populateTimeline();
@@ -418,9 +422,9 @@ function verticalLoop(items, config) {
         deep && tl.draggable && tl.paused()
           ? tl.time(times[curIndex], true)
           : tl.progress(progress, true);
-      },
-      _vRafId = null,
-      _vScheduleRefresh = () => {
+      };
+    let _vRafId = null;
+    const _vScheduleRefresh = () => {
         if (_vRafId !== null) {
           cancelAnimationFrame(_vRafId);
         }
@@ -432,10 +436,10 @@ function verticalLoop(items, config) {
           }
           refresh(true);
         });
-      },
-      proxy,
-      internalResizeObserver,
-      _vWindowResizeHandler;
+      };
+    let proxy;
+    let internalResizeObserver;
+    let _vWindowResizeHandler;
     gsap.set(items, { y: 0 });
     populateHeights();
     populateTimeline();
@@ -453,8 +457,8 @@ function verticalLoop(items, config) {
       vars = vars || {};
       Math.abs(index - curIndex) > length / 2 &&
         (index += index > curIndex ? -length : length); // always go in the shortest direction
-      let newIndex = gsap.utils.wrap(0, length, index),
-        time = times[newIndex];
+      const newIndex = gsap.utils.wrap(0, length, index);
+      let time = times[newIndex];
       if (time > tl.time() !== index > curIndex && index !== curIndex) {
         // if we're wrapping the timeline's playhead, make the proper adjustments
         time += tl.duration() * (index > curIndex ? 1 : -1);
@@ -471,7 +475,7 @@ function verticalLoop(items, config) {
     }
     tl.toIndex = (index, vars) => toIndex(index, vars);
     tl.closestIndex = (setCurrent) => {
-      let index = getClosest(times, tl.time(), tl.duration());
+      const index = getClosest(times, tl.time(), tl.duration());
       if (setCurrent) {
         curIndex = index;
         indexIsDirty = false;
@@ -489,19 +493,18 @@ function verticalLoop(items, config) {
     }
     if (config.draggable && typeof Draggable === 'function') {
       proxy = document.createElement('div');
-      let wrap = gsap.utils.wrap(0, 1),
-        ratio,
-        startProgress,
-        draggable,
-        dragSnap,
-        lastSnap,
-        initChangeY,
-        wasPlaying,
-        align = () =>
+      const wrap = gsap.utils.wrap(0, 1);
+      let ratio;
+      let startProgress;
+      let draggable;
+      let lastSnap;
+      let initChangeY;
+      let wasPlaying;
+      const align = () =>
           tl.progress(
             wrap(startProgress + (draggable.startY - draggable.y) * ratio)
-          ),
-        syncIndex = () => tl.closestIndex(true);
+          );
+      const syncIndex = () => tl.closestIndex(true);
       typeof InertiaPlugin === 'undefined' &&
         console.warn(
           'InertiaPlugin required for momentum-based scrolling and snapping. https://greensock.com/club'
@@ -510,7 +513,7 @@ function verticalLoop(items, config) {
         trigger: items[0].parentNode,
         type: 'y',
         onPressInit() {
-          let y = this.y;
+          const y = this.y;
           gsap.killTweensOf(tl);
           wasPlaying = !tl.paused();
           tl.pause();
@@ -529,10 +532,10 @@ function verticalLoop(items, config) {
           if (Math.abs(startProgress / -ratio - this.y) < 10) {
             return lastSnap + initChangeY;
           }
-          let time = -(value * ratio) * tl.duration(),
-            wrappedTime = timeWrap(time),
-            snapTime = times[getClosest(times, wrappedTime, tl.duration())],
-            dif = snapTime - wrappedTime;
+          const time = -(value * ratio) * tl.duration();
+          const wrappedTime = timeWrap(time);
+          const snapTime = times[getClosest(times, wrappedTime, tl.duration())];
+          let dif = snapTime - wrappedTime;
           Math.abs(dif) > tl.duration() / 2 &&
             (dif += dif < 0 ? tl.duration() : -tl.duration());
           lastSnap = (time + dif) / tl.duration() / -ratio;

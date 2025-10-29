@@ -1,15 +1,15 @@
-import { parseCoreConfig, parseCloningConfig, parseInteractionConfig } from '../config/parsers.js';
-import { CONFIG } from '../config/config.js';
-import { cloneItems, removeClones } from './cloning.js';
-import { buildTimeline, rebuildTimeline } from './timeline.js';
-import { attachHoverHandlers } from '../interaction/hover.js';
+import { parseCoreConfig, parseCloningConfig, parseInteractionConfig } from './setup/parsers.js';
+import { CONFIG } from './setup/config.js';
+import { cloneItems, removeClones } from './features/cloning.js';
+import { buildTimeline, rebuildTimeline } from './features/timeline.js';
+import { attachHoverHandlers } from './features/hover.js';
 
 /**
  * Manages a single marquee instance with timeline, cloning, and interaction handlers.
  */
 export class MarqueeInstance {
   constructor(container, options = {}) {
-    if (!container || !(container instanceof Element)) {
+    if (!container || !(container instanceof window.Element)) {
       throw new Error('Marquee: container must be a valid DOM element');
     }
 
@@ -216,7 +216,8 @@ export class MarqueeInstance {
       if (typeof this.timeline.cleanup === 'function') {
         try {
           this.timeline.cleanup();
-        } catch (e) {}
+        // eslint-disable-next-line no-unused-vars
+        } catch (_e) {}
       }
       this.timeline.kill();
       this.timeline = null;

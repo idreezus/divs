@@ -3,18 +3,6 @@
 
 import { CONFIG } from './config.js';
 
-// Parses a boolean attribute where presence implies true unless explicitly set to "false".
-function parseBooleanAttribute(element, attributeName) {
-  // Purpose: Interpret boolean-like attributes in a predictable way.
-  if (!element.hasAttribute(attributeName)) return false;
-  const raw = element.getAttribute(attributeName);
-  if (raw === null) return true;
-  const normalized = String(raw).trim().toLowerCase();
-  if (normalized === 'false' || normalized === '0' || normalized === 'no') {
-    return false;
-  }
-  return true;
-}
 
 // Parses a float attribute with a fallback default and optional clamp.
 function parseFloatAttribute(element, attributeName, fallback, min) {

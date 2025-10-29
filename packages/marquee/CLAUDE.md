@@ -30,9 +30,28 @@ Build output paths:
 
 ## Architecture
 
+### File Structure
+
+```
+src/
+├── marquee.js          # Entry point, auto-initializes on DOMContentLoaded
+├── api.js              # Public API (init, get, pause, play, destroy, etc.)
+├── core.js             # MarqueeInstance class (main logic coordinator)
+├── setup/              # Initialization & configuration
+│   ├── config.js       # Centralized attribute names and defaults
+│   └── parsers.js      # Converts data-* attributes to config objects
+├── features/           # Feature-specific logic
+│   ├── cloning.js      # Smart clone calculation and management
+│   ├── timeline.js     # Timeline building and rebuilding
+│   ├── hover.js        # Hover interaction effects (pause/slow)
+│   └── spacing.js      # Median gap computation for seamless looping
+└── utils/              # Helpers
+    └── seamlessLoop.js # GSAP horizontal/vertical loop helpers
+```
+
 ### Core Components
 
-**MarqueeInstance (src/marquee.js:11-571)**
+**MarqueeInstance (src/core.js)**
 - Main class managing individual marquee instances
 - Stored in a WeakMap to prevent memory leaks
 - Lifecycle: initialization → cloning → styling → timeline build → interaction setup
@@ -44,13 +63,13 @@ Build output paths:
 - Use xPercent/yPercent transforms to maintain responsiveness during window resizing
 - Automatically compute spacing between items using DOM geometry (getBoundingClientRect)
 
-**Configuration System (src/config/)**
+**Configuration System (src/setup/)**
 - `config.js` - Centralized attribute names and defaults
 - `parsers.js` - Converts data-* attributes to normalized config objects
 - Three namespaces: core (speed, direction, repeat, reverse), cloning (auto-clone, smart clone count), interaction (hover effects)
 - Validates CSS and warns about common issues (missing flex, overflow, reverse directions)
 
-**Spacing Computation (src/spacing.js)**
+**Spacing Computation (src/features/spacing.js)**
 - `computeMedianGap()` measures inter-item spacing using DOM geometry
 - Respects margins, flex gaps, and padding by measuring actual rendered positions
 - Returns median spacing (robust to outliers) for seamless loop padding

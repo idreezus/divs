@@ -1,4 +1,4 @@
-import { CONFIG } from '../config/config.js';
+import { CONFIG } from '../setup/config.js';
 
 // Calculates optimal clone count based on container and items size
 function calculateOptimalCloneCount(container, items, isVertical) {

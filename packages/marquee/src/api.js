@@ -1,5 +1,5 @@
-import { MarqueeInstance } from '../core/MarqueeInstance.js';
-import { CONFIG } from '../config/config.js';
+import { MarqueeInstance } from './core.js';
+import { CONFIG } from './setup/config.js';
 
 const instances = new WeakMap();
 

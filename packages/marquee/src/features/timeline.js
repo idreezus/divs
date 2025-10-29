@@ -1,6 +1,6 @@
 import { horizontalLoop, verticalLoop } from '../utils/seamlessLoop.js';
-import { computeMedianGap } from '../spacing.js';
-import { CONFIG } from '../config/config.js';
+import { computeMedianGap } from './spacing.js';
+import { CONFIG } from '../setup/config.js';
 
 // Creates a new GSAP timeline for the marquee animation
 export function buildTimeline(instance) {
@@ -113,7 +113,8 @@ function cleanupPreviousTimeline(instance) {
     if (typeof instance.timeline.cleanup === 'function') {
       try {
         instance.timeline.cleanup();
-      } catch (e) {}
+      // eslint-disable-next-line no-unused-vars
+      } catch (_e) {}
     }
     instance.timeline.kill();
     instance.timeline = null;

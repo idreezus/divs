@@ -1,4 +1,4 @@
-import { MarqueeAPI } from './api/public.js';
+import { MarqueeAPI } from './api.js';
 
 // Auto-initialize marquees when DOM is ready
 if (typeof window !== 'undefined') {
