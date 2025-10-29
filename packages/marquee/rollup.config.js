@@ -48,30 +48,4 @@ const mainConfig = {
   external: ['gsap'],
 };
 
-// Helper function to create diagnostics outputs for a given path
-function createDiagnosticsOutputs(basePath) {
-  return [
-    {
-      file: `${basePath}marquee-diagnostics.js`,
-      format: 'iife',
-      name: 'MarqueeDiagnostics',
-      globals: { gsap: 'gsap' },
-    },
-    {
-      file: `${basePath}marquee-diagnostics.min.js`,
-      format: 'iife',
-      name: 'MarqueeDiagnostics',
-      globals: { gsap: 'gsap' },
-      plugins: [terser()],
-    },
-  ];
-}
-
-// Configuration for the diagnostics bundle (separate optional file)
-const diagnosticsConfig = {
-  input: 'src/diagnostics.js',
-  output: outputPaths.flatMap(createDiagnosticsOutputs),
-  external: ['gsap'],
-};
-
-export default [mainConfig, diagnosticsConfig];
+export default [mainConfig];

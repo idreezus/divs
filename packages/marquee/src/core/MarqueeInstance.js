@@ -14,7 +14,11 @@ export class MarqueeInstance {
     }
 
     if (!window.gsap) {
-      console.error('Marquee: GSAP is required but not found. Load GSAP before initializing marquees.');
+      console.error(
+        'Marquee: GSAP is required but not found.\n' +
+        'Load GSAP before the marquee library:\n' +
+        '<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>'
+      );
       return;
     }
 
@@ -25,6 +29,7 @@ export class MarqueeInstance {
     this.wasPausedByEffect = false;
     this.pauseRampTimeline = null;
     this.baseTimeScale = 1;
+    this.currentDirection = null;
 
     try {
       this.coreConfig = parseCoreConfig(container, options.core);
@@ -44,16 +49,29 @@ export class MarqueeInstance {
       const originalItems = this.getOriginalItems();
 
       if (originalItems.length === 0) {
-        console.warn('Marquee: No items found with data-marquee-item="true"', this.container);
+        console.warn(
+          'Marquee: No items found with data-marquee-item="true".\n' +
+          'Add the attribute to child elements:\n' +
+          '<div data-marquee-item="true">Item content</div>',
+          this.container
+        );
         return;
       }
 
+      this.validateContainerStyles();
       this.applyContainerStyles();
-      cloneItems(this.container, originalItems, this.cloningConfig);
+      const isVertical = this.coreConfig.direction === 'vertical';
+      cloneItems(this.container, originalItems, this.cloningConfig, isVertical);
       buildTimeline(this);
 
       if (!this.timeline) {
-        console.error('Marquee: Failed to create timeline', this.container);
+        console.error(
+          'Marquee: Failed to create timeline. Possible causes:\n' +
+          '- Items are hidden (display: none)\n' +
+          '- Items have zero width/height\n' +
+          '- Invalid CSS on container or items',
+          this.container
+        );
         return;
       }
 
@@ -66,18 +84,71 @@ export class MarqueeInstance {
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         this.timeline.timeScale(this.timeline.timeScale() * 0.1);
       }
+
+      // Store initial direction for change detection
+      this.currentDirection = this.coreConfig.direction;
     } catch (error) {
       console.error('Marquee: Initialization failed', error, this.container);
     }
   }
 
-  // Applies flex layout and overflow styles to the container element
-  applyContainerStyles() {
-    this.container.style.display = 'flex';
-    this.container.style.overflow = 'hidden';
+  // Checks if CSS direction has changed and returns true if different
+  checkDirectionChange() {
+    const computedStyle = window.getComputedStyle(this.container);
+    const flexDirection = computedStyle.flexDirection;
+    const isVertical = flexDirection === 'column' || flexDirection === 'column-reverse';
+    const newDirection = isVertical ? 'vertical' : 'horizontal';
 
-    const isVertical = this.coreConfig.direction === 'vertical';
-    this.container.style.flexDirection = isVertical ? 'column' : 'row';
+    return newDirection !== this.currentDirection;
+  }
+
+  // Manually refresh direction and rebuild if changed
+  refreshDirection() {
+    if (this.checkDirectionChange()) {
+      const computedStyle = window.getComputedStyle(this.container);
+      const flexDirection = computedStyle.flexDirection;
+      const isVertical = flexDirection === 'column' || flexDirection === 'column-reverse';
+      const newDirection = isVertical ? 'vertical' : 'horizontal';
+
+      this.currentDirection = newDirection;
+      this.coreConfig.direction = newDirection;
+      this.rebuild(true);
+    }
+  }
+
+  // Validates container CSS and warns about missing required styles
+  validateContainerStyles() {
+    if (this.container.hasAttribute(CONFIG.core.attributes.stylesValidated)) {
+      return;
+    }
+
+    const computed = window.getComputedStyle(this.container);
+
+    if (computed.display !== 'flex' && computed.display !== 'inline-flex') {
+      console.warn('Marquee: Container should have display: flex. Add it to your CSS or let the library apply it.', this.container);
+    }
+
+    if (computed.overflow !== 'hidden') {
+      console.warn('Marquee: Container should have overflow: hidden. Add it to your CSS or let the library apply it.', this.container);
+    }
+
+    // Mark as validated to avoid repeated warnings
+    this.container.setAttribute(CONFIG.core.attributes.stylesValidated, 'true');
+  }
+
+  // Applies flex layout and overflow styles only if not already set
+  applyContainerStyles() {
+    const computed = window.getComputedStyle(this.container);
+
+    if (computed.display !== 'flex' && computed.display !== 'inline-flex') {
+      this.container.style.display = 'flex';
+    }
+
+    if (computed.overflow !== 'hidden') {
+      this.container.style.overflow = 'hidden';
+    }
+
+    // Don't force flex-direction - it's read from CSS in parseDirection
   }
 
   // Returns only non-cloned marquee items
@@ -108,7 +179,8 @@ export class MarqueeInstance {
 
     removeClones(this.container);
     const originalItems = this.getOriginalItems();
-    cloneItems(this.container, originalItems, this.cloningConfig);
+    const isVertical = this.coreConfig.direction === 'vertical';
+    cloneItems(this.container, originalItems, this.cloningConfig, isVertical);
     rebuildTimeline(this, preserveState);
 
     this.baseTimeScale = this.timeline ? this.timeline.timeScale() : 1;

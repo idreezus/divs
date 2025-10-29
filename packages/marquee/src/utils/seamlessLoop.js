@@ -156,12 +156,17 @@ function horizontalLoop(items, config) {
       tl.progress(previousProgress, true);
     };
 
-    let _hPending = false;
+    let _hRafId = null;
     const _hScheduleRefresh = () => {
-      if (_hPending) return;
-      _hPending = true;
-      requestAnimationFrame(() => {
-        _hPending = false;
+      if (_hRafId !== null) {
+        cancelAnimationFrame(_hRafId);
+      }
+      _hRafId = requestAnimationFrame(() => {
+        _hRafId = null;
+        // Check for direction change before refreshing
+        if (config.onDirectionChange) {
+          config.onDirectionChange();
+        }
         refresh(true);
       });
     };
@@ -211,9 +216,7 @@ function horizontalLoop(items, config) {
     }
     tl.cleanup = () => {
       if (internalResizeObserver) {
-        try {
-          internalResizeObserver.disconnect();
-        } catch (e) {}
+        internalResizeObserver.disconnect();
         internalResizeObserver = null;
       }
     };
@@ -416,12 +419,17 @@ function verticalLoop(items, config) {
           ? tl.time(times[curIndex], true)
           : tl.progress(progress, true);
       },
-      _vPending = false,
+      _vRafId = null,
       _vScheduleRefresh = () => {
-        if (_vPending) return;
-        _vPending = true;
-        requestAnimationFrame(() => {
-          _vPending = false;
+        if (_vRafId !== null) {
+          cancelAnimationFrame(_vRafId);
+        }
+        _vRafId = requestAnimationFrame(() => {
+          _vRafId = null;
+          // Check for direction change before refreshing
+          if (config.onDirectionChange) {
+            config.onDirectionChange();
+          }
           refresh(true);
         });
       },
@@ -548,15 +556,11 @@ function verticalLoop(items, config) {
     tl.refresh = refresh;
     tl.cleanup = () => {
       if (internalResizeObserver) {
-        try {
-          internalResizeObserver.disconnect();
-        } catch (e) {}
+        internalResizeObserver.disconnect();
         internalResizeObserver = null;
       }
       if (_vWindowResizeHandler) {
-        try {
-          window.removeEventListener('resize', _vWindowResizeHandler);
-        } catch (e) {}
+        window.removeEventListener('resize', _vWindowResizeHandler);
         _vWindowResizeHandler = null;
       }
     };

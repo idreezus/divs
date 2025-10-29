@@ -23,7 +23,6 @@ npm run release
 
 The build system uses Rollup and creates:
 - `marquee.js` and `marquee.min.js` - Main library bundle
-- `marquee-diagnostics.js` and `marquee-diagnostics.min.js` - Optional diagnostics utilities
 
 Build output paths:
 - Dev mode: `../../dist/marquee/latest/`
@@ -48,7 +47,8 @@ Build output paths:
 **Configuration System (src/config/)**
 - `config.js` - Centralized attribute names and defaults
 - `parsers.js` - Converts data-* attributes to normalized config objects
-- Three namespaces: core (speed, direction, repeat), cloning (auto-clone, clone count), interaction (hover effects)
+- Three namespaces: core (speed, direction, repeat, reverse), cloning (auto-clone, smart clone count), interaction (hover effects)
+- Validates CSS and warns about common issues (missing flex, overflow, reverse directions)
 
 **Spacing Computation (src/spacing.js)**
 - `computeMedianGap()` measures inter-item spacing using DOM geometry
@@ -59,8 +59,9 @@ Build output paths:
 
 **Cloning Strategy**
 - Items are cloned in complete sets and appended in order: `[1,2,3,4,5]` → `[1,2,3,4,5,1,2,3,4,5,1,2,3,4,5]`
-- Clones marked with `aria-hidden="true"` for accessibility
-- Default clone count is 2 (configurable via `data-marquee-clone-count`)
+- Clones marked with `aria-hidden="true"` and `data-marquee-clone="true"` for accessibility and safe removal
+- Clone count is auto-calculated based on container/item sizes (can be overridden via `data-marquee-clone-count`)
+- Capped at maximum of 10 clones for performance
 - Can be disabled with `data-marquee-auto-clone="false"`
 
 **Timeline Rebuild Logic**
@@ -75,26 +76,29 @@ Build output paths:
 - All speed changes preserve playback direction sign to maintain forward/reverse behavior
 - `wasPausedByEffect` flag prevents double-triggering during hover
 
-**Responsive Refresh**
+**Responsive Refresh & Direction Detection**
 - Loop helpers internally observe container size and window resize events
-- Refresh is RAF-coalesced to batch rapid resize events
+- Refresh is RAF-coalesced with cancelAnimationFrame to batch rapid resize events
+- Direction changes detected automatically via `onDirectionChange` callback during resize
 - `populateWidths()`/`populateHeights()` recalculate measurements
 - `populateTimeline()` rebuilds tweens when deep=true
 - Progress is saved/restored proportionally to avoid visual jumps
+- Full rebuild triggered when CSS flex-direction changes (e.g., at breakpoints)
 
 ## Data Attributes
 
 All configuration via `data-marquee-*` attributes on container element:
 
 **Core:**
-- `data-marquee-direction` - "horizontal" or "vertical" (required)
+- `data-marquee="true"` - Marks container for initialization (required)
 - `data-marquee-item="true"` - Marks child elements for animation (required on items)
-- `data-marquee-speed` - Speed multiplier (default: 0.7, translates to ~70 px/sec)
+- `data-marquee-speed` - Speed multiplier (default: 0.7, where 1.0 ≈ 100px/sec)
 - `data-marquee-reverse` - Set to "true" for reverse direction
+- `data-marquee-repeat` - Number of loops (default: -1 for infinite, 0 for once, positive numbers for count)
 
 **Cloning:**
 - `data-marquee-auto-clone` - "true" (default) or "false"
-- `data-marquee-clone-count` - Number of clone sets (default: 2)
+- `data-marquee-clone-count` - Number of clone sets (auto-calculated if not set, max: 10)
 
 **Interaction:**
 - `data-marquee-hover-effect` - "pause" or "slow"
@@ -110,13 +114,25 @@ All configuration via `data-marquee-*` attributes on container element:
 
 ```javascript
 // Auto-initializes on DOMContentLoaded
-window.Marquee.init()     // Initialize all marquees
-window.Marquee.get(element) // Get instance for manual control
+window.Marquee.init(selector, options)  // Initialize marquees
+window.Marquee.get(element)             // Get single instance
+window.Marquee.getAll(selector)         // Get all instances (array)
+window.Marquee.has(element)             // Check if has instance (boolean)
+
+// Control methods (chainable)
+window.Marquee.pauseAll(selector)       // Pause multiple
+window.Marquee.playAll(selector)        // Play multiple
+window.Marquee.refresh(element)         // Refresh direction for one
+window.Marquee.refreshAll(selector)     // Refresh direction for all
+window.Marquee.destroy(element)         // Destroy one
+window.Marquee.destroyAll(selector)     // Destroy multiple
 
 // Instance methods (via window.Marquee.get(element))
 instance.play()
 instance.pause()
 instance.destroy()
+instance.rebuild(preserveState)
+instance.refreshDirection()             // Manual direction check/rebuild
 ```
 
 ## Development Notes
@@ -126,21 +142,4 @@ instance.destroy()
 - `willChange: transform` is auto-applied to items for performance
 - `flexShrink: 0` is critical - prevents items from compressing in flex layout
 - Reduced motion preference (`prefers-reduced-motion`) automatically slows animation to 0.1x speed
-
-## Diagnostics
-
-Optional diagnostics bundle provides spacing measurement tools:
-
-```javascript
-// Load marquee-diagnostics.js separately, then:
-window.MarqueeDiagnostics.run('#my-marquee')        // Diagnose single container
-window.MarqueeDiagnostics.runAll()                   // Diagnose all marquees
-window.MarqueeDiagnostics.runHorizontalExit('#my-marquee') // Check for early repositioning
-```
-
-Diagnostics measure:
-- Inter-item spacing statistics (median, mean, stddev)
-- Geometry span vs helper loop distance
-- Seam spacing accuracy
-- Container padding/gap values
-- Per-item positioning data
+- Debug mode: Add `?marquee-debug` to URL to see auto-calculated clone counts in console

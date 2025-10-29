@@ -10,6 +10,9 @@ export const CONFIG = {
       item: 'data-marquee-item',
       speed: 'data-marquee-speed',
       reverse: 'data-marquee-reverse',
+      repeat: 'data-marquee-repeat',
+      reverseWarned: 'data-marquee-reverse-warned', // Internal flag
+      stylesValidated: 'data-marquee-styles-validated', // Internal flag
     },
     defaults: {
       // Default speed multiplier used by loop helpers
@@ -27,6 +30,7 @@ export const CONFIG = {
     attributes: {
       autoClone: 'data-marquee-auto-clone',
       cloneCount: 'data-marquee-clone-count',
+      clone: 'data-marquee-clone', // Marks cloned items
     },
     defaults: {
       // Auto-clone enabled by default for seamless looping

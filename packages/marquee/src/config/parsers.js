@@ -28,13 +28,14 @@ function parseFloatAttribute(element, attributeName, fallback, min) {
 }
 
 // Parses an integer attribute with a fallback default and optional clamp.
-function parseIntAttribute(element, attributeName, fallback, min) {
+function parseIntAttribute(element, attributeName, fallback, min, max) {
   // Purpose: Read integer-like attributes (counts, repeats) safely.
   const raw = element.getAttribute(attributeName);
   if (raw === null) return fallback;
   const value = parseInt(raw, 10);
   if (Number.isNaN(value)) return fallback;
   if (typeof min === 'number' && value < min) return min;
+  if (typeof max === 'number' && value > max) return max;
   return value;
 }
 
@@ -43,6 +44,17 @@ function parseIntAttribute(element, attributeName, fallback, min) {
 function parseDirection(element) {
   const computedStyle = window.getComputedStyle(element);
   const flexDirection = computedStyle.flexDirection;
+
+  // Warn about reverse directions - should use data-marquee-reverse instead
+  if (flexDirection === 'row-reverse' || flexDirection === 'column-reverse') {
+    if (!element.hasAttribute(CONFIG.core.attributes.reverseWarned)) {
+      console.warn(
+        'Marquee: Detected flex-direction "' + flexDirection + '". For reverse animation, use ' + CONFIG.core.attributes.reverse + '="true" instead of CSS reverse directions.',
+        element
+      );
+      element.setAttribute(CONFIG.core.attributes.reverseWarned, 'true');
+    }
+  }
 
   const isVertical = flexDirection === 'column' || flexDirection === 'column-reverse';
   return isVertical ? 'vertical' : 'horizontal';
@@ -56,7 +68,7 @@ export function parseCoreConfig(element) {
   return {
     direction: parseDirection(element),
     speed: parseFloatAttribute(element, attributes.speed, defaults.speed, 0),
-    repeat: defaults.repeat,
+    repeat: parseIntAttribute(element, attributes.repeat, defaults.repeat),
     paused: defaults.paused,
     reversed: reverseAttr === 'true',
   };
@@ -69,13 +81,28 @@ export function parseCloningConfig(element) {
   const autoCloneRaw = element.getAttribute(attributes.autoClone);
   const autoClone =
     autoCloneRaw === null ? defaults.autoClone : autoCloneRaw !== 'false';
+
+  const rawCloneCount = element.getAttribute(attributes.cloneCount);
+  const requestedCount = rawCloneCount ? parseInt(rawCloneCount, 10) : null;
+
+  // Warn if user tries to exceed maximum
+  if (requestedCount !== null && !isNaN(requestedCount) && requestedCount > 10) {
+    console.warn(
+      'Marquee: Clone count capped at 10 for performance. Requested:',
+      requestedCount,
+      '→ Using: 10. To improve performance with many items, reduce data-marquee-clone-count.',
+      element
+    );
+  }
+
   return {
     autoClone,
     cloneCount: parseIntAttribute(
       element,
       attributes.cloneCount,
       defaults.cloneCount,
-      1
+      1,
+      10
     ),
   };
 }

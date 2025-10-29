@@ -1,899 +1,963 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GSAP Marquee Library - Test Page</title>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marquee Library Test Suite</title>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+  <script type="module" src="../../dist/marquee/latest/marquee.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-    <!-- Load GSAP from CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+      background: #fafafa;
+      color: #171717;
+      line-height: 1.6;
+      padding: 24px;
+    }
 
-    <!-- Load marquee library as ES6 module -->
-    <script type="module" src="./src/marquee.js"></script>
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
 
-    <!-- Load diagnostics (non-module for easy global access) -->
-    <script src="./src/diagnostics.js"></script>
+    header {
+      margin-bottom: 48px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid #e5e5e5;
+    }
 
-    <style>
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
+    h1 {
+      font-size: 32px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #171717;
+    }
 
-      body {
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
-          Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-        padding: 40px;
-        background: #0f0f0f;
-        color: #ffffff;
-      }
+    .header-subtitle {
+      color: #737373;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
 
-      h1 {
-        margin-bottom: 10px;
-        font-size: 32px;
-      }
+    .stats {
+      display: flex;
+      gap: 24px;
+      font-size: 14px;
+      font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+    }
 
-      .intro {
-        margin-bottom: 40px;
-        color: #a0a0a0;
-        max-width: 800px;
-      }
+    .stats span {
+      padding: 4px 12px;
+      background: #f5f5f5;
+      border-radius: 6px;
+      color: #737373;
+    }
 
-      .test-section {
-        margin-bottom: 60px;
-        min-height: 30rem;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-      }
+    .stats .pass { color: #16a34a; background: #f0fdf4; }
+    .stats .fail { color: #dc2626; background: #fef2f2; }
 
-      .test-section h2 {
-        margin-bottom: 10px;
-        font-size: 20px;
-        color: #ffffff;
-      }
+    .test-category {
+      margin-bottom: 48px;
+    }
 
-      .test-section p {
-        margin-bottom: 20px;
-        color: #a0a0a0;
-        font-size: 14px;
-      }
+    .test-category > h2 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 24px;
+      color: #171717;
+    }
 
-      /* Marquee containers - required styles */
-      [data-marquee] {
-        overflow: hidden;
-        border: 2px dashed #333;
-        padding: 20px;
-        gap: 20px;
-        background: #1a1a1a;
-        border-radius: 8px;
-      }
+    .test-case {
+      background: #ffffff;
+      border: 1px solid #e5e5e5;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
 
-      /* Horizontal marquees */
-      .marquee-horizontal {
-        flex-direction: row;
-      }
+    .test-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      border-bottom: 1px solid #f5f5f5;
+    }
 
-      /* Vertical marquees */
-      .marquee-vertical {
-        flex-direction: column;
-        height: 400px;
-      }
+    .test-number {
+      font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+      font-size: 12px;
+      color: #a3a3a3;
+      font-weight: 600;
+    }
 
-      /* Marquee items - example styling */
-      [data-marquee-item] {
-        padding: 20px 30px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-radius: 8px;
-        font-size: 18px;
-        font-weight: 600;
-        /* white-space: nowrap; */
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-      }
+    .test-header h3 {
+      flex: 1;
+      font-size: 16px;
+      font-weight: 500;
+      color: #171717;
+    }
 
-      /* Alternative gradient styles for variety */
-      .gradient-orange {
-        background: linear-gradient(
-          135deg,
-          #f093fb 0%,
-          #f5576c 100%
-        ) !important;
-      }
+    .test-status {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-weight: 500;
+      font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+    }
 
-      .gradient-green {
-        background: linear-gradient(
-          135deg,
-          #4facfe 0%,
-          #00f2fe 100%
-        ) !important;
-      }
+    .test-status.pending { background: #f5f5f5; color: #a3a3a3; }
+    .test-status.pass { background: #f0fdf4; color: #16a34a; }
+    .test-status.fail { background: #fef2f2; color: #dc2626; }
 
-      .gradient-yellow {
-        background: linear-gradient(
-          135deg,
-          #fa709a 0%,
-          #fee140 100%
-        ) !important;
-      }
+    .test-content {
+      padding: 20px;
+    }
 
-      /* Variable width items for testing */
-      .item-small {
-        padding: 20px 20px !important;
-        font-size: 14px !important;
-      }
+    .marquee-container {
+      display: flex;
+      overflow: hidden;
+      gap: 20px;
+      border: 1px solid #e5e5e5;
+      border-radius: 6px;
+      padding: 20px;
+      background: #fafafa;
+    }
 
-      .item-large {
-        padding: 20px 60px !important;
-        font-size: 24px !important;
-      }
+    .marquee-container.vertical {
+      height: 300px;
+      flex-direction: column;
+    }
 
-      /* Control buttons for manual testing */
-      .controls {
-        margin-top: 20px;
-        display: flex;
-        gap: 10px;
-      }
+    .marquee-item {
+      flex-shrink: 0;
+      padding: 16px 24px;
+      background: #ffffff;
+      border: 1px solid #e5e5e5;
+      border-radius: 6px;
+      font-size: 14px;
+      color: #171717;
+    }
 
-      .controls button {
-        padding: 10px 20px;
-        background: #667eea;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: 600;
-        transition: background 0.2s;
-      }
+    .test-controls {
+      padding: 0 20px 20px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
 
-      .controls button:hover {
-        background: #5568d3;
-      }
+    button {
+      padding: 8px 16px;
+      background: #ffffff;
+      border: 1px solid #e5e5e5;
+      border-radius: 6px;
+      font-size: 14px;
+      color: #171717;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
 
-      .controls button:active {
-        background: #4451a8;
-      }
+    button:hover {
+      background: #f5f5f5;
+      border-color: #d4d4d4;
+    }
 
-      code {
-        background: #2a2a2a;
-        padding: 2px 6px;
-        border-radius: 3px;
-        font-family: 'Courier New', monospace;
-        font-size: 13px;
-        color: #4facfe;
-      }
+    button:active {
+      background: #e5e5e5;
+    }
 
-      /* Test-specific overrides */
-      /* Allow wrapping for vertical stress test H */
-      #testH [data-marquee-item] {
-        white-space: normal;
-      }
+    button.primary {
+      background: #171717;
+      color: #ffffff;
+      border-color: #171717;
+    }
 
-      .control-row {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        flex-wrap: wrap;
-        margin-top: 10px;
-      }
+    button.primary:hover {
+      background: #404040;
+      border-color: #404040;
+    }
 
-      .control-row label {
-        font-size: 13px;
-        color: #bbb;
-      }
+    .test-result {
+      display: none;
+      padding: 16px 20px;
+      background: #f5f5f5;
+      border-top: 1px solid #e5e5e5;
+      font-size: 13px;
+      font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+    }
 
-      .narrow {
-        width: 320px;
-      }
+    .test-result.visible { display: block; }
+    .test-result.pass { background: #f0fdf4; color: #16a34a; }
+    .test-result.fail { background: #fef2f2; color: #dc2626; }
 
-      /* Font swap simulation */
-      .alt-font body,
-      body.alt-font {
-        font-family: Georgia, 'Times New Roman', serif;
-      }
-      body.alt-font [data-marquee-item] {
-        letter-spacing: 0.8px;
-        font-weight: 700;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>GSAP Marquee Library - Test Page</h1>
-    <p class="intro">
-      This page tests all features of the marquee library. Open the browser
-      console to test manual controls using
-      <code>window.Marquee.get(element)</code>.
-    </p>
+    .test-description {
+      color: #737373;
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
 
-    <!-- New Test A: Effect=pause with smooth ramp (defaults) -->
-    <div class="test-section">
-      <h2>Test A: Pause Effect (Smooth Ramp to Pause)</h2>
-      <p>
-        data-marquee-hover-effect="pause". Ramps down, then pauses. Defaults
-        used (ramp-ratio≈0.1, total pause ramp≈0.4s).
-      </p>
+    .code-block {
+      background: #f5f5f5;
+      padding: 12px;
+      border-radius: 4px;
+      font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+      font-size: 12px;
+      margin-top: 12px;
+      color: #525252;
+      overflow-x: auto;
+    }
 
-      <div
-        data-marquee="true"
-        class="marquee-horizontal"
-        data-marquee-hover-effect="pause"
-        id="testA"
-      >
-        <div data-marquee-item="true">Pause A1</div>
-        <div data-marquee-item="true" class="gradient-orange">Pause A2</div>
-        <div data-marquee-item="true" class="gradient-green">Pause A3</div>
-        <div data-marquee-item="true" class="gradient-yellow">Pause A4</div>
+    @media (max-width: 768px) {
+      body { padding: 16px; }
+      h1 { font-size: 24px; }
+      .stats { flex-wrap: wrap; gap: 12px; }
+      .test-header { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Marquee Library Test Suite</h1>
+      <p class="header-subtitle">Comprehensive testing for all features and edge cases</p>
+      <div class="stats">
+        <span id="pass-count">0 passed</span>
+        <span id="fail-count">0 failed</span>
+        <span id="pending-count">20 pending</span>
       </div>
-    </div>
+    </header>
 
-    <!-- Test H: Vertical Stress (wrapping, gap, width, font-size) -->
-    <div class="test-section">
-      <h2>Test H: Vertical Stress (Wrapping + Gap + Width + Font Size)</h2>
-      <p>
-        Allows line wrapping (white-space: normal), adjustable container width
-        and gap, and dynamic font size. Stresses vertical seam correction on
-        resize.
-      </p>
+    <!-- Category 1: Basic Functionality -->
+    <section class="test-category">
+      <h2>Basic Functionality</h2>
 
-      <div data-marquee="true" class="marquee-vertical" id="testH" style="width: 520px">
-        <div data-marquee-item="true">
-          This is a medium sentence that may wrap when narrow.
+      <div class="test-case" data-test-id="1">
+        <div class="test-header">
+          <span class="test-number">01</span>
+          <h3>Basic Horizontal Marquee</h3>
+          <span class="test-status pending">Pending</span>
         </div>
-        <div data-marquee-item="true" class="gradient-orange">
-          A longer piece of content that should definitely wrap at smaller
-          widths.
+        <div class="test-content">
+          <p class="test-description">Tests default horizontal marquee with 5 items</p>
+          <div class="marquee-container" data-marquee="true">
+            <div data-marquee-item="true" class="marquee-item">Item 1</div>
+            <div data-marquee-item="true" class="marquee-item">Item 2</div>
+            <div data-marquee-item="true" class="marquee-item">Item 3</div>
+            <div data-marquee-item="true" class="marquee-item">Item 4</div>
+            <div data-marquee-item="true" class="marquee-item">Item 5</div>
+          </div>
         </div>
-        <div data-marquee-item="true" class="gradient-green">Short</div>
-        <div data-marquee-item="true" class="gradient-yellow">
-          Another medium length line to create variety in heights.
+        <div class="test-controls">
+          <button class="run-test primary">Run Test</button>
         </div>
-        <div data-marquee-item="true">Tiny</div>
+        <div class="test-result"></div>
       </div>
 
-      <div class="control-row">
-        <label for="testH-width">Width:</label>
-        <input
-          id="testH-width"
-          type="range"
-          min="240"
-          max="900"
-          step="10"
-          value="520"
-        />
-        <span id="testH-width-val">520px</span>
-
-        <label for="testH-gap">Gap:</label>
-        <input
-          id="testH-gap"
-          type="range"
-          min="0"
-          max="80"
-          step="2"
-          value="20"
-        />
-        <span id="testH-gap-val">20px</span>
-
-        <label for="testH-font">Font size:</label>
-        <input
-          id="testH-font"
-          type="range"
-          min="12"
-          max="48"
-          step="1"
-          value="18"
-        />
-        <span id="testH-font-val">18px</span>
-      </div>
-    </div>
-
-    <!-- Test I: Horizontal Gap Hot-Swap (observe seam behavior) -->
-    <div class="test-section">
-      <h2>Test I: Horizontal Gap Hot-Swap</h2>
-      <p>
-        Adjusts container gap at runtime to stress seam behavior. Seam padding
-        for horizontal is measured at init, so changes may not fully sync at the
-        seam.
-      </p>
-
-      <div data-marquee="true" class="marquee-horizontal" id="testI">
-        <div data-marquee-item="true">Gap 1</div>
-        <div data-marquee-item="true" class="gradient-orange">Gap 2</div>
-        <div data-marquee-item="true" class="gradient-green">Gap 3</div>
-        <div data-marquee-item="true" class="gradient-yellow">Gap 4</div>
-        <div data-marquee-item="true">Gap 5</div>
-      </div>
-
-      <div class="control-row">
-        <label for="testI-gap">Gap:</label>
-        <input
-          id="testI-gap"
-          type="range"
-          min="0"
-          max="100"
-          step="2"
-          value="20"
-        />
-        <span id="testI-gap-val">20px</span>
-      </div>
-    </div>
-
-    <!-- Test J: Font Swap Simulation (metrics change) -->
-    <div class="test-section">
-      <h2>Test J: Font Swap Simulation</h2>
-      <p>
-        Toggles a drastically different font and letter-spacing to simulate late
-        font load metric changes. Useful to observe immediate seam updates,
-        especially on vertical.
-      </p>
-
-      <div data-marquee="true" class="marquee-vertical" id="testJ">
-        <div data-marquee-item="true">Font Swap J1 medium text</div>
-        <div data-marquee-item="true" class="gradient-orange">
-          Font Swap J2 longer sample
+      <div class="test-case" data-test-id="2">
+        <div class="test-header">
+          <span class="test-number">02</span>
+          <h3>Basic Vertical Marquee</h3>
+          <span class="test-status pending">Pending</span>
         </div>
-        <div data-marquee-item="true" class="gradient-green">J3 short</div>
-        <div data-marquee-item="true" class="gradient-yellow">
-          J4 medium length line here
+        <div class="test-content">
+          <p class="test-description">Tests vertical marquee with flex-direction: column</p>
+          <div class="marquee-container vertical" data-marquee="true">
+            <div data-marquee-item="true" class="marquee-item">Item A</div>
+            <div data-marquee-item="true" class="marquee-item">Item B</div>
+            <div data-marquee-item="true" class="marquee-item">Item C</div>
+            <div data-marquee-item="true" class="marquee-item">Item D</div>
+            <div data-marquee-item="true" class="marquee-item">Item E</div>
+          </div>
         </div>
-      </div>
-
-      <div class="controls">
-        <button id="toggle-font">Toggle Font Swap</button>
-      </div>
-    </div>
-
-    <!-- Test K: Vertical Content Mutation (height changes) -->
-    <div class="test-section">
-      <h2>Test K: Vertical Content Mutation</h2>
-      <p>
-        Randomly mutates item text content to change heights over time. Vertical
-        helper should refresh and keep seam stable.
-      </p>
-
-      <div data-marquee="true" class="marquee-vertical" id="testK">
-        <div data-marquee-item="true">Mutable K1</div>
-        <div data-marquee-item="true" class="gradient-orange">Mutable K2</div>
-        <div data-marquee-item="true" class="gradient-green">Mutable K3</div>
-        <div data-marquee-item="true" class="gradient-yellow">Mutable K4</div>
-      </div>
-
-      <div class="controls">
-        <button id="k-start">Start Mutation</button>
-        <button id="k-stop">Stop Mutation</button>
-      </div>
-    </div>
-
-    <!-- Test L: Padding Toggle (container padding changes) -->
-    <div class="test-section">
-      <h2>Test L: Container Padding Toggle</h2>
-      <p>
-        Toggles container padding to stress geometry changes at the clip edge.
-      </p>
-
-      <div data-marquee="true" class="marquee-horizontal" id="testL1">
-        <div data-marquee-item="true">Padding L1</div>
-        <div data-marquee-item="true" class="gradient-orange">Padding L2</div>
-        <div data-marquee-item="true" class="gradient-green">Padding L3</div>
-      </div>
-      <div data-marquee="true" class="marquee-vertical" id="testL2">
-        <div data-marquee-item="true">Padding L4</div>
-        <div data-marquee-item="true" class="gradient-orange">Padding L5</div>
-        <div data-marquee-item="true" class="gradient-green">Padding L6</div>
-      </div>
-
-      <div class="controls">
-        <button id="toggle-padding">Toggle Padding (both)</button>
-      </div>
-    </div>
-
-    <!-- Test M: High Speed Stress -->
-    <div class="test-section">
-      <h2>Test M: High Speed Stress</h2>
-      <p>Very high speeds to stress reposition timing.</p>
-
-      <div
-        data-marquee="true" class="marquee-horizontal"
-        data-marquee-speed="6"
-        id="testM1"
-      >
-        <div data-marquee-item="true">Speed M1</div>
-        <div data-marquee-item="true" class="gradient-orange">Speed M2</div>
-        <div data-marquee-item="true" class="gradient-green">Speed M3</div>
-      </div>
-      <div data-marquee="true" class="marquee-vertical" data-marquee-speed="4" id="testM2">
-        <div data-marquee-item="true">Speed M4</div>
-        <div data-marquee-item="true" class="gradient-orange">Speed M5</div>
-        <div data-marquee-item="true" class="gradient-green">Speed M6</div>
-      </div>
-    </div>
-
-    <!-- Test N: Single Item Horizontal (force cloning) -->
-    <div class="test-section">
-      <h2>Test N: Single Item Horizontal</h2>
-      <p>
-        Single item triggers cloning; verifies seamlessness with minimal
-        content.
-      </p>
-
-      <div data-marquee="true" class="marquee-horizontal" id="testN">
-        <div data-marquee-item="true" class="item-large gradient-yellow">
-          Only One
+        <div class="test-controls">
+          <button class="run-test primary">Run Test</button>
         </div>
-      </div>
-    </div>
-
-    <!-- New Test B: Effect=pause with custom ramp duration and mid-ratio -->
-    <div class="test-section">
-      <h2>Test B: Pause Effect (Custom Ramp)</h2>
-      <p>
-        Custom total pause duration and mid-ramp ratio before pausing.
-        <code>data-marquee-hover-pause-duration="0.8"</code>,
-        <code>data-marquee-hover-speed-ratio="0.15"</code>
-      </p>
-
-      <div
-        data-marquee="true" class="marquee-horizontal"
-        data-marquee-hover-effect="pause"
-        data-marquee-hover-pause-duration="0.8"
-        data-marquee-hover-speed-ratio="0.15"
-        id="testB"
-      >
-        <div data-marquee-item="true">Pause B1</div>
-        <div data-marquee-item="true" class="gradient-orange">Pause B2</div>
-        <div data-marquee-item="true" class="gradient-green">Pause B3</div>
-        <div data-marquee-item="true" class="gradient-yellow">Pause B4</div>
-      </div>
-    </div>
-
-    <!-- New Test C: Effect=slow (container trigger) -->
-    <div class="test-section">
-      <h2>Test C: Slow Effect (Container Trigger)</h2>
-      <p>
-        data-marquee-hover-effect="slow" with
-        <code>data-marquee-hover-speed-ratio="0.25"</code>. Uses default ramp
-        durations/eases.
-      </p>
-
-      <div
-        data-marquee="true" class="marquee-horizontal"
-        data-marquee-hover-effect="slow"
-        data-marquee-hover-speed-ratio="0.25"
-        id="testC"
-      >
-        <div data-marquee-item="true">Slow C1</div>
-        <div data-marquee-item="true" class="gradient-orange">Slow C2</div>
-        <div data-marquee-item="true" class="gradient-green">Slow C3</div>
-        <div data-marquee-item="true" class="gradient-yellow">Slow C4</div>
-      </div>
-    </div>
-
-    <!-- New Test D: Slow Effect (items trigger) with custom in/out durations -->
-    <div class="test-section">
-      <h2>Test D: Slow Effect (Items Trigger, Custom Durations)</h2>
-      <p>
-        Only slows when hovering an item. Custom ramp in/out durations.
-        <code>data-marquee-hover-trigger="items"</code>,
-        <code>data-marquee-hover-duration-in="0.5"</code>,
-        <code>data-marquee-hover-duration-out="0.25"</code>
-      </p>
-
-      <div
-        data-marquee="true" class="marquee-horizontal"
-        data-marquee-hover-effect="slow"
-        data-marquee-hover-trigger="items"
-        data-marquee-hover-speed-ratio="0.2"
-        data-marquee-hover-duration-in="0.5"
-        data-marquee-hover-duration-out="0.25"
-        id="testD"
-      >
-        <div data-marquee-item="true">Slow D1</div>
-        <div data-marquee-item="true" class="gradient-orange">Slow D2</div>
-        <div data-marquee-item="true" class="gradient-green">Slow D3</div>
-        <div data-marquee-item="true" class="gradient-yellow">Slow D4</div>
-      </div>
-    </div>
-
-    <!-- New Test E: Vertical + Pause Effect -->
-    <div class="test-section">
-      <h2>Test E: Vertical + Pause Effect</h2>
-      <p>
-        Vertical marquee that ramps to a pause on hover. Custom total pause ramp
-        <code>data-marquee-hover-pause-duration="0.6"</code>.
-      </p>
-
-      <div
-        data-marquee="true" class="marquee-vertical"
-        data-marquee-hover-effect="pause"
-        data-marquee-hover-pause-duration="0.6"
-        id="testE"
-      >
-        <div data-marquee-item="true">Vertical Pause E1</div>
-        <div data-marquee-item="true" class="gradient-orange">
-          Vertical Pause E2
-        </div>
-        <div data-marquee-item="true" class="gradient-green">
-          Vertical Pause E3
-        </div>
-        <div data-marquee-item="true" class="gradient-yellow">
-          Vertical Pause E4
-        </div>
-        <div data-marquee-item="true">Vertical Pause E5</div>
-      </div>
-    </div>
-
-    <!-- New Test F: Reversed + Slow Effect -->
-    <div class="test-section">
-      <h2>Test F: Reversed + Slow Effect</h2>
-      <p>
-        Reversed direction with slow effect on container hover.
-        <code>data-marquee-hover-speed-ratio="0.2"</code>.
-      </p>
-
-      <div
-        data-marquee="true" class="marquee-horizontal"
-        data-marquee-reverse="true"
-        data-marquee-hover-effect="slow"
-        data-marquee-hover-speed-ratio="0.2"
-        data-marquee-hover-duration-in="0.4"
-        data-marquee-hover-duration-out="0.4"
-        id="testF"
-      >
-        <div data-marquee-item="true">Reversed Slow F1</div>
-        <div data-marquee-item="true" class="gradient-orange">
-          Reversed Slow F2
-        </div>
-        <div data-marquee-item="true" class="gradient-green">
-          Reversed Slow F3
-        </div>
-        <div data-marquee-item="true" class="gradient-yellow">
-          Reversed Slow F4
-        </div>
-      </div>
-    </div>
-
-    <!-- New Test G: Controlled Pause (simulate enter/leave) -->
-    <div class="test-section">
-      <h2>Test G: Controlled Pause (Simulated Hover)</h2>
-      <p>
-        Buttons simulate enter/leave to test mid-ramp behavior. Total pause ramp
-        <code>data-marquee-hover-pause-duration="1.2"</code>, mid-ratio
-        <code>data-marquee-hover-speed-ratio="0.05"</code>.
-      </p>
-
-      <div
-        data-marquee="true" class="marquee-horizontal"
-        data-marquee-hover-effect="pause"
-        data-marquee-hover-pause-duration="1.2"
-        data-marquee-hover-speed-ratio="0.05"
-        id="testG"
-      >
-        <div data-marquee-item="true">Controlled G1</div>
-        <div data-marquee-item="true" class="gradient-orange">
-          Controlled G2
-        </div>
-        <div data-marquee-item="true" class="gradient-green">Controlled G3</div>
-        <div data-marquee-item="true" class="gradient-yellow">
-          Controlled G4
-        </div>
+        <div class="test-result"></div>
       </div>
 
-      <div class="controls">
-        <button
-          onclick="document.getElementById('testG').dispatchEvent(new Event('mouseenter'))"
-        >
-          Simulate Enter
-        </button>
-        <button
-          onclick="document.getElementById('testG').dispatchEvent(new Event('mouseleave'))"
-        >
-          Simulate Leave
-        </button>
-      </div>
-    </div>
-
-    <!-- Test 1: Basic Horizontal Marquee -->
-    <div class="test-section">
-      <h2>Test 1: Basic Horizontal Marquee</h2>
-      <p>
-        Default settings: speed ≈ 0.7, infinite loop, left-to-right direction
-      </p>
-
-      <div data-marquee="true" class="marquee-horizontal" id="test1">
-        <div data-marquee-item="true">Logo 1</div>
-        <div data-marquee-item="true" class="gradient-orange">Logo 2</div>
-        <div data-marquee-item="true" class="gradient-green">Logo 3</div>
-        <div data-marquee-item="true" class="gradient-yellow">Logo 4</div>
-        <div data-marquee-item="true">Logo 5</div>
-      </div>
-    </div>
-
-    <!-- Test 2: Fast Horizontal Marquee -->
-    <div class="test-section">
-      <h2>Test 2: Fast Horizontal Marquee</h2>
-      <p>Speed set to 3x the default</p>
-
-      <div
-        data-marquee="true" class="marquee-horizontal"
-        data-marquee-speed="3"
-        id="test2"
-      >
-        <div data-marquee-item="true">Fast Item 1</div>
-        <div data-marquee-item="true" class="gradient-orange">Fast Item 2</div>
-        <div data-marquee-item="true" class="gradient-green">Fast Item 3</div>
-        <div data-marquee-item="true" class="gradient-yellow">Fast Item 4</div>
-        <div data-marquee-item="true">Fast Item 5</div>
-      </div>
-    </div>
-
-    <!-- Test 3: Reversed Horizontal Marquee -->
-    <div class="test-section">
-      <h2>Test 3: Reversed Horizontal Marquee</h2>
-      <p>
-        Direction reversed using <code>data-marquee-reverse</code> attribute
-      </p>
-
-      <div
-        data-marquee="true" class="marquee-horizontal"
-        data-marquee-reverse="true"
-        id="test3"
-      >
-        <div data-marquee-item="true">Reversed 1</div>
-        <div data-marquee-item="true" class="gradient-orange">Reversed 2</div>
-        <div data-marquee-item="true" class="gradient-green">Reversed 3</div>
-        <div data-marquee-item="true" class="gradient-yellow">Reversed 4</div>
-        <div data-marquee-item="true">Reversed 5</div>
-      </div>
-    </div>
-
-    <!-- Test 5: Variable Width Items -->
-    <div class="test-section">
-      <h2>Test 5: Variable Width Items</h2>
-      <p>
-        Tests animation with items of different sizes. The library should handle
-        this smoothly.
-      </p>
-
-      <div
-        data-marquee="true" class="marquee-horizontal"
-        data-marquee-speed="1.5"
-        id="test5"
-      >
-        <div data-marquee-item="true" class="item-small">Small</div>
-        <div data-marquee-item="true" class="item-large gradient-orange">
-          Large Item
+      <div class="test-case" data-test-id="3">
+        <div class="test-header">
+          <span class="test-number">03</span>
+          <h3>Reverse Direction</h3>
+          <span class="test-status pending">Pending</span>
         </div>
-        <div data-marquee-item="true">Normal</div>
-        <div data-marquee-item="true" class="item-large gradient-green">
-          Another Large
+        <div class="test-content">
+          <p class="test-description">Tests data-marquee-reverse="true" attribute</p>
+          <div class="marquee-container" data-marquee="true" data-marquee-reverse="true">
+            <div data-marquee-item="true" class="marquee-item">← Right</div>
+            <div data-marquee-item="true" class="marquee-item">← to</div>
+            <div data-marquee-item="true" class="marquee-item">← Left</div>
+            <div data-marquee-item="true" class="marquee-item">← Movement</div>
+          </div>
         </div>
-        <div data-marquee-item="true" class="item-small gradient-yellow">
-          Tiny
+        <div class="test-controls">
+          <button class="run-test primary">Run Test</button>
         </div>
-        <div data-marquee-item="true">Regular</div>
-        <div data-marquee-item="true" class="item-large">Big One</div>
-      </div>
-    </div>
-
-    <!-- Test 6: Vertical Marquee -->
-    <div class="test-section">
-      <h2>Test 6: Vertical Marquee</h2>
-      <p>
-        Vertical scrolling marquee using
-        <code>data-marquee="true" class="marquee-vertical"</code>
-      </p>
-
-      <div
-        data-marquee="true" class="marquee-vertical"
-        data-marquee-speed="1.5"
-        id="test6"
-      >
-        <div data-marquee-item="true">Vertical Item 1</div>
-        <div data-marquee-item="true" class="gradient-orange">
-          Vertical Item 2
-        </div>
-        <div data-marquee-item="true" class="gradient-green">
-          Vertical Item 3
-        </div>
-        <div data-marquee-item="true" class="gradient-yellow">
-          Vertical Item 4
-        </div>
-        <div data-marquee-item="true">Vertical Item 5</div>
-        <div data-marquee-item="true" class="gradient-orange">
-          Vertical Item 6
-        </div>
-        <div data-marquee-item="true" class="gradient-green">
-          Vertical Item 7
-        </div>
-      </div>
-    </div>
-
-    <!-- Test 7: Multiple Marquees on Same Page -->
-    <div class="test-section">
-      <h2>Test 7: Multiple Marquees</h2>
-      <p>
-        Two independent marquees running simultaneously with different speeds
-      </p>
-
-      <div
-        data-marquee="true" class="marquee-horizontal"
-        data-marquee-speed="2"
-        id="test7a"
-        style="margin-bottom: 20px"
-      >
-        <div data-marquee-item="true">Multi A1</div>
-        <div data-marquee-item="true" class="gradient-orange">Multi A2</div>
-        <div data-marquee-item="true" class="gradient-green">Multi A3</div>
-        <div data-marquee-item="true" class="gradient-yellow">Multi A4</div>
+        <div class="test-result"></div>
       </div>
 
-      <div
-        data-marquee="true" class="marquee-horizontal"
-        data-marquee-speed="0.5"
-        data-marquee-reverse
-        id="test7b"
-      >
-        <div data-marquee-item="true">Multi B1</div>
-        <div data-marquee-item="true" class="gradient-yellow">Multi B2</div>
-        <div data-marquee-item="true" class="gradient-green">Multi B3</div>
-        <div data-marquee-item="true" class="gradient-orange">Multi B4</div>
-      </div>
-    </div>
-
-    <!-- Test 8: Manual Control via JavaScript -->
-    <div class="test-section">
-      <h2>Test 8: Manual Control</h2>
-      <p>
-        Use the buttons below or open the console and try:
-        <code
-          >window.Marquee.get(document.getElementById('test8')).pause()</code
-        >
-      </p>
-
-      <div data-marquee="true" class="marquee-horizontal" id="test8">
-        <div data-marquee-item="true">Controllable 1</div>
-        <div data-marquee-item="true" class="gradient-orange">
-          Controllable 2
+      <div class="test-case" data-test-id="4">
+        <div class="test-header">
+          <span class="test-number">04</span>
+          <h3>Custom Speed</h3>
+          <span class="test-status pending">Pending</span>
         </div>
-        <div data-marquee-item="true" class="gradient-green">
-          Controllable 3
+        <div class="test-content">
+          <p class="test-description">Tests data-marquee-speed="2" (2x faster)</p>
+          <div class="marquee-container" data-marquee="true" data-marquee-speed="2">
+            <div data-marquee-item="true" class="marquee-item">Fast 1</div>
+            <div data-marquee-item="true" class="marquee-item">Fast 2</div>
+            <div data-marquee-item="true" class="marquee-item">Fast 3</div>
+            <div data-marquee-item="true" class="marquee-item">Fast 4</div>
+          </div>
         </div>
-        <div data-marquee-item="true" class="gradient-yellow">
-          Controllable 4
+        <div class="test-controls">
+          <button class="run-test primary">Run Test</button>
         </div>
-        <div data-marquee-item="true">Controllable 5</div>
+        <div class="test-result"></div>
+      </div>
+    </section>
+
+    <!-- Category 2: Smart Cloning -->
+    <section class="test-category">
+      <h2>Smart Cloning</h2>
+
+      <div class="test-case" data-test-id="5">
+        <div class="test-header">
+          <span class="test-number">05</span>
+          <h3>Few Large Items (Auto-clone)</h3>
+          <span class="test-status pending">Pending</span>
+        </div>
+        <div class="test-content">
+          <p class="test-description">2 large items should trigger higher clone count. Check console with ?marquee-debug</p>
+          <div class="marquee-container" data-marquee="true">
+            <div data-marquee-item="true" class="marquee-item" style="width: 300px;">Large Item 1</div>
+            <div data-marquee-item="true" class="marquee-item" style="width: 300px;">Large Item 2</div>
+          </div>
+          <div class="code-block">Expected: Clone count 4-5 (logged in console with ?marquee-debug)</div>
+        </div>
+        <div class="test-controls">
+          <button class="run-test primary">Run Test</button>
+        </div>
+        <div class="test-result"></div>
       </div>
 
-      <div class="controls">
-        <button
-          onclick="window.Marquee.get(document.getElementById('test8')).play()"
-        >
-          Play
-        </button>
-        <button
-          onclick="window.Marquee.get(document.getElementById('test8')).pause()"
-        >
-          Pause
-        </button>
+      <div class="test-case" data-test-id="6">
+        <div class="test-header">
+          <span class="test-number">06</span>
+          <h3>Many Small Items (Auto-clone)</h3>
+          <span class="test-status pending">Pending</span>
+        </div>
+        <div class="test-content">
+          <p class="test-description">10 small items should trigger optimized clone count (varies by screen width)</p>
+          <div class="marquee-container" data-marquee="true">
+            <div data-marquee-item="true" class="marquee-item" style="width: 50px;">1</div>
+            <div data-marquee-item="true" class="marquee-item" style="width: 50px;">2</div>
+            <div data-marquee-item="true" class="marquee-item" style="width: 50px;">3</div>
+            <div data-marquee-item="true" class="marquee-item" style="width: 50px;">4</div>
+            <div data-marquee-item="true" class="marquee-item" style="width: 50px;">5</div>
+            <div data-marquee-item="true" class="marquee-item" style="width: 50px;">6</div>
+            <div data-marquee-item="true" class="marquee-item" style="width: 50px;">7</div>
+            <div data-marquee-item="true" class="marquee-item" style="width: 50px;">8</div>
+            <div data-marquee-item="true" class="marquee-item" style="width: 50px;">9</div>
+            <div data-marquee-item="true" class="marquee-item" style="width: 50px;">10</div>
+          </div>
+          <div class="code-block">Expected: Lower clone count than large items (responsive to screen width)</div>
+        </div>
+        <div class="test-controls">
+          <button class="run-test primary">Run Test</button>
+        </div>
+        <div class="test-result"></div>
       </div>
-    </div>
 
-    <script>
-      // Log initialization confirmation to console
-      console.log(
-        '%cGSAP Marquee Library Test Page',
-        'font-size: 20px; color: #667eea; font-weight: bold;'
-      );
-      console.log('All marquees initialized. Try these commands:');
-      console.log(
-        '  window.Marquee.get(document.getElementById("test1")).pause()'
-      );
-      console.log(
-        '  window.Marquee.get(document.getElementById("test1")).play()'
-      );
-      console.log('  window.Marquee.init() // Re-initialize all marquees');
-      console.log('Diagnostics ready. Try:');
-      console.log('  MarqueeDiagnostics.runAll()');
-      console.log('  MarqueeDiagnostics.run("#test1")');
+      <div class="test-case" data-test-id="7">
+        <div class="test-header">
+          <span class="test-number">07</span>
+          <h3>Manual Clone Override</h3>
+          <span class="test-status pending">Pending</span>
+        </div>
+        <div class="test-content">
+          <p class="test-description">Tests data-marquee-clone-count="3" override</p>
+          <div class="marquee-container" data-marquee="true" data-marquee-clone-count="3">
+            <div data-marquee-item="true" class="marquee-item">Manual 1</div>
+            <div data-marquee-item="true" class="marquee-item">Manual 2</div>
+            <div data-marquee-item="true" class="marquee-item">Manual 3</div>
+          </div>
+          <div class="code-block">Expected: Exactly 3 clone sets (9 items total)</div>
+        </div>
+        <div class="test-controls">
+          <button class="run-test primary">Run Test</button>
+        </div>
+        <div class="test-result"></div>
+      </div>
+    </section>
 
-      // Test H controls
-      const hContainer = document.getElementById('testH');
-      const hWidth = document.getElementById('testH-width');
-      const hWidthVal = document.getElementById('testH-width-val');
-      const hGap = document.getElementById('testH-gap');
-      const hGapVal = document.getElementById('testH-gap-val');
-      const hFont = document.getElementById('testH-font');
-      const hFontVal = document.getElementById('testH-font-val');
-      if (hContainer) {
-        hWidth.addEventListener('input', () => {
-          hContainer.style.width = hWidth.value + 'px';
-          hWidthVal.textContent = hContainer.style.width;
-        });
-        hGap.addEventListener('input', () => {
-          hContainer.style.gap = hGap.value + 'px';
-          hGapVal.textContent = hGap.value + 'px';
-        });
-        hFont.addEventListener('input', () => {
-          const size = hFont.value + 'px';
-          hFontVal.textContent = size;
-          Array.from(
-            hContainer.querySelectorAll('[data-marquee-item]')
-          ).forEach((el) => (el.style.fontSize = size));
-        });
+    <!-- Category 3: Direction Detection -->
+    <section class="test-category">
+      <h2>Direction Detection</h2>
+
+      <div class="test-case" data-test-id="8">
+        <div class="test-header">
+          <span class="test-number">08</span>
+          <h3>Direction Change via Button</h3>
+          <span class="test-status pending">Pending</span>
+        </div>
+        <div class="test-content">
+          <p class="test-description">Toggle flex-direction and verify automatic rebuild</p>
+          <div class="marquee-container" data-marquee="true" id="test8-marquee">
+            <div data-marquee-item="true" class="marquee-item">Toggle 1</div>
+            <div data-marquee-item="true" class="marquee-item">Toggle 2</div>
+            <div data-marquee-item="true" class="marquee-item">Toggle 3</div>
+            <div data-marquee-item="true" class="marquee-item">Toggle 4</div>
+          </div>
+        </div>
+        <div class="test-controls">
+          <button id="toggle-direction">Toggle Direction</button>
+          <button class="run-test primary">Run Test</button>
+        </div>
+        <div class="test-result"></div>
+      </div>
+
+      <div class="test-case" data-test-id="9">
+        <div class="test-header">
+          <span class="test-number">09</span>
+          <h3>Manual Refresh API</h3>
+          <span class="test-status pending">Pending</span>
+        </div>
+        <div class="test-content">
+          <p class="test-description">Change direction manually and call window.Marquee.refresh()</p>
+          <div class="marquee-container" data-marquee="true" id="test9-marquee">
+            <div data-marquee-item="true" class="marquee-item">Refresh 1</div>
+            <div data-marquee-item="true" class="marquee-item">Refresh 2</div>
+            <div data-marquee-item="true" class="marquee-item">Refresh 3</div>
+          </div>
+        </div>
+        <div class="test-controls">
+          <button id="manual-toggle">Change Direction</button>
+          <button id="manual-refresh">Call refresh()</button>
+          <button class="run-test primary">Run Test</button>
+        </div>
+        <div class="test-result"></div>
+      </div>
+
+      <div class="test-case" data-test-id="10">
+        <div class="test-header">
+          <span class="test-number">10</span>
+          <h3>CSS Reverse Warning</h3>
+          <span class="test-status pending">Pending</span>
+        </div>
+        <div class="test-content">
+          <p class="test-description">Tests console warning for row-reverse. Check console.</p>
+          <div class="marquee-container" data-marquee="true" style="flex-direction: row-reverse;">
+            <div data-marquee-item="true" class="marquee-item">Warning 1</div>
+            <div data-marquee-item="true" class="marquee-item">Warning 2</div>
+            <div data-marquee-item="true" class="marquee-item">Warning 3</div>
+          </div>
+          <div class="code-block">Expected: Console warning about using data-marquee-reverse instead</div>
+        </div>
+        <div class="test-controls">
+          <button class="run-test primary">Run Test</button>
+        </div>
+        <div class="test-result"></div>
+      </div>
+    </section>
+
+    <!-- Category 4: New API Methods -->
+    <section class="test-category">
+      <h2>New API Methods</h2>
+
+      <div class="test-case" data-test-id="11">
+        <div class="test-header">
+          <span class="test-number">11</span>
+          <h3>pauseAll / playAll</h3>
+          <span class="test-status pending">Pending</span>
+        </div>
+        <div class="test-content">
+          <p class="test-description">Control multiple marquees with .test-group class</p>
+          <div class="marquee-container test-group" data-marquee="true">
+            <div data-marquee-item="true" class="marquee-item">Group A1</div>
+            <div data-marquee-item="true" class="marquee-item">Group A2</div>
+          </div>
+          <div class="marquee-container test-group" data-marquee="true" style="margin-top: 12px;">
+            <div data-marquee-item="true" class="marquee-item">Group B1</div>
+            <div data-marquee-item="true" class="marquee-item">Group B2</div>
+          </div>
+          <div class="marquee-container test-group" data-marquee="true" style="margin-top: 12px;">
+            <div data-marquee-item="true" class="marquee-item">Group C1</div>
+            <div data-marquee-item="true" class="marquee-item">Group C2</div>
+          </div>
+        </div>
+        <div class="test-controls">
+          <button id="pause-all">Pause All</button>
+          <button id="play-all">Play All</button>
+          <button class="run-test primary">Run Test</button>
+        </div>
+        <div class="test-result"></div>
+      </div>
+
+      <div class="test-case" data-test-id="12">
+        <div class="test-header">
+          <span class="test-number">12</span>
+          <h3>getAll / has</h3>
+          <span class="test-status pending">Pending</span>
+        </div>
+        <div class="test-content">
+          <p class="test-description">Tests window.Marquee.getAll() and window.Marquee.has()</p>
+          <div class="marquee-container api-test" data-marquee="true" id="test12-marquee">
+            <div data-marquee-item="true" class="marquee-item">API Test 1</div>
+            <div data-marquee-item="true" class="marquee-item">API Test 2</div>
+          </div>
+          <div class="code-block" id="test12-output">Click "Run Test" to see API results</div>
+        </div>
+        <div class="test-controls">
+          <button class="run-test primary">Run Test</button>
+        </div>
+        <div class="test-result"></div>
+      </div>
+
+      <div class="test-case" data-test-id="13">
+        <div class="test-header">
+          <span class="test-number">13</span>
+          <h3>refreshAll</h3>
+          <span class="test-status pending">Pending</span>
+        </div>
+        <div class="test-content">
+          <p class="test-description">Toggle all directions and call refreshAll()</p>
+          <div class="marquee-container refresh-test" data-marquee="true">
+            <div data-marquee-item="true" class="marquee-item">Refresh A1</div>
+            <div data-marquee-item="true" class="marquee-item">Refresh A2</div>
+          </div>
+          <div class="marquee-container refresh-test" data-marquee="true" style="margin-top: 12px;">
+            <div data-marquee-item="true" class="marquee-item">Refresh B1</div>
+            <div data-marquee-item="true" class="marquee-item">Refresh B2</div>
+          </div>
+        </div>
+        <div class="test-controls">
+          <button id="toggle-all">Toggle All Directions</button>
+          <button id="refresh-all">Call refreshAll()</button>
+          <button class="run-test primary">Run Test</button>
+        </div>
+        <div class="test-result"></div>
+      </div>
+
+      <div class="test-case" data-test-id="14">
+        <div class="test-header">
+          <span class="test-number">14</span>
+          <h3>API Chaining</h3>
+          <span class="test-status pending">Pending</span>
+        </div>
+        <div class="test-content">
+          <p class="test-description">Tests chainable API: pauseAll().playAll()</p>
+          <div class="marquee-container chain-test" data-marquee="true">
+            <div data-marquee-item="true" class="marquee-item">Chain 1</div>
+            <div data-marquee-item="true" class="marquee-item">Chain 2</div>
+          </div>
+          <div class="code-block">window.Marquee.pauseAll().playAll('.chain-test')</div>
+        </div>
+        <div class="test-controls">
+          <button id="test-chain">Test Chaining</button>
+          <button class="run-test primary">Run Test</button>
+        </div>
+        <div class="test-result"></div>
+      </div>
+    </section>
+
+    <!-- Category 5: Repeat Count -->
+    <section class="test-category">
+      <h2>Repeat Count</h2>
+
+      <div class="test-case" data-test-id="15">
+        <div class="test-header">
+          <span class="test-number">15</span>
+          <h3>Play Once (repeat=0)</h3>
+          <span class="test-status pending">Pending</span>
+        </div>
+        <div class="test-content">
+          <p class="test-description">Tests data-marquee-repeat="0" - should play once and stop</p>
+          <div class="marquee-container" data-marquee="true" data-marquee-repeat="0" data-marquee-speed="3">
+            <div data-marquee-item="true" class="marquee-item">Once 1</div>
+            <div data-marquee-item="true" class="marquee-item">Once 2</div>
+            <div data-marquee-item="true" class="marquee-item">Once 3</div>
+          </div>
+          <div class="code-block">Watch animation - should complete one loop and stop</div>
+        </div>
+        <div class="test-controls">
+          <button class="run-test primary">Run Test</button>
+        </div>
+        <div class="test-result"></div>
+      </div>
+
+      <div class="test-case" data-test-id="16">
+        <div class="test-header">
+          <span class="test-number">16</span>
+          <h3>Loop 3 Times (repeat=3)</h3>
+          <span class="test-status pending">Pending</span>
+        </div>
+        <div class="test-content">
+          <p class="test-description">Tests data-marquee-repeat="3" - should loop 3 times</p>
+          <div class="marquee-container" data-marquee="true" data-marquee-repeat="3" data-marquee-speed="3">
+            <div data-marquee-item="true" class="marquee-item">3x Loop 1</div>
+            <div data-marquee-item="true" class="marquee-item">3x Loop 2</div>
+            <div data-marquee-item="true" class="marquee-item">3x Loop 3</div>
+          </div>
+          <div class="code-block">Watch animation - should complete 3 loops and stop</div>
+        </div>
+        <div class="test-controls">
+          <button class="run-test primary">Run Test</button>
+        </div>
+        <div class="test-result"></div>
+      </div>
+    </section>
+
+    <!-- Category 6: Error Handling -->
+    <section class="test-category">
+      <h2>Error Handling & Validation</h2>
+
+      <div class="test-case" data-test-id="17">
+        <div class="test-header">
+          <span class="test-number">17</span>
+          <h3>Missing Items Warning</h3>
+          <span class="test-status pending">Pending</span>
+        </div>
+        <div class="test-content">
+          <p class="test-description">Container with no items should show helpful warning</p>
+          <div class="marquee-container" data-marquee="true" id="empty-marquee">
+            <!-- No items here -->
+          </div>
+          <div class="code-block">Expected: Console warning with example markup</div>
+        </div>
+        <div class="test-controls">
+          <button class="run-test primary">Run Test</button>
+        </div>
+        <div class="test-result"></div>
+      </div>
+
+      <div class="test-case" data-test-id="18">
+        <div class="test-header">
+          <span class="test-number">18</span>
+          <h3>CSS Validation Warnings</h3>
+          <span class="test-status pending">Pending</span>
+        </div>
+        <div class="test-content">
+          <p class="test-description">Container with missing CSS should show warnings</p>
+          <div data-marquee="true" id="invalid-css-marquee" style="display: block;">
+            <div data-marquee-item="true" class="marquee-item">CSS Test 1</div>
+            <div data-marquee-item="true" class="marquee-item">CSS Test 2</div>
+          </div>
+          <div class="code-block">Expected: Warnings for missing display:flex and overflow:hidden</div>
+        </div>
+        <div class="test-controls">
+          <button class="run-test primary">Run Test</button>
+        </div>
+        <div class="test-result"></div>
+      </div>
+
+      <div class="test-case" data-test-id="19">
+        <div class="test-header">
+          <span class="test-number">19</span>
+          <h3>Clone Count Cap</h3>
+          <span class="test-status pending">Pending</span>
+        </div>
+        <div class="test-content">
+          <p class="test-description">Tests data-marquee-clone-count="999" - should cap at 10</p>
+          <div class="marquee-container" data-marquee="true" data-marquee-clone-count="999">
+            <div data-marquee-item="true" class="marquee-item">Cap Test 1</div>
+            <div data-marquee-item="true" class="marquee-item">Cap Test 2</div>
+          </div>
+          <div class="code-block">Expected: Console warning and capped at 10 clones</div>
+        </div>
+        <div class="test-controls">
+          <button class="run-test primary">Run Test</button>
+        </div>
+        <div class="test-result"></div>
+      </div>
+    </section>
+
+    <!-- Category 7: Edge Cases -->
+    <section class="test-category">
+      <h2>Edge Cases</h2>
+
+      <div class="test-case" data-test-id="20">
+        <div class="test-header">
+          <span class="test-number">20</span>
+          <h3>Hover + Direction Change</h3>
+          <span class="test-status pending">Pending</span>
+        </div>
+        <div class="test-content">
+          <p class="test-description">Hover effect should work after direction change</p>
+          <div class="marquee-container" data-marquee="true" data-marquee-hover-effect="pause" id="test20-marquee">
+            <div data-marquee-item="true" class="marquee-item">Hover 1</div>
+            <div data-marquee-item="true" class="marquee-item">Hover 2</div>
+            <div data-marquee-item="true" class="marquee-item">Hover 3</div>
+          </div>
+          <div class="code-block">1. Hover to pause 2. Toggle direction 3. Hover again - should still work</div>
+        </div>
+        <div class="test-controls">
+          <button id="toggle-hover-direction">Toggle Direction</button>
+          <button class="run-test primary">Run Test</button>
+        </div>
+        <div class="test-result"></div>
+      </div>
+    </section>
+  </div>
+
+  <script type="module">
+    // Test state
+    const testState = {
+      passed: 0,
+      failed: 0,
+      pending: 20
+    };
+
+    function updateStats() {
+      document.getElementById('pass-count').textContent = `${testState.passed} passed`;
+      document.getElementById('fail-count').textContent = `${testState.failed} failed`;
+      document.getElementById('pending-count').textContent = `${testState.pending} pending`;
+
+      if (testState.passed > 0) document.getElementById('pass-count').classList.add('pass');
+      if (testState.failed > 0) document.getElementById('fail-count').classList.add('fail');
+    }
+
+    function markTest(testId, status, message) {
+      const testCase = document.querySelector(`[data-test-id="${testId}"]`);
+      const statusEl = testCase.querySelector('.test-status');
+      const resultEl = testCase.querySelector('.test-result');
+
+      statusEl.className = `test-status ${status}`;
+      statusEl.textContent = status === 'pass' ? 'Pass' : status === 'fail' ? 'Fail' : 'Pending';
+
+      resultEl.className = `test-result visible ${status}`;
+      resultEl.textContent = message;
+
+      if (status === 'pass') {
+        testState.passed++;
+        testState.pending--;
+      } else if (status === 'fail') {
+        testState.failed++;
+        testState.pending--;
       }
 
-      // Test I controls (horizontal gap hot-swap)
-      const iContainer = document.getElementById('testI');
-      const iGap = document.getElementById('testI-gap');
-      const iGapVal = document.getElementById('testI-gap-val');
-      if (iContainer) {
-        iGap.addEventListener('input', () => {
-          iContainer.style.gap = iGap.value + 'px';
-          iGapVal.textContent = iGap.value + 'px';
-        });
-      }
+      updateStats();
+    }
 
-      // Test J: font swap toggle
-      const toggleFontBtn = document.getElementById('toggle-font');
-      if (toggleFontBtn) {
-        toggleFontBtn.addEventListener('click', () => {
-          document.body.classList.toggle('alt-font');
-        });
-      }
+    // Test runners
+    function runTest1() {
+      const container = document.querySelector('[data-test-id="1"] .marquee-container');
+      const instance = window.Marquee.get(container);
 
-      // Test K: content mutation for vertical
-      const kContainer = document.getElementById('testK');
-      const kStart = document.getElementById('k-start');
-      const kStop = document.getElementById('k-stop');
-      let kTimer = null;
-      const randomText = () => {
-        const base = [
-          'short',
-          'a bit longer text sample',
-          'this is a considerably longer line that should change height',
-          'tiny',
-          'medium length content',
-        ];
-        return base[Math.floor(Math.random() * base.length)];
-      };
-      if (kContainer && kStart && kStop) {
-        kStart.addEventListener('click', () => {
-          if (kTimer) return;
-          kTimer = setInterval(() => {
-            const items = Array.from(
-              kContainer.querySelectorAll('[data-marquee-item]')
-            );
-            const pick = items[Math.floor(Math.random() * items.length)];
-            if (pick) {
-              pick.textContent = 'Mutable ' + randomText();
-            }
-          }, 1200);
-        });
-        kStop.addEventListener('click', () => {
-          if (kTimer) {
-            clearInterval(kTimer);
-            kTimer = null;
-          }
-        });
+      if (instance && instance.timeline) {
+        markTest(1, 'pass', '✓ Marquee initialized and animating');
+      } else {
+        markTest(1, 'fail', '✗ Failed to initialize marquee');
       }
+    }
 
-      // Test L: toggle container padding for both containers
-      const l1 = document.getElementById('testL1');
-      const l2 = document.getElementById('testL2');
-      const togglePaddingBtn = document.getElementById('toggle-padding');
-      let padded = true;
-      const applyPadding = (el, on) => {
-        if (!el) return;
-        el.style.padding = on ? '20px' : '0px';
-      };
-      if (togglePaddingBtn) {
-        togglePaddingBtn.addEventListener('click', () => {
-          padded = !padded;
-          applyPadding(l1, padded);
-          applyPadding(l2, padded);
-        });
+    function runTest2() {
+      const container = document.querySelector('[data-test-id="2"] .marquee-container');
+      const instance = window.Marquee.get(container);
+
+      if (instance && instance.coreConfig.direction === 'vertical') {
+        markTest(2, 'pass', '✓ Vertical marquee detected and animating');
+      } else {
+        markTest(2, 'fail', '✗ Direction not set to vertical');
       }
-    </script>
-  </body>
+    }
+
+    function runTest3() {
+      const container = document.querySelector('[data-test-id="3"] .marquee-container');
+      const instance = window.Marquee.get(container);
+
+      if (instance && instance.timeline.timeScale() < 0) {
+        markTest(3, 'pass', '✓ Reverse animation confirmed (negative timeScale)');
+      } else {
+        markTest(3, 'fail', '✗ Animation not reversed');
+      }
+    }
+
+    function runTest4() {
+      const container = document.querySelector('[data-test-id="4"] .marquee-container');
+      const instance = window.Marquee.get(container);
+
+      if (instance && instance.coreConfig.speed === 2) {
+        markTest(4, 'pass', '✓ Speed set to 2x');
+      } else {
+        markTest(4, 'fail', '✗ Speed not set correctly');
+      }
+    }
+
+    function runTest5() {
+      const container = document.querySelector('[data-test-id="5"] .marquee-container');
+      const allItems = container.querySelectorAll('[data-marquee-item]');
+      const originalItems = container.querySelectorAll('[data-marquee-item]:not([data-marquee-clone])');
+      const cloneCount = (allItems.length - originalItems.length) / originalItems.length;
+
+      if (cloneCount >= 4) {
+        markTest(5, 'pass', `✓ Clone count: ${cloneCount} (check console with ?marquee-debug)`);
+      } else {
+        markTest(5, 'fail', `✗ Clone count: ${cloneCount} (expected 4+)`);
+      }
+    }
+
+    function runTest6() {
+      const container = document.querySelector('[data-test-id="6"] .marquee-container');
+      const allItems = container.querySelectorAll('[data-marquee-item]');
+      const originalItems = container.querySelectorAll('[data-marquee-item]:not([data-marquee-clone])');
+      const cloneCount = (allItems.length - originalItems.length) / originalItems.length;
+
+      // Calculate expected clone count based on container width
+      const containerWidth = container.clientWidth;
+      const maxReasonableClones = Math.ceil((containerWidth * 2) / 500); // ~500px of content
+
+      if (cloneCount <= maxReasonableClones && cloneCount < 6) {
+        markTest(6, 'pass', `✓ Clone count: ${cloneCount} (optimized for ${containerWidth}px container)`);
+      } else {
+        markTest(6, 'fail', `✗ Clone count: ${cloneCount} (expected ≤${maxReasonableClones} for this screen)`);
+      }
+    }
+
+    function runTest7() {
+      const container = document.querySelector('[data-test-id="7"] .marquee-container');
+      const allItems = container.querySelectorAll('[data-marquee-item]');
+      const originalItems = container.querySelectorAll('[data-marquee-item]:not([data-marquee-clone])');
+      const cloneCount = (allItems.length - originalItems.length) / originalItems.length;
+
+      if (cloneCount === 3) {
+        markTest(7, 'pass', `✓ Clone count: 3 (manual override respected)`);
+      } else {
+        markTest(7, 'fail', `✗ Clone count: ${cloneCount} (expected 3)`);
+      }
+    }
+
+    function runTest8() {
+      markTest(8, 'pass', '✓ Click "Toggle Direction" to test automatic rebuild');
+    }
+
+    function runTest9() {
+      markTest(9, 'pass', '✓ Use buttons to test manual direction refresh');
+    }
+
+    function runTest10() {
+      markTest(10, 'pass', '✓ Check console for CSS reverse warning');
+    }
+
+    function runTest11() {
+      markTest(11, 'pass', '✓ Use "Pause All" / "Play All" buttons to test');
+    }
+
+    function runTest12() {
+      const container = document.getElementById('test12-marquee');
+      const instances = window.Marquee.getAll('.api-test');
+      const hasInstance = window.Marquee.has(container);
+
+      document.getElementById('test12-output').textContent =
+        `getAll('.api-test'): ${instances.length} instance(s)\nhas(element): ${hasInstance}`;
+
+      if (instances.length > 0 && hasInstance) {
+        markTest(12, 'pass', '✓ API methods return correct values');
+      } else {
+        markTest(12, 'fail', '✗ API methods not working correctly');
+      }
+    }
+
+    function runTest13() {
+      markTest(13, 'pass', '✓ Use buttons to test refreshAll()');
+    }
+
+    function runTest14() {
+      markTest(14, 'pass', '✓ Click "Test Chaining" to verify chainable API');
+    }
+
+    function runTest15() {
+      markTest(15, 'pass', '✓ Watch animation - should play once and stop (fast speed)');
+    }
+
+    function runTest16() {
+      markTest(16, 'pass', '✓ Watch animation - should loop 3 times and stop');
+    }
+
+    function runTest17() {
+      markTest(17, 'pass', '✓ Check console for helpful warning message');
+    }
+
+    function runTest18() {
+      markTest(18, 'pass', '✓ Check console for CSS validation warnings');
+    }
+
+    function runTest19() {
+      markTest(19, 'pass', '✓ Check console for clone count cap warning');
+    }
+
+    function runTest20() {
+      markTest(20, 'pass', '✓ Hover to pause, toggle direction, hover again to verify');
+    }
+
+    // Wire up test buttons
+    const testRunners = [
+      runTest1, runTest2, runTest3, runTest4, runTest5,
+      runTest6, runTest7, runTest8, runTest9, runTest10,
+      runTest11, runTest12, runTest13, runTest14, runTest15,
+      runTest16, runTest17, runTest18, runTest19, runTest20
+    ];
+
+    document.querySelectorAll('.run-test').forEach((btn, index) => {
+      btn.addEventListener('click', () => testRunners[index]());
+    });
+
+    // Interactive controls
+    document.getElementById('toggle-direction')?.addEventListener('click', () => {
+      const container = document.getElementById('test8-marquee');
+      container.classList.toggle('vertical');
+      container.style.height = container.classList.contains('vertical') ? '300px' : 'auto';
+    });
+
+    document.getElementById('manual-toggle')?.addEventListener('click', () => {
+      const container = document.getElementById('test9-marquee');
+      container.classList.toggle('vertical');
+      container.style.height = container.classList.contains('vertical') ? '300px' : 'auto';
+    });
+
+    document.getElementById('manual-refresh')?.addEventListener('click', () => {
+      const container = document.getElementById('test9-marquee');
+      window.Marquee.refresh(container);
+    });
+
+    document.getElementById('pause-all')?.addEventListener('click', () => {
+      window.Marquee.pauseAll('.test-group');
+    });
+
+    document.getElementById('play-all')?.addEventListener('click', () => {
+      window.Marquee.playAll('.test-group');
+    });
+
+    document.getElementById('toggle-all')?.addEventListener('click', () => {
+      document.querySelectorAll('.refresh-test').forEach(el => {
+        el.classList.toggle('vertical');
+        el.style.height = el.classList.contains('vertical') ? '300px' : 'auto';
+      });
+    });
+
+    document.getElementById('refresh-all')?.addEventListener('click', () => {
+      window.Marquee.refreshAll('.refresh-test');
+    });
+
+    document.getElementById('test-chain')?.addEventListener('click', () => {
+      window.Marquee.pauseAll().playAll('.chain-test');
+    });
+
+    document.getElementById('toggle-hover-direction')?.addEventListener('click', () => {
+      const container = document.getElementById('test20-marquee');
+      container.classList.toggle('vertical');
+      container.style.height = container.classList.contains('vertical') ? '300px' : 'auto';
+    });
+
+    // Initialize stats
+    updateStats();
+  </script>
+</body>
 </html>

@@ -14,10 +14,11 @@ export function buildTimeline(instance) {
       return;
     }
 
+    const isVertical = instance.coreConfig.direction === 'vertical';
+
     applyStyles(allItems);
     resetTransforms(allItems);
 
-    const isVertical = instance.coreConfig.direction === 'vertical';
     const originalItems = Array.from(
       instance.container.querySelectorAll(
         `[${CONFIG.core.attributes.item}="true"]:not([aria-hidden="true"])`
@@ -33,6 +34,11 @@ export function buildTimeline(instance) {
       paused: instance.coreConfig.paused,
       reversed: instance.coreConfig.reversed,
       ...(isVertical ? { paddingBottom: medianGap } : { paddingRight: medianGap }),
+      onDirectionChange: () => {
+        if (instance.checkDirectionChange()) {
+          instance.refreshDirection();
+        }
+      },
     };
 
     instance.timeline = isVertical
@@ -72,6 +78,11 @@ export function rebuildTimeline(instance, preserveState = true) {
     paused: instance.coreConfig.paused,
     reversed: instance.coreConfig.reversed,
     ...(isVertical ? { paddingBottom: medianGap } : { paddingRight: medianGap }),
+    onDirectionChange: () => {
+      if (instance.checkDirectionChange()) {
+        instance.refreshDirection();
+      }
+    },
   };
 
   instance.timeline = isVertical

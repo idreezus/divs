@@ -75,7 +75,9 @@ The marquee direction is controlled by CSS `flex-direction`, making it perfect f
 }
 ```
 
-The library automatically detects direction changes and rebuilds the animation seamlessly.
+The library automatically detects direction changes on window resize and rebuilds the animation seamlessly.
+
+**Note:** Direction changes are detected automatically during resize events. If you need to manually trigger a direction refresh, use `window.Marquee.refresh(element)`.
 
 ## Hover Effects
 
@@ -124,15 +126,16 @@ Add interactive hover effects with simple attributes:
 |-----------|--------|---------|-------------|
 | `data-marquee` | `"true"` | - | **Required** - Marks container for initialization |
 | `data-marquee-item` | `"true"` | - | **Required** - Marks items to animate |
-| `data-marquee-speed` | number | `0.7` | Speed multiplier (higher = faster) |
+| `data-marquee-speed` | number | `0.7` | Speed multiplier where 1.0 ≈ 100px/second (higher = faster) |
 | `data-marquee-reverse` | `"true"` | - | Reverses animation direction |
+| `data-marquee-repeat` | number | `-1` | Number of times to loop. `-1` = infinite, `0` = play once, `5` = loop 5 times |
 
 ### Cloning Options
 
 | Attribute | Values | Default | Description |
 |-----------|--------|---------|-------------|
 | `data-marquee-auto-clone` | `"true"` / `"false"` | `"true"` | Auto-clone items for seamless loops |
-| `data-marquee-clone-count` | number | `2` | Number of clone sets to create |
+| `data-marquee-clone-count` | number | Auto-calculated | Number of clone sets (1-10). Auto-calculates if not set. |
 
 ### Hover Effect Options
 
@@ -152,21 +155,41 @@ Add interactive hover effects with simple attributes:
 Control marquees programmatically:
 
 ```javascript
-// Get a marquee instance
-const marquee = window.Marquee.get(element);
-
-// Control playback
-marquee.play();
-marquee.pause();
-
-// Destroy instance
-marquee.destroy();
-
 // Initialize all marquees (called automatically on load)
 window.Marquee.init();
 
 // Initialize with custom selector
 window.Marquee.init('.custom-selector');
+
+// Get a single marquee instance
+const marquee = window.Marquee.get(element);
+
+// Control single instance
+marquee.play();
+marquee.pause();
+marquee.destroy();
+
+// Get all instances (returns array)
+const allMarquees = window.Marquee.getAll();
+const specificMarquees = window.Marquee.getAll('.my-marquees');
+
+// Check if element has a marquee
+const hasMarquee = window.Marquee.has(element);
+
+// Control multiple marquees
+window.Marquee.pauseAll();              // Pause all
+window.Marquee.playAll('.my-marquees'); // Play specific ones
+window.Marquee.destroyAll();            // Destroy all
+
+// Manual direction refresh (for responsive breakpoints)
+window.Marquee.refresh(element);        // Refresh one
+window.Marquee.refreshAll();            // Refresh all
+
+// Methods are chainable (except getters)
+window.Marquee
+  .pauseAll('.slow')
+  .playAll('.fast')
+  .refreshAll();
 ```
 
 ## CSS Requirements
@@ -289,13 +312,30 @@ Works in all modern browsers that support:
 
 Check the console for error messages. Common issues:
 
-- **"GSAP is required but not found"** - Load GSAP before the marquee library
+- **"GSAP is required but not found"** - Load GSAP before the marquee library: `<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>`
 - **"No containers found"** - Ensure containers have `data-marquee="true"`
-- **"No items found"** - Add `data-marquee-item="true"` to child elements
+- **"No items found"** - Add `data-marquee-item="true"` to child elements: `<div data-marquee-item="true">Content</div>`
+- **"Failed to create timeline"** - Items may be hidden, have zero dimensions, or invalid CSS
+
+### CSS Warnings
+
+The library validates your CSS and provides warnings:
+
+- **"Container should have display: flex"** - Add `display: flex` to your CSS or let the library apply it
+- **"Container should have overflow: hidden"** - Add `overflow: hidden` to prevent content overflow
+- **"Detected flex-direction row-reverse"** - Use `data-marquee-reverse="true"` instead of CSS reverse directions
+
+### Direction not changing at breakpoints
+
+Direction changes are detected automatically on resize. If not working:
+
+- Ensure your CSS `flex-direction` changes at the breakpoint
+- Check that the container is actually resizing
+- Manually trigger with `window.Marquee.refresh(element)` if needed
 
 ### Gap at loop point
 
-The library uses intelligent gap detection, but you can help it by:
+The library auto-calculates gap spacing, but you can help it by:
 
 - Using CSS `gap` property instead of margins
 - Ensuring consistent spacing between items
@@ -306,6 +346,7 @@ The library uses intelligent gap detection, but you can help it by:
 - Ensure `overflow: hidden` is set on the container
 - Avoid animating other properties on the same elements
 - Check for CSS transitions that might conflict
+- Reduce clone count if you have many items: `data-marquee-clone-count="2"`
 
 ## Advanced Usage
 
@@ -358,11 +399,11 @@ window.Marquee.init();
 
 ### How It Works
 
-1. **Direction Detection** - Reads `flex-direction` from computed styles
-2. **Auto-Cloning** - Duplicates items to ensure seamless loops
-3. **Gap Calculation** - Measures spacing between items using DOM geometry
+1. **Direction Detection** - Reads `flex-direction` from computed styles, auto-detects changes on resize
+2. **Smart Cloning** - Auto-calculates optimal clone count based on container/item sizes
+3. **Gap Calculation** - Measures spacing between items using DOM geometry (median of gaps)
 4. **GSAP Timeline** - Creates optimized animation with proper seam padding
-5. **Responsive Updates** - Internal ResizeObserver handles window resizes
+5. **Responsive Updates** - Internal ResizeObserver and direction change detection handle all updates
 
 ### Performance
 
