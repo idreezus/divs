@@ -1,77 +1,51 @@
 # Deployment Guide
 
-How to deploy components to CDN.
+Deployment process for components to the CDN. Cloudflare Pages is configured to auto-deploy when changes are merged to main.
 
-## Quick overview
+## Overview
 
-Components build from `packages/` to `dist/`, then deploy to CDN.
+JavaScript files are created for users to load in Webflow and other platforms via `<script>` tags. This guide covers development and production workflows.
 
-**Current components:**
-
-- **marquee** - Infinite scrolling
-
-## Build types
-
-### Development (testing only)
-
-```bash
-pnpm build:marquee
-```
-
-- Updates `dist/marquee/latest/` only
-- Not for users
-
-### Release (for users)
-
-```bash
-pnpm release:marquee
-```
-
-- Creates `dist/marquee/v{version}/`
-- Reads version from `package.json`
-- Frozen and stable
-
-See [VERSIONING.md](./VERSIONING.md) for full workflow.
-
-## What gets built
+## What Gets Built
 
 Each component creates 4 files:
 
-- `{name}.js` - Unminified
-- `{name}.min.js` - Minified (production)
-- `{name}-diagnostics.js` - Debug tool (unminified)
-- `{name}-diagnostics.min.js` - Debug tool (minified)
-
-**Example:**
-
 ```
-dist/marquee/
-├── latest/                 # Development
-│   ├── marquee.js
-│   ├── marquee.min.js
-│   ├── marquee-diagnostics.js
-│   └── marquee-diagnostics.min.js
-├── v1.0.0-beta/           # Release
-└── v1.0.1/                # Another release
+dist/marquee/v1.0.1/
+├── marquee.js                  # Unminified
+├── marquee.min.js             # Minified (production)
+├── marquee-diagnostics.js     # Debug tool (unminified)
+└── marquee-diagnostics.min.js # Debug tool (minified)
 ```
 
-## Development workflow
+## Development Workflow
 
-```bash
-pnpm dev:marquee           # Watch mode
+**For testing and previewing features:**
+
+1. Create or checkout feature branch: `git checkout -b feature/new-thing`
+2. Run `pnpm dev:marquee` locally to test changes
+3. When feature is ready, merge to main: `git checkout main && git merge feature/new-thing && git push`
+4. Cloudflare automatically builds and deploys → updates `dist/marquee/latest/`
+
+**Use `/latest/` for:**
+
+- Testing unreleased features
+- Beta and preview versions
+- Internal testing before production release
+
+**Example URL:**
+
+```html
+<script src="https://divs-cdn.idreezus.com/marquee/latest/marquee.min.js"></script>
 ```
 
-Test at `packages/marquee/test.html` which loads from `dist/marquee/latest/`.
+**Note:** `/latest/` changes frequently. This URL should not be provided to users for production sites.
 
-Before releasing:
+## Production Workflow
 
-1. Test in `latest/`
-2. Check for console errors
-3. Test multiple browsers (optional)
+**To release a stable version:**
 
-## Release workflow
-
-### 1. Update version
+### Step 1: Update Version (Mandatory)
 
 Edit `packages/marquee/package.json`:
 
@@ -81,170 +55,139 @@ Edit `packages/marquee/package.json`:
 }
 ```
 
-### 2. Build
+Semantic versioning guidelines:
+
+- **Patch** (1.0.1) - Bug fixes
+- **Minor** (1.1.0) - New features
+- **Major** (2.0.0) - Breaking changes
+
+### Step 2: Deploy to Cloudflare
+
+Merge to main:
 
 ```bash
-pnpm release:marquee
+git add packages/marquee/package.json
+git commit -m "Release marquee v1.0.1"
+git push origin main
 ```
 
-Creates `dist/marquee/v1.0.1/`.
+Cloudflare automatically:
 
-### 3. Deploy
+1. Runs `pnpm install && pnpm release`
+2. Creates `dist/marquee/v1.0.1/` with production files
+3. Deploys to CDN
 
-Upload `dist/` to CDN (see options below).
-
-### 4. Done
-
-Users load it:
+Versioned files are then live at:
 
 ```html
 <script src="https://divs-cdn.idreezus.com/marquee/v1.0.1/marquee.min.js"></script>
 ```
 
-## How users load components
+**Complete.** This URL is frozen permanently and remains accessible for production use.
 
-Example for marquee:
+### Step 3: GitHub Releases (Optional)
+
+**Only required when using jsDelivr CDN instead of Cloudflare.**
+
+Create a GitHub release with a tag:
+
+```bash
+# Create and push tag
+git tag marquee-v1.0.1
+git push origin marquee-v1.0.1
+
+# Or create release via GitHub UI
+# Tag: marquee-v1.0.1
+# Title: Marquee v1.0.1
+```
+
+**Tag naming for monorepo:** Use `{component}-v{version}` format (e.g., `marquee-v1.0.1`, `accordion-v2.0.0`)
+
+**Why jsDelivr?**
+
+- Global CDN alternative to Cloudflare
+- Works directly from GitHub releases
+- No need to manage separate CDN hosting
+
+**jsDelivr URL format:**
 
 ```html
-<!-- Dependencies first -->
-<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
-
-<!-- Component -->
-<script src="https://divs-cdn.idreezus.com/marquee/v1.0.0-beta/marquee.min.js"></script>
-
-<!-- Optional: Diagnostics -->
-<script src="https://divs-cdn.idreezus.com/marquee/v1.0.0-beta/marquee-diagnostics.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/{username}/{repo}@marquee-v1.0.1/dist/marquee/v1.0.1/marquee.min.js"></script>
 ```
 
-Available as `window.Marquee` with:
+**Note:** jsDelivr requires the GitHub tag to exist. Cloudflare functions independently of GitHub tags.
 
-- `Marquee.init()` - Initialize all
-- `Marquee.get(element)` - Get instance
+## CDN URL Patterns
 
-## CDN URL pattern
+### Cloudflare (Default)
 
 ```
-https://divs-cdn.idreezus.com/{component}/{version}/{component}.min.js
+https://divs-cdn.idreezus.com/{component}/{version}/{file}
 ```
 
 **Examples:**
 
-- `/marquee/v1.0.0-beta/marquee.min.js` - Production
-- `/marquee/latest/marquee.min.js` - Testing only
-- `/accordion/v1.0.0/accordion.min.js` - Different component
+```html
+<!-- Production -->
+<script src="https://divs-cdn.idreezus.com/marquee/v1.0.1/marquee.min.js"></script>
 
-Users should always use versioned URLs, never `latest/`.
+<!-- Testing the latest -->
+<script src="https://divs-cdn.idreezus.com/marquee/latest/marquee.min.js"></script>
+```
 
-## Deploying to Cloudflare Pages
+### jsDelivr (Optional Alternative)
 
-### Option 1: Manual
+```
+https://cdn.jsdelivr.net/gh/{username}/{repo}@{component}-{version}/dist/{component}/{version}/{file}
+```
 
-1. Run `pnpm release`
-2. Upload `dist/` to Cloudflare Pages
+**Examples:**
 
-### Option 2: Automated (recommended)
+```html
+<script src="https://cdn.jsdelivr.net/gh/idreezus/divs@marquee-v1.0.1/dist/marquee/v1.0.1/marquee.min.js"></script>
+```
 
-1. Connect GitHub repo to Cloudflare Pages
+## How Users Load Components
 
-2. Build settings:
+**Marquee example:**
 
-   - **Build command:** `pnpm install && pnpm release`
-   - **Output directory:** `dist`
+```html
+<!-- 1. Load dependencies first -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
 
-3. Set `NODE_VERSION` to `18` or higher
+<!-- 2. Load component (use versioned URL for production) -->
+<script src="https://divs-cdn.idreezus.com/marquee/v1.0.1/marquee.min.js"></script>
 
-4. Cloudflare rebuilds on each push
+<!-- 3. Optional: Load diagnostics for debugging -->
+<script src="https://divs-cdn.idreezus.com/marquee/v1.0.1/marquee-diagnostics.min.js"></script>
+```
 
-5. Old version folders persist automatically
+Available as `window.Marquee` with methods like `Marquee.init()`, `Marquee.get(element)`, etc.
 
-**Benefits:**
+## Working with Multiple Components
 
-- Auto HTTPS
-- Global CDN
-- Git integration
-- Custom domains
-
-## Versioning
-
-Components version independently:
+When multiple components exist, each receives its own folder with independent versions:
 
 ```
 dist/
-├── marquee/v1.2.5/
-└── accordion/v3.0.0/
+├── marquee/
+│   ├── latest/           # Development builds
+│   ├── v1.0.0-beta/      # Old release
+│   └── v1.2.5/           # Current release
+└── accordion/
+    ├── latest/
+    └── v3.0.0/
 ```
 
-- **Versioned folders** (`v1.0.0/`) - Frozen, for users
-- **Latest folder** (`latest/`) - Changing, for testing
+**To release all components simultaneously:**
 
-See [VERSIONING.md](./VERSIONING.md) for full workflow.
+1. Update versions in each `packages/{component}/package.json`
+2. Merge to main
+3. Cloudflare runs `pnpm release` which builds all components
 
-## Adding new components
+**Example result:**
 
-1. Copy `packages/marquee/` to `packages/new-component/`
-2. Update `package.json` with new name
-3. Add scripts to root `package.json`:
+- `dist/marquee/v1.2.6/`
+- `dist/accordion/v3.0.1/`
 
-```json
-{
-  "build:new-component": "pnpm --filter new-component build",
-  "dev:new-component": "pnpm --filter new-component build:watch",
-  "release:new-component": "pnpm --filter new-component release"
-}
-```
-
-4. Build: `pnpm dev:new-component`
-5. Release: `pnpm release:new-component`
-
-Available at:
-
-```
-https://divs-cdn.idreezus.com/new-component/v1.0.0/new-component.min.js
-```
-
-## Build all components
-
-```bash
-pnpm build        # Updates all latest/
-pnpm release      # Releases all
-```
-
-## Important notes
-
-- Dependencies (like GSAP) must be loaded globally
-- Modern JavaScript (ES6+), no IE11
-- Components auto-initialize on page load
-- Use `pnpm`, not `npm`
-- Never delete old version folders
-
-## Quick commands
-
-| Command                | What it does      |
-| ---------------------- | ----------------- |
-| `pnpm dev:marquee`     | Watch mode        |
-| `pnpm build:marquee`   | Development build |
-| `pnpm release:marquee` | Release build     |
-| `pnpm build`           | Build all         |
-| `pnpm release`         | Release all       |
-
-## Troubleshooting
-
-**Build fails:**
-Run `pnpm install`.
-
-**Version folder not created:**
-Check version in `package.json`.
-
-**Users see old code:**
-CDN cache takes time. Hard refresh (Ctrl+F5).
-
-**Watch mode not detecting changes:**
-Edit files in `packages/{component}/src/` only.
-
-## After deployment
-
-1. Test CDN URLs in incognito
-2. Update docs with new URLs
-3. Notify users if breaking changes
-
-See [VERSIONING.md](./VERSIONING.md) for more.
+Both are deployed simultaneously.
