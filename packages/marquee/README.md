@@ -5,6 +5,7 @@ A seamless, responsive marquee animation library powered by GSAP. Perfect for cr
 ## Features
 
 - **Truly Seamless** - No visible jumps or gaps at the loop point
+- **Performance Optimized** - Only animates when visible using IntersectionObserver (enabled by default)
 - **Responsive** - Automatically adapts to window resizes and content changes
 - **CSS-Driven Direction** - Use flexbox properties for responsive layouts
 - **Hover Effects** - Built-in pause and slow effects
@@ -149,6 +150,12 @@ Add interactive hover effects with simple attributes:
 | `data-marquee-hover-out` | seconds | `0.25` | Slow effect ramp out duration |
 | `data-marquee-hover-ease-in` | GSAP ease | `"power1.out"` | Ramp in easing function |
 | `data-marquee-hover-ease-out` | GSAP ease | `"power1.out"` | Ramp out easing function |
+
+### Performance Options
+
+| Attribute | Values | Default | Description |
+|-----------|--------|---------|-------------|
+| `data-marquee-intersection` | `"true"` / `"false"` | `"true"` | Use IntersectionObserver to only animate when visible. Improves performance by pausing marquees that are out of viewport. |
 
 ## JavaScript API
 
@@ -395,6 +402,18 @@ window.Marquee.init();
 </div>
 ```
 
+### Disabling IntersectionObserver
+
+If you want marquees to run continuously regardless of visibility (legacy behavior):
+
+```html
+<div data-marquee="true" data-marquee-intersection="false" class="marquee">
+  <!-- This marquee runs even when scrolled out of view -->
+  <div data-marquee-item="true">Item 1</div>
+  <div data-marquee-item="true">Item 2</div>
+</div>
+```
+
 ## Technical Details
 
 ### How It Works
@@ -403,24 +422,35 @@ window.Marquee.init();
 2. **Smart Cloning** - Auto-calculates optimal clone count based on container/item sizes
 3. **Gap Calculation** - Measures spacing between items using DOM geometry (median of gaps)
 4. **GSAP Timeline** - Creates optimized animation with proper seam padding
-5. **Responsive Updates** - Internal ResizeObserver and direction change detection handle all updates
+5. **IntersectionObserver** - Pauses animations when marquees scroll out of viewport (enabled by default)
+6. **Responsive Updates** - Internal ResizeObserver and direction change detection handle all updates
 
 ### Performance
 
 - Uses GSAP's highly optimized animation engine
 - GPU-accelerated transforms (translate/transform)
+- **IntersectionObserver pauses animations when out of view** - Reduces CPU/GPU usage on long pages
 - Automatic cleanup prevents memory leaks
 - Minimal DOM manipulation after initialization
+- ResizeObserver continues calculating even when paused (responsive resizing works seamlessly)
 
 ### Architecture
 
 ```
 src/
-├── core/              - Instance management and timeline logic
-├── interaction/       - Hover effect handlers
-├── api/              - Public API surface
-├── config/           - Configuration and parsing
-└── utils/            - GSAP loop helpers
+├── core.js            - MarqueeInstance class (main logic coordinator)
+├── api.js             - Public API surface
+├── setup/
+│   ├── config.js      - Centralized attribute names and defaults
+│   └── parsers.js     - Converts data-* attributes to config objects
+├── features/
+│   ├── cloning.js     - Smart clone calculation and management
+│   ├── timeline.js    - Timeline building and rebuilding
+│   ├── hover.js       - Hover interaction effects
+│   ├── observer.js    - IntersectionObserver for visibility control
+│   └── spacing.js     - Median gap computation
+└── utils/
+    └── seamlessLoop.js - GSAP horizontal/vertical loop helpers
 ```
 
 ## License

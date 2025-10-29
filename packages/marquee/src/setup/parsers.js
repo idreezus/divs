@@ -153,3 +153,18 @@ export function parseInteractionConfig(element) {
 
   return result;
 }
+
+// Builds observer configuration from attributes.
+export function parseObserverConfig(element) {
+  // Purpose: Control intersection observer behavior.
+  const { attributes, defaults } = CONFIG.observers;
+  const intersectionRaw = element.getAttribute(attributes.intersection);
+  const intersection =
+    intersectionRaw === null ? defaults.intersection : intersectionRaw !== 'false';
+
+  return {
+    intersection,
+    threshold: defaults.threshold,
+    rootMargin: defaults.rootMargin,
+  };
+}

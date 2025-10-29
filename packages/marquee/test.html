@@ -229,7 +229,7 @@
       <div class="stats">
         <span id="pass-count">0 passed</span>
         <span id="fail-count">0 failed</span>
-        <span id="pending-count">20 pending</span>
+        <span id="pending-count">22 pending</span>
       </div>
     </header>
 
@@ -679,19 +679,66 @@
       </div>
     </section>
 
-    <!-- Category 7: Edge Cases -->
+    <!-- Category 7: Intersection Observer -->
     <section class="test-category">
-      <h2>Edge Cases</h2>
+      <h2>Intersection Observer</h2>
 
       <div class="test-case" data-test-id="20">
         <div class="test-header">
           <span class="test-number">20</span>
+          <h3>Intersection Observer Enabled (Default)</h3>
+          <span class="test-status pending">Pending</span>
+        </div>
+        <div class="test-content">
+          <p class="test-description">Marquee only animates when visible. Scroll it out of view to test.</p>
+          <div class="marquee-container" data-marquee="true" id="test20-marquee">
+            <div data-marquee-item="true" class="marquee-item">🚀 Plays when visible</div>
+            <div data-marquee-item="true" class="marquee-item">👀 Pauses when hidden</div>
+            <div data-marquee-item="true" class="marquee-item">⚡ Better performance</div>
+          </div>
+          <div class="code-block">Default behavior: data-marquee-intersection="true" (enabled by default)</div>
+        </div>
+        <div class="test-controls">
+          <button class="run-test primary">Run Test</button>
+        </div>
+        <div class="test-result"></div>
+      </div>
+
+      <div class="test-case" data-test-id="21">
+        <div class="test-header">
+          <span class="test-number">21</span>
+          <h3>Intersection Observer Disabled</h3>
+          <span class="test-status pending">Pending</span>
+        </div>
+        <div class="test-content">
+          <p class="test-description">Marquee runs continuously even when out of viewport</p>
+          <div class="marquee-container" data-marquee="true" data-marquee-intersection="false" id="test21-marquee">
+            <div data-marquee-item="true" class="marquee-item">Always running</div>
+            <div data-marquee-item="true" class="marquee-item">Even when hidden</div>
+            <div data-marquee-item="true" class="marquee-item">Observer disabled</div>
+          </div>
+          <div class="code-block">data-marquee-intersection="false" - reverts to legacy behavior</div>
+        </div>
+        <div class="test-controls">
+          <button class="run-test primary">Run Test</button>
+        </div>
+        <div class="test-result"></div>
+      </div>
+    </section>
+
+    <!-- Category 8: Edge Cases -->
+    <section class="test-category">
+      <h2>Edge Cases</h2>
+
+      <div class="test-case" data-test-id="22">
+        <div class="test-header">
+          <span class="test-number">22</span>
           <h3>Hover + Direction Change</h3>
           <span class="test-status pending">Pending</span>
         </div>
         <div class="test-content">
           <p class="test-description">Hover effect should work after direction change</p>
-          <div class="marquee-container" data-marquee="true" data-marquee-hover-effect="pause" id="test20-marquee">
+          <div class="marquee-container" data-marquee="true" data-marquee-hover-effect="pause" id="test22-marquee">
             <div data-marquee-item="true" class="marquee-item">Hover 1</div>
             <div data-marquee-item="true" class="marquee-item">Hover 2</div>
             <div data-marquee-item="true" class="marquee-item">Hover 3</div>
@@ -712,7 +759,7 @@
     const testState = {
       passed: 0,
       failed: 0,
-      pending: 20
+      pending: 22
     };
 
     function updateStats() {
@@ -894,7 +941,29 @@
     }
 
     function runTest20() {
-      markTest(20, 'pass', '✓ Hover to pause, toggle direction, hover again to verify');
+      const container = document.getElementById('test20-marquee');
+      const instance = window.Marquee.get(container);
+
+      if (instance && instance.observerConfig.intersection && instance.intersectionObserver) {
+        markTest(20, 'pass', '✓ Intersection observer enabled and attached');
+      } else {
+        markTest(20, 'fail', '✗ Intersection observer not properly set up');
+      }
+    }
+
+    function runTest21() {
+      const container = document.getElementById('test21-marquee');
+      const instance = window.Marquee.get(container);
+
+      if (instance && !instance.observerConfig.intersection && !instance.intersectionObserver) {
+        markTest(21, 'pass', '✓ Intersection observer disabled, marquee runs continuously');
+      } else {
+        markTest(21, 'fail', '✗ Intersection observer should be disabled');
+      }
+    }
+
+    function runTest22() {
+      markTest(22, 'pass', '✓ Hover to pause, toggle direction, hover again to verify');
     }
 
     // Wire up test buttons
@@ -902,7 +971,8 @@
       runTest1, runTest2, runTest3, runTest4, runTest5,
       runTest6, runTest7, runTest8, runTest9, runTest10,
       runTest11, runTest12, runTest13, runTest14, runTest15,
-      runTest16, runTest17, runTest18, runTest19, runTest20
+      runTest16, runTest17, runTest18, runTest19, runTest20,
+      runTest21, runTest22
     ];
 
     document.querySelectorAll('.run-test').forEach((btn, index) => {
@@ -951,7 +1021,7 @@
     });
 
     document.getElementById('toggle-hover-direction')?.addEventListener('click', () => {
-      const container = document.getElementById('test20-marquee');
+      const container = document.getElementById('test22-marquee');
       container.classList.toggle('vertical');
       container.style.height = container.classList.contains('vertical') ? '300px' : 'auto';
     });

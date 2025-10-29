@@ -1,8 +1,9 @@
-import { parseCoreConfig, parseCloningConfig, parseInteractionConfig } from './setup/parsers.js';
+import { parseCoreConfig, parseCloningConfig, parseInteractionConfig, parseObserverConfig } from './setup/parsers.js';
 import { CONFIG } from './setup/config.js';
 import { cloneItems, removeClones } from './features/cloning.js';
 import { buildTimeline, rebuildTimeline } from './features/timeline.js';
 import { attachHoverHandlers } from './features/hover.js';
+import { setupIntersectionObserver } from './features/observer.js';
 
 /**
  * Manages a single marquee instance with timeline, cloning, and interaction handlers.
@@ -30,11 +31,13 @@ export class MarqueeInstance {
     this.pauseRampTimeline = null;
     this.baseTimeScale = 1;
     this.currentDirection = null;
+    this.intersectionObserver = null;
 
     try {
       this.coreConfig = parseCoreConfig(container, options.core);
       this.cloningConfig = parseCloningConfig(container, options.cloning);
       this.interactionConfig = parseInteractionConfig(container, options.interaction);
+      this.observerConfig = parseObserverConfig(container, options.observers);
     } catch (error) {
       console.error('Marquee: Failed to parse configuration', error);
       return;
@@ -62,6 +65,12 @@ export class MarqueeInstance {
       this.applyContainerStyles();
       const isVertical = this.coreConfig.direction === 'vertical';
       cloneItems(this.container, originalItems, this.cloningConfig, isVertical);
+
+      // If intersection observer is enabled, start timeline paused
+      if (this.observerConfig.intersection) {
+        this.coreConfig.paused = true;
+      }
+
       buildTimeline(this);
 
       if (!this.timeline) {
@@ -77,12 +86,18 @@ export class MarqueeInstance {
 
       this.baseTimeScale = this.timeline.timeScale();
 
-      if (this.interactionConfig?.effectType) {
-        attachHoverHandlers(this, this.interactionConfig);
-      }
-
+      // Apply reduced motion before setting up observer
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         this.timeline.timeScale(this.timeline.timeScale() * 0.1);
+      }
+
+      // Setup intersection observer after timeline is built
+      if (this.observerConfig.intersection && this.timeline) {
+        setupIntersectionObserver(this, this.observerConfig);
+      }
+
+      if (this.interactionConfig?.effectType) {
+        attachHoverHandlers(this, this.interactionConfig);
       }
 
       // Store initial direction for change detection
@@ -184,6 +199,14 @@ export class MarqueeInstance {
     rebuildTimeline(this, preserveState);
 
     this.baseTimeScale = this.timeline ? this.timeline.timeScale() : 1;
+
+    // Re-setup intersection observer if it was enabled
+    if (this.observerConfig.intersection && this.timeline) {
+      if (this.intersectionObserver) {
+        this.intersectionObserver.disconnect();
+      }
+      setupIntersectionObserver(this, this.observerConfig);
+    }
   }
 
   // Resumes the marquee animation
@@ -210,6 +233,12 @@ export class MarqueeInstance {
     if (this.pauseRampTimeline) {
       this.pauseRampTimeline.kill();
       this.pauseRampTimeline = null;
+    }
+
+    // Cleanup intersection observer
+    if (this.intersectionObserver) {
+      this.intersectionObserver.disconnect();
+      this.intersectionObserver = null;
     }
 
     if (this.timeline) {

@@ -44,6 +44,7 @@ src/
 │   ├── cloning.js      # Smart clone calculation and management
 │   ├── timeline.js     # Timeline building and rebuilding
 │   ├── hover.js        # Hover interaction effects (pause/slow)
+│   ├── observer.js     # IntersectionObserver for visibility control
 │   └── spacing.js      # Median gap computation for seamless looping
 └── utils/              # Helpers
     └── seamlessLoop.js # GSAP horizontal/vertical loop helpers
@@ -66,7 +67,7 @@ src/
 **Configuration System (src/setup/)**
 - `config.js` - Centralized attribute names and defaults
 - `parsers.js` - Converts data-* attributes to normalized config objects
-- Three namespaces: core (speed, direction, repeat, reverse), cloning (auto-clone, smart clone count), interaction (hover effects)
+- Four namespaces: core (speed, direction, repeat, reverse), cloning (auto-clone, smart clone count), interaction (hover effects), observers (intersection observer)
 - Validates CSS and warns about common issues (missing flex, overflow, reverse directions)
 
 **Spacing Computation (src/features/spacing.js)**
@@ -94,6 +95,13 @@ src/
 - Pause effect uses a two-stage ramp timeline: optional mid-ratio phase → full pause
 - All speed changes preserve playback direction sign to maintain forward/reverse behavior
 - `wasPausedByEffect` flag prevents double-triggering during hover
+
+**Performance Optimization (src/features/observer.js)**
+- IntersectionObserver pauses timelines when marquees are out of viewport (enabled by default)
+- Improves performance on long pages with multiple marquees
+- Can be disabled with `data-marquee-intersection="false"`
+- Observer is cleaned up in `destroy()` and re-attached in `rebuild()`
+- ResizeObserver in seamlessLoop.js continues working even when timeline is paused
 
 **Responsive Refresh & Direction Detection**
 - Loop helpers internally observe container size and window resize events
@@ -128,6 +136,9 @@ All configuration via `data-marquee-*` attributes on container element:
 - `data-marquee-hover-out` - Ramp-out duration for slow effect
 - `data-marquee-hover-ease-in` - GSAP ease for ramp-in (default: "power1.out")
 - `data-marquee-hover-ease-out` - GSAP ease for ramp-out (default: "power1.out")
+
+**Performance:**
+- `data-marquee-intersection` - "true" (default) or "false" - Use IntersectionObserver to pause when out of viewport
 
 ## Public API
 

@@ -63,4 +63,18 @@ export const CONFIG = {
       slowRampOutEase: 'power1.out',
     },
   },
+
+  observers: {
+    attributes: {
+      intersection: 'data-marquee-intersection',
+    },
+    defaults: {
+      // Enable intersection observer by default for performance
+      intersection: true,
+      // Trigger when 10% of the marquee is visible
+      threshold: 0.1,
+      // No margin adjustment by default
+      rootMargin: '0px',
+    },
+  },
 };
