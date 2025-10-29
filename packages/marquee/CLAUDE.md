@@ -79,8 +79,8 @@ src/
 
 **Cloning Strategy**
 - Items are cloned in complete sets and appended in order: `[1,2,3,4,5]` → `[1,2,3,4,5,1,2,3,4,5,1,2,3,4,5]`
-- Clones marked with `aria-hidden="true"` and `data-marquee-clone="true"` for accessibility and safe removal
-- Clone count is auto-calculated based on container/item sizes (can be overridden via `data-marquee-clone-count`)
+- Clones marked with `aria-hidden="true"` and `data-marquee-clone="true"` (internal flag) for accessibility and safe removal
+- Clone count is auto-calculated based on container/item sizes (can be overridden via `data-marquee-clones`)
 - Capped at maximum of 10 clones for performance
 - Can be disabled with `data-marquee-auto-clone="false"`
 

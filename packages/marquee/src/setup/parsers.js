@@ -35,12 +35,12 @@ function parseDirection(element) {
 
   // Warn about reverse directions - should use data-marquee-reverse instead
   if (flexDirection === 'row-reverse' || flexDirection === 'column-reverse') {
-    if (!element.hasAttribute(CONFIG.core.attributes.reverseWarned)) {
+    if (!element.hasAttribute(CONFIG.internalFlags.attributes.reverseWarned)) {
       console.warn(
         'Marquee: Detected flex-direction "' + flexDirection + '". For reverse animation, use ' + CONFIG.core.attributes.reverse + '="true" instead of CSS reverse directions.',
         element
       );
-      element.setAttribute(CONFIG.core.attributes.reverseWarned, 'true');
+      element.setAttribute(CONFIG.internalFlags.attributes.reverseWarned, 'true');
     }
   }
 

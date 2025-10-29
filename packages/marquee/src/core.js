@@ -133,7 +133,7 @@ export class MarqueeInstance {
 
   // Validates container CSS and warns about missing required styles
   validateContainerStyles() {
-    if (this.container.hasAttribute(CONFIG.core.attributes.stylesValidated)) {
+    if (this.container.hasAttribute(CONFIG.internalFlags.attributes.stylesValidated)) {
       return;
     }
 
@@ -148,7 +148,7 @@ export class MarqueeInstance {
     }
 
     // Mark as validated to avoid repeated warnings
-    this.container.setAttribute(CONFIG.core.attributes.stylesValidated, 'true');
+    this.container.setAttribute(CONFIG.internalFlags.attributes.stylesValidated, 'true');
   }
 
   // Applies flex layout and overflow styles only if not already set

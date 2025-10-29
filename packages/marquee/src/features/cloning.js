@@ -98,7 +98,7 @@ export function cloneItems(
     originalItems.forEach((item) => {
       const clone = item.cloneNode(true);
       clone.setAttribute('aria-hidden', 'true');
-      clone.setAttribute(CONFIG.cloning.attributes.clone, 'true');
+      clone.setAttribute(CONFIG.internalFlags.attributes.clone, 'true');
       container.appendChild(clone);
     });
   }
@@ -107,7 +107,7 @@ export function cloneItems(
 // Removes all cloned marquee items from the container
 export function removeClones(container) {
   const clones = container.querySelectorAll(
-    `[${CONFIG.cloning.attributes.clone}="true"]`
+    `[${CONFIG.internalFlags.attributes.clone}="true"]`
   );
   clones.forEach((clone) => clone.remove());
 }

@@ -23,6 +23,7 @@ export default [
         console: 'readonly',
         gsap: 'readonly',
         ResizeObserver: 'readonly',
+        IntersectionObserver: 'readonly',
         requestAnimationFrame: 'readonly',
         cancelAnimationFrame: 'readonly',
         Draggable: 'readonly',
