@@ -1,0 +1,41 @@
+================================================================================
+MARQUEE FLEXBOX TEST REPORT
+================================================================================
+
+Test Suite: Flexbox Direction Detection
+Date: 2025-10-29T07:41:05.800Z
+
+Tests Available:
+
+1. Media Query Test
+   Tests horizontal ↔ vertical transitions via media queries
+   URL: http://localhost:8080/test-media-query.html
+
+2. Reverse Direction Test
+   Tests row-reverse and column-reverse auto-detection
+   URL: http://localhost:8080/test-reverse.html
+
+
+Manual Testing Checklist:
+
+[ ] Media Query Test
+    [ ] Desktop view (>768px) shows horizontal marquee
+    [ ] Mobile view (<768px) shows vertical marquee
+    [ ] Transition is smooth when resizing
+    [ ] Console logs show direction changes
+    [ ] data-marquee-active-direction updates correctly
+
+[ ] Reverse Direction Test
+    [ ] row → horizontal, normal direction
+    [ ] row-reverse → horizontal, reversed
+    [ ] column → vertical, normal direction
+    [ ] column-reverse → vertical, reversed
+    [ ] data-marquee-active-reverse="true" for reverse variants
+    [ ] Console logs show CSS auto-detection
+
+Notes:
+___________________________________________________________________________
+
+___________________________________________________________________________
+
+================================================================================

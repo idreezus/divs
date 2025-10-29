@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marquee Flexbox Direction Test - Media Queries</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 20px;
+      background: #0a0a0a;
+      color: #fff;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+      font-size: 24px;
+    }
+
+    .instructions {
+      background: #1a1a1a;
+      padding: 15px;
+      margin-bottom: 30px;
+      border-radius: 8px;
+      border-left: 4px solid #4CAF50;
+    }
+
+    .instructions h2 {
+      font-size: 18px;
+      margin-bottom: 10px;
+      color: #4CAF50;
+    }
+
+    .instructions p {
+      margin-bottom: 8px;
+      line-height: 1.6;
+    }
+
+    .instructions code {
+      background: #2a2a2a;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Monaco', 'Courier New', monospace;
+      color: #FFD700;
+    }
+
+    .test-section {
+      margin-bottom: 40px;
+    }
+
+    .test-section h3 {
+      margin-bottom: 15px;
+      padding: 10px;
+      background: #1a1a1a;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    .marquee-container {
+      display: flex;
+      gap: 20px;
+      padding: 10px;
+      background: #1a1a1a;
+      border-radius: 8px;
+      border: 2px solid #333;
+      overflow: hidden;
+      min-height: 80px;
+      align-items: center;
+    }
+
+    /* Test 1: Horizontal → Vertical at 768px */
+    #test1 {
+      flex-direction: row;
+    }
+
+    @media (max-width: 768px) {
+      #test1 {
+        flex-direction: column;
+        height: 400px;
+        align-items: stretch;
+      }
+    }
+
+    /* Test 2: Vertical → Horizontal at 768px */
+    #test2 {
+      flex-direction: column;
+      height: 400px;
+      align-items: stretch;
+    }
+
+    @media (max-width: 768px) {
+      #test2 {
+        flex-direction: row;
+        height: auto;
+        min-height: 80px;
+        align-items: center;
+      }
+    }
+
+    .marquee-item {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px 40px;
+      border-radius: 8px;
+      font-weight: 600;
+      white-space: nowrap;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    }
+
+    .marquee-item:nth-child(2n) {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    .marquee-item:nth-child(3n) {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+
+    .console-output {
+      background: #000;
+      color: #0f0;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 6px;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #333;
+    }
+
+    .console-output .log-entry {
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .console-output .log-entry.direction-change {
+      color: #FFD700;
+      font-weight: bold;
+    }
+
+    .console-output .log-entry.css-read {
+      color: #4CAF50;
+    }
+
+    .console-output .log-entry.timeline-rebuild {
+      color: #FF6B6B;
+    }
+
+    .status-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 8px;
+      background: #4CAF50;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .current-state {
+      background: #1a1a1a;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 6px;
+      font-size: 14px;
+      color: #888;
+    }
+
+    .current-state strong {
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <h1><span class="status-indicator"></span>Marquee Flexbox Direction Test - Media Queries</h1>
+
+  <div class="instructions">
+    <h2>Test Instructions</h2>
+    <p><strong>What to test:</strong> This page tests automatic direction switching based on CSS media queries.</p>
+    <p><strong>How to test:</strong> Resize your browser window to cross the 768px breakpoint and watch:</p>
+    <ul style="margin-left: 20px; margin-top: 10px;">
+      <li>Test 1: Changes from <code>flex-direction: row</code> (horizontal) to <code>column</code> (vertical) below 768px</li>
+      <li>Test 2: Changes from <code>flex-direction: column</code> (vertical) to <code>row</code> (horizontal) below 768px</li>
+    </ul>
+    <p style="margin-top: 10px;"><strong>Expected behavior:</strong> Direction changes automatically when you resize, with console logs showing the transition.</p>
+    <p><strong>Current viewport:</strong> <span id="viewport-width">...</span>px</p>
+  </div>
+
+  <div class="test-section">
+    <h3>Test 1: Horizontal → Vertical (below 768px)</h3>
+    <div class="current-state">
+      Current direction: <strong id="test1-direction">...</strong> |
+      Reversed: <strong id="test1-reversed">...</strong>
+    </div>
+    <div id="test1" class="marquee-container" data-marquee>
+      <div data-marquee-item="true" class="marquee-item">Item 1</div>
+      <div data-marquee-item="true" class="marquee-item">Item 2</div>
+      <div data-marquee-item="true" class="marquee-item">Item 3</div>
+      <div data-marquee-item="true" class="marquee-item">Item 4</div>
+      <div data-marquee-item="true" class="marquee-item">Item 5</div>
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h3>Test 2: Vertical → Horizontal (below 768px)</h3>
+    <div class="current-state">
+      Current direction: <strong id="test2-direction">...</strong> |
+      Reversed: <strong id="test2-reversed">...</strong>
+    </div>
+    <div id="test2" class="marquee-container" data-marquee>
+      <div data-marquee-item="true" class="marquee-item">Alpha</div>
+      <div data-marquee-item="true" class="marquee-item">Beta</div>
+      <div data-marquee-item="true" class="marquee-item">Gamma</div>
+      <div data-marquee-item="true" class="marquee-item">Delta</div>
+      <div data-marquee-item="true" class="marquee-item">Epsilon</div>
+    </div>
+  </div>
+
+  <div class="console-output" id="console-output">
+    <div class="log-entry">Waiting for marquee initialization...</div>
+  </div>
+
+  <script src="../../../dist/marquee/latest/marquee.js"></script>
+  <script>
+    // Capture console logs for display
+    const consoleOutput = document.getElementById('console-output');
+    const originalLog = console.log;
+    const logs = [];
+
+    console.log = function(...args) {
+      originalLog.apply(console, args);
+
+      const logText = args.map(arg => {
+        if (typeof arg === 'object' && arg !== null) {
+          return JSON.stringify(arg, null, 2);
+        }
+        return String(arg);
+      }).join(' ');
+
+      logs.push(logText);
+
+      let className = 'log-entry';
+      if (logText.includes('Direction Change')) className += ' direction-change';
+      else if (logText.includes('CSS Read')) className += ' css-read';
+      else if (logText.includes('Timeline Rebuild')) className += ' timeline-rebuild';
+
+      const entry = document.createElement('div');
+      entry.className = className;
+      entry.textContent = logText;
+      consoleOutput.appendChild(entry);
+
+      // Auto-scroll to bottom
+      consoleOutput.scrollTop = consoleOutput.scrollHeight;
+
+      // Keep only last 50 entries
+      if (consoleOutput.children.length > 50) {
+        consoleOutput.removeChild(consoleOutput.firstChild);
+      }
+    };
+
+    // Update viewport width display
+    function updateViewportInfo() {
+      const width = window.innerWidth;
+      document.getElementById('viewport-width').textContent = width;
+
+      // Update current state displays
+      const test1 = document.getElementById('test1');
+      const test2 = document.getElementById('test2');
+
+      if (test1) {
+        document.getElementById('test1-direction').textContent =
+          test1.getAttribute('data-marquee-active-direction') || 'Not initialized';
+        document.getElementById('test1-reversed').textContent =
+          test1.getAttribute('data-marquee-active-reverse') || 'false';
+      }
+
+      if (test2) {
+        document.getElementById('test2-direction').textContent =
+          test2.getAttribute('data-marquee-active-direction') || 'Not initialized';
+        document.getElementById('test2-reversed').textContent =
+          test2.getAttribute('data-marquee-active-reverse') || 'false';
+      }
+    }
+
+    updateViewportInfo();
+    window.addEventListener('resize', () => {
+      updateViewportInfo();
+      setTimeout(updateViewportInfo, 100); // Update again after animations
+      setTimeout(updateViewportInfo, 500); // And once more after rebuild
+    });
+
+    // Update state displays periodically
+    setInterval(updateViewportInfo, 1000);
+
+    console.log('Test page loaded. Resize window to test direction changes.');
+    console.log(`Initial viewport width: ${window.innerWidth}px`);
+  </script>
+</body>
+</html>

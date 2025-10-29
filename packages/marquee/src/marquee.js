@@ -1,7 +1,50 @@
 import { horizontalLoop, verticalLoop } from './utils/seamlessLoop.js';
 import { computeMedianGap } from './spacing.js';
 import { CONFIG } from './config/config.js';
-import { buildConfigFromElement } from './config/parsers.js';
+import { buildConfigFromElement, parseDirectionFromCSS } from './config/parsers.js';
+
+// Debug logging helpers
+const DEBUG = {
+  enabled: true, // Set to false to disable all debug logging
+
+  log(message, data) {
+    if (!this.enabled) return;
+    console.log(`[Marquee Debug] ${message}`, data || '');
+  },
+
+  directionChange(container, oldDirection, newDirection, source) {
+    if (!this.enabled) return;
+    console.log(
+      `[Marquee Direction Change]`,
+      `\n  Container:`, container,
+      `\n  Old: ${oldDirection}`,
+      `\n  New: ${newDirection}`,
+      `\n  Source: ${source}`
+    );
+  },
+
+  cssRead(container, flexDirection, justifyContent, computedDirection, isReversed) {
+    if (!this.enabled) return;
+    console.log(
+      `[Marquee CSS Read]`,
+      `\n  Container:`, container,
+      `\n  flex-direction: ${flexDirection}`,
+      `\n  justify-content: ${justifyContent}`,
+      `\n  → Computed direction: ${computedDirection}`,
+      `\n  → Auto-reversed: ${isReversed}`
+    );
+  },
+
+  timelineRebuild(container, direction, reason) {
+    if (!this.enabled) return;
+    console.log(
+      `[Marquee Timeline Rebuild]`,
+      `\n  Container:`, container,
+      `\n  Direction: ${direction}`,
+      `\n  Reason: ${reason}`
+    );
+  }
+};
 
 // Stores all active marquee instances
 // Using WeakMap prevents memory leaks since instances are automatically garbage collected when elements are removed
@@ -28,6 +71,9 @@ class MarqueeInstance {
     );
     this.coreConfig = core;
     this.cloningConfig = cloning;
+
+    // Update container data attributes with current state for debugging
+    this.updateDebugAttributes();
 
     // Find all items marked for animation within this container
     const items = this.findMarqueeItems();
@@ -72,6 +118,47 @@ class MarqueeInstance {
     return Array.from(
       this.container.querySelectorAll(`[${CONFIG.core.attributes.item}="true"]`)
     );
+  }
+
+  // Updates debug data attributes on container for live inspection
+  updateDebugAttributes() {
+    if (!DEBUG.enabled) return;
+    this.container.setAttribute('data-marquee-active-direction', this.coreConfig.direction);
+    this.container.setAttribute('data-marquee-active-reverse', String(this.coreConfig.reversed));
+  }
+
+  // Checks if CSS flex-direction has changed and rebuilds timeline if needed
+  checkDirectionChange() {
+    const cssResult = parseDirectionFromCSS(this.container);
+    const oldDirection = this.coreConfig.direction;
+    const oldReversed = this.coreConfig.reversed;
+    const newDirection = cssResult.direction;
+
+    // Determine new reversed state (explicit attribute takes precedence)
+    const explicitReverse = this.container.getAttribute(CONFIG.core.attributes.reverse);
+    const newReversed = explicitReverse !== null
+      ? explicitReverse === 'true'
+      : cssResult.isReversed;
+
+    // Check if direction or reversed state changed
+    const directionChanged = oldDirection !== newDirection;
+    const reversedChanged = oldReversed !== newReversed;
+
+    if (directionChanged || reversedChanged) {
+      DEBUG.directionChange(
+        this.container,
+        `${oldDirection}${oldReversed ? '-reverse' : ''}`,
+        `${newDirection}${newReversed ? '-reverse' : ''}`,
+        'CSS change detected'
+      );
+
+      // Update config
+      this.coreConfig.direction = newDirection;
+      this.coreConfig.reversed = newReversed;
+
+      // Rebuild timeline with new direction
+      this.rebuildTimeline();
+    }
   }
 
   // Clones items multiple times to ensure the container is filled for seamless looping
@@ -143,6 +230,17 @@ class MarqueeInstance {
     const allItems = this.findMarqueeItems();
     this.applyRequiredStyles(allItems);
 
+    // Reset ALL transforms on both axes to prevent diagonal movement
+    // This ensures clean state when switching between horizontal/vertical
+    if (window.gsap) {
+      window.gsap.set(allItems, {
+        x: 0,
+        y: 0,
+        xPercent: 0,
+        yPercent: 0,
+      });
+    }
+
     const isVertical = this.coreConfig.direction === 'vertical';
     const originalItems = Array.from(
       this.container.querySelectorAll(
@@ -157,13 +255,22 @@ class MarqueeInstance {
       repeat: this.coreConfig.repeat,
       paused: this.coreConfig.paused,
       reversed: this.coreConfig.reversed,
-      // Only apply explicit seam padding for horizontal; vertical computes spacing via geometry + refresh
-      ...(isVertical ? {} : { paddingRight: medianGap }),
+      // Apply direction-specific seam padding
+      ...(isVertical
+        ? { paddingBottom: medianGap }
+        : { paddingRight: medianGap }),
     };
+
+    DEBUG.timelineRebuild(this.container, this.coreConfig.direction, 'Initial build');
 
     this.timeline = isVertical
       ? verticalLoop(allItems, loopConfig)
       : horizontalLoop(allItems, loopConfig);
+
+    // Attach instance reference for direction change detection
+    if (this.timeline) {
+      this.timeline._marqueeInstance = this;
+    }
   }
 
   // Rebuilds the GSAP timeline using current DOM measurements and preserves visual state
@@ -176,13 +283,11 @@ class MarqueeInstance {
     const previousTime = previousTimeline ? previousTimeline.time() : 0;
     const previousScale = previousTimeline ? previousTimeline.timeScale() : 1;
 
-    // Clean up the previous helper's internal listeners if provided
-    if (
-      previousTimeline &&
-      typeof previousTimeline._cleanupResize === 'function'
-    ) {
+    // Clean up the previous helper's internal listeners (ResizeObserver)
+    // CRITICAL: Must disconnect old timeline's observer to prevent dual animation
+    if (previousTimeline && typeof previousTimeline.cleanup === 'function') {
       try {
-        previousTimeline._cleanupResize();
+        previousTimeline.cleanup();
       } catch (e) {
         // Intentionally ignore cleanup errors
       }
@@ -195,6 +300,17 @@ class MarqueeInstance {
     // Gather items and ensure required styles
     const allItems = this.findMarqueeItems();
     this.applyRequiredStyles(allItems);
+
+    // Reset ALL transforms on both axes to prevent diagonal movement
+    // Critical: When switching horizontal ↔ vertical, old axis transforms must be cleared
+    if (window.gsap) {
+      window.gsap.set(allItems, {
+        x: 0,
+        y: 0,
+        xPercent: 0,
+        yPercent: 0,
+      });
+    }
 
     // Direction and seam gap measurement using only original (non-clone) items when available
     const isVertical = this.coreConfig.direction === 'vertical';
@@ -218,9 +334,19 @@ class MarqueeInstance {
     };
 
     // Create timeline
+    DEBUG.timelineRebuild(this.container, this.coreConfig.direction, 'Manual rebuild');
+
     this.timeline = isVertical
       ? verticalLoop(allItems, loopConfig)
       : horizontalLoop(allItems, loopConfig);
+
+    // Attach instance reference for direction change detection
+    if (this.timeline) {
+      this.timeline._marqueeInstance = this;
+    }
+
+    // Update debug attributes after rebuild
+    this.updateDebugAttributes();
 
     // Restore visual frame and playback characteristics
     if (!isInitialBuild) {
@@ -572,10 +698,11 @@ class MarqueeInstance {
 
 // Finds and initializes all marquees on the page
 function initMarquees() {
-  // Query only elements explicitly marked as horizontal or vertical
-  const containers = document.querySelectorAll(
-    '[data-marquee-direction="horizontal"], [data-marquee-direction="vertical"]'
-  );
+  // Query elements with data-marquee attribute
+  // Direction is now determined from CSS flex-direction
+  const containers = document.querySelectorAll('[data-marquee]');
+
+  DEBUG.log(`Initializing ${containers.length} marquee container(s)`);
 
   containers.forEach((container) => {
     // Skip if this container already has an instance

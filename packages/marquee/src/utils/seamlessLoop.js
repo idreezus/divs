@@ -163,7 +163,19 @@ function horizontalLoop(items, config) {
       _hPending = true;
       requestAnimationFrame(() => {
         _hPending = false;
-        refresh(true);
+        // Check for CSS direction changes before refreshing
+        // If direction changed, timeline will be rebuilt and this instance is obsolete
+        let directionChanged = false;
+        if (tl._marqueeInstance && typeof tl._marqueeInstance.checkDirectionChange === 'function') {
+          const oldTimeline = tl._marqueeInstance.timeline;
+          tl._marqueeInstance.checkDirectionChange();
+          const newTimeline = tl._marqueeInstance.timeline;
+          directionChanged = oldTimeline !== newTimeline;
+        }
+        // Only refresh if we're still the active timeline
+        if (!directionChanged) {
+          refresh(true);
+        }
       });
     };
 
@@ -424,7 +436,19 @@ function verticalLoop(items, config) {
         _vPending = true;
         requestAnimationFrame(() => {
           _vPending = false;
-          refresh(true);
+          // Check for CSS direction changes before refreshing
+          // If direction changed, timeline will be rebuilt and this instance is obsolete
+          let directionChanged = false;
+          if (tl._marqueeInstance && typeof tl._marqueeInstance.checkDirectionChange === 'function') {
+            const oldTimeline = tl._marqueeInstance.timeline;
+            tl._marqueeInstance.checkDirectionChange();
+            const newTimeline = tl._marqueeInstance.timeline;
+            directionChanged = oldTimeline !== newTimeline;
+          }
+          // Only refresh if we're still the active timeline
+          if (!directionChanged) {
+            refresh(true);
+          }
         });
       },
       proxy,

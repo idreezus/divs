@@ -61,4 +61,17 @@ export const CONFIG = {
       slowRampOutEase: 'power1.out',
     },
   },
+
+  // Advanced: Opt-in MutationObserver for dynamic content
+  // Useful for: dynamically added/removed items, style/class changes, attribute changes
+  mutations: {
+    attributes: {
+      // Set to "true" to enable mutation watching
+      watchMutations: 'data-marquee-watch-mutations',
+    },
+    defaults: {
+      // Disabled by default - opt-in feature for power users
+      enabled: false,
+    },
+  },
 };
