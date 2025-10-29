@@ -156,26 +156,13 @@ function horizontalLoop(items, config) {
       tl.progress(previousProgress, true);
     };
 
-    // rAF-coalesced refresh for ResizeObserver events
     let _hPending = false;
     const _hScheduleRefresh = () => {
       if (_hPending) return;
       _hPending = true;
       requestAnimationFrame(() => {
         _hPending = false;
-        // Check for CSS direction changes before refreshing
-        // If direction changed, timeline will be rebuilt and this instance is obsolete
-        let directionChanged = false;
-        if (tl._marqueeInstance && typeof tl._marqueeInstance.checkDirectionChange === 'function') {
-          const oldTimeline = tl._marqueeInstance.timeline;
-          tl._marqueeInstance.checkDirectionChange();
-          const newTimeline = tl._marqueeInstance.timeline;
-          directionChanged = oldTimeline !== newTimeline;
-        }
-        // Only refresh if we're still the active timeline
-        if (!directionChanged) {
-          refresh(true);
-        }
+        refresh(true);
       });
     };
 
@@ -429,26 +416,13 @@ function verticalLoop(items, config) {
           ? tl.time(times[curIndex], true)
           : tl.progress(progress, true);
       },
-      // rAF-coalesced refresh for ResizeObserver events
       _vPending = false,
       _vScheduleRefresh = () => {
         if (_vPending) return;
         _vPending = true;
         requestAnimationFrame(() => {
           _vPending = false;
-          // Check for CSS direction changes before refreshing
-          // If direction changed, timeline will be rebuilt and this instance is obsolete
-          let directionChanged = false;
-          if (tl._marqueeInstance && typeof tl._marqueeInstance.checkDirectionChange === 'function') {
-            const oldTimeline = tl._marqueeInstance.timeline;
-            tl._marqueeInstance.checkDirectionChange();
-            const newTimeline = tl._marqueeInstance.timeline;
-            directionChanged = oldTimeline !== newTimeline;
-          }
-          // Only refresh if we're still the active timeline
-          if (!directionChanged) {
-            refresh(true);
-          }
+          refresh(true);
         });
       },
       proxy,

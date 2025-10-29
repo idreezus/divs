@@ -38,76 +38,27 @@ function parseIntAttribute(element, attributeName, fallback, min) {
   return value;
 }
 
-// Parses direction from CSS flex-direction property
-function parseDirectionFromCSS(element) {
-  // Purpose: Read flex-direction from computed styles and map to marquee direction.
+// Reads direction from computed flex-direction CSS property
+// Defaults to horizontal when flex-direction is 'row' or unspecified
+function parseDirection(element) {
   const computedStyle = window.getComputedStyle(element);
   const flexDirection = computedStyle.flexDirection;
-  const justifyContent = computedStyle.justifyContent;
 
-  // Map flex-direction to marquee direction
   const isVertical = flexDirection === 'column' || flexDirection === 'column-reverse';
-  const direction = isVertical ? 'vertical' : 'horizontal';
-
-  // Detect auto-reverse from CSS
-  const isReversed = flexDirection === 'row-reverse' || flexDirection === 'column-reverse';
-
-  // Import DEBUG from marquee.js is not available here, so we'll log directly
-  // This will be improved when we refactor to pass DEBUG context
-  if (typeof console !== 'undefined') {
-    console.log(
-      `[Marquee CSS Read]`,
-      `\n  Container:`, element,
-      `\n  flex-direction: ${flexDirection}`,
-      `\n  justify-content: ${justifyContent}`,
-      `\n  → Computed direction: ${direction}`,
-      `\n  → Auto-reversed: ${isReversed}`
-    );
-  }
-
-  return { direction, isReversed };
+  return isVertical ? 'vertical' : 'horizontal';
 }
 
-// Parses the direction based on CSS (primary) or attribute (fallback).
-function parseDirection(element) {
-  // Purpose: Normalize direction to 'horizontal' or 'vertical'.
-  // Primary: Read from CSS flex-direction
-  // Fallback: Read from data-marquee-direction attribute
-
-  const cssResult = parseDirectionFromCSS(element);
-  return cssResult.direction;
-}
-
-// Parses whether animation should be reversed
-function parseReversed(element) {
-  // Purpose: Determine if animation should play in reverse.
-  // Primary: Auto-detect from CSS flex-direction reverse variants
-  // Override: Explicit data-marquee-reverse attribute
-
-  const cssResult = parseDirectionFromCSS(element);
-  const explicitReverse = element.getAttribute(CONFIG.core.attributes.reverse);
-
-  // If explicit attribute is set, it takes precedence
-  if (explicitReverse !== null) {
-    return explicitReverse === 'true';
-  }
-
-  // Otherwise use CSS auto-detection
-  return cssResult.isReversed;
-}
-
-// Builds core loop configuration from attributes.
+// Builds core loop configuration from attributes
 export function parseCoreConfig(element) {
-  // Purpose: Produce base loop settings such as speed, repeat, reversed.
   const { attributes, defaults } = CONFIG.core;
+  const reverseAttr = element.getAttribute(attributes.reverse);
+
   return {
     direction: parseDirection(element),
     speed: parseFloatAttribute(element, attributes.speed, defaults.speed, 0),
-    // Repeat is intentionally fixed to infinite for simplicity of public API
     repeat: defaults.repeat,
     paused: defaults.paused,
-    // Reverse uses CSS auto-detection (flex-direction reverse variants) or explicit attribute
-    reversed: parseReversed(element),
+    reversed: reverseAttr === 'true',
   };
 }
 
@@ -187,15 +138,3 @@ export function parseInteractionConfig(element) {
 
   return result;
 }
-
-// Builds a single normalized object grouping core, cloning, and interaction.
-export function buildConfigFromElement(element) {
-  // Purpose: Gather all namespaces in one pass for the calling site.
-  const core = parseCoreConfig(element);
-  const cloning = parseCloningConfig(element);
-  const interaction = parseInteractionConfig(element);
-  return { core, cloning, interaction };
-}
-
-// Export CSS parsing function for use in change detection
-export { parseDirectionFromCSS };

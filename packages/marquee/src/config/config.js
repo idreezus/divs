@@ -5,6 +5,7 @@
 export const CONFIG = {
   core: {
     attributes: {
+      container: 'data-marquee',
       direction: 'data-marquee-direction',
       item: 'data-marquee-item',
       speed: 'data-marquee-speed',
@@ -47,11 +48,8 @@ export const CONFIG = {
       slowEaseOut: 'data-marquee-hover-ease-out',
     },
     defaults: {
-      // No effect by default; valid values: "pause" | "slow" | null
       effectType: null,
-      // Apply hover to container by default; valid: "container" | "items"
       triggerArea: 'container',
-      // Fractional target speeds and durations for ramps
       rampRatioWhileHoveringForPause: 0.1,
       rampRatioWhileHoveringForSlow: 0.3,
       totalPauseRampDuration: 0.4,
@@ -59,19 +57,6 @@ export const CONFIG = {
       slowRampOutDuration: 0.25,
       slowRampInEase: 'power1.out',
       slowRampOutEase: 'power1.out',
-    },
-  },
-
-  // Advanced: Opt-in MutationObserver for dynamic content
-  // Useful for: dynamically added/removed items, style/class changes, attribute changes
-  mutations: {
-    attributes: {
-      // Set to "true" to enable mutation watching
-      watchMutations: 'data-marquee-watch-mutations',
-    },
-    defaults: {
-      // Disabled by default - opt-in feature for power users
-      enabled: false,
     },
   },
 };
