@@ -78,7 +78,7 @@ export function parseCloningConfig(element) {
     console.warn(
       'Marquee: Clone count capped at 10 for performance. Requested:',
       requestedCount,
-      '→ Using: 10. To improve performance with many items, reduce data-marquee-clone-count.',
+      '→ Using: 10. To improve performance with many items, reduce data-marquee-clones.',
       element
     );
   }

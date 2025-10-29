@@ -29,7 +29,7 @@ export const CONFIG = {
   cloning: {
     attributes: {
       autoClone: 'data-marquee-auto-clone',
-      cloneCount: 'data-marquee-clone-count',
+      cloneCount: 'data-marquee-clones',
       clone: 'data-marquee-clone', // Marks cloned items
     },
     defaults: {
@@ -44,10 +44,10 @@ export const CONFIG = {
     attributes: {
       effect: 'data-marquee-hover-effect',
       effectTrigger: 'data-marquee-hover-trigger',
-      rampRatio: 'data-marquee-hover-speed-ratio',
-      pauseDuration: 'data-marquee-hover-pause-duration',
-      slowDurationIn: 'data-marquee-hover-duration-in',
-      slowDurationOut: 'data-marquee-hover-duration-out',
+      rampRatio: 'data-marquee-hover-speed',
+      pauseDuration: 'data-marquee-hover-duration',
+      slowDurationIn: 'data-marquee-hover-in',
+      slowDurationOut: 'data-marquee-hover-out',
       slowEaseIn: 'data-marquee-hover-ease-in',
       slowEaseOut: 'data-marquee-hover-ease-out',
     },

@@ -100,7 +100,7 @@ Add interactive hover effects with simple attributes:
 <div
   data-marquee="true"
   data-marquee-hover-effect="slow"
-  data-marquee-hover-speed-ratio="0.3"
+  data-marquee-hover-speed="0.3"
   class="my-marquee">
   <!-- items -->
 </div>
@@ -135,7 +135,7 @@ Add interactive hover effects with simple attributes:
 | Attribute | Values | Default | Description |
 |-----------|--------|---------|-------------|
 | `data-marquee-auto-clone` | `"true"` / `"false"` | `"true"` | Auto-clone items for seamless loops |
-| `data-marquee-clone-count` | number | Auto-calculated | Number of clone sets (1-10). Auto-calculates if not set. |
+| `data-marquee-clones` | number | Auto-calculated | Number of clone sets (1-10). Auto-calculates if not set. |
 
 ### Hover Effect Options
 
@@ -143,10 +143,10 @@ Add interactive hover effects with simple attributes:
 |-----------|--------|---------|-------------|
 | `data-marquee-hover-effect` | `"pause"` / `"slow"` | - | Type of hover effect |
 | `data-marquee-hover-trigger` | `"container"` / `"items"` | `"container"` | Where hover is detected |
-| `data-marquee-hover-speed-ratio` | 0-1 | `0.3` (slow)<br>`0.1` (pause) | Target speed during hover |
-| `data-marquee-hover-pause-duration` | seconds | `0.4` | Duration to ramp to pause |
-| `data-marquee-hover-duration-in` | seconds | `0.7` | Slow effect ramp in duration |
-| `data-marquee-hover-duration-out` | seconds | `0.25` | Slow effect ramp out duration |
+| `data-marquee-hover-speed` | 0-1 | `0.3` (slow)<br>`0.1` (pause) | Target speed during hover |
+| `data-marquee-hover-duration` | seconds | `0.4` | Duration to ramp to pause |
+| `data-marquee-hover-in` | seconds | `0.7` | Slow effect ramp in duration |
+| `data-marquee-hover-out` | seconds | `0.25` | Slow effect ramp out duration |
 | `data-marquee-hover-ease-in` | GSAP ease | `"power1.out"` | Ramp in easing function |
 | `data-marquee-hover-ease-out` | GSAP ease | `"power1.out"` | Ramp out easing function |
 
@@ -346,7 +346,7 @@ The library auto-calculates gap spacing, but you can help it by:
 - Ensure `overflow: hidden` is set on the container
 - Avoid animating other properties on the same elements
 - Check for CSS transitions that might conflict
-- Reduce clone count if you have many items: `data-marquee-clone-count="2"`
+- Reduce clone count if you have many items: `data-marquee-clones="2"`
 
 ## Advanced Usage
 

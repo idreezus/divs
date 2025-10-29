@@ -117,15 +117,15 @@ All configuration via `data-marquee-*` attributes on container element:
 
 **Cloning:**
 - `data-marquee-auto-clone` - "true" (default) or "false"
-- `data-marquee-clone-count` - Number of clone sets (auto-calculated if not set, max: 10)
+- `data-marquee-clones` - Number of clone sets (auto-calculated if not set, max: 10)
 
 **Interaction:**
 - `data-marquee-hover-effect` - "pause" or "slow"
 - `data-marquee-hover-trigger` - "container" (default) or "items"
-- `data-marquee-hover-speed-ratio` - Target speed fraction during hover
-- `data-marquee-hover-pause-duration` - Total ramp duration for pause effect
-- `data-marquee-hover-duration-in` - Ramp-in duration for slow effect
-- `data-marquee-hover-duration-out` - Ramp-out duration for slow effect
+- `data-marquee-hover-speed` - Target speed fraction during hover
+- `data-marquee-hover-duration` - Total ramp duration for pause effect
+- `data-marquee-hover-in` - Ramp-in duration for slow effect
+- `data-marquee-hover-out` - Ramp-out duration for slow effect
 - `data-marquee-hover-ease-in` - GSAP ease for ramp-in (default: "power1.out")
 - `data-marquee-hover-ease-out` - GSAP ease for ramp-out (default: "power1.out")
 
