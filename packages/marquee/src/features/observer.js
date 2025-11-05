@@ -40,7 +40,13 @@ export function setupIntersectionObserver(instance, config) {
       if (entry.isIntersecting) {
         // Entering viewport - play if currently paused
         if (instance.timeline.paused()) {
-          instance.timeline.play();
+          // Use reverse() or play() based on the marquee's configured direction
+          // timeline.play() resets to forward, timeline.reverse() resumes in reverse
+          if (instance.coreConfig.reversed) {
+            instance.timeline.reverse();
+          } else {
+            instance.timeline.play();
+          }
         }
       } else {
         // Leaving viewport - pause if currently playing

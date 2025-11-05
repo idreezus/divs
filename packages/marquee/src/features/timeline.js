@@ -26,14 +26,20 @@ export function buildTimeline(instance) {
     );
 
     const itemsForGap = originalItems.length > 1 ? originalItems : allItems;
-    const medianGap = computeMedianGap(instance.container, itemsForGap, isVertical);
+    const medianGap = computeMedianGap(
+      instance.container,
+      itemsForGap,
+      isVertical
+    );
 
     const loopConfig = {
       speed: instance.coreConfig.speed,
       repeat: instance.coreConfig.repeat,
       paused: instance.coreConfig.paused,
       reversed: instance.coreConfig.reversed,
-      ...(isVertical ? { paddingBottom: medianGap } : { paddingRight: medianGap }),
+      ...(isVertical
+        ? { paddingBottom: medianGap }
+        : { paddingRight: medianGap }),
       onDirectionChange: () => {
         if (instance.checkDirectionChange()) {
           instance.refreshDirection();
@@ -52,7 +58,9 @@ export function buildTimeline(instance) {
 // Rebuilds the timeline while optionally preserving playback position and state
 export function rebuildTimeline(instance, preserveState = true) {
   const previousTimeline = instance.timeline;
-  const wasPaused = previousTimeline ? previousTimeline.paused() : !instance.coreConfig?.paused;
+  const wasPaused = previousTimeline
+    ? previousTimeline.paused()
+    : !instance.coreConfig?.paused;
   const previousTime = previousTimeline ? previousTimeline.time() : 0;
   const previousScale = previousTimeline ? previousTimeline.timeScale() : 1;
 
@@ -70,14 +78,20 @@ export function rebuildTimeline(instance, preserveState = true) {
   );
 
   const itemsForGap = originalItems.length > 1 ? originalItems : allItems;
-  const medianGap = computeMedianGap(instance.container, itemsForGap, isVertical);
+  const medianGap = computeMedianGap(
+    instance.container,
+    itemsForGap,
+    isVertical
+  );
 
   const loopConfig = {
     speed: instance.coreConfig.speed,
     repeat: instance.coreConfig.repeat,
     paused: instance.coreConfig.paused,
     reversed: instance.coreConfig.reversed,
-    ...(isVertical ? { paddingBottom: medianGap } : { paddingRight: medianGap }),
+    ...(isVertical
+      ? { paddingBottom: medianGap }
+      : { paddingRight: medianGap }),
     onDirectionChange: () => {
       if (instance.checkDirectionChange()) {
         instance.refreshDirection();
@@ -100,7 +114,13 @@ export function rebuildTimeline(instance, preserveState = true) {
     instance.timeline.timeScale(previousScale);
 
     if (!wasPaused) {
-      instance.timeline.play();
+      // Preserve reversed state when resuming playback
+      // Check if the marquee should be reversed based on coreConfig
+      if (instance.coreConfig.reversed) {
+        instance.timeline.reverse();
+      } else {
+        instance.timeline.play();
+      }
     } else {
       instance.timeline.pause();
     }
@@ -113,7 +133,7 @@ function cleanupPreviousTimeline(instance) {
     if (typeof instance.timeline.cleanup === 'function') {
       try {
         instance.timeline.cleanup();
-      // eslint-disable-next-line no-unused-vars
+        // eslint-disable-next-line no-unused-vars
       } catch (_e) {}
     }
     instance.timeline.kill();
