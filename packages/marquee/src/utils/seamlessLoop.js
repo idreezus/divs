@@ -19,12 +19,11 @@ function horizontalLoop(items, config) {
   gsap.context(() => {
     // use a context so resize listeners/observers can be cleaned up automatically
     const tl = gsap.timeline({
-        repeat: config.repeat,
-        paused: config.paused,
-        defaults: { ease: 'none' },
-        onReverseComplete: () =>
-          tl.totalTime(tl.rawTime() + tl.duration() * 100),
-      });
+      repeat: config.repeat,
+      paused: config.paused,
+      defaults: { ease: 'none' },
+      onReverseComplete: () => tl.totalTime(tl.rawTime() + tl.duration() * 100),
+    });
     const length = items.length;
     let startX = items[0].offsetLeft;
     const times = [];
@@ -35,10 +34,11 @@ function horizontalLoop(items, config) {
     let curIndex = 0;
     const pixelsPerSecond = (config.speed || 1) * 100;
     const snap =
-        config.snap === false ? (v) => v : gsap.utils.snap(config.snap || 1);
+      config.snap === false ? (v) => v : gsap.utils.snap(config.snap || 1);
     let totalWidth;
     const container = items[0].parentNode;
     let internalResizeObserver;
+    let _hDisposed = false;
 
     // set initial transform basis
     gsap.set(items, { x: 0 });
@@ -166,6 +166,11 @@ function horizontalLoop(items, config) {
         // Check for direction change before refreshing
         if (config.onDirectionChange) {
           config.onDirectionChange();
+          // Check again after direction change callback, which may have disposed this timeline
+          if (_hDisposed) {
+            _hRafId = null;
+            return;
+          }
         }
         refresh(true);
       });
@@ -215,6 +220,7 @@ function horizontalLoop(items, config) {
       internalResizeObserver.observe(container);
     }
     tl.cleanup = () => {
+      _hDisposed = true;
       if (internalResizeObserver) {
         internalResizeObserver.disconnect();
         internalResizeObserver = null;
@@ -250,21 +256,20 @@ function verticalLoop(items, config) {
     const onChange = config.onChange;
     let lastIndex = 0;
     const tl = gsap.timeline({
-        repeat: config.repeat,
-        onUpdate:
-          onChange &&
-          function () {
-            const i = tl.closestIndex();
-            if (lastIndex !== i) {
-              lastIndex = i;
-              onChange(items[i], i);
-            }
-          },
-        paused: config.paused,
-        defaults: { ease: 'none' },
-        onReverseComplete: () =>
-          tl.totalTime(tl.rawTime() + tl.duration() * 100),
-      });
+      repeat: config.repeat,
+      onUpdate:
+        onChange &&
+        function () {
+          const i = tl.closestIndex();
+          if (lastIndex !== i) {
+            lastIndex = i;
+            onChange(items[i], i);
+          }
+        },
+      paused: config.paused,
+      defaults: { ease: 'none' },
+      onReverseComplete: () => tl.totalTime(tl.rawTime() + tl.duration() * 100),
+    });
     const length = items.length;
     let startY = items[0].offsetTop;
     const times = [];
@@ -276,167 +281,172 @@ function verticalLoop(items, config) {
     const center = config.center;
     const pixelsPerSecond = (config.speed || 1) * 100;
     const snap =
-        config.snap === false ? (v) => v : gsap.utils.snap(config.snap || 1); // some browsers shift by a pixel to accommodate flex layouts, so for example if height is 20% the first element's height might be 242px, and the next 243px, alternating back and forth. So we snap to 5 percentage points to make things look more natural
+      config.snap === false ? (v) => v : gsap.utils.snap(config.snap || 1); // some browsers shift by a pixel to accommodate flex layouts, so for example if height is 20% the first element's height might be 242px, and the next 243px, alternating back and forth. So we snap to 5 percentage points to make things look more natural
     let timeOffset = 0;
     const container =
-        center === true
-          ? items[0].parentNode
-          : gsap.utils.toArray(center)[0] || items[0].parentNode;
+      center === true
+        ? items[0].parentNode
+        : gsap.utils.toArray(center)[0] || items[0].parentNode;
     let totalHeight;
     // Detect if the user explicitly provided paddingBottom so that auto-derivation
     // does not overwrite the author's intent on refresh.
     const userSpecifiedPaddingBottom =
-        Object.prototype.hasOwnProperty.call(config, 'paddingBottom') &&
-        !isNaN(parseFloat(config.paddingBottom));
+      Object.prototype.hasOwnProperty.call(config, 'paddingBottom') &&
+      !isNaN(parseFloat(config.paddingBottom));
+    let _vDisposed = false;
     const getTotalHeight = () =>
-        items[length - 1].offsetTop +
-        (yPercents[length - 1] / 100) * heights[length - 1] -
-        startY +
-        // Align with horizontal approach: exclude initial top spacing from total height
-        // so that seam spacing is controlled explicitly via paddingBottom
-        items[length - 1].offsetHeight *
-          gsap.getProperty(items[length - 1], 'scaleY') +
-        (parseFloat(config.paddingBottom) || 0);
+      items[length - 1].offsetTop +
+      (yPercents[length - 1] / 100) * heights[length - 1] -
+      startY +
+      // Align with horizontal approach: exclude initial top spacing from total height
+      // so that seam spacing is controlled explicitly via paddingBottom
+      items[length - 1].offsetHeight *
+        gsap.getProperty(items[length - 1], 'scaleY') +
+      (parseFloat(config.paddingBottom) || 0);
     const populateHeights = () => {
-        // Recalculate the starting offset on each refresh to account for layout shifts
-        // caused by text wrapping, font loading, or container reflow. This keeps loop points aligned.
-        startY = items[0].offsetTop;
-        let b1 = container.getBoundingClientRect();
-        let b2;
-        items.forEach((el, i) => {
-          heights[i] = parseFloat(gsap.getProperty(el, 'height', 'px'));
-          yPercents[i] = snap(
-            (parseFloat(gsap.getProperty(el, 'y', 'px')) / heights[i]) * 100 +
-              gsap.getProperty(el, 'yPercent')
-          );
-          b2 = el.getBoundingClientRect();
-          spaceBefore[i] = b2.top - (i ? b1.bottom : b1.top);
-          b1 = b2;
-        });
-        // Determine a seam gap from inter-item geometry (median of gaps), so the wrap includes
-        // a stable visual spacing that matches layout. If the user did not explicitly provide
-        // paddingBottom, always re-derive it on each refresh so breakpoint-driven CSS gap changes
-        // are reflected immediately even when the container's height is unchanged.
-        if (!userSpecifiedPaddingBottom) {
-          const gaps = spaceBefore.slice(1);
-          const numericGaps = gaps.filter(
-            (gapValue) => typeof gapValue === 'number' && isFinite(gapValue)
-          );
-          if (numericGaps.length > 0) {
-            const sorted = numericGaps.slice().sort((a, b) => a - b);
-            const midpointIndex = Math.floor(sorted.length / 2);
-            const median =
-              sorted.length % 2 === 0
-                ? (sorted[midpointIndex - 1] + sorted[midpointIndex]) / 2
-                : sorted[midpointIndex];
-            config.paddingBottom = median > 0 ? median : 0;
-          } else {
-            config.paddingBottom = 0;
-          }
+      // Recalculate the starting offset on each refresh to account for layout shifts
+      // caused by text wrapping, font loading, or container reflow. This keeps loop points aligned.
+      startY = items[0].offsetTop;
+      let b1 = container.getBoundingClientRect();
+      let b2;
+      items.forEach((el, i) => {
+        heights[i] = parseFloat(gsap.getProperty(el, 'height', 'px'));
+        yPercents[i] = snap(
+          (parseFloat(gsap.getProperty(el, 'y', 'px')) / heights[i]) * 100 +
+            gsap.getProperty(el, 'yPercent')
+        );
+        b2 = el.getBoundingClientRect();
+        spaceBefore[i] = b2.top - (i ? b1.bottom : b1.top);
+        b1 = b2;
+      });
+      // Determine a seam gap from inter-item geometry (median of gaps), so the wrap includes
+      // a stable visual spacing that matches layout. If the user did not explicitly provide
+      // paddingBottom, always re-derive it on each refresh so breakpoint-driven CSS gap changes
+      // are reflected immediately even when the container's height is unchanged.
+      if (!userSpecifiedPaddingBottom) {
+        const gaps = spaceBefore.slice(1);
+        const numericGaps = gaps.filter(
+          (gapValue) => typeof gapValue === 'number' && isFinite(gapValue)
+        );
+        if (numericGaps.length > 0) {
+          const sorted = numericGaps.slice().sort((a, b) => a - b);
+          const midpointIndex = Math.floor(sorted.length / 2);
+          const median =
+            sorted.length % 2 === 0
+              ? (sorted[midpointIndex - 1] + sorted[midpointIndex]) / 2
+              : sorted[midpointIndex];
+          config.paddingBottom = median > 0 ? median : 0;
+        } else {
+          config.paddingBottom = 0;
         }
-        gsap.set(items, {
-          // convert "y" to "yPercent" to make things responsive, and populate the heights/yPercents Arrays to make lookups faster.
-          yPercent: (i) => yPercents[i],
-        });
-        totalHeight = getTotalHeight();
-      };
+      }
+      gsap.set(items, {
+        // convert "y" to "yPercent" to make things responsive, and populate the heights/yPercents Arrays to make lookups faster.
+        yPercent: (i) => yPercents[i],
+      });
+      totalHeight = getTotalHeight();
+    };
     let timeWrap;
     const populateOffsets = () => {
-        timeOffset = center
-          ? (tl.duration() * (container.offsetHeight / 2)) / totalHeight
-          : 0;
-        center &&
-          times.forEach((t, i) => {
-            times[i] = timeWrap(
-              tl.labels['label' + i] +
-                (tl.duration() * heights[i]) / 2 / totalHeight -
-                timeOffset
-            );
-          });
-      };
+      timeOffset = center
+        ? (tl.duration() * (container.offsetHeight / 2)) / totalHeight
+        : 0;
+      center &&
+        times.forEach((t, i) => {
+          times[i] = timeWrap(
+            tl.labels['label' + i] +
+              (tl.duration() * heights[i]) / 2 / totalHeight -
+              timeOffset
+          );
+        });
+    };
     const getClosest = (values, value, wrap) => {
-        let i = values.length;
-        let closest = 1e10;
-        let index = 0;
-        let d;
-        while (i--) {
-          d = Math.abs(values[i] - value);
-          if (d > wrap / 2) {
-            d = wrap - d;
-          }
-          if (d < closest) {
-            closest = d;
-            index = i;
-          }
+      let i = values.length;
+      let closest = 1e10;
+      let index = 0;
+      let d;
+      while (i--) {
+        d = Math.abs(values[i] - value);
+        if (d > wrap / 2) {
+          d = wrap - d;
         }
-        return index;
-      };
+        if (d < closest) {
+          closest = d;
+          index = i;
+        }
+      }
+      return index;
+    };
     const populateTimeline = () => {
-        let i;
-        let item;
-        let curY;
-        let distanceToStart;
-        let distanceToLoop;
-        tl.clear();
-        for (i = 0; i < length; i++) {
-          item = items[i];
-          curY = (yPercents[i] / 100) * heights[i];
-          distanceToStart = item.offsetTop + curY - startY + spaceBefore[0];
-          distanceToLoop =
-            distanceToStart + heights[i] * gsap.getProperty(item, 'scaleY');
-          tl.to(
+      let i;
+      let item;
+      let curY;
+      let distanceToStart;
+      let distanceToLoop;
+      tl.clear();
+      for (i = 0; i < length; i++) {
+        item = items[i];
+        curY = (yPercents[i] / 100) * heights[i];
+        distanceToStart = item.offsetTop + curY - startY + spaceBefore[0];
+        distanceToLoop =
+          distanceToStart + heights[i] * gsap.getProperty(item, 'scaleY');
+        tl.to(
+          item,
+          {
+            yPercent: snap(((curY - distanceToLoop) / heights[i]) * 100),
+            duration: distanceToLoop / pixelsPerSecond,
+          },
+          0
+        )
+          .fromTo(
             item,
             {
-              yPercent: snap(((curY - distanceToLoop) / heights[i]) * 100),
-              duration: distanceToLoop / pixelsPerSecond,
+              yPercent: snap(
+                ((curY - distanceToLoop + totalHeight) / heights[i]) * 100
+              ),
             },
-            0
+            {
+              yPercent: yPercents[i],
+              duration:
+                (curY - distanceToLoop + totalHeight - curY) / pixelsPerSecond,
+              immediateRender: false,
+            },
+            distanceToLoop / pixelsPerSecond
           )
-            .fromTo(
-              item,
-              {
-                yPercent: snap(
-                  ((curY - distanceToLoop + totalHeight) / heights[i]) * 100
-                ),
-              },
-              {
-                yPercent: yPercents[i],
-                duration:
-                  (curY - distanceToLoop + totalHeight - curY) /
-                  pixelsPerSecond,
-                immediateRender: false,
-              },
-              distanceToLoop / pixelsPerSecond
-            )
-            .add('label' + i, distanceToStart / pixelsPerSecond);
-          times[i] = distanceToStart / pixelsPerSecond;
-        }
-        timeWrap = gsap.utils.wrap(0, tl.duration());
-      };
+          .add('label' + i, distanceToStart / pixelsPerSecond);
+        times[i] = distanceToStart / pixelsPerSecond;
+      }
+      timeWrap = gsap.utils.wrap(0, tl.duration());
+    };
     const refresh = (deep) => {
-        const progress = tl.progress();
-        tl.progress(0, true);
-        populateHeights();
-        deep && populateTimeline();
-        populateOffsets();
-        deep && tl.draggable && tl.paused()
-          ? tl.time(times[curIndex], true)
-          : tl.progress(progress, true);
-      };
+      const progress = tl.progress();
+      tl.progress(0, true);
+      populateHeights();
+      deep && populateTimeline();
+      populateOffsets();
+      deep && tl.draggable && tl.paused()
+        ? tl.time(times[curIndex], true)
+        : tl.progress(progress, true);
+    };
     let _vRafId = null;
     const _vScheduleRefresh = () => {
-        if (_vRafId !== null) {
-          cancelAnimationFrame(_vRafId);
-        }
-        _vRafId = requestAnimationFrame(() => {
-          _vRafId = null;
-          // Check for direction change before refreshing
-          if (config.onDirectionChange) {
-            config.onDirectionChange();
+      if (_vRafId !== null) {
+        cancelAnimationFrame(_vRafId);
+      }
+      _vRafId = requestAnimationFrame(() => {
+        _vRafId = null;
+        // Check for direction change before refreshing
+        if (config.onDirectionChange) {
+          config.onDirectionChange();
+          // Check again after direction change callback, which may have disposed this timeline
+          if (_vDisposed) {
+            _vRafId = null;
+            return;
           }
-          refresh(true);
-        });
-      };
+        }
+        refresh(true);
+      });
+    };
     let proxy;
     let internalResizeObserver;
     let _vWindowResizeHandler;
@@ -501,9 +511,9 @@ function verticalLoop(items, config) {
       let initChangeY;
       let wasPlaying;
       const align = () =>
-          tl.progress(
-            wrap(startProgress + (draggable.startY - draggable.y) * ratio)
-          );
+        tl.progress(
+          wrap(startProgress + (draggable.startY - draggable.y) * ratio)
+        );
       const syncIndex = () => tl.closestIndex(true);
       typeof InertiaPlugin === 'undefined' &&
         console.warn(
@@ -558,6 +568,7 @@ function verticalLoop(items, config) {
     // expose refresh and cleanup hooks for external consumers
     tl.refresh = refresh;
     tl.cleanup = () => {
+      _vDisposed = true;
       if (internalResizeObserver) {
         internalResizeObserver.disconnect();
         internalResizeObserver = null;
