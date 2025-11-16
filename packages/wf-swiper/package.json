@@ -1,0 +1,23 @@
+{
+  "name": "wf-swiper",
+  "version": "0.1.0-alpha",
+  "description": "A helper library for SwiperJS in Webflow",
+  "main": "wf-swiper.js",
+  "type": "module",
+  "scripts": {
+    "build": "rollup -c",
+    "build:watch": "rollup -c --watch",
+    "release": "BUILD_MODE=release rollup -c"
+  },
+  "keywords": [
+    "swiper",
+    "carousel",
+    "webflow",
+    "slider"
+  ],
+  "author": "Idrees Isse (https://github.com/idreezus)",
+  "license": "Apache-2.0",
+  "peerDependencies": {
+    "swiper": "^11.0.0"
+  }
+}
