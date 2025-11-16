@@ -28,13 +28,13 @@ export const SWIPER_MODULE_ATTRIBUTE_SELECTORS = {
 };
 
 // Prefix for all console logs
-export const LOG_PREFIX = '[WF Swiper]';
+export const SWIPER_LOG_PREFIX = '[WF Swiper]';
 
 // ------------------------------------------------------------
 // Don't change anything below here
 // ------------------------------------------------------------
 
-// Mandatory classes required by SwiperJS's expected structure that we add to the DOM
+// Mandatory classes required by SwiperJS's expected structure that this script abstracts and adds to the DOM
 export const SWIPER_STRUCTURE_CLASSES = {
   swiper: 'swiper',
   wrapper: 'swiper-wrapper',
