@@ -408,3 +408,49 @@ export function setupWebflowSwipers() {
 
   return instances;
 }
+
+// Export utilities for runtime access and debugging
+if (typeof window !== 'undefined') {
+  window.wfSwiper = window.wfSwiper || {};
+  Object.assign(window.wfSwiper, {
+    // Direct access to the parser for advanced use cases
+    parseOptionsFromAttributes,
+
+    // Convenience function to export config with clipboard support
+    exportConfig: function (selector) {
+      const root =
+        typeof selector === 'string'
+          ? document.querySelector(selector)
+          : selector;
+
+      if (!root) {
+        log('error', 'Element not found. Provide a valid selector or element.');
+        return null;
+      }
+
+      const config = parseOptionsFromAttributes(root);
+      const json = JSON.stringify(config, null, 2);
+
+      console.log('Swiper Config:\n', json);
+
+      // Auto-copy to clipboard
+      if (typeof copy === 'function') {
+        copy(json);
+        console.log('Copied to clipboard!');
+      } else if (navigator.clipboard) {
+        navigator.clipboard
+          .writeText(json)
+          .then(() => {
+            console.log('Copied to clipboard!');
+          })
+          .catch((err) => {
+            console.warn('Failed to copy to clipboard:', err);
+          });
+      } else {
+        console.log('Tip: Manually copy the JSON above.');
+      }
+
+      return config;
+    },
+  });
+}

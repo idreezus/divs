@@ -341,6 +341,31 @@ Check what options were applied:
 console.log(swiper.params);
 ```
 
+### Exporting Configuration
+
+Export the configuration from an existing slider to reuse it elsewhere:
+
+```javascript
+// Export config from any slider (auto-copies to clipboard)
+wfSwiper.exportConfig('[data-swiper="root"]');
+
+// Export from a specific slider
+wfSwiper.exportConfig('[data-swiper-root-id="swiper-root-2"]');
+
+// Or pass an element directly
+const root = document.querySelector('.my-slider[data-swiper="root"]');
+wfSwiper.exportConfig(root);
+```
+
+This will:
+- Parse all `data-swiper-*` attributes from the element
+- Include `data-swiper-options` bulk JSON if present
+- Merge everything into a clean config object
+- Pretty-print the JSON to the console
+- Auto-copy to clipboard for easy pasting
+
+**Use case:** Copy the config from one slider and paste it into another element's `data-swiper-options` attribute to quickly duplicate configurations.
+
 ### Root ID
 
 Each root gets a unique ID you can inspect:
@@ -364,6 +389,18 @@ window.setupWebflowSwipers();
 ```
 
 **Note:** The root ID counter resets on each run, so IDs stay consistent.
+
+### Accessing Utilities
+
+The library exposes utility functions via `window.wfSwiper`:
+
+```javascript
+// Export configuration (see Debugging section)
+wfSwiper.exportConfig('[data-swiper="root"]');
+
+// Access the attribute parser directly
+const config = wfSwiper.parseOptionsFromAttributes(rootElement);
+```
 
 ### Customizing Attribute Names
 
