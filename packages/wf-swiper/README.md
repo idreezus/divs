@@ -11,10 +11,11 @@ Webflow integrates CSS classes strongly to the designer experience, making it an
 This helper lets you use semantic `data-swiper="..."` attributes instead of classes. The script:
 
 - Automatically adds Swiper's required classes at runtime
-- Parses configuration directly from HTML attributes
+- Parses configuration directly from HTML attributes OR bulk JSON
 - Auto-initializes all sliders on page load
 - Supports multiple independent sliders with scoped selectors
 - Works with all Swiper modules (navigation, pagination, scrollbar, etc.)
+- Enables quick copy/paste from Swiper docs with visual overrides
 
 ---
 
@@ -120,11 +121,9 @@ Add these anywhere inside the root to enable navigation, pagination, or scrollba
 
 ## Configuration Options
 
-All Swiper configuration happens via `data-swiper-*` attributes on the **root element**. The helper automatically converts kebab-case to camelCase and parses values.
+Configure your slider in **two ways**: individual attributes or bulk JSON config. Both methods work on the **root element** only.
 
-### Basic Options
-
-Add any Swiper parameter as `data-swiper-{parameter-name}`:
+### Method 1: Individual Attributes (Recommended for Visual Editing)
 
 ```html
 <div
@@ -188,18 +187,100 @@ These module names are recognized for nested parameters:
 
 `a11y`, `autoplay`, `controller`, `cards-effect`, `coverflow-effect`, `creative-effect`, `cube-effect`, `fade-effect`, `flip-effect`, `free-mode`, `grid`, `hash-navigation`, `history`, `keyboard`, `mousewheel`, `navigation`, `pagination`, `parallax`, `scrollbar`, `thumbs`, `virtual`, `zoom`
 
+---
+
+### Method 2: Bulk JSON Config (Quick Copy/Paste)
+
+For power users or when copying config from Swiper docs, use `data-swiper-options` with complete JSON:
+
+```html
+<div
+  data-swiper="root"
+  data-swiper-options='{
+    "slidesPerView": 3,
+    "spaceBetween": 20,
+    "loop": true,
+    "autoplay": {
+      "delay": 3000,
+      "disableOnInteraction": false
+    },
+    "breakpoints": {
+      "768": {
+        "slidesPerView": 2
+      },
+      "1024": {
+        "slidesPerView": 3
+      }
+    }
+  }'
+>
+  <!-- ... -->
+</div>
+```
+
+**Important Notes:**
+
+- **JSON keys must be camelCase** (matching Swiper's JavaScript API): `slidesPerView`, not `slides-per-view`
+- Use **single quotes around the attribute value** and **double quotes inside the JSON**
+- The JSON must be a valid object (not an array or primitive)
+- **Individual attributes override JSON values** (see below)
+
+**Typical Workflow:**
+
+1. Copy config from [Swiper docs](https://swiperjs.com/swiper-api) or your own JS setup
+2. Paste into `data-swiper-options`
+3. Override specific values with individual attributes in Webflow Designer
+
+**Example: JSON Base + Attribute Overrides**
+
+```html
+<div
+  data-swiper="root"
+  data-swiper-options='{"slidesPerView":3,"spaceBetween":20,"loop":true}'
+  data-swiper-slides-per-view="2"
+>
+  <!-- Result: slidesPerView=2 (attribute wins), spaceBetween=20, loop=true -->
+</div>
+```
+
+This gives designers the flexibility to tweak settings visually without editing JSON.
+
+**Error Handling:**
+
+- **Invalid JSON**: Warning logged, falls back to individual attributes only
+- **Unknown params**: Warnings logged for params not in Swiper's API (helps catch typos)
+
+---
+
 ### Value Conversion
 
-Attribute values are automatically converted to the appropriate JavaScript type:
+**Individual attribute values** are automatically converted to the appropriate JavaScript type:
 
-| Attribute Value          | JavaScript Value |
-| ------------------------ | ---------------- |
-| `""` (empty) or `"true"` | `true`           |
-| `"false"`                | `false`          |
-| `"null"`                 | `null`           |
-| `"undefined"`            | `undefined`      |
-| `"42"` or `"3.14"`       | Number           |
-| Anything else            | String           |
+| Attribute Value                         | JavaScript Value                   |
+| --------------------------------------- | ---------------------------------- |
+| `""` (empty) or `"true"`                | `true`                             |
+| `"false"`                               | `false`                            |
+| `"42"` or `"3.14"`                      | Number                             |
+| `'{"key":"value"}'` (looks like JSON)   | Parsed as JSON object              |
+| Anything else                           | String                             |
+
+**Examples of JSON in individual attributes:**
+
+```html
+<!-- Breakpoints as JSON in a single attribute -->
+<div
+  data-swiper="root"
+  data-swiper-breakpoints='{"768":{"slidesPerView":2},"1024":{"slidesPerView":3}}'
+>
+
+<!-- Free mode with nested config -->
+<div
+  data-swiper="root"
+  data-swiper-free-mode='{"enabled":true,"sticky":true}'
+>
+```
+
+This lets you use complex configs even when building with individual attributes.
 
 ---
 
@@ -340,9 +421,9 @@ When the page loads, the script:
 3. **Validates structure** – Checks for exactly one swiper/wrapper, at least one slide
 4. **Assigns root ID** – Adds unique `data-swiper-root-id` to each root
 5. **Adds classes** – Applies `.swiper`, `.swiper-wrapper`, `.swiper-slide` to structural elements
-6. **Parses config** – Converts `data-swiper-*` attributes to JavaScript options
+6. **Parses config** – Parses `data-swiper-options` JSON (if present), then processes `data-swiper-*` attributes (attributes override JSON)
 7. **Builds scoped selectors** – Creates selectors like `[data-swiper-root-id="swiper-root-1"] [data-swiper-navigation="next"]`
-8. **Initializes Swiper** – Calls `new Swiper()` with merged options
+8. **Initializes Swiper** – Calls `new Swiper()` with deep-merged options
 9. **Stores instance** – Saves to `root.swiperInstance` for debugging
 
 ### Scoping Mechanism
