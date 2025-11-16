@@ -286,10 +286,10 @@ window.setupWebflowSwipers();
 
 ### Customizing Attribute Names
 
-Edit `DATA_SWIPER_CONFIG` in `webflow-swiper.js`:
+Edit `SWIPER_CONFIG` in `webflow-swiper.js`:
 
 ```javascript
-const DATA_SWIPER_CONFIG = {
+const SWIPER_CONFIG = {
   attributePrefix: 'data-slider', // Change from 'data-swiper'
   attributes: {
     root: 'container', // Use data-slider="container" instead
@@ -305,10 +305,10 @@ const DATA_SWIPER_CONFIG = {
 
 To support additional Swiper modules:
 
-1. **Add to module config** (`SWIPER_MODULE_CONFIG`):
+1. **Add to module config** (`SWIPER_MODULE_ATTRIBUTE_SELECTORS`):
 
 ```javascript
-const SWIPER_MODULE_CONFIG = {
+const SWIPER_MODULE_ATTRIBUTE_SELECTORS = {
   // Existing modules...
   customModule: {
     someParam: 'value',
