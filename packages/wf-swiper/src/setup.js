@@ -23,20 +23,17 @@ function log(type, message, element) {
 function buildStructuralSelector(key) {
   const { attributePrefix, attributes } = SWIPER_CONFIG;
   const value = attributes[key];
-  if (!value) return null;
   return `[${attributePrefix}="${value}"]`;
 }
 
 // Builds selector for module elements so that modules can be auto-discovered from DOM
 function buildModuleSelector(moduleName, value) {
-  if (!moduleName || !value) return null;
   const { attributePrefix } = SWIPER_CONFIG;
   return `[${attributePrefix}-${moduleName}="${value}"]`;
 }
 
 // Builds scoped selector so multiple sliders on same page don't interfere with each other
 function buildScopedSelector(rootId, elementSelector) {
-  if (!rootId || !elementSelector) return null;
   const { attrName } = SWIPER_CONFIG.scope;
   return `[${attrName}="${rootId}"] ${elementSelector}`;
 }
@@ -50,8 +47,6 @@ function toCamelCase(text) {
 function parseAttributeValue(value) {
   if (value === '' || value === 'true') return true;
   if (value === 'false') return false;
-  if (value === 'null') return null;
-  if (value === 'undefined') return undefined;
   const asNumber = Number(value);
   if (!Number.isNaN(asNumber) && value.trim() !== '') return asNumber;
   return value;
@@ -114,11 +109,10 @@ function assignRootId(root) {
 
 // Validates DOM structure meets Swiper requirements because missing elements cause runtime errors
 function validateRootStructure(root) {
-  // Validate exactly one swiper element because multiple would create ambiguous initialization
   const swiperSelector = buildStructuralSelector('swiper');
-  const swipers = root.querySelectorAll(swiperSelector);
+  const swiperElement = root.querySelector(swiperSelector);
 
-  if (swipers.length === 0) {
+  if (!swiperElement) {
     log(
       'error',
       `Missing ${swiperSelector} inside ${buildStructuralSelector('root')}.`,
@@ -127,22 +121,10 @@ function validateRootStructure(root) {
     return null;
   }
 
-  if (swipers.length > 1) {
-    log(
-      'error',
-      `Found ${swipers.length} ${swiperSelector} elements inside root. Expected exactly one.`,
-      root
-    );
-    return null;
-  }
-
-  const swiperElement = swipers[0];
-
-  // Validate exactly one wrapper element because Swiper requires single wrapper for transforms
   const wrapperSelector = buildStructuralSelector('wrapper');
-  const wrappers = swiperElement.querySelectorAll(wrapperSelector);
+  const wrapperElement = swiperElement.querySelector(wrapperSelector);
 
-  if (wrappers.length === 0) {
+  if (!wrapperElement) {
     log(
       'error',
       `Missing ${wrapperSelector} inside ${swiperSelector}.`,
@@ -150,17 +132,6 @@ function validateRootStructure(root) {
     );
     return null;
   }
-
-  if (wrappers.length > 1) {
-    log(
-      'error',
-      `Found ${wrappers.length} ${wrapperSelector} elements inside swiper. Expected exactly one.`,
-      swiperElement
-    );
-    return null;
-  }
-
-  const wrapperElement = wrappers[0];
 
   // Validate at least one slide because empty swiper would have nothing to display
   const slideSelector = buildStructuralSelector('slide');
@@ -180,8 +151,8 @@ function validateRootStructure(root) {
 
 // Applies Swiper's required CSS classes that we've been avoiding to the DOM
 function applySwiperStructureClasses(swiperElement, wrapperElement, slides) {
-  swiperElement?.classList.add(SWIPER_STRUCTURE_CLASSES.swiper);
-  wrapperElement?.classList.add(SWIPER_STRUCTURE_CLASSES.wrapper);
+  swiperElement.classList.add(SWIPER_STRUCTURE_CLASSES.swiper);
+  wrapperElement.classList.add(SWIPER_STRUCTURE_CLASSES.wrapper);
   slides.forEach((slide) =>
     slide.classList.add(SWIPER_STRUCTURE_CLASSES.slide)
   );
@@ -189,20 +160,13 @@ function applySwiperStructureClasses(swiperElement, wrapperElement, slides) {
 
 // Merges module configuration with user options so defaults don't override user settings
 function mergeModuleConfig(baseConfig, userOptions) {
-  if (!userOptions || userOptions === true) {
-    return baseConfig;
-  }
-  if (typeof userOptions === 'object') {
-    return { ...baseConfig, ...userOptions };
-  }
-  return baseConfig;
+  if (!userOptions) return baseConfig;
+  return { ...baseConfig, ...userOptions };
 }
 
 // Finds module elements and returns scoped selectors so only descendants of this slider instance are targeted (so multiple sliders on the same page don't interfere with each other)
 function findModuleElement(root, rootId, moduleName, value) {
   const moduleSelector = buildModuleSelector(moduleName, value);
-  if (!moduleSelector) return null;
-
   const elements = root.querySelectorAll(moduleSelector);
 
   if (elements.length === 0) return null;
@@ -293,11 +257,6 @@ export function setupWebflowSwipers() {
 
   // Find all root elements so each can be initialized independently
   const rootSelector = buildStructuralSelector(SWIPER_CONFIG.attributes.root);
-  if (!rootSelector) {
-    log('error', 'Root selector is not configured.');
-    return [];
-  }
-
   const roots = document.querySelectorAll(rootSelector);
   const instances = [];
 
