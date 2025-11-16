@@ -6,6 +6,7 @@ export const SWIPER_CONFIG = {
     swiper: 'swiper',
     wrapper: 'wrapper',
     slide: 'slide',
+    bulkJson: 'options',
   },
   scope: {
     attrName: 'data-swiper-root-id',

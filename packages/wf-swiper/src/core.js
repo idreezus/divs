@@ -82,6 +82,56 @@ function formatValue(value) {
   return value;
 }
 
+// Parses data-swiper-options attribute containing complete JSON configuration
+// Returns parsed and validated options object, or empty object if invalid/missing
+// JSON keys must use camelCase (matching Swiper's JS API)
+function parseOptionsFromBulkJSON(root) {
+  const bulkAttr = root.getAttribute(
+    `${SWIPER_CONFIG.attributePrefix}-${SWIPER_CONFIG.attributes.bulkJson}`
+  );
+
+  // No bulk config provided
+  if (!bulkAttr || !bulkAttr.trim()) {
+    return {};
+  }
+
+  // Try to parse JSON
+  let parsedOptions;
+  try {
+    parsedOptions = JSON.parse(bulkAttr);
+  } catch (err) {
+    log(
+      'warn',
+      `Invalid JSON in data-swiper-options attribute. Using individual attributes only. Error: ${err.message}`,
+      root
+    );
+    return {};
+  }
+
+  // Validate it's an object
+  if (!isObject(parsedOptions)) {
+    log(
+      'warn',
+      'data-swiper-options must contain a JSON object, not an array or primitive. Using individual attributes only.',
+      root
+    );
+    return {};
+  }
+
+  // Validate params against Swiper's allowed list (already in camelCase)
+  Object.keys(parsedOptions).forEach((key) => {
+    if (!SWIPER_ALLOWED_PARAMS.includes(key)) {
+      log(
+        'warn',
+        `Unknown parameter "${key}" in data-swiper-options. This may be ignored by Swiper. Check the Swiper API docs.`,
+        root
+      );
+    }
+  });
+
+  return parsedOptions;
+}
+
 // Deep merges source object into target, preserving nested object properties
 // Arrays and primitives are replaced, not merged
 function deepMerge(target, source) {
@@ -102,7 +152,9 @@ function deepMerge(target, source) {
 
 // Takes all the data-* attributes on the root element and converts them into a Swiper configuration object so users can configure without JavaScript
 function parseOptionsFromAttributes(root) {
-  const options = {};
+  // Start with bulk JSON config if provided, otherwise empty object
+  // Individual attributes will override/merge with these base options
+  const options = parseOptionsFromBulkJSON(root);
   const prefix = `${SWIPER_CONFIG.attributePrefix}-`;
   const { attrName: rootIdAttr } = SWIPER_CONFIG.scope;
 
@@ -115,6 +167,9 @@ function parseOptionsFromAttributes(root) {
 
     const rawName = attr.name.slice(prefix.length);
     if (!rawName) return;
+
+    // Skip the bulk config attribute (already processed at the start)
+    if (rawName === SWIPER_CONFIG.attributes.bulkJson) return;
 
     // Check if this is a module key so it can be nested under the appropriate module name in the Swiper config
     const moduleKey = SWIPER_MODULE_ATTRIBUTE_KEYS.find((key) =>
