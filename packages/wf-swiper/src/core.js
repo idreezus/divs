@@ -3,6 +3,7 @@ import {
   SWIPER_STRUCTURE_CLASSES,
   SWIPER_MODULE_ATTRIBUTE_KEYS,
   SWIPER_MODULE_ATTRIBUTE_SELECTORS,
+  SWIPER_ALLOWED_PARAMS,
   SWIPER_LOG_PREFIX,
 } from './config.js';
 
@@ -43,15 +44,60 @@ function toCamelCase(text) {
   return text.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
 }
 
-// Parses attribute value strings into native types
-function parseAttributeValue(value) {
-  // Boolean checks
+// Checks if value is a plain object (not array, null, or primitive)
+// Used in deep merge to distinguish objects from arrays that should be replaced
+function isObject(o) {
+  return typeof o === 'object' && o !== null && !Array.isArray(o);
+}
+
+// Parses attribute value strings into native JavaScript types
+// Handles empty strings, booleans, numbers, JSON objects, and plain strings
+function formatValue(value) {
+  // Empty attribute (e.g., data-swiper-free-mode) becomes true
+  if (value === '') return true;
+
+  // Boolean strings
   if (value === 'true') return true;
   if (value === 'false') return false;
-  // Number check
+
+  // JSON objects for complex configs (e.g., breakpoints)
+  if (
+    typeof value === 'string' &&
+    value.includes('{') &&
+    value.includes('}') &&
+    value.includes('"')
+  ) {
+    try {
+      return JSON.parse(value);
+    } catch (err) {
+      // Fall through to return as string if parsing fails
+    }
+  }
+
+  // Numbers
   const asNumber = Number(value);
   if (!Number.isNaN(asNumber)) return asNumber;
+
+  // Plain string fallback
   return value;
+}
+
+// Deep merges source object into target, preserving nested object properties
+// Arrays and primitives are replaced, not merged
+function deepMerge(target, source) {
+  Object.keys(source).forEach((key) => {
+    const sourceValue = source[key];
+    const targetValue = target[key];
+
+    // If both are plain objects, recurse to merge nested properties
+    if (isObject(sourceValue) && isObject(targetValue)) {
+      deepMerge(targetValue, sourceValue);
+    } else {
+      // Otherwise replace (handles primitives, arrays, null, undefined)
+      target[key] = sourceValue;
+    }
+  });
+  return target;
 }
 
 // Takes all the data-* attributes on the root element and converts them into a Swiper configuration object so users can configure without JavaScript
@@ -67,9 +113,6 @@ function parseOptionsFromAttributes(root) {
     // Only process attributes with the configured prefix
     if (!attr.name.startsWith(prefix)) return;
 
-    // Skip empty strings or whitespace-only values
-    if (!attr.value.trim()) return;
-
     const rawName = attr.name.slice(prefix.length);
     if (!rawName) return;
 
@@ -78,7 +121,7 @@ function parseOptionsFromAttributes(root) {
       rawName.startsWith(`${key}-`)
     );
 
-    const value = parseAttributeValue(attr.value);
+    const value = formatValue(attr.value);
 
     if (moduleKey) {
       const parentKey = toCamelCase(moduleKey);
@@ -98,7 +141,30 @@ function parseOptionsFromAttributes(root) {
     } else {
       // Not part of a known module, so it's a top-level option
       const camelKey = toCamelCase(rawName);
-      options[camelKey] = value;
+
+      // Validate against allowed params list to catch typos
+      if (!SWIPER_ALLOWED_PARAMS.includes(camelKey)) {
+        log(
+          'warn',
+          `Unknown parameter "${rawName}" (as "${camelKey}"). This may be a typo and could be ignored by Swiper. Check the Swiper API docs for valid parameters.`,
+          root
+        );
+      }
+
+      // Handle edge case: if setting a module param that's already a boolean, convert to object
+      // Example: data-swiper-navigation="true" then data-swiper-navigation-disabled-class="is-disabled"
+      if (
+        options[camelKey] &&
+        SWIPER_MODULE_ATTRIBUTE_KEYS.includes(rawName) &&
+        !isObject(value)
+      ) {
+        if (typeof options[camelKey] === 'boolean') {
+          options[camelKey] = { enabled: options[camelKey] };
+        }
+        options[camelKey].enabled = !!value;
+      } else {
+        options[camelKey] = value;
+      }
     }
   });
 
@@ -199,7 +265,11 @@ function buildCombinedModuleOptions(
 
   // Pass config if we found elements OR user provided options
   if (Object.keys(resolvedParams).length > 0 || userModuleOptions) {
-    return { ...resolvedParams, ...userModuleOptions };
+    // Deep merge to preserve nested properties from both sources
+    if (userModuleOptions) {
+      return deepMerge({ ...resolvedParams }, userModuleOptions);
+    }
+    return resolvedParams;
   }
 
   return null;
@@ -264,8 +334,8 @@ export function setupWebflowSwipers() {
     const userOptions = parseOptionsFromAttributes(root);
     const moduleOptions = buildModuleOptions(root, rootId, userOptions);
 
-    // Merge them
-    const swiperOptions = { ...userOptions, ...moduleOptions };
+    // Deep merge to preserve nested properties in both objects
+    const swiperOptions = deepMerge({ ...userOptions }, moduleOptions);
 
     // Initialize Swiper instance
     try {
