@@ -1,6 +1,6 @@
 {
   "name": "wf-swiper",
-  "version": "0.1.0-alpha",
+  "version": "0.1.0",
   "description": "A helper library for SwiperJS in Webflow",
   "main": "wf-swiper.js",
   "type": "module",

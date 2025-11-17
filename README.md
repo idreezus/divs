@@ -30,16 +30,29 @@ This watches `packages/marquee/src/` and automatically rebuilds to `dist/marquee
 
 **Steps to publish a stable version:**
 
-1. Update version in `packages/marquee/package.json` (e.g., `1.0.0` → `1.0.1`)
-2. Commit and merge to main:
+1. Update the version in `packages/marquee/package.json` (e.g., `1.0.0` → `1.0.1`).
+2. Build the release locally so the new `dist` folder exists:
 
 ```bash
-git add packages/marquee/package.json
+pnpm release:marquee
+```
+
+3. Make a single commit that includes the version bump **and** the generated `dist/marquee/v1.0.1/` files, then push to `main`:
+
+```bash
+git add packages/marquee/package.json dist/marquee/v1.0.1
 git commit -m "Release marquee v1.0.1"
 git push origin main
 ```
 
-3. Cloudflare builds and deploys to CDN automatically
+4. (Optional, required for jsDelivr) tag that same commit so CDN URLs can reference it:
+
+```bash
+git tag marquee-v1.0.1
+git push origin marquee-v1.0.1
+```
+
+Cloudflare builds and deploys to CDN automatically after the push.
 
 **How users load it:**
 

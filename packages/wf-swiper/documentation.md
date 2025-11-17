@@ -250,7 +250,69 @@ Add control elements with these attributes:
 
 ### Breakpoints
 
-Configure responsive behavior with breakpoints as JSON in an individual attribute:
+Configure responsive behavior using either individual attributes or JSON configuration.
+
+#### Individual Breakpoint Attributes
+
+Set breakpoint-specific parameters using `data-swiper-breakpoints-{breakpoint}-{param}`:
+
+```html
+<div
+  data-swiper="root"
+  data-swiper-breakpoints-mobile-slides-per-view="1"
+  data-swiper-breakpoints-tablet-slides-per-view="2"
+  data-swiper-breakpoints-1200-slides-per-view="3"
+  data-swiper-breakpoints-mobile-space-between="8"
+  data-swiper-breakpoints-tablet-space-between="16"
+>
+  <!-- structure -->
+</div>
+```
+
+This becomes:
+
+```javascript
+{
+  breakpoints: {
+    767: { slidesPerView: 1, spaceBetween: 8 },    // mobile
+    991: { slidesPerView: 2, spaceBetween: 16 },   // tablet
+    1200: { slidesPerView: 3 }
+  }
+}
+```
+
+**Nested module parameters in breakpoints** are also supported:
+
+```html
+<div
+  data-swiper="root"
+  data-swiper-breakpoints-mobile-navigation-enabled="false"
+  data-swiper-breakpoints-tablet-navigation-enabled="true"
+  data-swiper-breakpoints-tablet-pagination-dynamic-bullets="true"
+>
+  <!-- structure -->
+</div>
+```
+
+This becomes:
+
+```javascript
+{
+  breakpoints: {
+    767: {
+      navigation: { enabled: false }
+    },
+    991: {
+      navigation: { enabled: true },
+      pagination: { dynamicBullets: true }
+    }
+  }
+}
+```
+
+#### JSON Breakpoint Configuration
+
+For complex breakpoint configurations, use JSON in an individual attribute:
 
 ```html
 <div
@@ -268,7 +330,7 @@ Breakpoint keys are viewport widths in pixels. Values are configuration objects 
 
 #### Webflow Breakpoint Shorthands
 
-Instead of remembering pixel values, use Webflow's familiar breakpoint names:
+Instead of remembering pixel values, use Webflow's familiar breakpoint names in **both attribute and JSON formats**:
 
 | Shorthand | Pixel Value | Webflow Breakpoint |
 |-----------|-------------|-------------------|
@@ -276,7 +338,21 @@ Instead of remembering pixel values, use Webflow's familiar breakpoint names:
 | `mobile-landscape` or `mobile` | 767 | Mobile landscape |
 | `mobile-portrait` or `phone` | 479 | Mobile portrait |
 
-**Example:**
+**Example with individual attributes:**
+
+```html
+<div
+  data-swiper="root"
+  data-swiper-breakpoints-tablet-slides-per-view="2"
+  data-swiper-breakpoints-tablet-space-between="16"
+  data-swiper-breakpoints-mobile-slides-per-view="1"
+  data-swiper-breakpoints-mobile-space-between="8"
+>
+  <!-- structure -->
+</div>
+```
+
+**Example with JSON:**
 
 ```html
 <div
@@ -292,10 +368,10 @@ Instead of remembering pixel values, use Webflow's familiar breakpoint names:
 
 **Features:**
 
-- **Case-insensitive**: `"Tablet"`, `"TABLET"`, `"tablet"` all work
-- **Mixable**: Combine shorthands with custom pixel values like `{"tablet": {...}, "600": {...}}`
+- **Case-insensitive**: `"Tablet"`, `"TABLET"`, `"tablet"`, `mobile`, `Mobile` all work
+- **Mixable**: Combine shorthands with custom pixel values like `tablet`, `600`, `1200`
 - **Aliases**: Use `"mobile"` for `"mobile-landscape"` or `"phone"` for `"mobile-portrait"`
-- **Works everywhere**: Both bulk JSON and individual breakpoints attributes
+- **Works everywhere**: Individual attributes, bulk JSON, and `data-swiper-options`
 
 **Works in bulk JSON too:**
 
@@ -313,7 +389,7 @@ Instead of remembering pixel values, use Webflow's familiar breakpoint names:
 ```
 
 > [!NOTE]
-> Complex options like breakpoints, free mode configuration, and effect settings work best as JSON in individual attributes or within bulk `data-swiper-options`.
+> Breakpoints can now be configured with individual attributes (recommended for Webflow Designer) or as JSON. Individual breakpoint attributes provide the same visual editing flexibility as other parameters.
 
 ## JavaScript API
 

@@ -61,12 +61,18 @@ Semantic versioning guidelines:
 - **Minor** (1.1.0) - New features
 - **Major** (2.0.0) - Breaking changes
 
-### Step 2: Deploy to Cloudflare
+### Step 2: Build and push release
 
-Merge to main:
+1. Generate the new `dist` folders locally so they can be committed:
 
 ```bash
-git add packages/marquee/package.json
+pnpm release:marquee
+```
+
+2. Make a **single commit** that includes the `package.json` bump and the new `dist/marquee/v1.0.1/` folder, then push to `main`:
+
+```bash
+git add packages/marquee/package.json dist/marquee/v1.0.1
 git commit -m "Release marquee v1.0.1"
 git push origin main
 ```
@@ -74,8 +80,8 @@ git push origin main
 Cloudflare automatically:
 
 1. Runs `pnpm install && pnpm release`
-2. Creates `dist/marquee/v1.0.1/` with production files
-3. Deploys to CDN
+2. Creates/updates `dist/marquee/v1.0.1/` on the CDN
+3. Refreshes `dist/marquee/latest/`
 
 Versioned files are then live at:
 
@@ -89,7 +95,7 @@ Versioned files are then live at:
 
 **Only required when using jsDelivr CDN instead of Cloudflare.**
 
-Create a GitHub release with a tag:
+Create a GitHub release with a tag on the same commit you pushed in Step 2:
 
 ```bash
 # Create and push tag

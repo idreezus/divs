@@ -1,6 +1,6 @@
 {
   "name": "marquee",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "A seamless marquee animation library powered by GSAP",
   "main": "marquee.js",
   "type": "module",
