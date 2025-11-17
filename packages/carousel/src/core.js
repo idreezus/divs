@@ -515,7 +515,8 @@ function getSwiperConfig(selector) {
     return null;
   }
 
-  return parseOptionsFromAttributes(root);
+  const parsedConfig = parseOptionsFromAttributes(root);
+  return transformBreakpointShorthands(parsedConfig);
 }
 
 // Helper to copy text to clipboard
@@ -573,10 +574,10 @@ if (typeof window !== 'undefined') {
       );
 
       const embedCode = `<script>
-// Carousel library by Idrees Isse (divs.idreezus.com)
-// This runs after Webflow finishes loading the DOM structure
+// Paste this into a custom code embed on Webflow 
+// Update YOUR_SELECTOR_HERE below to match the ".swiper" element in your project
+// Credits: Carousel library by Idrees Isse (divs.idreezus.com)
 document.addEventListener('DOMContentLoaded', () => {
-  // Update YOUR_SELECTOR_HERE so it matches the swiper element in the project
   const swiper = new Swiper('YOUR_SELECTOR_HERE', ${jsConfig});
 });
 </script>`;
@@ -592,7 +593,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Interactive export with prompt
     exportConfig: function (selector) {
       const choice = window.prompt(
-        'Export format?\n1) Pasting into the data-swiper-options attribute\n2) Pasting into a custom code embed or Javascript'
+        'Export format?\nType "1" for pasting into the "data-swiper-options" attribute\nType "2" for pasting into a custom code embed'
       );
 
       if (choice === '1') {

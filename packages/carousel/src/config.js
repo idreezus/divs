@@ -32,13 +32,17 @@ export const SWIPER_MODULE_ATTRIBUTE_SELECTORS = {
 export const SWIPER_LOG_PREFIX = '[Carousel]';
 
 // Maps friendly shorthand names to Webflow's default breakpoint pixel values
-// (these are max-width values)
+// These are min-width pixel values.
+// Swiper will apply the changes at the breakpoint value and upwards, and the default value (without breakpoints) is applied at the smallest breakpoint, kinda like Tailwind.
+// TODO: Survey people on how they want the breakpoint surveys to act: mobile-first (like SwiperJS expects) or desktop-first (like Webflow expects)?
 export const SWIPER_BREAKPOINT_SHORTHANDS = {
-  tablet: '991', // Tablet and below
-  'mobile-landscape': '767', // Mobile landscape and below
-  'mobile-portrait': '479', // Mobile portrait
-  mobile: '767', // Alias for mobile-landscape
-  phone: '479', // Alias for mobile-portrait
+  desktop: '992', // Desktop and above
+  tablet: '768', // Tablet and above
+  'mobile-landscape': '480', // Mobile landscape and above
+  mobile: '0', // Mobile portrait and above
+
+  // mobile: '767', // Alias for mobile-landscape
+  // phone: '0', // Alias for mobile-portrait
 };
 
 // ------------------------------------------------------------

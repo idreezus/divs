@@ -208,7 +208,7 @@ For power users or when copying config from Swiper docs, use `data-swiper-option
       "768": {
         "slidesPerView": 2
       },
-      "1024": {
+      "992": {
         "slidesPerView": 3
       }
     }
@@ -335,11 +335,14 @@ For complex configurations or quick copy/paste:
 
 Instead of remembering pixel values, use Webflow's familiar breakpoint names:
 
-| Shorthand                      | Pixel Value | Webflow Breakpoint |
-| ------------------------------ | ----------- | ------------------ |
-| `tablet`                       | 991         | Tablet             |
-| `mobile-landscape` or `mobile` | 767         | Mobile landscape   |
-| `mobile-portrait` or `phone`   | 479         | Mobile portrait    |
+| Shorthand          | Pixel Value | Webflow Breakpoint |
+| ------------------ | ----------- | ------------------ |
+| `desktop`          | 992         | Desktop            |
+| `tablet`           | 768         | Tablet             |
+| `mobile-landscape` | 480         | Mobile landscape   |
+| `mobile`           | 0           | Mobile portrait    |
+
+Note: SwiperJS cascades UP, not down. So if you write a parameter without any breakpoint specified, it'll actually start at the 0px breakpoint, and
 
 **Works in both formats:**
 
@@ -355,7 +358,7 @@ Instead of remembering pixel values, use Webflow's familiar breakpoint names:
     data-swiper="root"
     data-swiper-breakpoints='{
     "tablet": {"slidesPerView": 2},
-    "mobile": {"slidesPerView": 1}
+    "mobile-landscape": {"slidesPerView": 1}
   }'
   >
     <!-- Bulk JSON -->
@@ -376,7 +379,7 @@ Instead of remembering pixel values, use Webflow's familiar breakpoint names:
 
 - **Case-insensitive**: `"Tablet"`, `"tablet"`, `mobile` all work
 - **Mixable**: Combine shorthands with custom pixel values (`tablet`, `600`, `1200`)
-- **Aliases**: Use `"mobile"` for mobile-landscape or `"phone"` for mobile-portrait
+- **Aliases**: Use the shorthand names above
 - **Works everywhere**: Individual attributes, JSON attributes, bulk JSON
 
 ---
@@ -487,8 +490,8 @@ const swiper = new Swiper('.swiper', {
   slidesPerView: 3,
   spaceBetween: 20,
   breakpoints: {
-    991: { slidesPerView: 2 },
-    767: { slidesPerView: 1 },
+    480: { slidesPerView: 2 },
+    768: { slidesPerView: 3 },
   },
 });
 ```

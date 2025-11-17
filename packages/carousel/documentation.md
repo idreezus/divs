@@ -278,9 +278,8 @@ This becomes:
 ```javascript
 {
   breakpoints: {
-    767: { slidesPerView: 1, spaceBetween: 8 },    // mobile
-    991: { slidesPerView: 2, spaceBetween: 16 },   // tablet
-    1200: { slidesPerView: 3 }
+    480: { slidesPerView: 1, spaceBetween: 8 },    // mobile-landscape and up
+    768: { slidesPerView: 2, spaceBetween: 16 },   // tablet and up
   }
 }
 ```
@@ -303,10 +302,10 @@ This becomes:
 ```javascript
 {
   breakpoints: {
-    767: {
+    480: {
       navigation: { enabled: false }
     },
-    991: {
+    768: {
       navigation: { enabled: true },
       pagination: { dynamicBullets: true }
     }
@@ -336,11 +335,12 @@ Breakpoint keys are viewport widths in pixels. Values are configuration objects 
 
 Instead of remembering pixel values, use Webflow's familiar breakpoint names in **both attribute and JSON formats**:
 
-| Shorthand                      | Pixel Value | Webflow Breakpoint |
-| ------------------------------ | ----------- | ------------------ |
-| `tablet`                       | 991         | Tablet             |
-| `mobile-landscape` or `mobile` | 767         | Mobile landscape   |
-| `mobile-portrait` or `phone`   | 479         | Mobile portrait    |
+| Shorthand          | Pixel Value | Webflow Breakpoint |
+| ------------------ | ----------- | ------------------ |
+| `desktop`          | 992         | Desktop            |
+| `tablet`           | 768         | Tablet             |
+| `mobile-landscape` | 480         | Mobile landscape   |
+| `mobile`           | 0           | Mobile portrait    |
 
 **Example with individual attributes:**
 
@@ -363,7 +363,7 @@ Instead of remembering pixel values, use Webflow's familiar breakpoint names in 
   data-swiper="root"
   data-swiper-breakpoints='{
     "tablet": {"slidesPerView": 2, "spaceBetween": 16},
-    "mobile": {"slidesPerView": 1, "spaceBetween": 8}
+    "mobile-landscape": {"slidesPerView": 1, "spaceBetween": 8}
   }'
 >
   <!-- structure -->
@@ -374,7 +374,7 @@ Instead of remembering pixel values, use Webflow's familiar breakpoint names in 
 
 - **Case-insensitive**: `"Tablet"`, `"TABLET"`, `"tablet"`, `mobile`, `Mobile` all work
 - **Mixable**: Combine shorthands with custom pixel values like `tablet`, `600`, `1200`
-- **Aliases**: Use `"mobile"` for `"mobile-landscape"` or `"phone"` for `"mobile-portrait"`
+- **Aliases**: Use the shorthand names above; `mobile` now maps to the smallest (0px) breakpoint
 - **Works everywhere**: Individual attributes, bulk JSON, and `data-swiper-options`
 
 **Works in bulk JSON too:**
@@ -475,8 +475,8 @@ const swiper = new Swiper('.swiper', {
   slidesPerView: 3,
   spaceBetween: 20,
   breakpoints: {
-    991: { slidesPerView: 2 },
-    767: { slidesPerView: 1 },
+    480: { slidesPerView: 2 },
+    768: { slidesPerView: 3 },
   },
 });
 ```
@@ -518,7 +518,7 @@ Access the SwiperJS instance via `root.swiperInstance` and inspect `swiper.param
 </Accordion>
 
 <Accordion title="Can I use Webflow breakpoint names instead of pixel values?">
-Yes! Use friendly names like `"tablet"` (991px), `"mobile"` (767px), or `"phone"` (479px) in your breakpoints configuration. These shorthands are case-insensitive and can be mixed with custom pixel values. For example: `{"tablet": {...}, "600": {...}}`. This makes breakpoints easier to remember and more aligned with Webflow's design system.
+Yes! Use friendly names like `"desktop"` (992px), `"tablet"` (768px), `"mobile-landscape"` (480px), or `"mobile"` (0px) in your breakpoints configuration. These shorthands are case-insensitive and can be mixed with custom pixel values. For example: `{"tablet": {...}, "600": {...}}`. This makes breakpoints easier to remember and more aligned with Webflow's design system.
 </Accordion>
 
 </div>

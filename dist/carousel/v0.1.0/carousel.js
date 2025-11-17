@@ -46,13 +46,17 @@
   const SWIPER_LOG_PREFIX = '[Carousel]';
 
   // Maps friendly shorthand names to Webflow's default breakpoint pixel values
-  // (these are max-width values)
+  // These are min-width pixel values.
+  // Swiper will apply the changes at the breakpoint value and upwards, and the default value (without breakpoints) is applied at the smallest breakpoint, kinda like Tailwind.
+  // TODO: Survey people on how they want the breakpoint surveys to act: mobile-first (like SwiperJS expects) or desktop-first (like Webflow expects)?
   const SWIPER_BREAKPOINT_SHORTHANDS = {
-    tablet: '991', // Tablet and below
-    'mobile-landscape': '767', // Mobile landscape and below
-    'mobile-portrait': '479', // Mobile portrait
-    mobile: '767', // Alias for mobile-landscape
-    phone: '479', // Alias for mobile-portrait
+    desktop: '992', // Desktop and above
+    tablet: '768', // Tablet and above
+    'mobile-landscape': '480', // Mobile landscape and above
+    mobile: '0', // Mobile portrait and above
+
+    // mobile: '767', // Alias for mobile-landscape
+    // phone: '0', // Alias for mobile-portrait
   };
 
   // ------------------------------------------------------------
@@ -722,7 +726,8 @@
       return null;
     }
 
-    return parseOptionsFromAttributes(root);
+    const parsedConfig = parseOptionsFromAttributes(root);
+    return transformBreakpointShorthands(parsedConfig);
   }
 
   // Helper to copy text to clipboard
@@ -780,10 +785,10 @@
         );
 
         const embedCode = `<script>
-// Carousel library by Idrees Isse (divs.idreezus.com)
-// This runs after Webflow finishes loading the DOM structure
+// Paste this into a custom code embed on Webflow 
+// Update YOUR_SELECTOR_HERE below to match the ".swiper" element in your project
+// Credits: Carousel library by Idrees Isse (divs.idreezus.com)
 document.addEventListener('DOMContentLoaded', () => {
-  // Update YOUR_SELECTOR_HERE so it matches the swiper element in the project
   const swiper = new Swiper('YOUR_SELECTOR_HERE', ${jsConfig});
 });
 </script>`;
@@ -799,7 +804,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Interactive export with prompt
       exportConfig: function (selector) {
         const choice = window.prompt(
-          'Export format?\n1) Pasting into the data-swiper-options attribute\n2) Pasting into a custom code embed or Javascript'
+          'Export format?\nType "1" for pasting into the "data-swiper-options" attribute\nType "2" for pasting into a custom code embed'
         );
 
         if (choice === '1') {
