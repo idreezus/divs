@@ -2,7 +2,7 @@
 description: SwiperJS integration helper for Webflow with data-attribute configuration
 ---
 
-# WF Swiper
+# Carousel
 
 A helper library for using SwiperJS in Webflow without managing required CSS classes.
 
@@ -29,7 +29,7 @@ The library requires SwiperJS 8 or later to handle slider functionality:
 Add the helper script after SwiperJS:
 
 ```html
-<script type="module" src="path/to/wf-swiper.js"></script>
+<script type="module" src="path/to/carousel.js"></script>
 ```
 
 ### Add Elements &amp; Attributes
@@ -37,7 +37,11 @@ Add the helper script after SwiperJS:
 Mark the container with `data-swiper` = `"root"` and add the required structure:
 
 ```html
-<div data-swiper="root" data-swiper-slides-per-view="2" data-swiper-space-between="20">
+<div
+  data-swiper="root"
+  data-swiper-slides-per-view="2"
+  data-swiper-space-between="20"
+>
   <div data-swiper="swiper">
     <div data-swiper="wrapper">
       <div data-swiper="slide">Slide 1</div>
@@ -63,12 +67,12 @@ The helper library uses semantic `data-swiper` attributes instead of classes. At
 
 Four attributes create the basic slider structure:
 
-| Element     | Attribute               | Description                      | Gets Class        |
-| ----------- | ----------------------- | -------------------------------- | ----------------- |
-| **Root**    | `data-swiper="root"`    | Outermost container for config   | —                 |
-| **Swiper**  | `data-swiper="swiper"`  | Main slider container            | `.swiper`         |
-| **Wrapper** | `data-swiper="wrapper"` | Slides wrapper                   | `.swiper-wrapper` |
-| **Slide**   | `data-swiper="slide"`   | Individual slides (repeatable)   | `.swiper-slide`   |
+| Element     | Attribute               | Description                    | Gets Class        |
+| ----------- | ----------------------- | ------------------------------ | ----------------- |
+| **Root**    | `data-swiper="root"`    | Outermost container for config | —                 |
+| **Swiper**  | `data-swiper="swiper"`  | Main slider container          | `.swiper`         |
+| **Wrapper** | `data-swiper="wrapper"` | Slides wrapper                 | `.swiper-wrapper` |
+| **Slide**   | `data-swiper="slide"`   | Individual slides (repeatable) | `.swiper-slide`   |
 
 Each root must contain exactly one swiper and wrapper. Each wrapper must contain at least one slide. Other HTML elements can be nested anywhere between these structural elements.
 
@@ -159,13 +163,13 @@ This becomes:
 
 Attribute values are converted to appropriate JavaScript types:
 
-| Attribute Value         | JavaScript Value       |
-| ----------------------- | ---------------------- |
-| `""` or `"true"`        | `true`                 |
-| `"false"`               | `false`                |
-| `"42"` or `"3.14"`      | Number                 |
-| `'{"key":"value"}'`     | Parsed JSON object     |
-| Anything else           | String                 |
+| Attribute Value     | JavaScript Value   |
+| ------------------- | ------------------ |
+| `""` or `"true"`    | `true`             |
+| `"false"`           | `false`            |
+| `"42"` or `"3.14"`  | Number             |
+| `'{"key":"value"}'` | Parsed JSON object |
+| Anything else       | String             |
 
 #### Bulk JSON Configuration
 
@@ -219,17 +223,17 @@ Individual attributes override JSON values, giving designers flexibility to twea
 
 Top-level SwiperJS parameters configured on the root element:
 
-| Attribute                      | Type    | Default | Description                                        |
-| ------------------------------ | ------- | ------- | -------------------------------------------------- |
-| `data-swiper-slides-per-view`  | number  | `1`     | Number of slides visible at once                   |
-| `data-swiper-space-between`    | number  | `0`     | Space between slides in pixels                     |
-| `data-swiper-loop`             | boolean | -       | Enable continuous loop mode                        |
-| `data-swiper-speed`            | number  | `300`   | Transition duration in milliseconds                |
-| `data-swiper-direction`        | string  | `"horizontal"` | Slider direction: `"horizontal"` or `"vertical"` |
-| `data-swiper-effect`           | string  | `"slide"` | Transition effect: `"slide"`, `"fade"`, `"cube"`, `"coverflow"`, `"flip"`, `"cards"`, `"creative"` |
-| `data-swiper-autoplay`         | boolean | -       | Enable autoplay (use nested params for control)    |
-| `data-swiper-initial-slide`    | number  | `0`     | Index of initial slide                             |
-| `data-swiper-centered-slides`  | boolean | -       | Center active slide                                |
+| Attribute                     | Type    | Default        | Description                                                                                        |
+| ----------------------------- | ------- | -------------- | -------------------------------------------------------------------------------------------------- |
+| `data-swiper-slides-per-view` | number  | `1`            | Number of slides visible at once                                                                   |
+| `data-swiper-space-between`   | number  | `0`            | Space between slides in pixels                                                                     |
+| `data-swiper-loop`            | boolean | -              | Enable continuous loop mode                                                                        |
+| `data-swiper-speed`           | number  | `300`          | Transition duration in milliseconds                                                                |
+| `data-swiper-direction`       | string  | `"horizontal"` | Slider direction: `"horizontal"` or `"vertical"`                                                   |
+| `data-swiper-effect`          | string  | `"slide"`      | Transition effect: `"slide"`, `"fade"`, `"cube"`, `"coverflow"`, `"flip"`, `"cards"`, `"creative"` |
+| `data-swiper-autoplay`        | boolean | -              | Enable autoplay (use nested params for control)                                                    |
+| `data-swiper-initial-slide`   | number  | `0`            | Index of initial slide                                                                             |
+| `data-swiper-centered-slides` | boolean | -              | Center active slide                                                                                |
 
 ### Module Options
 
@@ -241,12 +245,12 @@ The library recognizes these module names for nested parameters:
 
 Add control elements with these attributes:
 
-| Attribute                       | Maps To             | Description                   |
-| ------------------------------- | ------------------- | ----------------------------- |
-| `data-swiper-navigation="next"` | `navigation.nextEl` | Next button                   |
-| `data-swiper-navigation="prev"` | `navigation.prevEl` | Previous button               |
-| `data-swiper-pagination="el"`   | `pagination.el`     | Pagination container          |
-| `data-swiper-scrollbar="el"`    | `scrollbar.el`      | Scrollbar container           |
+| Attribute                       | Maps To             | Description          |
+| ------------------------------- | ------------------- | -------------------- |
+| `data-swiper-navigation="next"` | `navigation.nextEl` | Next button          |
+| `data-swiper-navigation="prev"` | `navigation.prevEl` | Previous button      |
+| `data-swiper-pagination="el"`   | `pagination.el`     | Pagination container |
+| `data-swiper-scrollbar="el"`    | `scrollbar.el`      | Scrollbar container  |
 
 ### Breakpoints
 
@@ -332,11 +336,11 @@ Breakpoint keys are viewport widths in pixels. Values are configuration objects 
 
 Instead of remembering pixel values, use Webflow's familiar breakpoint names in **both attribute and JSON formats**:
 
-| Shorthand | Pixel Value | Webflow Breakpoint |
-|-----------|-------------|-------------------|
-| `tablet` | 991 | Tablet |
-| `mobile-landscape` or `mobile` | 767 | Mobile landscape |
-| `mobile-portrait` or `phone` | 479 | Mobile portrait |
+| Shorthand                      | Pixel Value | Webflow Breakpoint |
+| ------------------------------ | ----------- | ------------------ |
+| `tablet`                       | 991         | Tablet             |
+| `mobile-landscape` or `mobile` | 767         | Mobile landscape   |
+| `mobile-portrait` or `phone`   | 479         | Mobile portrait    |
 
 **Example with individual attributes:**
 
@@ -385,7 +389,7 @@ Instead of remembering pixel values, use Webflow's familiar breakpoint names in 
       "tablet": {"slidesPerView": 3}
     }
   }'
->
+></div>
 ```
 
 > [!NOTE]
@@ -428,14 +432,14 @@ Export configuration from existing sliders in two formats:
 
 ```javascript
 // Shows prompt asking: "Type 1 for attribute format, 2 for embed code"
-wfSwiper.exportConfig('[data-swiper="root"]');
+carousel.exportConfig('[data-swiper="root"]');
 
 // Works with specific selectors
-wfSwiper.exportConfig('[data-swiper-root-id="swiper-root-2"]');
+carousel.exportConfig('[data-swiper-root-id="swiper-root-2"]');
 
 // Or pass element directly
 const root = document.querySelector('.my-slider[data-swiper="root"]');
-wfSwiper.exportConfig(root);
+carousel.exportConfig(root);
 ```
 
 #### Direct Export (Skip Prompt)
@@ -444,10 +448,11 @@ wfSwiper.exportConfig(root);
 
 ```javascript
 // Exports as HTML-escaped JSON for pasting into data-swiper-options
-wfSwiper.exportConfigAttr('[data-swiper="root"]');
+carousel.exportConfigAttr('[data-swiper="root"]');
 ```
 
 Output format uses `&quot;` instead of `"` to work around Webflow's attribute value restrictions:
+
 ```html
 {&quot;slidesPerView&quot;: 3, &quot;spaceBetween&quot;: 20}
 ```
@@ -458,10 +463,11 @@ Paste this directly into the `data-swiper-options` attribute in Webflow Designer
 
 ```javascript
 // Exports as JavaScript code for custom embeds
-wfSwiper.exportConfigEmbed('[data-swiper="root"]');
+carousel.exportConfigEmbed('[data-swiper="root"]');
 ```
 
 Output format is ready-to-paste JavaScript with unquoted object keys:
+
 ```javascript
 // Swiper initialization (paste into custom code embed)
 // Update the selector to match your .swiper element
@@ -469,13 +475,14 @@ const swiper = new Swiper('.swiper', {
   slidesPerView: 3,
   spaceBetween: 20,
   breakpoints: {
-    991: {slidesPerView: 2},
-    767: {slidesPerView: 1}
-  }
+    991: { slidesPerView: 2 },
+    767: { slidesPerView: 1 },
+  },
 });
 ```
 
 **What gets exported:**
+
 - All `data-swiper-*` attributes from the element
 - Bulk JSON from `data-swiper-options` if present
 - Merged into a clean config object
@@ -507,7 +514,7 @@ Yes. Start with bulk JSON in `data-swiper-options` for base configuration, then 
 </Accordion>
 
 <Accordion title="How do I debug slider configuration?">
-Access the SwiperJS instance via `root.swiperInstance` and inspect `swiper.params` to see applied configuration. Use `wfSwiper.exportConfig()` to export current configuration in either attribute format (for pasting into Webflow) or embed format (for custom code). Use `wfSwiper.exportConfigAttr()` or `wfSwiper.exportConfigEmbed()` to skip the prompt and export directly.
+Access the SwiperJS instance via `root.swiperInstance` and inspect `swiper.params` to see applied configuration. Use `carousel.exportConfig()` to export current configuration in either attribute format (for pasting into Webflow) or embed format (for custom code). Use `carousel.exportConfigAttr()` or `carousel.exportConfigEmbed()` to skip the prompt and export directly.
 </Accordion>
 
 <Accordion title="Can I use Webflow breakpoint names instead of pixel values?">

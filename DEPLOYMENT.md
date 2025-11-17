@@ -118,8 +118,12 @@ git push origin marquee-v1.0.1
 **jsDelivr URL format:**
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/{username}/{repo}@marquee-v1.0.1/dist/marquee/v1.0.1/marquee.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/{user}/{repo}@{tag}/dist/{component}/{version}/file.js"></script>
+<!-- So basically -->
+<script src="https://cdn.jsdelivr.net/gh/idreezus/divs@{package-version(the-tag-format)}/dist/{package}/{version}/file.js"></script>
 ```
+
+Always include the `@{component}-v{version}` tag segment; without it, jsDelivr serves whatever is currently on the default branch, so a later change to `dist/...` would silently update existing embeds.
 
 **Note:** jsDelivr requires the GitHub tag to exist. Cloudflare functions independently of GitHub tags.
 
@@ -150,7 +154,7 @@ https://cdn.jsdelivr.net/gh/{username}/{repo}@{component}-{version}/dist/{compon
 **Examples:**
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/idreezus/divs@marquee-v1.0.1/dist/marquee/v1.0.1/marquee.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/idreezus/divs@marquee-v0.1.0/dist/marquee/v0.1.0/marquee.min.js"></script>
 ```
 
 ## How Users Load Components

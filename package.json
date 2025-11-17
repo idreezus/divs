@@ -7,12 +7,12 @@
   "scripts": {
     "build": "pnpm -r build",
     "build:marquee": "pnpm --filter marquee build",
-    "build:wf-swiper": "pnpm --filter wf-swiper build",
+    "build:carousel": "pnpm --filter carousel build",
     "dev:marquee": "pnpm --filter marquee build:watch",
-    "dev:wf-swiper": "pnpm --filter wf-swiper build:watch",
+    "dev:carousel": "pnpm --filter carousel build:watch",
     "release": "pnpm -r release",
     "release:marquee": "pnpm --filter marquee release",
-    "release:wf-swiper": "pnpm --filter wf-swiper release"
+    "release:carousel": "pnpm --filter carousel release"
   },
   "keywords": [
     "components",

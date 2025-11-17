@@ -20,35 +20,37 @@ const license = packageJson.license;
 // Release mode: both versioned folder and latest/
 const isRelease = process.env.BUILD_MODE === 'release';
 const outputPaths = isRelease
-  ? [`../../dist/wf-swiper/v${version}/`, `../../dist/wf-swiper/latest/`]
-  : [`../../dist/wf-swiper/latest/`];
+  ? [`../../dist/carousel/v${version}/`, `../../dist/carousel/latest/`]
+  : [`../../dist/carousel/latest/`];
 
 // Helper function to create output configurations for a given path.
 function createOutputs(basePath) {
   // Create banner comment with package information
   const banner = `/*!
- * WFSwiper v${version}
+ * Carousel v${version}
  * ${description}
  * 
- * Part of <divs> by Idreeszus, a component library → (divs.idreezus.com)
+ * A part of Divs by Idreezus, a component library
+ * divs.idreezus.com
  * 
  * (c) ${new Date().getFullYear()} ${author}
  * Released under ${license}
- */`;
+ */
+`;
 
   return [
     {
-      file: `${basePath}wf-swiper.js`,
+      file: `${basePath}carousel.js`,
       format: 'iife',
-      name: 'WFSwiper',
+      name: 'Carousel',
       globals: { swiper: 'Swiper' },
       sourcemap: true,
       banner: banner,
     },
     {
-      file: `${basePath}wf-swiper.min.js`,
+      file: `${basePath}carousel.min.js`,
       format: 'iife',
-      name: 'WFSwiper',
+      name: 'Carousel',
       globals: { swiper: 'Swiper' },
       sourcemap: true,
       plugins: [terser()],
@@ -57,9 +59,9 @@ function createOutputs(basePath) {
   ];
 }
 
-// Configuration for the main wf-swiper library bundle.
+// Configuration for the main carousel library bundle.
 const mainConfig = {
-  input: 'src/wf-swiper.js',
+  input: 'src/carousel.js',
   output: outputPaths.flatMap(createOutputs),
   external: ['swiper'],
 };

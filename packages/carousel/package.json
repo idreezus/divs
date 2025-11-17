@@ -1,8 +1,8 @@
 {
-  "name": "wf-swiper",
+  "name": "carousel",
   "version": "0.1.0",
   "description": "A helper library for SwiperJS in Webflow",
-  "main": "wf-swiper.js",
+  "main": "carousel.js",
   "type": "module",
   "scripts": {
     "build": "rollup -c",

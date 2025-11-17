@@ -539,8 +539,8 @@ function copyToClipboard(text, successMessage) {
 
 // Export utilities for runtime access and debugging
 if (typeof window !== 'undefined') {
-  window.wfSwiper = window.wfSwiper || {};
-  Object.assign(window.wfSwiper, {
+  window.carousel = window.carousel || {};
+  Object.assign(window.carousel, {
     // Direct access to the parser for advanced use cases
     parseOptionsFromAttributes,
 
@@ -573,7 +573,7 @@ if (typeof window !== 'undefined') {
       );
 
       const embedCode = `<script>
-// wf-swiper library by Idrees Isse (divs.idreezus.com)
+// Carousel library by Idrees Isse (divs.idreezus.com)
 // This runs after Webflow finishes loading the DOM structure
 document.addEventListener('DOMContentLoaded', () => {
   // Update YOUR_SELECTOR_HERE so it matches the swiper element in the project
@@ -596,10 +596,10 @@ document.addEventListener('DOMContentLoaded', () => {
       );
 
       if (choice === '1') {
-        return window.wfSwiper.exportConfigAttr(selector);
+        return window.carousel.exportConfigAttr(selector);
       }
       if (choice === '2') {
-        return window.wfSwiper.exportConfigEmbed(selector);
+        return window.carousel.exportConfigEmbed(selector);
       }
 
       console.log('Export cancelled.');

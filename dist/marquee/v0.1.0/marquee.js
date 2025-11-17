@@ -2,11 +2,13 @@
  * Marquee v0.1.0
  * A seamless marquee animation library powered by GSAP
  * 
- * Part of <divs> by Idreeszus, a component library → (divs.idreezus.com)
+ * A part of Divs by Idreezus, a component library
+ * divs.idreezus.com
  * 
  * (c) 2025 Idrees Isse (https://github.com/idreezus)
  * Released under AGPL-3.0
  */
+
 (function () {
   'use strict';
 

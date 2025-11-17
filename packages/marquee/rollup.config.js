@@ -32,11 +32,13 @@ function createOutputs(basePath) {
  * Marquee v${version}
  * ${description}
  * 
- * Part of <divs> by Idreeszus, a component library → (divs.idreezus.com)
+ * A part of Divs by Idreezus, a component library
+ * divs.idreezus.com
  * 
  * (c) ${new Date().getFullYear()} ${author}
  * Released under ${license}
- */`;
+ */
+`;
 
   return [
     {

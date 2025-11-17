@@ -1,12 +1,14 @@
 /*!
- * WFSwiper v0.1.0
+ * Carousel v0.1.0
  * A helper library for SwiperJS in Webflow
  * 
- * Part of <divs> by Idreeszus, a component library → (divs.idreezus.com)
+ * A part of Divs by Idreezus, a component library
+ * divs.idreezus.com
  * 
  * (c) 2025 Idrees Isse (https://github.com/idreezus)
  * Released under AGPL-3.0
  */
+
 (function () {
   'use strict';
 
@@ -41,7 +43,7 @@
   };
 
   // Prefix for all console logs
-  const SWIPER_LOG_PREFIX = '[WF Swiper]';
+  const SWIPER_LOG_PREFIX = '[Carousel]';
 
   // Maps friendly shorthand names to Webflow's default breakpoint pixel values
   // (these are max-width values)
@@ -744,8 +746,8 @@
 
   // Export utilities for runtime access and debugging
   if (typeof window !== 'undefined') {
-    window.wfSwiper = window.wfSwiper || {};
-    Object.assign(window.wfSwiper, {
+    window.carousel = window.carousel || {};
+    Object.assign(window.carousel, {
       // Direct access to the parser for advanced use cases
       parseOptionsFromAttributes,
 
@@ -778,7 +780,7 @@
         );
 
         const embedCode = `<script>
-// wf-swiper library by Idrees Isse (divs.idreezus.com)
+// Carousel library by Idrees Isse (divs.idreezus.com)
 // This runs after Webflow finishes loading the DOM structure
 document.addEventListener('DOMContentLoaded', () => {
   // Update YOUR_SELECTOR_HERE so it matches the swiper element in the project
@@ -801,10 +803,10 @@ document.addEventListener('DOMContentLoaded', () => {
         );
 
         if (choice === '1') {
-          return window.wfSwiper.exportConfigAttr(selector);
+          return window.carousel.exportConfigAttr(selector);
         }
         if (choice === '2') {
-          return window.wfSwiper.exportConfigEmbed(selector);
+          return window.carousel.exportConfigEmbed(selector);
         }
 
         console.log('Export cancelled.');
@@ -826,4 +828,4 @@ document.addEventListener('DOMContentLoaded', () => {
   window.setupWebflowSwipers = setupWebflowSwipers;
 
 })();
-//# sourceMappingURL=wf-swiper.js.map
+//# sourceMappingURL=carousel.js.map

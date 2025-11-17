@@ -1,4 +1,4 @@
-# Webflow Swiper Helper
+# Carousel Helper
 
 A lightweight JavaScript helper that makes it easy to use [Swiper](https://swiperjs.com/) sliders in Webflow without fighting the designer's class system.
 
@@ -30,7 +30,7 @@ Add these scripts before your closing `</body>` tag:
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
 <!-- This helper script -->
-<script src="path/to/webflow-swiper.js"></script>
+<script src="path/to/carousel.js"></script>
 ```
 
 ### 2. Basic Example
@@ -256,13 +256,13 @@ This gives designers the flexibility to tweak settings visually without editing 
 
 **Individual attribute values** are automatically converted to the appropriate JavaScript type:
 
-| Attribute Value                         | JavaScript Value                   |
-| --------------------------------------- | ---------------------------------- |
-| `""` (empty) or `"true"`                | `true`                             |
-| `"false"`                               | `false`                            |
-| `"42"` or `"3.14"`                      | Number                             |
-| `'{"key":"value"}'` (looks like JSON)   | Parsed as JSON object              |
-| Anything else                           | String                             |
+| Attribute Value                       | JavaScript Value      |
+| ------------------------------------- | --------------------- |
+| `""` (empty) or `"true"`              | `true`                |
+| `"false"`                             | `false`               |
+| `"42"` or `"3.14"`                    | Number                |
+| `'{"key":"value"}'` (looks like JSON) | Parsed as JSON object |
+| Anything else                         | String                |
 
 **Examples of JSON in individual attributes:**
 
@@ -272,12 +272,12 @@ This gives designers the flexibility to tweak settings visually without editing 
   data-swiper="root"
   data-swiper-breakpoints='{"768":{"slidesPerView":2},"1024":{"slidesPerView":3}}'
 >
-
-<!-- Free mode with nested config -->
-<div
-  data-swiper="root"
-  data-swiper-free-mode='{"enabled":true,"sticky":true}'
->
+  <!-- Free mode with nested config -->
+  <div
+    data-swiper="root"
+    data-swiper-free-mode='{"enabled":true,"sticky":true}'
+  ></div>
+</div>
 ```
 
 This lets you use complex configs even when building with individual attributes.
@@ -335,11 +335,11 @@ For complex configurations or quick copy/paste:
 
 Instead of remembering pixel values, use Webflow's familiar breakpoint names:
 
-| Shorthand | Pixel Value | Webflow Breakpoint |
-|-----------|-------------|-------------------|
-| `tablet` | 991 | Tablet |
-| `mobile-landscape` or `mobile` | 767 | Mobile landscape |
-| `mobile-portrait` or `phone` | 479 | Mobile portrait |
+| Shorthand                      | Pixel Value | Webflow Breakpoint |
+| ------------------------------ | ----------- | ------------------ |
+| `tablet`                       | 991         | Tablet             |
+| `mobile-landscape` or `mobile` | 767         | Mobile landscape   |
+| `mobile-portrait` or `phone`   | 479         | Mobile portrait    |
 
 **Works in both formats:**
 
@@ -350,26 +350,26 @@ Instead of remembering pixel values, use Webflow's familiar breakpoint names:
   data-swiper-breakpoints-tablet-slides-per-view="2"
   data-swiper-breakpoints-mobile-slides-per-view="1"
 >
-
-<!-- JSON -->
-<div
-  data-swiper="root"
-  data-swiper-breakpoints='{
+  <!-- JSON -->
+  <div
+    data-swiper="root"
+    data-swiper-breakpoints='{
     "tablet": {"slidesPerView": 2},
     "mobile": {"slidesPerView": 1}
   }'
->
-
-<!-- Bulk JSON -->
-<div
-  data-swiper="root"
-  data-swiper-options='{
+  >
+    <!-- Bulk JSON -->
+    <div
+      data-swiper="root"
+      data-swiper-options='{
     "breakpoints": {
       "mobile": {"slidesPerView": 2},
       "tablet": {"slidesPerView": 3}
     }
   }'
->
+    ></div>
+  </div>
+</div>
 ```
 
 **Features:**
@@ -446,14 +446,14 @@ Export configuration from existing sliders in two formats:
 
 ```javascript
 // Shows prompt asking: "1) attribute format or 2) embed code"
-wfSwiper.exportConfig('[data-swiper="root"]');
+carousel.exportConfig('[data-swiper="root"]');
 
 // Works with specific selectors
-wfSwiper.exportConfig('[data-swiper-root-id="swiper-root-2"]');
+carousel.exportConfig('[data-swiper-root-id="swiper-root-2"]');
 
 // Or pass element directly
 const root = document.querySelector('.my-slider[data-swiper="root"]');
-wfSwiper.exportConfig(root);
+carousel.exportConfig(root);
 ```
 
 #### Direct Export (Skip Prompt)
@@ -462,10 +462,11 @@ wfSwiper.exportConfig(root);
 
 ```javascript
 // Exports as HTML-escaped JSON for pasting into data-swiper-options
-wfSwiper.exportConfigAttr('[data-swiper="root"]');
+carousel.exportConfigAttr('[data-swiper="root"]');
 ```
 
 Output format uses `&quot;` instead of `"` to work around Webflow's attribute value restrictions:
+
 ```html
 {&quot;slidesPerView&quot;: 3, &quot;spaceBetween&quot;: 20}
 ```
@@ -474,10 +475,11 @@ Output format uses `&quot;` instead of `"` to work around Webflow's attribute va
 
 ```javascript
 // Exports as JavaScript code for custom embeds
-wfSwiper.exportConfigEmbed('[data-swiper="root"]');
+carousel.exportConfigEmbed('[data-swiper="root"]');
 ```
 
 Output format is ready-to-paste JavaScript:
+
 ```javascript
 // Swiper initialization (paste into custom code embed)
 // Update the selector to match your .swiper element
@@ -485,13 +487,14 @@ const swiper = new Swiper('.swiper', {
   slidesPerView: 3,
   spaceBetween: 20,
   breakpoints: {
-    991: {slidesPerView: 2},
-    767: {slidesPerView: 1}
-  }
+    991: { slidesPerView: 2 },
+    767: { slidesPerView: 1 },
+  },
 });
 ```
 
 **What gets exported:**
+
 - All `data-swiper-*` attributes from the element
 - Bulk JSON from `data-swiper-options` if present
 - Merged into a clean config object
@@ -524,23 +527,23 @@ window.setupWebflowSwipers();
 
 ### Accessing Utilities
 
-The library exposes utility functions via `window.wfSwiper`:
+The library exposes utility functions via `window.carousel`:
 
 ```javascript
 // Interactive export with format prompt
-wfSwiper.exportConfig('[data-swiper="root"]');
+carousel.exportConfig('[data-swiper="root"]');
 
 // Direct exports (skip prompt)
-wfSwiper.exportConfigAttr('[data-swiper="root"]');   // → Attribute format
-wfSwiper.exportConfigEmbed('[data-swiper="root"]');  // → Embed format
+carousel.exportConfigAttr('[data-swiper="root"]'); // → Attribute format
+carousel.exportConfigEmbed('[data-swiper="root"]'); // → Embed format
 
 // Access the attribute parser directly
-const config = wfSwiper.parseOptionsFromAttributes(rootElement);
+const config = carousel.parseOptionsFromAttributes(rootElement);
 ```
 
 ### Customizing Attribute Names
 
-Edit `SWIPER_CONFIG` in `webflow-swiper.js`:
+Edit `SWIPER_CONFIG` in `carousel.js`:
 
 ```javascript
 const SWIPER_CONFIG = {

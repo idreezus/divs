@@ -29,7 +29,7 @@ export const SWIPER_MODULE_ATTRIBUTE_SELECTORS = {
 };
 
 // Prefix for all console logs
-export const SWIPER_LOG_PREFIX = '[WF Swiper]';
+export const SWIPER_LOG_PREFIX = '[Carousel]';
 
 // Maps friendly shorthand names to Webflow's default breakpoint pixel values
 // (these are max-width values)
