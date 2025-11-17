@@ -455,7 +455,7 @@ src/
 
 ## License
 
-[Your License Here]
+AGPL-3.0
 
 ## Credits
 

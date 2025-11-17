@@ -1,6 +1,6 @@
 {
   "name": "wf-swiper",
-  "version": "0.1.0-alpha",
+  "version": "0.1.0",
   "description": "A helper library for SwiperJS in Webflow",
   "main": "wf-swiper.js",
   "type": "module",
@@ -16,7 +16,7 @@
     "slider"
   ],
   "author": "Idrees Isse (https://github.com/idreezus)",
-  "license": "Apache-2.0",
+  "license": "AGPL-3.0",
   "peerDependencies": {
     "swiper": "^11.0.0"
   }

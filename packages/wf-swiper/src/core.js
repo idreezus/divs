@@ -215,6 +215,80 @@ function parseOptionsFromAttributes(root) {
       }
 
       options[parentKey][childKey] = value;
+    } else if (rawName.startsWith('breakpoints-')) {
+      // Handle breakpoint parameters with the data-swiper-breakpoints-{breakpoint}-{param} format, such as data-swiper-breakpoints-mobile-slides-per-view="1"
+      const afterPrefix = rawName.slice('breakpoints-'.length);
+      const firstDashIndex = afterPrefix.indexOf('-');
+
+      // Skip if no parameter specified (just "breakpoints-mobile")
+      if (firstDashIndex === -1) {
+        return;
+      }
+
+      const breakpointKey = afterPrefix.slice(0, firstDashIndex);
+      const paramPath = afterPrefix.slice(firstDashIndex + 1);
+
+      // Initialize breakpoints object if needed
+      if (typeof options.breakpoints === 'undefined') {
+        options.breakpoints = {};
+      }
+
+      // Initialize this specific breakpoint's key (the actual breakpoint value) if needed
+      if (typeof options.breakpoints[breakpointKey] === 'undefined') {
+        options.breakpoints[breakpointKey] = {};
+      }
+
+      // Check if param is a module param (e.g., "navigation-enabled", "autoplay-delay")
+      const breakpointModuleKey = SWIPER_MODULE_ATTRIBUTE_KEYS.find((key) =>
+        paramPath.startsWith(`${key}-`)
+      );
+
+      // Handle nested module parameters within breakpoints, such as data-swiper-breakpoints-mobile-navigation-enabled="false"
+      // Result: {breakpoints: {mobile: {navigation: {enabled: false}}}}
+      if (breakpointModuleKey) {
+        const parentKey = toCamelCase(breakpointModuleKey);
+        const childKey = toCamelCase(
+          paramPath.slice(breakpointModuleKey.length + 1)
+        );
+
+        // Validate parent module is allowed
+        if (!SWIPER_ALLOWED_PARAMS.includes(parentKey)) {
+          log(
+            'warn',
+            `Unknown breakpoint parameter "${rawName}" (module "${parentKey}" not recognized). This may be ignored by Swiper. Check the Swiper API docs.`,
+            root
+          );
+        }
+
+        if (
+          typeof options.breakpoints[breakpointKey][parentKey] === 'undefined'
+        ) {
+          options.breakpoints[breakpointKey][parentKey] = {};
+        }
+        if (options.breakpoints[breakpointKey][parentKey] === true) {
+          options.breakpoints[breakpointKey][parentKey] = { enabled: true };
+        }
+        if (options.breakpoints[breakpointKey][parentKey] === false) {
+          options.breakpoints[breakpointKey][parentKey] = { enabled: false };
+        }
+
+        options.breakpoints[breakpointKey][parentKey][childKey] = value;
+      } else {
+        // Simple breakpoint param that isn't nested under a module
+
+        const camelParam = toCamelCase(paramPath);
+
+        // Validate against allowed params to catch typos
+        if (!SWIPER_ALLOWED_PARAMS.includes(camelParam)) {
+          log(
+            'warn',
+            `Unknown breakpoint parameter "breakpoints-${breakpointKey}-${paramPath}" (as "${camelParam}"). This may be a typo and could be ignored by Swiper. Check the Swiper API docs for valid parameters.`,
+            root
+          );
+        }
+
+        options.breakpoints[breakpointKey][camelParam] = value;
+      }
     } else {
       // Not part of a known module, so it's a top-level option
       const camelKey = toCamelCase(rawName);
@@ -228,8 +302,7 @@ function parseOptionsFromAttributes(root) {
         );
       }
 
-      // Handle edge case: if setting a module param that's already a boolean, convert to object
-      // Example: data-swiper-navigation="true" then data-swiper-navigation-disabled-class="is-disabled"
+      // Handle edge case: if we previously saw a boolean for this module param, convert it to an object before adding more nested props
       if (
         options[camelKey] &&
         SWIPER_MODULE_ATTRIBUTE_KEYS.includes(rawName) &&

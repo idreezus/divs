@@ -284,9 +284,56 @@ This lets you use complex configs even when building with individual attributes.
 
 ---
 
-### Webflow Breakpoint Shorthands
+### Responsive Breakpoints
 
-Instead of remembering pixel values for breakpoints, use Webflow's familiar breakpoint names:
+Configure responsive behavior using **individual attributes** or **JSON**.
+
+#### Individual Breakpoint Attributes (Recommended)
+
+Use `data-swiper-breakpoints-{breakpoint}-{param}` for visual editing in Webflow Designer:
+
+```html
+<div
+  data-swiper="root"
+  data-swiper-breakpoints-mobile-slides-per-view="1"
+  data-swiper-breakpoints-tablet-slides-per-view="2"
+  data-swiper-breakpoints-1200-slides-per-view="3"
+>
+  <!-- structure -->
+</div>
+```
+
+**Nested module parameters work too:**
+
+```html
+<div
+  data-swiper="root"
+  data-swiper-breakpoints-mobile-navigation-enabled="false"
+  data-swiper-breakpoints-tablet-navigation-enabled="true"
+>
+  <!-- structure -->
+</div>
+```
+
+#### JSON Breakpoint Configuration
+
+For complex configurations or quick copy/paste:
+
+```html
+<div
+  data-swiper="root"
+  data-swiper-breakpoints='{
+    "768": {"slidesPerView": 2, "spaceBetween": 16},
+    "1024": {"slidesPerView": 3, "spaceBetween": 24}
+  }'
+>
+  <!-- structure -->
+</div>
+```
+
+#### Webflow Breakpoint Shorthands
+
+Instead of remembering pixel values, use Webflow's familiar breakpoint names:
 
 | Shorthand | Pixel Value | Webflow Breakpoint |
 |-----------|-------------|-------------------|
@@ -294,34 +341,29 @@ Instead of remembering pixel values for breakpoints, use Webflow's familiar brea
 | `mobile-landscape` or `mobile` | 767 | Mobile landscape |
 | `mobile-portrait` or `phone` | 479 | Mobile portrait |
 
-**Example:**
+**Works in both formats:**
 
 ```html
+<!-- Individual attributes -->
+<div
+  data-swiper="root"
+  data-swiper-breakpoints-tablet-slides-per-view="2"
+  data-swiper-breakpoints-mobile-slides-per-view="1"
+>
+
+<!-- JSON -->
 <div
   data-swiper="root"
   data-swiper-breakpoints='{
-    "tablet": {"slidesPerView": 2, "spaceBetween": 16},
-    "mobile": {"slidesPerView": 1, "spaceBetween": 8}
+    "tablet": {"slidesPerView": 2},
+    "mobile": {"slidesPerView": 1}
   }'
 >
-  <!-- structure -->
-</div>
-```
 
-**Features:**
-
-- **Case-insensitive**: `"Tablet"`, `"TABLET"`, `"tablet"` all work
-- **Mixable**: Combine shorthands with custom pixel values like `{"tablet": {...}, "600": {...}}`
-- **Aliases**: Use `"mobile"` for `"mobile-landscape"` or `"phone"` for `"mobile-portrait"`
-- **Works everywhere**: Both bulk JSON and individual breakpoints attributes
-
-**Works in bulk JSON too:**
-
-```html
+<!-- Bulk JSON -->
 <div
   data-swiper="root"
   data-swiper-options='{
-    "slidesPerView": 1,
     "breakpoints": {
       "mobile": {"slidesPerView": 2},
       "tablet": {"slidesPerView": 3}
@@ -329,6 +371,13 @@ Instead of remembering pixel values for breakpoints, use Webflow's familiar brea
   }'
 >
 ```
+
+**Features:**
+
+- **Case-insensitive**: `"Tablet"`, `"tablet"`, `mobile` all work
+- **Mixable**: Combine shorthands with custom pixel values (`tablet`, `600`, `1200`)
+- **Aliases**: Use `"mobile"` for mobile-landscape or `"phone"` for mobile-portrait
+- **Works everywhere**: Individual attributes, JSON attributes, bulk JSON
 
 ---
 
@@ -584,4 +633,4 @@ The script enforces strict structural requirements:
 
 ## License
 
-This helper script is provided as-is for use with Webflow and Swiper.js projects.
+AGPL-3.0

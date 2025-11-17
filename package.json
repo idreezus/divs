@@ -21,7 +21,7 @@
     "webflow"
   ],
   "author": "Idrees Isse (https://github.com/idreezus)",
-  "license": "Apache-2.0",
+  "license": "AGPL-3.0",
   "devDependencies": {
     "@eslint/js": "^9.38.0",
     "@rollup/plugin-terser": "^0.4.4",
