@@ -409,6 +409,38 @@ export function setupWebflowSwipers() {
   return instances;
 }
 
+// Private helper: Pure parser with no side effects
+function getSwiperConfig(selector) {
+  const root =
+    typeof selector === 'string' ? document.querySelector(selector) : selector;
+
+  if (!root) {
+    log('error', 'Element not found. Provide a valid selector or element.');
+    return null;
+  }
+
+  return parseOptionsFromAttributes(root);
+}
+
+// Helper to copy text to clipboard
+function copyToClipboard(text, successMessage) {
+  if (typeof copy === 'function') {
+    copy(text);
+    console.log(successMessage);
+  } else if (navigator.clipboard) {
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        console.log(successMessage);
+      })
+      .catch((err) => {
+        console.warn('Failed to copy to clipboard:', err);
+      });
+  } else {
+    console.log('Tip: Manually copy the output above.');
+  }
+}
+
 // Export utilities for runtime access and debugging
 if (typeof window !== 'undefined') {
   window.wfSwiper = window.wfSwiper || {};
@@ -416,41 +448,64 @@ if (typeof window !== 'undefined') {
     // Direct access to the parser for advanced use cases
     parseOptionsFromAttributes,
 
-    // Convenience function to export config with clipboard support
-    exportConfig: function (selector) {
-      const root =
-        typeof selector === 'string'
-          ? document.querySelector(selector)
-          : selector;
+    // Export as Webflow-safe attribute (HTML-escaped JSON)
+    exportConfigAttr: function (selector) {
+      const config = getSwiperConfig(selector);
+      if (!config) return null;
 
-      if (!root) {
-        log('error', 'Element not found. Provide a valid selector or element.');
-        return null;
-      }
+      const webflowSafeJson = JSON.stringify(config, null, 2).replace(
+        /"/g,
+        '&quot;'
+      );
 
-      const config = parseOptionsFromAttributes(root);
-      const json = JSON.stringify(config, null, 2);
-
-      console.log('Swiper Config:\n', json);
-
-      // Auto-copy to clipboard
-      if (typeof copy === 'function') {
-        copy(json);
-        console.log('Copied to clipboard!');
-      } else if (navigator.clipboard) {
-        navigator.clipboard
-          .writeText(json)
-          .then(() => {
-            console.log('Copied to clipboard!');
-          })
-          .catch((err) => {
-            console.warn('Failed to copy to clipboard:', err);
-          });
-      } else {
-        console.log('Tip: Manually copy the JSON above.');
-      }
+      console.log('Swiper Config (Webflow-safe format):\n', webflowSafeJson);
+      copyToClipboard(
+        webflowSafeJson,
+        'Copied to clipboard! Paste into data-swiper-options attribute.'
+      );
 
       return config;
+    },
+
+    // Export as custom embed code (JavaScript template)
+    exportConfigEmbed: function (selector) {
+      const config = getSwiperConfig(selector);
+      if (!config) return null;
+
+      // Convert to JS object literal: unquote valid identifiers and numeric keys
+      const jsConfig = JSON.stringify(config, null, 2).replace(
+        /"([a-zA-Z_$][a-zA-Z0-9_$]*|\d+)"\s*:/g,
+        '$1:'
+      );
+
+      const embedCode = `// Swiper initialization (paste into custom code embed)
+// Update the selector to match your .swiper element
+const swiper = new Swiper('.swiper', ${jsConfig});`;
+
+      console.log(embedCode);
+      copyToClipboard(
+        embedCode,
+        'Copied to clipboard! Paste into a custom code embed.'
+      );
+
+      return config;
+    },
+
+    // Interactive export with prompt
+    exportConfig: function (selector) {
+      const choice = window.prompt(
+        'Export format?\n1) data-swiper-options attribute\n2) custom embed code'
+      );
+
+      if (choice === '1') {
+        return window.wfSwiper.exportConfigAttr(selector);
+      }
+      if (choice === '2') {
+        return window.wfSwiper.exportConfigEmbed(selector);
+      }
+
+      console.log('Export cancelled.');
+      return null;
     },
   });
 }
