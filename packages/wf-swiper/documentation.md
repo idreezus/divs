@@ -266,6 +266,52 @@ Configure responsive behavior with breakpoints as JSON in an individual attribut
 
 Breakpoint keys are viewport widths in pixels. Values are configuration objects applied at that breakpoint and above.
 
+#### Webflow Breakpoint Shorthands
+
+Instead of remembering pixel values, use Webflow's familiar breakpoint names:
+
+| Shorthand | Pixel Value | Webflow Breakpoint |
+|-----------|-------------|-------------------|
+| `tablet` | 991 | Tablet |
+| `mobile-landscape` or `mobile` | 767 | Mobile landscape |
+| `mobile-portrait` or `phone` | 479 | Mobile portrait |
+
+**Example:**
+
+```html
+<div
+  data-swiper="root"
+  data-swiper-breakpoints='{
+    "tablet": {"slidesPerView": 2, "spaceBetween": 16},
+    "mobile": {"slidesPerView": 1, "spaceBetween": 8}
+  }'
+>
+  <!-- structure -->
+</div>
+```
+
+**Features:**
+
+- **Case-insensitive**: `"Tablet"`, `"TABLET"`, `"tablet"` all work
+- **Mixable**: Combine shorthands with custom pixel values like `{"tablet": {...}, "600": {...}}`
+- **Aliases**: Use `"mobile"` for `"mobile-landscape"` or `"phone"` for `"mobile-portrait"`
+- **Works everywhere**: Both bulk JSON and individual breakpoints attributes
+
+**Works in bulk JSON too:**
+
+```html
+<div
+  data-swiper="root"
+  data-swiper-options='{
+    "slidesPerView": 1,
+    "breakpoints": {
+      "mobile": {"slidesPerView": 2},
+      "tablet": {"slidesPerView": 3}
+    }
+  }'
+>
+```
+
 > [!NOTE]
 > Complex options like breakpoints, free mode configuration, and effect settings work best as JSON in individual attributes or within bulk `data-swiper-options`.
 
@@ -300,13 +346,15 @@ The root ID counter resets on each run for consistent IDs.
 
 ### Exporting Configuration
 
-Export configuration from existing sliders to reuse elsewhere:
+Export configuration from existing sliders in two formats:
+
+#### Interactive Export (Prompts for Format)
 
 ```javascript
-// Export from first slider (auto-copies to clipboard)
+// Shows prompt asking: "Type 1 for attribute format, 2 for embed code"
 wfSwiper.exportConfig('[data-swiper="root"]');
 
-// Export from specific slider by ID
+// Works with specific selectors
 wfSwiper.exportConfig('[data-swiper-root-id="swiper-root-2"]');
 
 // Or pass element directly
@@ -314,7 +362,49 @@ const root = document.querySelector('.my-slider[data-swiper="root"]');
 wfSwiper.exportConfig(root);
 ```
 
-This parses all `data-swiper-*` attributes, includes bulk JSON if present, merges into a clean configuration object, and copies to clipboard for pasting into another element's `data-swiper-options` attribute.
+#### Direct Export (Skip Prompt)
+
+**For Webflow Attributes:**
+
+```javascript
+// Exports as HTML-escaped JSON for pasting into data-swiper-options
+wfSwiper.exportConfigAttr('[data-swiper="root"]');
+```
+
+Output format uses `&quot;` instead of `"` to work around Webflow's attribute value restrictions:
+```html
+{&quot;slidesPerView&quot;: 3, &quot;spaceBetween&quot;: 20}
+```
+
+Paste this directly into the `data-swiper-options` attribute in Webflow Designer. The browser automatically converts `&quot;` back to `"` when JavaScript reads the attribute.
+
+**For Custom Code Embeds:**
+
+```javascript
+// Exports as JavaScript code for custom embeds
+wfSwiper.exportConfigEmbed('[data-swiper="root"]');
+```
+
+Output format is ready-to-paste JavaScript with unquoted object keys:
+```javascript
+// Swiper initialization (paste into custom code embed)
+// Update the selector to match your .swiper element
+const swiper = new Swiper('.swiper', {
+  slidesPerView: 3,
+  spaceBetween: 20,
+  breakpoints: {
+    991: {slidesPerView: 2},
+    767: {slidesPerView: 1}
+  }
+});
+```
+
+**What gets exported:**
+- All `data-swiper-*` attributes from the element
+- Bulk JSON from `data-swiper-options` if present
+- Merged into a clean config object
+- Breakpoint shorthands converted to pixel values for portability
+- Auto-copied to clipboard
 
 ## FAQ
 
@@ -341,7 +431,11 @@ Yes. Start with bulk JSON in `data-swiper-options` for base configuration, then 
 </Accordion>
 
 <Accordion title="How do I debug slider configuration?">
-Access the SwiperJS instance via `root.swiperInstance` and inspect `swiper.params` to see applied configuration. Use `wfSwiper.exportConfig()` to export current configuration as JSON for debugging or reuse.
+Access the SwiperJS instance via `root.swiperInstance` and inspect `swiper.params` to see applied configuration. Use `wfSwiper.exportConfig()` to export current configuration in either attribute format (for pasting into Webflow) or embed format (for custom code). Use `wfSwiper.exportConfigAttr()` or `wfSwiper.exportConfigEmbed()` to skip the prompt and export directly.
+</Accordion>
+
+<Accordion title="Can I use Webflow breakpoint names instead of pixel values?">
+Yes! Use friendly names like `"tablet"` (991px), `"mobile"` (767px), or `"phone"` (479px) in your breakpoints configuration. These shorthands are case-insensitive and can be mixed with custom pixel values. For example: `{"tablet": {...}, "600": {...}}`. This makes breakpoints easier to remember and more aligned with Webflow's design system.
 </Accordion>
 
 </div>

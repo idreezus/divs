@@ -11,6 +11,9 @@ const packageJson = JSON.parse(
   readFileSync(join(currentDir, 'package.json'), 'utf-8')
 );
 const version = packageJson.version;
+const description = packageJson.description;
+const author = packageJson.author;
+const license = packageJson.license;
 
 // Determine build mode: 'release' builds to versioned folder + latest, 'dev' builds only to latest
 const isRelease = process.env.BUILD_MODE === 'release';
@@ -24,12 +27,24 @@ const outputPaths = isRelease
 
 // Helper function to create output configurations for a given path
 function createOutputs(basePath) {
+  // Create banner comment with package information
+  const banner = `/*!
+ * Marquee v${version}
+ * ${description}
+ * 
+ * Part of <divs> by Idreeszus, a component library → (divs.idreezus.com)
+ * 
+ * (c) ${new Date().getFullYear()} ${author}
+ * Released under ${license}
+ */`;
+
   return [
     {
       file: `${basePath}marquee.js`,
       format: 'iife',
       name: 'Marquee',
       globals: { gsap: 'gsap' },
+      banner: banner,
     },
     {
       file: `${basePath}marquee.min.js`,
@@ -37,6 +52,7 @@ function createOutputs(basePath) {
       name: 'Marquee',
       globals: { gsap: 'gsap' },
       plugins: [terser()],
+      banner: banner,
     },
   ];
 }

@@ -5,6 +5,7 @@ import {
   SWIPER_MODULE_ATTRIBUTE_SELECTORS,
   SWIPER_ALLOWED_PARAMS,
   SWIPER_LOG_PREFIX,
+  SWIPER_BREAKPOINT_SHORTHANDS,
 } from './config.js';
 
 // Tracks unique IDs for root elements to isolate scope
@@ -148,6 +149,27 @@ function deepMerge(target, source) {
     }
   });
   return target;
+}
+
+// Transforms Webflow breakpoint shorthands to pixel values
+// Example: {tablet: {...}, mobile: {...}} → {991: {...}, 767: {...}}
+function transformBreakpointShorthands(config) {
+  if (!config.breakpoints || !isObject(config.breakpoints)) {
+    return config;
+  }
+
+  const transformed = {};
+
+  Object.keys(config.breakpoints).forEach((key) => {
+    // Check if key is a shorthand (case-insensitive)
+    const lowerKey = key.toLowerCase();
+    const pixelValue = SWIPER_BREAKPOINT_SHORTHANDS[lowerKey] || key;
+
+    transformed[pixelValue] = config.breakpoints[key];
+  });
+
+  config.breakpoints = transformed;
+  return config;
 }
 
 // Takes all the data-* attributes on the root element and converts them into a Swiper configuration object so users can configure without JavaScript
@@ -387,10 +409,11 @@ export function setupWebflowSwipers() {
 
     // Parse the user and module options
     const userOptions = parseOptionsFromAttributes(root);
-    const moduleOptions = buildModuleOptions(root, rootId, userOptions);
+    const transformedOptions = transformBreakpointShorthands(userOptions);
+    const moduleOptions = buildModuleOptions(root, rootId, transformedOptions);
 
     // Deep merge to preserve nested properties in both objects
-    const swiperOptions = deepMerge({ ...userOptions }, moduleOptions);
+    const swiperOptions = deepMerge({ ...transformedOptions }, moduleOptions);
 
     // Initialize Swiper instance
     try {
@@ -457,11 +480,9 @@ if (typeof window !== 'undefined') {
         /"/g,
         '&quot;'
       );
-
-      console.log('Swiper Config (Webflow-safe format):\n', webflowSafeJson);
       copyToClipboard(
         webflowSafeJson,
-        'Copied to clipboard! Paste into data-swiper-options attribute.'
+        'Copied to clipboard! You can paste this into a data-swiper-options attribute.'
       );
 
       return config;
@@ -478,11 +499,15 @@ if (typeof window !== 'undefined') {
         '$1:'
       );
 
-      const embedCode = `// Swiper initialization (paste into custom code embed)
-// Update the selector to match your .swiper element
-const swiper = new Swiper('.swiper', ${jsConfig});`;
+      const embedCode = `<script>
+// wf-swiper library by Idrees Isse (divs.idreezus.com)
+// This runs after Webflow finishes loading the DOM structure
+document.addEventListener('DOMContentLoaded', () => {
+  // Update YOUR_SELECTOR_HERE so it matches the swiper element in the project
+  const swiper = new Swiper('YOUR_SELECTOR_HERE', ${jsConfig});
+});
+</script>`;
 
-      console.log(embedCode);
       copyToClipboard(
         embedCode,
         'Copied to clipboard! Paste into a custom code embed.'
@@ -494,7 +519,7 @@ const swiper = new Swiper('.swiper', ${jsConfig});`;
     // Interactive export with prompt
     exportConfig: function (selector) {
       const choice = window.prompt(
-        'Export format?\n1) data-swiper-options attribute\n2) custom embed code'
+        'Export format?\n1) Pasting into the data-swiper-options attribute\n2) Pasting into a custom code embed or Javascript'
       );
 
       if (choice === '1') {

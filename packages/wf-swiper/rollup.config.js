@@ -11,6 +11,9 @@ const packageJson = JSON.parse(
   readFileSync(join(currentDir, 'package.json'), 'utf-8')
 );
 const version = packageJson.version;
+const description = packageJson.description;
+const author = packageJson.author;
+const license = packageJson.license;
 
 // Build output paths based on mode
 // Dev mode: only latest/
@@ -22,21 +25,34 @@ const outputPaths = isRelease
 
 // Helper function to create output configurations for a given path.
 function createOutputs(basePath) {
+  // Create banner comment with package information
+  const banner = `/*!
+ * WFSwiper v${version}
+ * ${description}
+ * 
+ * Part of <divs> by Idreeszus, a component library → (divs.idreezus.com)
+ * 
+ * (c) ${new Date().getFullYear()} ${author}
+ * Released under ${license}
+ */`;
+
   return [
     {
       file: `${basePath}wf-swiper.js`,
       format: 'iife',
-      name: 'WfSwiper',
+      name: 'WFSwiper',
       globals: { swiper: 'Swiper' },
       sourcemap: true,
+      banner: banner,
     },
     {
       file: `${basePath}wf-swiper.min.js`,
       format: 'iife',
-      name: 'WfSwiper',
+      name: 'WFSwiper',
       globals: { swiper: 'Swiper' },
       sourcemap: true,
       plugins: [terser()],
+      banner: banner,
     },
   ];
 }

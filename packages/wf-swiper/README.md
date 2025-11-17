@@ -284,6 +284,54 @@ This lets you use complex configs even when building with individual attributes.
 
 ---
 
+### Webflow Breakpoint Shorthands
+
+Instead of remembering pixel values for breakpoints, use Webflow's familiar breakpoint names:
+
+| Shorthand | Pixel Value | Webflow Breakpoint |
+|-----------|-------------|-------------------|
+| `tablet` | 991 | Tablet |
+| `mobile-landscape` or `mobile` | 767 | Mobile landscape |
+| `mobile-portrait` or `phone` | 479 | Mobile portrait |
+
+**Example:**
+
+```html
+<div
+  data-swiper="root"
+  data-swiper-breakpoints='{
+    "tablet": {"slidesPerView": 2, "spaceBetween": 16},
+    "mobile": {"slidesPerView": 1, "spaceBetween": 8}
+  }'
+>
+  <!-- structure -->
+</div>
+```
+
+**Features:**
+
+- **Case-insensitive**: `"Tablet"`, `"TABLET"`, `"tablet"` all work
+- **Mixable**: Combine shorthands with custom pixel values like `{"tablet": {...}, "600": {...}}`
+- **Aliases**: Use `"mobile"` for `"mobile-landscape"` or `"phone"` for `"mobile-portrait"`
+- **Works everywhere**: Both bulk JSON and individual breakpoints attributes
+
+**Works in bulk JSON too:**
+
+```html
+<div
+  data-swiper="root"
+  data-swiper-options='{
+    "slidesPerView": 1,
+    "breakpoints": {
+      "mobile": {"slidesPerView": 2},
+      "tablet": {"slidesPerView": 3}
+    }
+  }'
+>
+```
+
+---
+
 ## Complete Example
 
 Here's a full-featured slider with autoplay, pagination, and navigation:
@@ -343,28 +391,63 @@ console.log(swiper.params);
 
 ### Exporting Configuration
 
-Export the configuration from an existing slider to reuse it elsewhere:
+Export configuration from existing sliders in two formats:
+
+#### Interactive Export (Prompts for Format)
 
 ```javascript
-// Export config from any slider (auto-copies to clipboard)
+// Shows prompt asking: "1) attribute format or 2) embed code"
 wfSwiper.exportConfig('[data-swiper="root"]');
 
-// Export from a specific slider
+// Works with specific selectors
 wfSwiper.exportConfig('[data-swiper-root-id="swiper-root-2"]');
 
-// Or pass an element directly
+// Or pass element directly
 const root = document.querySelector('.my-slider[data-swiper="root"]');
 wfSwiper.exportConfig(root);
 ```
 
-This will:
-- Parse all `data-swiper-*` attributes from the element
-- Include `data-swiper-options` bulk JSON if present
-- Merge everything into a clean config object
-- Pretty-print the JSON to the console
-- Auto-copy to clipboard for easy pasting
+#### Direct Export (Skip Prompt)
 
-**Use case:** Copy the config from one slider and paste it into another element's `data-swiper-options` attribute to quickly duplicate configurations.
+**For Webflow Attributes:**
+
+```javascript
+// Exports as HTML-escaped JSON for pasting into data-swiper-options
+wfSwiper.exportConfigAttr('[data-swiper="root"]');
+```
+
+Output format uses `&quot;` instead of `"` to work around Webflow's attribute value restrictions:
+```html
+{&quot;slidesPerView&quot;: 3, &quot;spaceBetween&quot;: 20}
+```
+
+**For Custom Code Embeds:**
+
+```javascript
+// Exports as JavaScript code for custom embeds
+wfSwiper.exportConfigEmbed('[data-swiper="root"]');
+```
+
+Output format is ready-to-paste JavaScript:
+```javascript
+// Swiper initialization (paste into custom code embed)
+// Update the selector to match your .swiper element
+const swiper = new Swiper('.swiper', {
+  slidesPerView: 3,
+  spaceBetween: 20,
+  breakpoints: {
+    991: {slidesPerView: 2},
+    767: {slidesPerView: 1}
+  }
+});
+```
+
+**What gets exported:**
+- All `data-swiper-*` attributes from the element
+- Bulk JSON from `data-swiper-options` if present
+- Merged into a clean config object
+- Breakpoint shorthands converted to pixel values
+- Auto-copied to clipboard
 
 ### Root ID
 
@@ -395,8 +478,12 @@ window.setupWebflowSwipers();
 The library exposes utility functions via `window.wfSwiper`:
 
 ```javascript
-// Export configuration (see Debugging section)
+// Interactive export with format prompt
 wfSwiper.exportConfig('[data-swiper="root"]');
+
+// Direct exports (skip prompt)
+wfSwiper.exportConfigAttr('[data-swiper="root"]');   // → Attribute format
+wfSwiper.exportConfigEmbed('[data-swiper="root"]');  // → Embed format
 
 // Access the attribute parser directly
 const config = wfSwiper.parseOptionsFromAttributes(rootElement);

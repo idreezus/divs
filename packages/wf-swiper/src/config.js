@@ -31,8 +31,18 @@ export const SWIPER_MODULE_ATTRIBUTE_SELECTORS = {
 // Prefix for all console logs
 export const SWIPER_LOG_PREFIX = '[WF Swiper]';
 
+// Maps friendly shorthand names to Webflow's default breakpoint pixel values
+// (these are max-width values)
+export const SWIPER_BREAKPOINT_SHORTHANDS = {
+  tablet: '991', // Tablet and below
+  'mobile-landscape': '767', // Mobile landscape and below
+  'mobile-portrait': '479', // Mobile portrait
+  mobile: '767', // Alias for mobile-landscape
+  phone: '479', // Alias for mobile-portrait
+};
+
 // ------------------------------------------------------------
-// Don't change anything below here
+// Note to self: Don't change anything below here
 // ------------------------------------------------------------
 
 // Mandatory classes required by SwiperJS's expected structure that this script abstracts and adds to the DOM
