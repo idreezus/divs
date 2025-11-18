@@ -28,20 +28,6 @@ export function detectActiveItem(instance) {
     }
   );
 
-  console.log('[DEBUG detectActiveItem]', {
-    scrollLeft,
-    currentIndex,
-    activeIndex,
-    changed: activeIndex !== currentIndex,
-    startInset,
-    endInset,
-    itemPositions: itemPositions.map((p, i) => ({
-      index: i,
-      left: p.left,
-      width: p.width,
-    })),
-  });
-
   // Only update if the active item has changed
   if (activeIndex !== currentIndex) {
     state.currentIndex = activeIndex;
@@ -62,14 +48,6 @@ export function updateButtonStates(instance) {
   // Detect edges with tolerance for fractional pixels
   const atStart = scrollLeft <= TOLERANCE.EDGE_DETECTION;
   const atEnd = scrollLeft >= maxScroll - TOLERANCE.EDGE_DETECTION;
-
-  console.log('[DEBUG updateButtonStates]', {
-    scrollLeft,
-    maxScroll,
-    atStart,
-    atEnd,
-    currentIndex: state.currentIndex,
-  });
 
   // Update prev button state
   if (prevBtn) {
@@ -129,11 +107,6 @@ export function calculateNextIndex(instance) {
   const { state, items } = instance;
   const { currentIndex } = state;
   const nextIndex = Math.min(currentIndex + 1, items.length - 1);
-  console.log('[DEBUG calculateNextIndex]', {
-    currentIndex,
-    nextIndex,
-    itemsLength: items.length,
-  });
   return nextIndex;
 }
 
@@ -142,10 +115,6 @@ export function calculatePrevIndex(instance) {
   const { state } = instance;
   const { currentIndex } = state;
   const prevIndex = Math.max(currentIndex - 1, 0);
-  console.log('[DEBUG calculatePrevIndex]', {
-    currentIndex,
-    prevIndex,
-  });
   return prevIndex;
 }
 
@@ -153,8 +122,6 @@ export function calculatePrevIndex(instance) {
 export function scrollToItem(instance, index) {
   const { track, items, state, snapAlign } = instance;
   const { CLASSES, TIMING } = CONFIG;
-
-  console.log('[DEBUG scrollToItem] called with index:', index);
 
   const targetItem = items[index];
   if (!targetItem) {
@@ -166,12 +133,6 @@ export function scrollToItem(instance, index) {
   state.isAnimating = true;
   track.classList.add(CLASSES.ANIMATING);
   track.classList.add(CLASSES.SNAP_DISABLED);
-
-  console.log('[DEBUG scrollToItem]', {
-    index,
-    snapAlign,
-    currentScrollLeft: track.scrollLeft,
-  });
 
   // Browser handles positioning with respect to scroll-padding and scroll-margin
   targetItem.scrollIntoView({
@@ -195,29 +156,18 @@ export function scrollToItem(instance, index) {
 // Handles next button click
 export function handleNext(instance) {
   const { state } = instance;
-  console.log('[DEBUG handleNext] called', {
-    isAnimating: state.isAnimating,
-    currentIndex: state.currentIndex,
-  });
   if (state.isAnimating) return;
 
   const targetIndex = calculateNextIndex(instance);
-  console.log('[DEBUG handleNext] scrolling to:', targetIndex);
   scrollToItem(instance, targetIndex);
 }
 
 // Handles previous button click
 export function handlePrev(instance) {
-  const { state, prevBtn } = instance;
-  console.log('[DEBUG handlePrev] called', {
-    isAnimating: state.isAnimating,
-    currentIndex: state.currentIndex,
-    buttonDisabled: prevBtn ? prevBtn.disabled : 'no button',
-  });
+  const { state } = instance;
   if (state.isAnimating) return;
 
   const targetIndex = calculatePrevIndex(instance);
-  console.log('[DEBUG handlePrev] scrolling to:', targetIndex);
   scrollToItem(instance, targetIndex);
 }
 

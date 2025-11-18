@@ -22,7 +22,7 @@ function autoInit() {
   });
 
   if (instances.size > 0) {
-    console.log(`Carousel: Initialized ${instances.size} instance(s)`);
+    // Carousel instances initialized
   }
 }
 

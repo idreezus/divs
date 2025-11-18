@@ -106,18 +106,6 @@ export function findActiveIndex(
     }
   });
 
-  console.log('[DEBUG findActiveIndex]', {
-    scrollLeft,
-    containerWidth,
-    snapAlign,
-    referencePoint,
-    startInset,
-    endInset,
-    distances,
-    closestIndex,
-    minDistance,
-  });
-
   return closestIndex;
 }
 
@@ -242,14 +230,4 @@ export function calculateDimensions(instance) {
 
   // Store snap alignment on instance for reference
   instance.snapAlign = config.align;
-
-  console.log('[DEBUG calculateDimensions] Dimensions calculated:', {
-    gap,
-    containerWidth,
-    scrollWidth,
-    snapAlign: instance.snapAlign,
-    startInset,
-    endInset,
-    itemCount: itemPositions.length,
-  });
 }

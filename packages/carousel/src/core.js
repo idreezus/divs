@@ -35,14 +35,6 @@ function findElements(instance) {
 
   // Find required item elements
   const items = [...container.querySelectorAll(SELECTORS.ITEM)];
-  console.log('[DEBUG findElements] Items found:', {
-    count: items.length,
-    items: items.map((item, i) => ({
-      index: i,
-      textContent: item.textContent?.substring(0, 30),
-      classList: Array.from(item.classList),
-    })),
-  });
   if (items.length === 0) {
     console.warn(
       `Carousel ${id}: No items found. Expected at least one element with data-carousel="item".`
@@ -169,13 +161,6 @@ function init(instance) {
 
   // Set initial UI state
   updateUI(instance);
-
-  console.log('[DEBUG init] Carousel initialized', {
-    id: instance.id,
-    currentIndex: instance.state.currentIndex,
-    itemCount: instance.items.length,
-    scrollLeft: instance.track.scrollLeft,
-  });
 
   return true;
 }

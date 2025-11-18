@@ -14,6 +14,8 @@ GSAP-powered marquee component for seamless infinite scrolling. Features truly c
 
 ### Carousel
 
+Lightweight, CSS-first carousel library built on native scroll snap for smooth GPU-accelerated scrolling. Zero dependencies with simple data-attribute configuration, auto-generated pagination dots, optional keyboard navigation, and support for variable-width items. Features responsive design with automatic recalculation, chainable programmatic API, event system, and state classes for custom styling. Perfect for product showcases, image galleries, testimonials, and card carousels.
+
 **[Documentation](https://divs.idreezus.com/components/carousel)**
 
 ## License

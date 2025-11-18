@@ -1,18 +1,20 @@
 # Carousel
 
-A lightweight, CSS-first carousel library built on native browser scroll snap.
+A lightweight, CSS-first carousel library built on native browser scroll snap for smooth, GPU-accelerated scrolling.
 
 ## Features
 
-- Native CSS scroll snap for smooth, GPU-accelerated scrolling
-- Uses `scrollIntoView()` for programmatic navigation
-- Respects `scroll-padding` and `scroll-margin` for flexible positioning
+- Smooth, GPU-accelerated scrolling with no JavaScript transforms
+- Zero dependencies, framework-agnostic vanilla JavaScript
+- Simple data-attribute configuration with auto-initialization
+- Auto-generated pagination dots with active state tracking
 - Optional keyboard navigation (Arrow keys, Home, End)
-- Pagination with auto-generated dots
-- Multiple carousels per page
-- Responsive with automatic recalculation
+- Responsive design with automatic recalculation
 - Works with variable-width items
-- Framework-agnostic, zero dependencies
+- Multiple independent carousels per page
+- Flexible positioning with CSS scroll-padding and scroll-margin
+- Chainable programmatic API with event system
+- State classes for custom styling (active, disabled, scrolling, animating)
 
 ## Installation
 
