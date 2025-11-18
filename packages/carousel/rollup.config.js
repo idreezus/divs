@@ -1,5 +1,5 @@
 import terser from '@rollup/plugin-terser';
-import { readFileSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
@@ -23,6 +23,27 @@ const outputPaths = isRelease
   ? [`../../dist/carousel/v${version}/`, `../../dist/carousel/latest/`]
   : [`../../dist/carousel/latest/`];
 
+// Custom plugin to copy CSS file to dist folders
+function cssPlugin() {
+  return {
+    name: 'css-copy',
+    writeBundle() {
+      const cssSource = join(currentDir, 'src/carousel.css');
+      const cssContent = readFileSync(cssSource, 'utf-8');
+
+      outputPaths.forEach((outputPath) => {
+        const fullPath = join(currentDir, outputPath);
+        mkdirSync(fullPath, { recursive: true });
+
+        // Copy CSS file as-is
+        writeFileSync(join(fullPath, 'carousel.css'), cssContent, 'utf-8');
+      });
+
+      console.log('CSS file copied to dist');
+    },
+  };
+}
+
 // Helper function to create output configurations for a given path.
 function createOutputs(basePath) {
   // Create banner comment with package information
@@ -43,7 +64,6 @@ function createOutputs(basePath) {
       file: `${basePath}carousel.js`,
       format: 'iife',
       name: 'Carousel',
-      globals: { swiper: 'Swiper' },
       sourcemap: true,
       banner: banner,
     },
@@ -51,7 +71,6 @@ function createOutputs(basePath) {
       file: `${basePath}carousel.min.js`,
       format: 'iife',
       name: 'Carousel',
-      globals: { swiper: 'Swiper' },
       sourcemap: true,
       plugins: [terser()],
       banner: banner,
@@ -63,7 +82,7 @@ function createOutputs(basePath) {
 const mainConfig = {
   input: 'src/carousel.js',
   output: outputPaths.flatMap(createOutputs),
-  external: ['swiper'],
+  plugins: [cssPlugin()],
 };
 
 export default [mainConfig];

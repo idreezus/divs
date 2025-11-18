@@ -14,8 +14,6 @@ GSAP-powered marquee component for seamless infinite scrolling. Features truly c
 
 ### Carousel
 
-SwiperJS helper for Webflow that eliminates the need to touch Javascript or deal with Swiper's required CSS classes (`.swiper`, `.swiper-wrapper`, `.swiper-slide`). Configure sliders entirely with data attributes, supports all SwiperJS modules and effects, handles multiple independent sliders per page, and includes Webflow-friendly breakpoint shorthands. Ideal for product galleries, testimonials, and any carousel implementation.
-
 **[Documentation](https://divs.idreezus.com/components/carousel)**
 
 ## License

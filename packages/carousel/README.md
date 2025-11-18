@@ -1,642 +1,423 @@
-# Carousel Helper
+# Carousel
 
-A lightweight JavaScript helper that makes it easy to use [Swiper](https://swiperjs.com/) sliders in Webflow without fighting the designer's class system.
+A lightweight, CSS-first carousel library built on native browser scroll snap.
 
-## Why Use This?
+## Features
 
-**The Problem:**
-Webflow integrates CSS classes strongly to the designer experience, making it annoying to work with Swiper's required class names (`.swiper`, `.swiper-wrapper`, `.swiper-slide`, etc.). Manually adding these classes degrades the Webflow experience and makes elements less reusable and more annoying to work with.
+- Native CSS scroll snap for smooth, GPU-accelerated scrolling
+- Uses `scrollIntoView()` for programmatic navigation
+- Respects `scroll-padding` and `scroll-margin` for flexible positioning
+- Optional keyboard navigation (Arrow keys, Home, End)
+- Pagination with auto-generated dots
+- Multiple carousels per page
+- Responsive with automatic recalculation
+- Works with variable-width items
+- Framework-agnostic, zero dependencies
 
-**The Solution:**
-This helper lets you use semantic `data-swiper="..."` attributes instead of classes. The script:
+## Installation
 
-- Automatically adds Swiper's required classes at runtime
-- Parses configuration directly from HTML attributes OR bulk JSON
-- Auto-initializes all sliders on page load
-- Supports multiple independent sliders with scoped selectors
-- Works with all Swiper modules (navigation, pagination, scrollbar, etc.)
-- Enables quick copy/paste from Swiper docs with visual overrides
-
----
-
-## Quick Start
-
-### 1. Include Scripts
-
-Add these scripts before your closing `</body>` tag:
+Include the stylesheet and script:
 
 ```html
-<!-- Swiper's official bundle -->
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-
-<!-- This helper script -->
-<script src="path/to/carousel.js"></script>
+<link rel="stylesheet" href="path/to/src/carousel.css" />
+<script type="module" src="path/to/src/index.js"></script>
 ```
 
-### 2. Basic Example
+## Basic Usage
+
+### HTML Structure
 
 ```html
-<div
-  data-swiper="root"
-  data-swiper-slides-per-view="2"
-  data-swiper-space-between="20"
->
-  <div data-swiper="swiper">
-    <div data-swiper="wrapper">
-      <div data-swiper="slide">Slide 1</div>
-      <div data-swiper="slide">Slide 2</div>
-      <div data-swiper="slide">Slide 3</div>
-    </div>
+<div data-carousel="container">
+  <div data-carousel="track">
+    <div data-carousel="item">Item 1</div>
+    <div data-carousel="item">Item 2</div>
+    <div data-carousel="item">Item 3</div>
   </div>
-  <button data-swiper-navigation="prev">←</button>
-  <button data-swiper-navigation="next">→</button>
-  <div data-swiper-pagination="el"></div>
+
+  <button data-carousel="prev">Previous</button>
+  <button data-carousel="next">Next</button>
+
+  <div data-carousel="pagination">
+    <button data-carousel="dot"></button>
+  </div>
 </div>
 ```
 
-That's it! The slider will auto-initialize when the page loads.
+### CSS
 
----
+The library handles scroll behavior. You control the visuals:
 
-## How It Works
+```css
+/* Required: Set item dimensions */
+[data-carousel='item'] {
+  width: 300px;
+}
 
-### Author Workflow
+/* Required: Set spacing between items */
+[data-carousel='track'] {
+  gap: 16px;
+}
 
-1. **Wrap in a root** – Add `data-swiper="root"` to your outermost container
-2. **Add structure** – Mark up the required Swiper elements with attributes
-3. **Configure on the root** – Add all `data-swiper-*` options to the root element
-4. **Add controls** – Optional: Add navigation buttons, pagination, scrollbar
-5. **Publish** – The script handles the rest automatically
+/* Optional: Style buttons and dots */
+[data-carousel='prev'],
+[data-carousel='next'] {
+  /* Your button styles */
+}
 
-**No JavaScript required.** Everything is configured through HTML attributes.
+[data-carousel='dot'] {
+  /* Your dot styles */
+}
 
----
-
-## Attribute Reference
-
-### Required Structure
-
-These four attributes create the basic Swiper structure:
-
-| Element     | Attribute               | Description                                | Gets Class        |
-| ----------- | ----------------------- | ------------------------------------------ | ----------------- |
-| **Root**    | `data-swiper="root"`    | Outermost container. All config goes here. | —                 |
-| **Swiper**  | `data-swiper="swiper"`  | Swiper's main container                    | `.swiper`         |
-| **Wrapper** | `data-swiper="wrapper"` | Slides wrapper                             | `.swiper-wrapper` |
-| **Slide**   | `data-swiper="slide"`   | Individual slides (repeatable)             | `.swiper-slide`   |
-
-**Rules:**
-
-- Each root must contain **exactly one** swiper and wrapper
-- Each wrapper must contain **at least one** slide
-- You can nest other HTML elements anywhere between these
-
-**What happens automatically:**
-
-- The root gets a unique `data-swiper-root-id` for scoping (e.g., `swiper-root-1`)
-- Swiper's required classes are added to the structural elements at runtime
-- All sliders are isolated from each other, even with identical attribute names
-
----
-
-### Optional Controls
-
-Add these anywhere inside the root to enable navigation, pagination, or scrollbar:
-
-| Control         | Attribute                       | Maps To             |
-| --------------- | ------------------------------- | ------------------- |
-| **Next Button** | `data-swiper-navigation="next"` | `navigation.nextEl` |
-| **Prev Button** | `data-swiper-navigation="prev"` | `navigation.prevEl` |
-| **Pagination**  | `data-swiper-pagination="el"`   | `pagination.el`     |
-| **Scrollbar**   | `data-swiper-scrollbar="el"`    | `scrollbar.el`      |
-
-**Notes:**
-
-- Controls are automatically scoped to their root (no conflicts between sliders)
-- You can place controls outside the swiper element (e.g., for custom layouts)
-- If multiple elements match, only the first is used (with a warning)
-- Module elements stay unchanged—only selectors passed to Swiper are scoped
-
----
-
-## Configuration Options
-
-Configure your slider in **two ways**: individual attributes or bulk JSON config. Both methods work on the **root element** only.
-
-### Method 1: Individual Attributes (Recommended for Visual Editing)
-
-```html
-<div
-  data-swiper="root"
-  data-swiper-slides-per-view="3"
-  data-swiper-space-between="20"
-  data-swiper-loop="true"
-  data-swiper-speed="500"
->
-  <!-- ... -->
-</div>
-```
-
-**Becomes:**
-
-```javascript
-{
-  slidesPerView: 3,
-  spaceBetween: 20,
-  loop: true,
-  speed: 500
+[data-carousel='dot'].carousel-active {
+  /* Active dot styles */
 }
 ```
 
-### Module Options
+The carousel auto-initializes on page load. No JavaScript configuration needed.
 
-For nested module parameters, use `data-swiper-{module}-{param}`:
+## Configuration
+
+### Snap Alignment
+
+Control how items align when scrolled into view:
 
 ```html
-<div
-  data-swiper="root"
-  data-swiper-autoplay-delay="3000"
-  data-swiper-autoplay-disable-on-interaction="false"
-  data-swiper-pagination-clickable="true"
-  data-swiper-grid-rows="2"
->
-  <!-- ... -->
+<!-- Align to start (default) -->
+<div data-carousel="container" data-carousel-align="start">
+  <!-- Center items -->
+  <div data-carousel="container" data-carousel-align="center">
+    <!-- Align to end -->
+    <div data-carousel="container" data-carousel-align="end"></div>
+  </div>
 </div>
 ```
 
-**Becomes:**
+### Keyboard Navigation
 
-```javascript
-{
-  autoplay: {
-    delay: 3000,
-    disableOnInteraction: false
-  },
-  pagination: {
-    clickable: true
-  },
-  grid: {
-    rows: 2
+Enable arrow key navigation:
+
+```html
+<div data-carousel="container" data-carousel-keyboard="true">
+  <!-- items -->
+</div>
+```
+
+When enabled:
+
+- `Arrow Left` / `Arrow Right` navigate between items
+- `Home` jumps to first item
+- `End` jumps to last item
+
+## Spacing and Positioning
+
+Use CSS `gap` on the track to space items:
+
+```css
+[data-carousel='track'] {
+  gap: 16px;
+}
+```
+
+The library respects CSS [`scroll-padding`](https://developer.mozilla.org/en-US/docs/Web/CSS/scroll-padding) (container insets) and [`scroll-margin`](https://developer.mozilla.org/en-US/docs/Web/CSS/scroll-margin) (per-item offsets) for controlling snap positioning. Use these properties for "peeking" layouts or adjusting snap points.
+
+## Pagination
+
+Provide at least one dot element. The library duplicates it to match the number of items:
+
+```html
+<div data-carousel="pagination">
+  <button data-carousel="dot"></button>
+</div>
+```
+
+The library clones dots to match the slide count, normalizes them to `<button>` elements, adds click handlers, and applies the `.carousel-active` class to the current dot.
+
+## Responsive Behavior
+
+Item widths can change at breakpoints:
+
+```css
+[data-carousel='item'] {
+  width: 350px; /* Desktop */
+}
+
+@media (max-width: 768px) {
+  [data-carousel='item'] {
+    width: 280px; /* Tablet */
+  }
+}
+
+@media (max-width: 480px) {
+  [data-carousel='item'] {
+    width: 220px; /* Mobile */
   }
 }
 ```
 
-### Supported Modules
+The library uses `ResizeObserver` to detect changes and automatically recalculates positions and boundaries.
 
-These module names are recognized for nested parameters:
+## Variable-Width Items
 
-`a11y`, `autoplay`, `controller`, `cards-effect`, `coverflow-effect`, `creative-effect`, `cube-effect`, `fade-effect`, `flip-effect`, `free-mode`, `grid`, `hash-navigation`, `history`, `keyboard`, `mousewheel`, `navigation`, `pagination`, `parallax`, `scrollbar`, `thumbs`, `virtual`, `zoom`
-
----
-
-### Method 2: Bulk JSON Config (Quick Copy/Paste)
-
-For power users or when copying config from Swiper docs, use `data-swiper-options` with complete JSON:
+Items can have different widths:
 
 ```html
-<div
-  data-swiper="root"
-  data-swiper-options='{
-    "slidesPerView": 3,
-    "spaceBetween": 20,
-    "loop": true,
-    "autoplay": {
-      "delay": 3000,
-      "disableOnInteraction": false
-    },
-    "breakpoints": {
-      "768": {
-        "slidesPerView": 2
-      },
-      "992": {
-        "slidesPerView": 3
-      }
-    }
-  }'
->
-  <!-- ... -->
+<div data-carousel="track">
+  <div data-carousel="item" style="width: 300px;">Narrow</div>
+  <div data-carousel="item" style="width: 500px;">Wide</div>
+  <div data-carousel="item" style="width: 400px;">Medium</div>
 </div>
 ```
 
-**Important Notes:**
+Active item detection works with mixed widths.
 
-- **JSON keys must be camelCase** (matching Swiper's JavaScript API): `slidesPerView`, not `slides-per-view`
-- Use **single quotes around the attribute value** and **double quotes inside the JSON**
-- The JSON must be a valid object (not an array or primitive)
-- **Individual attributes override JSON values** (see below)
+## Multiple Carousels
 
-**Typical Workflow:**
-
-1. Copy config from [Swiper docs](https://swiperjs.com/swiper-api) or your own JS setup
-2. Paste into `data-swiper-options`
-3. Override specific values with individual attributes in Webflow Designer
-
-**Example: JSON Base + Attribute Overrides**
+Run multiple independent carousels on one page:
 
 ```html
-<div
-  data-swiper="root"
-  data-swiper-options='{"slidesPerView":3,"spaceBetween":20,"loop":true}'
-  data-swiper-slides-per-view="2"
->
-  <!-- Result: slidesPerView=2 (attribute wins), spaceBetween=20, loop=true -->
+<div data-carousel="container">
+  <!-- First carousel -->
+</div>
+
+<div data-carousel="container">
+  <!-- Second carousel -->
 </div>
 ```
 
-This gives designers the flexibility to tweak settings visually without editing JSON.
+Each carousel gets a unique ID (`data-carousel-id`) for debugging.
 
-**Error Handling:**
+## State Classes
 
-- **Invalid JSON**: Warning logged, falls back to individual attributes only
-- **Unknown params**: Warnings logged for params not in Swiper's API (helps catch typos)
+The library applies functional state classes you can style:
 
----
+| Class                     | Applied To | When                             |
+| ------------------------- | ---------- | -------------------------------- |
+| `.carousel-active`        | Item       | Item is currently active         |
+| `.carousel-active`        | Dot        | Dot represents active item       |
+| `.carousel-disabled`      | Button     | Button is disabled (at boundary) |
+| `.carousel-scrolling`     | Track      | User is actively scrolling       |
+| `.carousel-animating`     | Track      | Programmatic scroll in progress  |
+| `.carousel-snap-disabled` | Track      | Scroll snap temporarily disabled |
 
-### Value Conversion
+Example:
 
-**Individual attribute values** are automatically converted to the appropriate JavaScript type:
+```css
+/* Fade inactive items */
+[data-carousel='item']:not(.carousel-active) {
+  opacity: 0.6;
+}
 
-| Attribute Value                       | JavaScript Value      |
-| ------------------------------------- | --------------------- |
-| `""` (empty) or `"true"`              | `true`                |
-| `"false"`                             | `false`               |
-| `"42"` or `"3.14"`                    | Number                |
-| `'{"key":"value"}'` (looks like JSON) | Parsed as JSON object |
-| Anything else                         | String                |
-
-**Examples of JSON in individual attributes:**
-
-```html
-<!-- Breakpoints as JSON in a single attribute -->
-<div
-  data-swiper="root"
-  data-swiper-breakpoints='{"768":{"slidesPerView":2},"1024":{"slidesPerView":3}}'
->
-  <!-- Free mode with nested config -->
-  <div
-    data-swiper="root"
-    data-swiper-free-mode='{"enabled":true,"sticky":true}'
-  ></div>
-</div>
+/* Hide disabled buttons */
+button[data-carousel].carousel-disabled {
+  opacity: 0.3;
+  pointer-events: none;
+}
 ```
 
-This lets you use complex configs even when building with individual attributes.
-
----
-
-### Responsive Breakpoints
-
-Configure responsive behavior using **individual attributes** or **JSON**.
-
-#### Individual Breakpoint Attributes (Recommended)
-
-Use `data-swiper-breakpoints-{breakpoint}-{param}` for visual editing in Webflow Designer:
-
-```html
-<div
-  data-swiper="root"
-  data-swiper-breakpoints-mobile-slides-per-view="1"
-  data-swiper-breakpoints-tablet-slides-per-view="2"
-  data-swiper-breakpoints-1200-slides-per-view="3"
->
-  <!-- structure -->
-</div>
-```
-
-**Nested module parameters work too:**
-
-```html
-<div
-  data-swiper="root"
-  data-swiper-breakpoints-mobile-navigation-enabled="false"
-  data-swiper-breakpoints-tablet-navigation-enabled="true"
->
-  <!-- structure -->
-</div>
-```
-
-#### JSON Breakpoint Configuration
-
-For complex configurations or quick copy/paste:
-
-```html
-<div
-  data-swiper="root"
-  data-swiper-breakpoints='{
-    "768": {"slidesPerView": 2, "spaceBetween": 16},
-    "1024": {"slidesPerView": 3, "spaceBetween": 24}
-  }'
->
-  <!-- structure -->
-</div>
-```
-
-#### Webflow Breakpoint Shorthands
-
-Instead of remembering pixel values, use Webflow's familiar breakpoint names:
-
-| Shorthand   | Pixel Value | Webflow Breakpoint |
-| ----------- | ----------- | ------------------ |
-| `desktop`   | 992         | Desktop            |
-| `tablet`    | 768         | Tablet             |
-| `landscape` | 480         | Mobile landscape   |
-| `mobile`    | 0           | Mobile portrait    |
-
-Note: SwiperJS cascades UP, not down. So if you write a parameter without any breakpoint specified, it'll actually start at the 0px breakpoint, and
-
-**Works in both formats:**
-
-```html
-<!-- Individual attributes -->
-<div
-  data-swiper="root"
-  data-swiper-breakpoints-tablet-slides-per-view="2"
-  data-swiper-breakpoints-mobile-slides-per-view="1"
->
-  <!-- JSON -->
-  <div
-    data-swiper="root"
-    data-swiper-breakpoints='{
-    "tablet": {"slidesPerView": 2},
-    "landscape": {"slidesPerView": 1}
-  }'
-  >
-    <!-- Bulk JSON -->
-    <div
-      data-swiper="root"
-      data-swiper-options='{
-    "breakpoints": {
-      "mobile": {"slidesPerView": 2},
-      "tablet": {"slidesPerView": 3}
-    }
-  }'
-    ></div>
-  </div>
-</div>
-```
-
-**Features:**
-
-- **Case-insensitive**: `"Tablet"`, `"tablet"`, `mobile` all work
-- **Mixable**: Combine shorthands with custom pixel values (`tablet`, `600`, `1200`)
-- **Aliases**: Use the shorthand names above
-- **Works everywhere**: Individual attributes, JSON attributes, bulk JSON
-
----
-
-## Complete Example
-
-Here's a full-featured slider with autoplay, pagination, and navigation:
-
-```html
-<div
-  data-swiper="root"
-  data-swiper-slides-per-view="2"
-  data-swiper-space-between="24"
-  data-swiper-loop="true"
-  data-swiper-autoplay-delay="3000"
-  data-swiper-pagination-clickable="true"
-  data-swiper-navigation-enabled="true"
->
-  <div data-swiper="swiper">
-    <div data-swiper="wrapper">
-      <div data-swiper="slide">Slide A</div>
-      <div data-swiper="slide">Slide B</div>
-      <div data-swiper="slide">Slide C</div>
-      <div data-swiper="slide">Slide D</div>
-    </div>
-  </div>
-
-  <!-- Controls can be anywhere inside root -->
-  <button data-swiper-navigation="prev">← Previous</button>
-  <button data-swiper-navigation="next">Next →</button>
-  <div data-swiper-pagination="el"></div>
-</div>
-```
-
----
-
-## Debugging
-
-### Browser Console
-
-Access the Swiper instance from any root element:
-
-```javascript
-// Get the first slider on the page
-const root = document.querySelector('[data-swiper="root"]');
-const swiper = root.swiperInstance;
-
-// Now you can call Swiper methods
-swiper.slideNext();
-swiper.slidePrev();
-swiper.update();
-```
-
-### Inspecting Configuration
-
-Check what options were applied:
-
-```javascript
-console.log(swiper.params);
-```
-
-### Exporting Configuration
-
-Export configuration from existing sliders in two formats:
-
-#### Interactive Export (Prompts for Format)
-
-```javascript
-// Shows prompt asking: "1) attribute format or 2) embed code"
-carousel.exportConfig('[data-swiper="root"]');
-
-// Works with specific selectors
-carousel.exportConfig('[data-swiper-root-id="swiper-root-2"]');
-
-// Or pass element directly
-const root = document.querySelector('.my-slider[data-swiper="root"]');
-carousel.exportConfig(root);
-```
-
-#### Direct Export (Skip Prompt)
-
-**For Webflow Attributes:**
-
-```javascript
-// Exports as HTML-escaped JSON for pasting into data-swiper-options
-carousel.exportConfigAttr('[data-swiper="root"]');
-```
-
-Output format uses `&quot;` instead of `"` to work around Webflow's attribute value restrictions:
-
-```html
-{&quot;slidesPerView&quot;: 3, &quot;spaceBetween&quot;: 20}
-```
-
-**For Custom Code Embeds:**
-
-```javascript
-// Exports as JavaScript code for custom embeds
-carousel.exportConfigEmbed('[data-swiper="root"]');
-```
-
-Output format is ready-to-paste JavaScript:
-
-```javascript
-// Swiper initialization (paste into custom code embed)
-// Update the selector to match your .swiper element
-const swiper = new Swiper('.swiper', {
-  slidesPerView: 3,
-  spaceBetween: 20,
-  breakpoints: {
-    480: { slidesPerView: 2 },
-    768: { slidesPerView: 3 },
-  },
-});
-```
-
-**What gets exported:**
-
-- All `data-swiper-*` attributes from the element
-- Bulk JSON from `data-swiper-options` if present
-- Merged into a clean config object
-- Breakpoint shorthands converted to pixel values
-- Auto-copied to clipboard
-
-### Root ID
-
-Each root gets a unique ID you can inspect:
-
-```javascript
-const rootId = root.getAttribute('data-swiper-root-id');
-console.log(rootId); // "swiper-root-1"
-```
-
----
-
-## Advanced Usage
+## JavaScript API
 
 ### Manual Initialization
 
-If you're dynamically adding sliders after page load:
-
 ```javascript
-// After adding new sliders to the DOM
-window.setupWebflowSwipers();
+// Auto-initializes on page load by default
+// Or manually initialize:
+const carousel = new Carousel(
+  document.querySelector('[data-carousel="container"]')
+);
+
+// Or using selector:
+const carousel = Carousel.init('.my-carousel');
 ```
 
-**Note:** The root ID counter resets on each run, so IDs stay consistent.
-
-### Accessing Utilities
-
-The library exposes utility functions via `window.carousel`:
+### Instance Methods
 
 ```javascript
-// Interactive export with format prompt
-carousel.exportConfig('[data-swiper="root"]');
-
-// Direct exports (skip prompt)
-carousel.exportConfigAttr('[data-swiper="root"]'); // → Attribute format
-carousel.exportConfigEmbed('[data-swiper="root"]'); // → Embed format
-
-// Access the attribute parser directly
-const config = carousel.parseOptionsFromAttributes(rootElement);
+carousel.next(); // Go to next item
+carousel.prev(); // Go to previous item
+carousel.goTo(2); // Go to specific index (0-based)
+carousel.getActiveIndex(); // Returns current index
+carousel.refresh(); // Recalculate dimensions and update
+carousel.destroy(); // Clean up and remove listeners
 ```
 
-### Customizing Attribute Names
-
-Edit `SWIPER_CONFIG` in `carousel.js`:
+All methods are chainable:
 
 ```javascript
-const SWIPER_CONFIG = {
-  attributePrefix: 'data-slider', // Change from 'data-swiper'
-  attributes: {
-    root: 'container', // Use data-slider="container" instead
-    swiper: 'main',
-    wrapper: 'track',
-    slide: 'item',
-  },
-  // ...
+carousel.next().next().refresh();
+```
+
+### Events
+
+Listen to carousel events:
+
+```javascript
+carousel.on('change', (e) => {
+  console.log(`Active item: ${e.index}`);
+});
+
+carousel.on('scroll', (e) => {
+  console.log(`Scroll position: ${e.scrollLeft}px`);
+});
+
+carousel.on('reach-start', () => {
+  console.log('At first item');
+});
+
+carousel.on('reach-end', () => {
+  console.log('At last item');
+});
+
+// Remove listener
+carousel.off('change', handler);
+```
+
+Or use native DOM events:
+
+```javascript
+container.addEventListener('carousel:change', (e) => {
+  console.log(e.detail); // { carousel, index }
+});
+```
+
+### Global Registry
+
+Access all carousel instances:
+
+```javascript
+// Get all instances
+const instances = window.CarouselInstances;
+
+// Get specific instance by ID
+const carousel = instances.get('carousel-1');
+
+// Iterate over all
+instances.forEach((carousel) => {
+  console.log(carousel.id, carousel.getActiveIndex());
+});
+```
+
+### Dynamic Content
+
+When adding/removing items, call `refresh()`:
+
+```javascript
+const track = carousel.track;
+const newItem = document.createElement('div');
+newItem.setAttribute('data-carousel', 'item');
+newItem.textContent = 'New Item';
+track.appendChild(newItem);
+
+carousel.refresh(); // Recalculate positions
+```
+
+For major structural changes, destroy and reinitialize:
+
+```javascript
+carousel.destroy();
+const newCarousel = new Carousel(container);
+```
+
+## Accessibility
+
+The library doesn't add ARIA roles or labels. You control all accessibility features including semantic HTML, ARIA attributes, and screen reader announcements based on your specific use case.
+
+## Performance
+
+Built-in optimizations:
+
+- Debounced scroll handling (100ms)
+- Debounced resize handling (150ms)
+- RequestAnimationFrame batching for DOM updates
+- Button cooldown (300ms) to prevent rapid clicks
+
+These values are configured in `src/config.js` and can be adjusted:
+
+```javascript
+export const TIMING = {
+  DEBOUNCE_RESIZE: 150,
+  DEBOUNCE_SCROLL: 100,
+  BUTTON_COOLDOWN: 300,
+  SNAP_DISABLE_DURATION: 50,
 };
 ```
 
-### Adding Custom Modules
+## Browser Support
 
-To support additional Swiper modules:
+Requires modern browsers with:
 
-1. **Add to module config** (`SWIPER_MODULE_ATTRIBUTE_SELECTORS`):
+- ES6 modules
+- CSS Scroll Snap
+- ResizeObserver
+- Smooth scrolling
 
-```javascript
-const SWIPER_MODULE_ATTRIBUTE_SELECTORS = {
-  // Existing modules...
-  customModule: {
-    someParam: 'value',
-  },
-};
+Includes recent versions of Chrome, Firefox, Safari, and Edge. IE11 is not supported.
+
+## Examples
+
+See the `examples/` directory for complete demos:
+
+- `basic.html` - Simple carousel with prev/next buttons
+- `pagination.html` - Pagination dots
+- `multiple.html` - Multiple carousels on one page
+- `responsive.html` - Responsive item widths
+- `keyboard.html` - Keyboard navigation
+- `accessible.html` - Accessibility implementation example
+
+## How It Works
+
+This library is designed around native browser capabilities:
+
+- **CSS Scroll Snap** handles alignment automatically
+- **scrollIntoView()** provides smooth programmatic navigation
+- **scroll-padding** and **scroll-margin** control snap positioning
+- **JavaScript** manages state, events, and UI updates
+
+By leveraging native features, the carousel gets GPU acceleration and browser optimizations for free. Less JavaScript, better performance, smoother scrolling.
+
+## FAQ
+
+**Why use this instead of other carousel libraries?**
+
+This library uses native browser scroll behavior instead of JavaScript transforms, making it faster and smoother with less code.
+
+**Can I customize the animation duration?**
+
+The library uses native `scroll-behavior: smooth`, so animation timing is controlled by the browser. For custom timing, you'd need to implement custom scrolling instead of using the native behavior.
+
+**Does it work vertically?**
+
+Not currently. The library is designed for horizontal scrolling only.
+
+**How do I disable buttons at boundaries?**
+
+The library automatically adds the `.carousel-disabled` class and sets the `disabled` attribute when at the start or end. Style accordingly:
+
+```css
+button[data-carousel].carousel-disabled {
+  opacity: 0.3;
+  pointer-events: none;
+}
 ```
 
-2. **Add to attribute keys** (`SWIPER_MODULE_ATTRIBUTE_KEYS`):
+**Can I start at a specific item?**
+
+Yes, call `goTo()` after initialization:
 
 ```javascript
-const SWIPER_MODULE_ATTRIBUTE_KEYS = [
-  // Existing modules...
-  'custom-module',
-];
+const carousel = Carousel.init('.my-carousel');
+carousel.goTo(2); // Start at third item
 ```
 
-Now you can use `data-swiper-custom-module-some-param="..."` in your HTML.
+**What if my carousel is initially hidden?**
 
----
+The library skips calculations when `container.offsetParent === null`. Call `refresh()` when the carousel becomes visible:
 
-## Technical Details
+```javascript
+// When showing carousel
+carousel.refresh();
+```
 
-### How It Works (Runtime Flow)
+**How do I debug issues?**
 
-When the page loads, the script:
-
-1. **Resets counters** – Ensures consistent root IDs on each run
-2. **Finds roots** – Queries all `[data-swiper="root"]` elements
-3. **Validates structure** – Checks for exactly one swiper/wrapper, at least one slide
-4. **Assigns root ID** – Adds unique `data-swiper-root-id` to each root
-5. **Adds classes** – Applies `.swiper`, `.swiper-wrapper`, `.swiper-slide` to structural elements
-6. **Parses config** – Parses `data-swiper-options` JSON (if present), then processes `data-swiper-*` attributes (attributes override JSON)
-7. **Builds scoped selectors** – Creates selectors like `[data-swiper-root-id="swiper-root-1"] [data-swiper-navigation="next"]`
-8. **Initializes Swiper** – Calls `new Swiper()` with deep-merged options
-9. **Stores instance** – Saves to `root.swiperInstance` for debugging
-
-### Scoping Mechanism
-
-To prevent conflicts between multiple sliders:
-
-- Each root gets: `data-swiper-root-id="swiper-root-1"`
-- Module selectors become: `[data-swiper-root-id="swiper-root-1"] [data-swiper-navigation="next"]`
-- Swiper uses these scoped selectors to find the correct elements
-- Module elements themselves are **not modified** (no extra attributes added)
-
-This ensures that even if you have identical button markup in multiple sliders, each Swiper instance only finds its own controls.
-
-### Validation Rules
-
-The script enforces strict structural requirements:
-
-| Requirement                      | What Happens If Violated           |
-| -------------------------------- | ---------------------------------- |
-| Exactly 1 swiper per root        | Error logged, slider skipped       |
-| Exactly 1 wrapper per swiper     | Error logged, slider skipped       |
-| At least 1 slide per wrapper     | Error logged, slider skipped       |
-| Multiple pagination/nav elements | Warning logged, first element used |
-
----
-
-## Requirements
-
-- **Swiper.js** – Version 8 or later (tested with v11)
-- **Browsers** – Modern browsers with ES6 support
-- **Webflow** – Any plan (uses standard HTML attributes)
-
----
-
-## License
-
-AGPL-3.0
+Check the console for warnings. The library logs clear messages when required elements are missing. Each carousel also has a `data-carousel-id` attribute for easier debugging in DevTools.

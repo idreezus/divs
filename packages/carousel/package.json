@@ -1,7 +1,7 @@
 {
   "name": "carousel",
   "version": "0.1.0",
-  "description": "A helper library for SwiperJS in Webflow",
+  "description": "A lightweight, accessible carousel component built on CSS scroll snap",
   "main": "carousel.js",
   "type": "module",
   "scripts": {
@@ -10,14 +10,13 @@
     "release": "BUILD_MODE=release rollup -c"
   },
   "keywords": [
-    "swiper",
     "carousel",
+    "slider",
+    "scroll-snap",
     "webflow",
-    "slider"
+    "vanilla-js",
+    "accessible"
   ],
   "author": "Idrees Isse (https://github.com/idreezus)",
-  "license": "AGPL-3.0",
-  "peerDependencies": {
-    "swiper": "^11.0.0"
-  }
+  "license": "AGPL-3.0"
 }

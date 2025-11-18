@@ -1,610 +1,423 @@
+// Main Carousel class and core functionality
+
+import { CONFIG } from './config.js';
+import { generateUniqueId, parseConfig } from './utils.js';
 import {
-  SWIPER_CONFIG,
-  SWIPER_STRUCTURE_CLASSES,
-  SWIPER_MODULE_ATTRIBUTE_KEYS,
-  SWIPER_MODULE_ATTRIBUTE_SELECTORS,
-  SWIPER_ALLOWED_PARAMS,
-  SWIPER_LOG_PREFIX,
-  SWIPER_BREAKPOINT_SHORTHANDS,
-} from './config.js';
+  detectActiveItem,
+  handleScroll,
+  scrollToItem,
+  handleNext,
+  handlePrev,
+  setupResizeObserver,
+  setupPagination,
+  updateUI,
+} from './navigation.js';
+import { setupKeyboardNavigation } from './keyboard.js';
 
-// Tracks unique IDs for root elements to isolate scope
-let rootIdCounter = 0;
+// Finds and validates all required and optional elements within the carousel container
+function findElements(instance) {
+  const { container, id } = instance;
+  const { SELECTORS } = CONFIG;
 
-// Logs messages with consistent prefix
-function log(type, message, element) {
-  const logFn = console[type];
-  if (element) {
-    logFn(`${SWIPER_LOG_PREFIX} ${message}`, element);
-  } else {
-    logFn(`${SWIPER_LOG_PREFIX} ${message}`);
-  }
-}
-
-// Builds selector for structural elements
-function buildAttributeSelectorForStructure(key) {
-  const { attributePrefix, attributes } = SWIPER_CONFIG;
-  const value = attributes[key];
-  return `[${attributePrefix}="${value}"]`;
-}
-
-// Builds selector for module elements so that modules can be auto-discovered
-function buildAttributeSelectorForModule(moduleName, value) {
-  const { attributePrefix } = SWIPER_CONFIG;
-  return `[${attributePrefix}-${moduleName}="${value}"]`;
-}
-
-// Builds scoped selector to prevent instance conflicts
-function buildAttributeSelectorForScope(rootId, elementSelector) {
-  const { attrName } = SWIPER_CONFIG.scope;
-  return `[${attrName}="${rootId}"] ${elementSelector}`;
-}
-
-// Converts attribute kebab-case to camelCase for Swiper config
-function toCamelCase(text) {
-  return text.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
-}
-
-// Checks if value is a plain object (not array, null, or primitive)
-// Used in deep merge to distinguish objects from arrays that should be replaced
-function isObject(o) {
-  return typeof o === 'object' && o !== null && !Array.isArray(o);
-}
-
-// Parses attribute value strings into native JavaScript types
-// Handles empty strings, booleans, numbers, JSON objects, and plain strings
-function formatValue(value) {
-  // Empty attribute (e.g., data-swiper-free-mode) becomes true
-  if (value === '') return true;
-
-  // Boolean strings
-  if (value === 'true') return true;
-  if (value === 'false') return false;
-
-  // JSON objects for complex configs (e.g., breakpoints)
-  if (
-    typeof value === 'string' &&
-    value.includes('{') &&
-    value.includes('}') &&
-    value.includes('"')
-  ) {
-    try {
-      return JSON.parse(value);
-    } catch (err) {
-      // Fall through to return as string if parsing fails
-    }
-  }
-
-  // Numbers
-  const asNumber = Number(value);
-  if (!Number.isNaN(asNumber)) return asNumber;
-
-  // Plain string fallback
-  return value;
-}
-
-// Parses data-swiper-options attribute containing complete JSON configuration
-// Returns parsed and validated options object, or empty object if invalid/missing
-// JSON keys must use camelCase (matching Swiper's JS API)
-function parseOptionsFromBulkJSON(root) {
-  const bulkAttr = root.getAttribute(
-    `${SWIPER_CONFIG.attributePrefix}-${SWIPER_CONFIG.attributes.bulkJson}`
-  );
-
-  // No bulk config provided
-  if (!bulkAttr || !bulkAttr.trim()) {
-    return {};
-  }
-
-  // Try to parse JSON
-  let parsedOptions;
-  try {
-    parsedOptions = JSON.parse(bulkAttr);
-  } catch (err) {
-    log(
-      'warn',
-      `Invalid JSON in data-swiper-options attribute. Using individual attributes only. Error: ${err.message}`,
-      root
+  // Find required track element
+  const track = container.querySelector(SELECTORS.TRACK);
+  if (!track) {
+    console.warn(
+      `Carousel ${id}: Track element not found. Expected element with data-carousel="track".`
     );
-    return {};
+    return false;
   }
 
-  // Validate it's an object
-  if (!isObject(parsedOptions)) {
-    log(
-      'warn',
-      'data-swiper-options must contain a JSON object, not an array or primitive. Using individual attributes only.',
-      root
+  // Find required item elements
+  const items = [...container.querySelectorAll(SELECTORS.ITEM)];
+  console.log('[DEBUG findElements] Items found:', {
+    count: items.length,
+    items: items.map((item, i) => ({
+      index: i,
+      textContent: item.textContent?.substring(0, 30),
+      classList: Array.from(item.classList),
+    })),
+  });
+  if (items.length === 0) {
+    console.warn(
+      `Carousel ${id}: No items found. Expected at least one element with data-carousel="item".`
     );
-    return {};
+    return false;
   }
 
-  // Validate params against Swiper's allowed list (already in camelCase)
-  Object.keys(parsedOptions).forEach((key) => {
-    if (!SWIPER_ALLOWED_PARAMS.includes(key)) {
-      log(
-        'warn',
-        `Unknown parameter "${key}" in data-swiper-options. This may be ignored by Swiper. Check the Swiper API docs.`,
-        root
-      );
-    }
+  // Find optional navigation buttons (no warning if missing)
+  const prevBtn = container.querySelector(SELECTORS.PREV_BTN);
+  const nextBtn = container.querySelector(SELECTORS.NEXT_BTN);
+
+  // Find optional pagination container and dots
+  const pagination = container.querySelector(SELECTORS.PAGINATION);
+  let dots = [];
+  if (pagination) {
+    dots = [...pagination.querySelectorAll(SELECTORS.DOT)];
+  }
+
+  // Add data-carousel-id for easier debugging in devtools
+  container.setAttribute('data-carousel-id', id);
+
+  // Store all element references on the instance
+  Object.assign(instance, {
+    track,
+    items,
+    prevBtn,
+    nextBtn,
+    pagination,
+    dots,
   });
 
-  return parsedOptions;
+  return true;
 }
 
-// Deep merges source object into target, preserving nested object properties
-// Arrays and primitives are replaced, not merged
-function deepMerge(target, source) {
-  Object.keys(source).forEach((key) => {
-    const sourceValue = source[key];
-    const targetValue = target[key];
+// Calculates and stores all dimensional measurements for the carousel
+export function calculateDimensions(instance) {
+  const { track, items, state, config } = instance;
 
-    // If both are plain objects, recurse to merge nested properties
-    if (isObject(sourceValue) && isObject(targetValue)) {
-      deepMerge(targetValue, sourceValue);
-    } else {
-      // Otherwise replace (handles primitives, arrays, null, undefined)
-      target[key] = sourceValue;
+  // Get computed styles to read CSS properties
+  const trackStyle = getComputedStyle(track);
+
+  const parseOffset = (value) => {
+    if (!value || value === 'auto') {
+      return { value: 0, specified: false };
     }
-  });
-  return target;
-}
+    const parsed = parseFloat(value);
+    if (Number.isNaN(parsed)) {
+      return { value: 0, specified: false };
+    }
+    return { value: parsed, specified: true };
+  };
 
-// Transforms Webflow breakpoint shorthands to pixel values
-// Example: {tablet: {...}, mobile: {...}} → {991: {...}, 767: {...}}
-function transformBreakpointShorthands(config) {
-  if (!config.breakpoints || !isObject(config.breakpoints)) {
-    return config;
-  }
+  // Read gap from CSS (try both gap and column-gap for compatibility)
+  const gap = parseFloat(trackStyle.gap || trackStyle.columnGap) || 0;
 
-  const transformed = {};
+  const paddingInlineStart = parseOffset(
+    trackStyle.paddingInlineStart || trackStyle.paddingLeft
+  );
+  const paddingInlineEnd = parseOffset(
+    trackStyle.paddingInlineEnd || trackStyle.paddingRight
+  );
+  const scrollPaddingInlineStart = parseOffset(
+    trackStyle.scrollPaddingInlineStart || trackStyle.scrollPaddingLeft
+  );
+  const scrollPaddingInlineEnd = parseOffset(
+    trackStyle.scrollPaddingInlineEnd || trackStyle.scrollPaddingRight
+  );
 
-  Object.keys(config.breakpoints).forEach((key) => {
-    // Check if key is a shorthand (case-insensitive)
-    const lowerKey = key.toLowerCase();
-    const pixelValue = SWIPER_BREAKPOINT_SHORTHANDS[lowerKey] || key;
+  const startInset = scrollPaddingInlineStart.specified
+    ? scrollPaddingInlineStart.value
+    : paddingInlineStart.value;
+  const endInset = scrollPaddingInlineEnd.specified
+    ? scrollPaddingInlineEnd.value
+    : paddingInlineEnd.value;
 
-    transformed[pixelValue] = config.breakpoints[key];
-  });
+  // Measure container and scroll dimensions
+  const containerWidth = track.clientWidth;
+  const scrollWidth = track.scrollWidth;
 
-  config.breakpoints = transformed;
-  return config;
-}
+  // Calculate basic position data for active item detection
+  const trackRect = track.getBoundingClientRect();
+  const itemPositions = items.map((item, index) => {
+    const rect = item.getBoundingClientRect();
+    const itemStyle = getComputedStyle(item);
 
-// Takes all the data-* attributes on the root element and converts them into a Swiper configuration object so users can configure without JavaScript
-function parseOptionsFromAttributes(root) {
-  // Start with bulk JSON config if provided, otherwise empty object
-  // Individual attributes will override/merge with these base options
-  const options = parseOptionsFromBulkJSON(root);
-  const prefix = `${SWIPER_CONFIG.attributePrefix}-`;
-  const { attrName: rootIdAttr } = SWIPER_CONFIG.scope;
-
-  Array.from(root.attributes).forEach((attr) => {
-    // Skip root ID attribute since it's not part of the Swiper config
-    if (attr.name === rootIdAttr) return;
-
-    // Only process attributes with the configured prefix
-    if (!attr.name.startsWith(prefix)) return;
-
-    const rawName = attr.name.slice(prefix.length);
-    if (!rawName) return;
-
-    // Skip the bulk config attribute (already processed at the start)
-    if (rawName === SWIPER_CONFIG.attributes.bulkJson) return;
-
-    // Check if this is a module key so it can be nested under the appropriate module name in the Swiper config
-    const moduleKey = SWIPER_MODULE_ATTRIBUTE_KEYS.find((key) =>
-      rawName.startsWith(`${key}-`)
+    // Read scroll-margin for detection calculations
+    const marginStartValue = parseFloat(
+      itemStyle.scrollMarginInlineStart || itemStyle.scrollMarginLeft
     );
+    const marginEndValue = parseFloat(
+      itemStyle.scrollMarginInlineEnd || itemStyle.scrollMarginRight
+    );
+    const marginStart = Number.isNaN(marginStartValue) ? 0 : marginStartValue;
+    const marginEnd = Number.isNaN(marginEndValue) ? 0 : marginEndValue;
 
-    const value = formatValue(attr.value);
+    // Calculate left position relative to track, accounting for current scroll
+    const left = rect.left - trackRect.left + track.scrollLeft;
+    const width = rect.width;
 
-    if (moduleKey) {
-      const parentKey = toCamelCase(moduleKey);
-      const childKey = toCamelCase(rawName.slice(moduleKey.length + 1));
-
-      if (typeof options[parentKey] === 'undefined') {
-        options[parentKey] = {};
-      }
-      if (options[parentKey] === true) {
-        options[parentKey] = { enabled: true };
-      }
-      if (options[parentKey] === false) {
-        options[parentKey] = { enabled: false };
-      }
-
-      options[parentKey][childKey] = value;
-    } else if (rawName.startsWith('breakpoints-')) {
-      // Handle breakpoint parameters with the data-swiper-breakpoints-{breakpoint}-{param} format, such as data-swiper-breakpoints-mobile-slides-per-view="1"
-      const afterPrefix = rawName.slice('breakpoints-'.length);
-      const firstDashIndex = afterPrefix.indexOf('-');
-
-      // Skip if no parameter specified (just "breakpoints-mobile")
-      if (firstDashIndex === -1) {
-        return;
-      }
-
-      const breakpointKey = afterPrefix.slice(0, firstDashIndex);
-      const paramPath = afterPrefix.slice(firstDashIndex + 1);
-
-      // Initialize breakpoints object if needed
-      if (typeof options.breakpoints === 'undefined') {
-        options.breakpoints = {};
-      }
-
-      // Initialize this specific breakpoint's key (the actual breakpoint value) if needed
-      if (typeof options.breakpoints[breakpointKey] === 'undefined') {
-        options.breakpoints[breakpointKey] = {};
-      }
-
-      // Check if param is a module param (e.g., "navigation-enabled", "autoplay-delay")
-      const breakpointModuleKey = SWIPER_MODULE_ATTRIBUTE_KEYS.find((key) =>
-        paramPath.startsWith(`${key}-`)
-      );
-
-      // Handle nested module parameters within breakpoints, such as data-swiper-breakpoints-mobile-navigation-enabled="false"
-      // Result: {breakpoints: {mobile: {navigation: {enabled: false}}}}
-      if (breakpointModuleKey) {
-        const parentKey = toCamelCase(breakpointModuleKey);
-        const childKey = toCamelCase(
-          paramPath.slice(breakpointModuleKey.length + 1)
-        );
-
-        // Validate parent module is allowed
-        if (!SWIPER_ALLOWED_PARAMS.includes(parentKey)) {
-          log(
-            'warn',
-            `Unknown breakpoint parameter "${rawName}" (module "${parentKey}" not recognized). This may be ignored by Swiper. Check the Swiper API docs.`,
-            root
-          );
-        }
-
-        if (
-          typeof options.breakpoints[breakpointKey][parentKey] === 'undefined'
-        ) {
-          options.breakpoints[breakpointKey][parentKey] = {};
-        }
-        if (options.breakpoints[breakpointKey][parentKey] === true) {
-          options.breakpoints[breakpointKey][parentKey] = { enabled: true };
-        }
-        if (options.breakpoints[breakpointKey][parentKey] === false) {
-          options.breakpoints[breakpointKey][parentKey] = { enabled: false };
-        }
-
-        options.breakpoints[breakpointKey][parentKey][childKey] = value;
-      } else {
-        // Simple breakpoint param that isn't nested under a module
-
-        const camelParam = toCamelCase(paramPath);
-
-        // Validate against allowed params to catch typos
-        if (!SWIPER_ALLOWED_PARAMS.includes(camelParam)) {
-          log(
-            'warn',
-            `Unknown breakpoint parameter "breakpoints-${breakpointKey}-${paramPath}" (as "${camelParam}"). This may be a typo and could be ignored by Swiper. Check the Swiper API docs for valid parameters.`,
-            root
-          );
-        }
-
-        options.breakpoints[breakpointKey][camelParam] = value;
-      }
-    } else {
-      // Not part of a known module, so it's a top-level option
-      const camelKey = toCamelCase(rawName);
-
-      // Validate against allowed params list to catch typos
-      if (!SWIPER_ALLOWED_PARAMS.includes(camelKey)) {
-        log(
-          'warn',
-          `Unknown parameter "${rawName}" (as "${camelKey}"). This may be a typo and could be ignored by Swiper. Check the Swiper API docs for valid parameters.`,
-          root
-        );
-      }
-
-      // Handle edge case: if we previously saw a boolean for this module param, convert it to an object before adding more nested props
-      if (
-        options[camelKey] &&
-        SWIPER_MODULE_ATTRIBUTE_KEYS.includes(rawName) &&
-        !isObject(value)
-      ) {
-        if (typeof options[camelKey] === 'boolean') {
-          options[camelKey] = { enabled: options[camelKey] };
-        }
-        options[camelKey].enabled = !!value;
-      } else {
-        options[camelKey] = value;
-      }
-    }
+    return {
+      index,
+      left,
+      width,
+      center: left + width / 2,
+      right: left + width,
+      marginStart,
+      marginEnd,
+    };
   });
 
-  return options;
-}
-
-// Assigns unique ID to root element so selectors (for module elements that get auto-detected) can be scoped to specific slider instance
-function assignRootId(root) {
-  const { attrName, valuePrefix } = SWIPER_CONFIG.scope;
-  rootIdCounter += 1;
-  const rootId = `${valuePrefix}${rootIdCounter}`;
-  root.setAttribute(attrName, rootId);
-  return rootId;
-}
-
-// Validates DOM structure meets Swiper requirements
-function validateRootStructure(root) {
-  const swiperSelector = buildAttributeSelectorForStructure(
-    SWIPER_CONFIG.attributes.swiper
-  );
-  const swiperElement = root.querySelector(swiperSelector);
-
-  if (!swiperElement) {
-    log(
-      'error',
-      `Missing ${swiperSelector} inside ${buildAttributeSelectorForStructure(
-        SWIPER_CONFIG.attributes.root
-      )}.`,
-      root
-    );
-    return null;
-  }
-
-  const wrapperSelector = buildAttributeSelectorForStructure(
-    SWIPER_CONFIG.attributes.wrapper
-  );
-  const wrapperElement = swiperElement.querySelector(wrapperSelector);
-
-  if (!wrapperElement) {
-    log(
-      'error',
-      `Missing ${wrapperSelector} inside ${swiperSelector}.`,
-      swiperElement
-    );
-    return null;
-  }
-
-  const slideSelector = buildAttributeSelectorForStructure(
-    SWIPER_CONFIG.attributes.slide
-  );
-  const slides = wrapperElement.querySelectorAll(slideSelector);
-
-  return { swiperElement, wrapperElement, slides };
-}
-
-// Applies Swiper's required CSS classes that we've been avoiding to the DOM
-function applyRequiredSwiperStructureClasses(
-  swiperElement,
-  wrapperElement,
-  slides
-) {
-  swiperElement.classList.add(SWIPER_STRUCTURE_CLASSES.swiper);
-  wrapperElement.classList.add(SWIPER_STRUCTURE_CLASSES.wrapper);
-  slides.forEach((slide) =>
-    slide.classList.add(SWIPER_STRUCTURE_CLASSES.slide)
-  );
-}
-
-// Helper to find module elements and returns scoped selectors
-function findModuleElement(root, rootId, moduleName, value) {
-  const moduleSelector = buildAttributeSelectorForModule(moduleName, value);
-  if (root.querySelector(moduleSelector)) {
-    return buildAttributeSelectorForScope(rootId, moduleSelector);
-  }
-  return null;
-}
-
-// Builds single module config by 1). finding the module elements (e.g. [data-swiper-navigation="next"]) 2). creating the scoped selector to the root to prevent instance conflict, and 3). merging with normal module options passed in via attributes on the root element
-function buildCombinedModuleOptions(
-  root,
-  rootId,
-  moduleName,
-  paramConfig,
-  userOptions
-) {
-  const resolvedParams = {};
-
-  // Iterate through module parameters to find and scope each element
-  Object.entries(paramConfig).forEach(([paramName, value]) => {
-    const scopedSelector = findModuleElement(root, rootId, moduleName, value);
-
-    if (scopedSelector) {
-      resolvedParams[paramName] = scopedSelector;
-    }
+  // Update state with measurements needed for detection
+  Object.assign(state, {
+    gap,
+    containerWidth,
+    scrollWidth,
+    itemPositions,
+    startInset,
+    endInset,
   });
 
-  const userModuleOptions = userOptions[moduleName];
+  // Store snap alignment on instance for reference
+  instance.snapAlign = config.align;
 
-  // Pass config if we found elements OR user provided options
-  if (Object.keys(resolvedParams).length > 0 || userModuleOptions) {
-    // Deep merge to preserve nested properties from both sources
-    if (userModuleOptions) {
-      return deepMerge({ ...resolvedParams }, userModuleOptions);
-    }
-    return resolvedParams;
-  }
-
-  return null;
+  console.log('[DEBUG calculateDimensions] Dimensions calculated:', {
+    gap,
+    containerWidth,
+    scrollWidth,
+    snapAlign: instance.snapAlign,
+    startInset,
+    endInset,
+    itemCount: itemPositions.length,
+  });
 }
 
-// Builds module configurations by finding elements and creating scoped selectors
-function buildModuleOptions(root, rootId, userOptions = {}) {
-  const modules = {};
+// Attaches event listeners for user interactions
+function attachEventListeners(instance) {
+  const { track, prevBtn, nextBtn, id } = instance;
 
-  Object.entries(SWIPER_MODULE_ATTRIBUTE_SELECTORS).forEach(
-    ([moduleName, paramConfig]) => {
-      const resolved = buildCombinedModuleOptions(
-        root,
-        rootId,
-        moduleName,
-        paramConfig,
-        userOptions
-      );
+  // Create bound handlers and store them for later removal
+  instance.boundHandlers = {
+    scroll: () => handleScroll(instance),
+    prev: () => handlePrev(instance),
+    next: () => handleNext(instance),
+  };
 
-      if (resolved) {
-        modules[moduleName] = resolved;
-      }
-    }
-  );
-
-  return modules;
-}
-
-// Creates Swiper instance for each root element found in the DOM
-export function setupWebflowSwipers() {
-  if (!window.Swiper) {
-    log(
-      'error',
-      'Swiper library not found. Make sure to include Swiper before this script.'
-    );
-    return [];
-  }
-
-  // Find all root elements and initialize indepdently
-  const rootSelector = buildAttributeSelectorForStructure(
-    SWIPER_CONFIG.attributes.root
-  );
-  const roots = document.querySelectorAll(rootSelector);
-  const instances = [];
-
-  roots.forEach((root) => {
-    // Assign unique root ID for scoping so multiple sliders don't interfere
-    const rootId = assignRootId(root);
-
-    // Validate structure
-    const structure = validateRootStructure(root);
-    if (!structure) return; // Skip if validation failed
-
-    // Apply required Swiper classes
-    applyRequiredSwiperStructureClasses(
-      structure.swiperElement,
-      structure.wrapperElement,
-      structure.slides
-    );
-
-    // Parse the user and module options
-    const userOptions = parseOptionsFromAttributes(root);
-    const transformedOptions = transformBreakpointShorthands(userOptions);
-    const moduleOptions = buildModuleOptions(root, rootId, transformedOptions);
-
-    // Deep merge to preserve nested properties in both objects
-    const swiperOptions = deepMerge({ ...transformedOptions }, moduleOptions);
-
-    // Initialize Swiper instance
-    try {
-      const instance = new window.Swiper(
-        structure.swiperElement,
-        swiperOptions
-      );
-      root.swiperInstance = instance; // Store for debugging and programmatic access
-      instances.push(instance);
-    } catch (error) {
-      log('error', 'Failed to initialize Swiper for root:', root);
-      console.error(error);
-    }
+  // Attach scroll listener with passive flag for better performance
+  track.addEventListener('scroll', instance.boundHandlers.scroll, {
+    passive: true,
   });
 
-  return instances;
-}
-
-// Private helper: Pure parser with no side effects
-function getSwiperConfig(selector) {
-  const root =
-    typeof selector === 'string' ? document.querySelector(selector) : selector;
-
-  if (!root) {
-    log('error', 'Element not found. Provide a valid selector or element.');
-    return null;
+  // Attach button listeners if buttons exist
+  if (prevBtn) {
+    prevBtn.addEventListener('click', instance.boundHandlers.prev);
   }
-
-  const parsedConfig = parseOptionsFromAttributes(root);
-  return transformBreakpointShorthands(parsedConfig);
+  if (nextBtn) {
+    nextBtn.addEventListener('click', instance.boundHandlers.next);
+  }
 }
 
-// Helper to copy text to clipboard
-function copyToClipboard(text, successMessage) {
-  if (typeof copy === 'function') {
-    copy(text);
-    console.log(successMessage);
-  } else if (navigator.clipboard) {
-    navigator.clipboard
-      .writeText(text)
-      .then(() => {
-        console.log(successMessage);
-      })
-      .catch((err) => {
-        console.warn('Failed to copy to clipboard:', err);
+// Emits custom events both through the instance event system and as DOM events
+export function emit(instance, event, data = {}) {
+  const { events, container } = instance;
+
+  // Call registered callbacks via instance.on()
+  if (events.has(event)) {
+    const callbacks = events.get(event);
+    callbacks.forEach((callback) => {
+      callback.call(instance, {
+        type: event,
+        target: instance,
+        ...data,
       });
-  } else {
-    console.log('Tip: Manually copy the output above.');
+    });
   }
+
+  // Dispatch native DOM custom event for addEventListener compatibility
+  const customEvent = new CustomEvent(`carousel:${event}`, {
+    detail: { carousel: instance, ...data },
+    bubbles: true,
+  });
+  container.dispatchEvent(customEvent);
 }
 
-// Export utilities for runtime access and debugging
-if (typeof window !== 'undefined') {
-  window.carousel = window.carousel || {};
-  Object.assign(window.carousel, {
-    // Direct access to the parser for advanced use cases
-    parseOptionsFromAttributes,
+// Cleans up all event listeners, observers, and references
+function cleanup(instance) {
+  const { prevBtn, nextBtn, track, container } = instance;
 
-    // Export as Webflow-safe attribute (HTML-escaped JSON)
-    exportConfigAttr: function (selector) {
-      const config = getSwiperConfig(selector);
-      if (!config) return null;
+  // Remove event listeners using stored bound handlers
+  if (instance.boundHandlers) {
+    track.removeEventListener('scroll', instance.boundHandlers.scroll);
 
-      const webflowSafeJson = JSON.stringify(config, null, 0).replace(
-        /"/g,
-        '&quot;'
-      );
-      copyToClipboard(
-        webflowSafeJson,
-        'Copied to clipboard! You can paste this into a data-swiper-options attribute.'
-      );
+    if (prevBtn) {
+      prevBtn.removeEventListener('click', instance.boundHandlers.prev);
+    }
+    if (nextBtn) {
+      nextBtn.removeEventListener('click', instance.boundHandlers.next);
+    }
 
-      return config;
-    },
+    // Remove keyboard listener if it exists
+    if (instance.boundHandlers.keyboard) {
+      container.removeEventListener('keydown', instance.boundHandlers.keyboard);
+    }
+  }
 
-    // Export as custom embed code (JavaScript template)
-    exportConfigEmbed: function (selector) {
-      const config = getSwiperConfig(selector);
-      if (!config) return null;
+  // Remove pagination dot event listeners
+  if (instance.boundDotHandlers) {
+    instance.boundDotHandlers.forEach(({ dot, handler }) => {
+      dot.removeEventListener('click', handler);
+    });
+  }
 
-      // Convert to JS object literal: unquote valid identifiers and numeric keys
-      const jsConfig = JSON.stringify(config, null, 2).replace(
-        /"([a-zA-Z_$][a-zA-Z0-9_$]*|\d+)"\s*:/g,
-        '$1:'
-      );
+  // Disconnect ResizeObserver
+  if (instance.resizeObserver) {
+    instance.resizeObserver.disconnect();
+    instance.resizeObserver = null;
+  }
 
-      const embedCode = `<script>
-// Paste this into a custom code embed on Webflow 
-// Update YOUR_SELECTOR_HERE below to match the ".swiper" element in your project
-// Credits: Carousel library by Idrees Isse (divs.idreezus.com)
-document.addEventListener('DOMContentLoaded', () => {
-  const swiper = new Swiper('YOUR_SELECTOR_HERE', ${jsConfig});
-});
-</script>`;
-
-      copyToClipboard(
-        embedCode,
-        'Copied to clipboard! Paste into a custom code embed.'
-      );
-
-      return config;
-    },
-
-    // Interactive export with prompt
-    exportConfig: function (selector) {
-      const choice = window.prompt(
-        'Export format?\nType "1" for pasting into the "data-swiper-options" attribute\nType "2" for pasting into a custom code embed'
-      );
-
-      if (choice === '1') {
-        return window.carousel.exportConfigAttr(selector);
-      }
-      if (choice === '2') {
-        return window.carousel.exportConfigEmbed(selector);
-      }
-
-      console.log('Export cancelled.');
-      return null;
-    },
+  // Clear all instance properties to help garbage collection
+  Object.keys(instance).forEach((key) => {
+    instance[key] = null;
   });
+}
+
+// Initializes the carousel instance
+function init(instance) {
+  // Find and validate elements first
+  const elementsFound = findElements(instance);
+  if (!elementsFound) {
+    return false;
+  }
+
+  // Calculate initial dimensions
+  calculateDimensions(instance);
+
+  // Attach event listeners
+  attachEventListeners(instance);
+
+  // Set up responsive behavior
+  setupResizeObserver(instance);
+
+  // Set up pagination if container exists
+  setupPagination(instance);
+
+  // Set up keyboard navigation if enabled
+  if (instance.config.keyboard) {
+    setupKeyboardNavigation(instance, handlePrev, handleNext);
+  }
+
+  // Set initial UI state
+  updateUI(instance);
+
+  console.log('[DEBUG init] Carousel initialized', {
+    id: instance.id,
+    currentIndex: instance.state.currentIndex,
+    itemCount: instance.items.length,
+    scrollLeft: instance.track.scrollLeft,
+  });
+
+  return true;
+}
+
+// Main Carousel class
+export class Carousel {
+  constructor(container) {
+    const id = generateUniqueId();
+    const config = parseConfig(container);
+
+    // Initialize state object with all tracking properties
+    const state = {
+      currentIndex: 0,
+      isScrolling: false,
+      isAnimating: false,
+      itemPositions: [],
+      gap: 0,
+      containerWidth: 0,
+      scrollWidth: 0,
+      startInset: 0,
+      endInset: 0,
+      hasEmittedStart: false,
+      hasEmittedEnd: false,
+    };
+
+    // Store core properties on instance
+    Object.assign(this, {
+      container,
+      id,
+      config,
+      state,
+      events: new Map(),
+      rafPending: false,
+      boundHandlers: null,
+      debouncedScrollHandler: null,
+    });
+
+    // Initialize the carousel
+    const initialized = init(this);
+    if (!initialized) {
+      console.warn(
+        `Carousel ${id}: Initialization failed due to missing required elements.`
+      );
+    }
+  }
+
+  // Navigates to the next item
+  next() {
+    handleNext(this);
+    return this;
+  }
+
+  // Navigates to the previous item
+  prev() {
+    handlePrev(this);
+    return this;
+  }
+
+  // Navigates to a specific item by index
+  goTo(index) {
+    const { items } = this;
+    if (index < 0 || index >= items.length) {
+      console.warn(
+        `Carousel ${this.id}: Invalid index ${index}. Must be between 0 and ${
+          items.length - 1
+        }.`
+      );
+      return this;
+    }
+    scrollToItem(this, index);
+    return this;
+  }
+
+  // Returns the current active item index
+  getActiveIndex() {
+    return this.state.currentIndex;
+  }
+
+  // Manually recalculates dimensions and updates UI
+  refresh() {
+    calculateDimensions(this);
+    detectActiveItem(this);
+    updateUI(this);
+    return this;
+  }
+
+  // Destroys the carousel instance and cleans up all resources
+  destroy() {
+    cleanup(this);
+    return null;
+  }
+
+  // Subscribes to a carousel event
+  on(event, callback) {
+    const { events } = this;
+    if (!events.has(event)) {
+      events.set(event, []);
+    }
+    events.get(event).push(callback);
+    return this;
+  }
+
+  // Unsubscribes from a carousel event
+  off(event, callback) {
+    const { events } = this;
+    if (!events.has(event)) return this;
+
+    const callbacks = events.get(event);
+    const index = callbacks.indexOf(callback);
+    if (index > -1) {
+      callbacks.splice(index, 1);
+    }
+    return this;
+  }
+
+  // Static method for manual initialization
+  static init(container) {
+    if (typeof container === 'string') {
+      container = document.querySelector(container);
+    }
+    if (!container) {
+      throw new Error('Carousel.init(): Container element not found');
+    }
+    return new Carousel(container);
+  }
 }
