@@ -19,8 +19,8 @@ A lightweight, CSS-first carousel library built on native browser scroll snap.
 Include the stylesheet and script:
 
 ```html
-<link rel="stylesheet" href="path/to/src/carousel.css" />
-<script type="module" src="path/to/src/index.js"></script>
+<link rel="stylesheet" href="path/to/carousel.css" />
+<script src="path/to/carousel.min.js"></script>
 ```
 
 ## Basic Usage
@@ -346,7 +346,6 @@ export const TIMING = {
 
 Requires modern browsers with:
 
-- ES6 modules
 - CSS Scroll Snap
 - ResizeObserver
 - Smooth scrolling

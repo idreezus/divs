@@ -129,3 +129,127 @@ export function calculateTotalSlides(items) {
 
   return items.length;
 }
+
+// Emits custom events both through the instance event system and as DOM events
+export function emit(instance, event, data = {}) {
+  const { events, container } = instance;
+
+  // Call registered callbacks via instance.on()
+  if (events.has(event)) {
+    const callbacks = events.get(event);
+    callbacks.forEach((callback) => {
+      callback.call(instance, {
+        type: event,
+        target: instance,
+        ...data,
+      });
+    });
+  }
+
+  // Dispatch native DOM custom event for addEventListener compatibility
+  const customEvent = new CustomEvent(`carousel:${event}`, {
+    detail: { carousel: instance, ...data },
+    bubbles: true,
+  });
+  container.dispatchEvent(customEvent);
+}
+
+// Calculates and stores all dimensional measurements for the carousel
+export function calculateDimensions(instance) {
+  const { track, items, state, config } = instance;
+
+  // Get computed styles to read CSS properties
+  const trackStyle = getComputedStyle(track);
+
+  const parseOffset = (value) => {
+    if (!value || value === 'auto') {
+      return { value: 0, specified: false };
+    }
+    const parsed = parseFloat(value);
+    if (Number.isNaN(parsed)) {
+      return { value: 0, specified: false };
+    }
+    return { value: parsed, specified: true };
+  };
+
+  // Read gap from CSS (try both gap and column-gap for compatibility)
+  const gap = parseFloat(trackStyle.gap || trackStyle.columnGap) || 0;
+
+  const paddingInlineStart = parseOffset(
+    trackStyle.paddingInlineStart || trackStyle.paddingLeft
+  );
+  const paddingInlineEnd = parseOffset(
+    trackStyle.paddingInlineEnd || trackStyle.paddingRight
+  );
+  const scrollPaddingInlineStart = parseOffset(
+    trackStyle.scrollPaddingInlineStart || trackStyle.scrollPaddingLeft
+  );
+  const scrollPaddingInlineEnd = parseOffset(
+    trackStyle.scrollPaddingInlineEnd || trackStyle.scrollPaddingRight
+  );
+
+  const startInset = scrollPaddingInlineStart.specified
+    ? scrollPaddingInlineStart.value
+    : paddingInlineStart.value;
+  const endInset = scrollPaddingInlineEnd.specified
+    ? scrollPaddingInlineEnd.value
+    : paddingInlineEnd.value;
+
+  // Measure container and scroll dimensions
+  const containerWidth = track.clientWidth;
+  const scrollWidth = track.scrollWidth;
+
+  // Calculate basic position data for active item detection
+  const trackRect = track.getBoundingClientRect();
+  const itemPositions = items.map((item, index) => {
+    const rect = item.getBoundingClientRect();
+    const itemStyle = getComputedStyle(item);
+
+    // Read scroll-margin for detection calculations
+    const marginStartValue = parseFloat(
+      itemStyle.scrollMarginInlineStart || itemStyle.scrollMarginLeft
+    );
+    const marginEndValue = parseFloat(
+      itemStyle.scrollMarginInlineEnd || itemStyle.scrollMarginRight
+    );
+    const marginStart = Number.isNaN(marginStartValue) ? 0 : marginStartValue;
+    const marginEnd = Number.isNaN(marginEndValue) ? 0 : marginEndValue;
+
+    // Calculate left position relative to track, accounting for current scroll
+    const left = rect.left - trackRect.left + track.scrollLeft;
+    const width = rect.width;
+
+    return {
+      index,
+      left,
+      width,
+      center: left + width / 2,
+      right: left + width,
+      marginStart,
+      marginEnd,
+    };
+  });
+
+  // Update state with measurements needed for detection
+  Object.assign(state, {
+    gap,
+    containerWidth,
+    scrollWidth,
+    itemPositions,
+    startInset,
+    endInset,
+  });
+
+  // Store snap alignment on instance for reference
+  instance.snapAlign = config.align;
+
+  console.log('[DEBUG calculateDimensions] Dimensions calculated:', {
+    gap,
+    containerWidth,
+    scrollWidth,
+    snapAlign: instance.snapAlign,
+    startInset,
+    endInset,
+    itemCount: itemPositions.length,
+  });
+}

@@ -1,6 +1,6 @@
 // Entry point for the carousel library
 
-import { Carousel } from './carousel.js';
+import { Carousel } from './core.js';
 import { SELECTORS } from './config.js';
 
 // Global registry to store all initialized carousel instances
@@ -36,6 +36,3 @@ if (typeof window !== 'undefined') {
   window.Carousel = Carousel;
   window.CarouselInstances = instances;
 }
-
-export { Carousel };
-export default Carousel;

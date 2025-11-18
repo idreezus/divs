@@ -1,8 +1,13 @@
 // Navigation and pagination functionality
 
 import { CONFIG } from './config.js';
-import { findActiveIndex, debounce, calculateTotalSlides } from './utils.js';
-import { emit, calculateDimensions } from './core.js';
+import {
+  findActiveIndex,
+  debounce,
+  calculateTotalSlides,
+  emit,
+  calculateDimensions,
+} from './utils.js';
 import { updateActiveClasses } from './keyboard.js';
 
 // Detects which item is currently active based on scroll position
