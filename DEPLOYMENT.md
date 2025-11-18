@@ -120,7 +120,7 @@ git push origin marquee-v1.0.1
 ```html
 <script src="https://cdn.jsdelivr.net/gh/{user}/{repo}@{tag}/dist/{component}/{version}/file.js"></script>
 <!-- So basically -->
-<script src="https://cdn.jsdelivr.net/gh/idreezus/divs@{package-version(the-tag-format)}/dist/{package}/{version}/file.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/idreezus/divs@{package-(version-i-e-the-tag-format)}/dist/{package}/{version}/{file}.js"></script>
 ```
 
 Always include the `@{component}-v{version}` tag segment; without it, jsDelivr serves whatever is currently on the default branch, so a later change to `dist/...` would silently update existing embeds.

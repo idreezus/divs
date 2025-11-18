@@ -38,10 +38,10 @@ export const SWIPER_LOG_PREFIX = '[Carousel]';
 export const SWIPER_BREAKPOINT_SHORTHANDS = {
   desktop: '992', // Desktop and above
   tablet: '768', // Tablet and above
-  'mobile-landscape': '480', // Mobile landscape and above
-  mobile: '0', // Mobile portrait and above
+  landscape: '480', // Mobile landscape and above
+  portrait: '0', // Mobile portrait and above
 
-  // mobile: '767', // Alias for mobile-landscape
+  // mobile: '767', // Alias for landscape
   // phone: '0', // Alias for mobile-portrait
 };
 

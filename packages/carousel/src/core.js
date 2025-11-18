@@ -550,7 +550,7 @@ if (typeof window !== 'undefined') {
       const config = getSwiperConfig(selector);
       if (!config) return null;
 
-      const webflowSafeJson = JSON.stringify(config, null, 2).replace(
+      const webflowSafeJson = JSON.stringify(config, null, 0).replace(
         /"/g,
         '&quot;'
       );

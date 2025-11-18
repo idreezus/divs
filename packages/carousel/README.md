@@ -335,12 +335,12 @@ For complex configurations or quick copy/paste:
 
 Instead of remembering pixel values, use Webflow's familiar breakpoint names:
 
-| Shorthand          | Pixel Value | Webflow Breakpoint |
-| ------------------ | ----------- | ------------------ |
-| `desktop`          | 992         | Desktop            |
-| `tablet`           | 768         | Tablet             |
-| `mobile-landscape` | 480         | Mobile landscape   |
-| `mobile`           | 0           | Mobile portrait    |
+| Shorthand   | Pixel Value | Webflow Breakpoint |
+| ----------- | ----------- | ------------------ |
+| `desktop`   | 992         | Desktop            |
+| `tablet`    | 768         | Tablet             |
+| `landscape` | 480         | Mobile landscape   |
+| `mobile`    | 0           | Mobile portrait    |
 
 Note: SwiperJS cascades UP, not down. So if you write a parameter without any breakpoint specified, it'll actually start at the 0px breakpoint, and
 
@@ -358,7 +358,7 @@ Note: SwiperJS cascades UP, not down. So if you write a parameter without any br
     data-swiper="root"
     data-swiper-breakpoints='{
     "tablet": {"slidesPerView": 2},
-    "mobile-landscape": {"slidesPerView": 1}
+    "landscape": {"slidesPerView": 1}
   }'
   >
     <!-- Bulk JSON -->

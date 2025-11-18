@@ -278,7 +278,7 @@ This becomes:
 ```javascript
 {
   breakpoints: {
-    480: { slidesPerView: 1, spaceBetween: 8 },    // mobile-landscape and up
+    480: { slidesPerView: 1, spaceBetween: 8 },    // landscape and up
     768: { slidesPerView: 2, spaceBetween: 16 },   // tablet and up
   }
 }
@@ -335,12 +335,12 @@ Breakpoint keys are viewport widths in pixels. Values are configuration objects 
 
 Instead of remembering pixel values, use Webflow's familiar breakpoint names in **both attribute and JSON formats**:
 
-| Shorthand          | Pixel Value | Webflow Breakpoint |
-| ------------------ | ----------- | ------------------ |
-| `desktop`          | 992         | Desktop            |
-| `tablet`           | 768         | Tablet             |
-| `mobile-landscape` | 480         | Mobile landscape   |
-| `mobile`           | 0           | Mobile portrait    |
+| Shorthand   | Pixel Value | Webflow Breakpoint |
+| ----------- | ----------- | ------------------ |
+| `desktop`   | 992         | Desktop            |
+| `tablet`    | 768         | Tablet             |
+| `landscape` | 480         | Mobile landscape   |
+| `mobile`    | 0           | Mobile portrait    |
 
 **Example with individual attributes:**
 
@@ -363,7 +363,7 @@ Instead of remembering pixel values, use Webflow's familiar breakpoint names in 
   data-swiper="root"
   data-swiper-breakpoints='{
     "tablet": {"slidesPerView": 2, "spaceBetween": 16},
-    "mobile-landscape": {"slidesPerView": 1, "spaceBetween": 8}
+    "landscape": {"slidesPerView": 1, "spaceBetween": 8}
   }'
 >
   <!-- structure -->
@@ -518,7 +518,7 @@ Access the SwiperJS instance via `root.swiperInstance` and inspect `swiper.param
 </Accordion>
 
 <Accordion title="Can I use Webflow breakpoint names instead of pixel values?">
-Yes! Use friendly names like `"desktop"` (992px), `"tablet"` (768px), `"mobile-landscape"` (480px), or `"mobile"` (0px) in your breakpoints configuration. These shorthands are case-insensitive and can be mixed with custom pixel values. For example: `{"tablet": {...}, "600": {...}}`. This makes breakpoints easier to remember and more aligned with Webflow's design system.
+Yes! Use friendly names like `"desktop"` (992px), `"tablet"` (768px), `"landscape"` (480px), or `"mobile"` (0px) in your breakpoints configuration. These shorthands are case-insensitive and can be mixed with custom pixel values. For example: `{"tablet": {...}, "600": {...}}`. This makes breakpoints easier to remember and more aligned with Webflow's design system.
 </Accordion>
 
 </div>
