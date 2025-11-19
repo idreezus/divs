@@ -476,6 +476,7 @@
     targetItem.scrollIntoView({
       behavior: 'smooth',
       block: 'nearest',
+      container: 'nearest',
       inline: snapAlign, // 'start', 'center', or 'end'
     });
 
