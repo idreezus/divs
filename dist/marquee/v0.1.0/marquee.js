@@ -1512,10 +1512,6 @@
         console.warn('Marquee: Container should have display: flex. Add it to your CSS or let the library apply it.', this.container);
       }
 
-      if (computed.overflow !== 'hidden') {
-        console.warn('Marquee: Container should have overflow: hidden. Add it to your CSS or let the library apply it.', this.container);
-      }
-
       // Mark as validated to avoid repeated warnings
       this.container.setAttribute(CONFIG.internalFlags.attributes.stylesValidated, 'true');
     }

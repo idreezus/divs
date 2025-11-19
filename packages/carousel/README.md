@@ -1,33 +1,83 @@
 # Carousel
 
-A lightweight, CSS-first carousel library built on native browser scroll snap for smooth, GPU-accelerated scrolling.
+A smooth scrolling slider that leverages native CSS for easy setup and styling.
 
 ## Features
 
-- Smooth, GPU-accelerated scrolling with no JavaScript transforms
-- Zero dependencies, framework-agnostic vanilla JavaScript
-- Simple data-attribute configuration with auto-initialization
-- Auto-generated pagination dots with active state tracking
-- Optional keyboard navigation (Arrow keys, Home, End)
-- Responsive design with automatic recalculation
-- Works with variable-width items
-- Multiple independent carousels per page
-- Flexible positioning with CSS scroll-padding and scroll-margin
-- Chainable programmatic API with event system
-- State classes for custom styling (active, disabled, scrolling, animating)
+- Works with any item sizes, even if different widths
+- Navigation buttons work just by placing them in the container
+- Optional keyboard navigation with a single data attribute
+- Automatic recalculations for sizes & spacing that change on breakpoints
+- Allows for multiple carousels per page without initialization conflicts
+- Native CSS gives performant, GPU-accelerated scrolling
+- Javascript API and events available for complex builds
 
-## Installation
+## Setup
 
-Include the stylesheet and script:
+<Steps>
+<Step number="1" title="Copy and paste the script">
+Paste this script into your Page Settings "Before `</body>` tag".
 
 ```html
-<link rel="stylesheet" href="path/to/carousel.css" />
-<script src="path/to/carousel.min.js"></script>
+<!-- Divs Carousel Library -->
+<script src="https://cdn.jsdelivr.net/gh/idreezus/divs@carousel-v1.0.0/dist/carousel/v1.0.0/carousel.min.js"></script>
 ```
 
-## Basic Usage
+</Step>
 
-### HTML Structure
+<Step number="2" title="Copy and paste the styles">
+Put the required styling on your page. Either an Embed element that's placed anywhere on your page, or your Page Settings "Inside `<head>` tag".
+</Step>
+
+<Step number="3" title="That's all folks">
+Snag one of the variants below, or continue reading the documentation if you want learn more.
+</Step>
+</Steps>
+
+## Variants
+
+### Content Cards
+
+### Galleries
+
+### Testimonials
+
+## How It Works
+
+I started coding a carousel library on top of [SwiperJS](https://swiperjs.com/) for days until I remembered how difficult it always is to work with – especially when it came to controlling the styling. So I threw that library in the trash.
+
+This new library was made to be easy to work with (especially on Webflow) without fighting unexpected Javascript shenanigans. You style things like always and control item sizes and spacing with standard CSS properties.
+
+In the background, `ResizeObserver` detects changes and automatically recalculates positions and boundaries. CSS Scroll Snap handles alignment. `scrollIntoView()` provides the smooth programmatic navigation.
+
+The benefit of leveraging native browser features instead of a library like SwiperJS is that the carousel gets GPU acceleration and performance optimizations for free. And it's just smoother. Less JavaScript, better performance, smoother scrolling.
+
+### Structure
+
+There's three elements required:
+
+- `[data-carousel="container"]` – the outermost container, used for scoping a specific instance.
+- `[data-carousel="track"]` – the horizontal list that houses all the items.
+- `[data-carousel="item"]` – the individual slides.
+
+The purpose of the `[data-carousel="container"]` element is three-fold:
+
+- **It allows for automatic unique instance detection**. Translation: you can simply have elements like the previous/next navigation buttons exist within the `[data-carousel="container"]` , and the code already knows those buttons are for _that_ specific carousel. It won't randomly start moving another carousel on another part of the page.
+- **It works perfectly with Webflow CMS.** How do you get navigation buttons inside Webflow's Collection List if you can't put non-CMS things inside a Collection List? Exactly. Now you can.
+- **Flexibility for future features.** Wink.
+
+> [!IMPORTANT]
+> You can put whatever you want inside of the `[data-carousel="container"]` element. The `[data-carousel="track"]` can be nested arbitrarily deep.
+>
+> The only restraints: there can only be one carousel within a container, and all the `[data-carousel="item"]` elements must be **direct children** of the track.
+
+## Webflow CMS
+
+To match up with the Webflow Collection List structure:
+
+1. `[data-carousel="container"]` – goes **on** the `Collection List Wrapper` (if you don't care for navigation buttons), or anywhere as an ancestor of the `Collection List Wrapper`.
+2. `[data-carousel="track"]` – goes on the `Collection List`
+3. `[data-carousel="item"]` – goes on the (you guessed it!) `Collection List Item`
 
 ```html
 <div data-carousel="container">
@@ -36,184 +86,88 @@ Include the stylesheet and script:
     <div data-carousel="item">Item 2</div>
     <div data-carousel="item">Item 3</div>
   </div>
-
-  <button data-carousel="prev">Previous</button>
-  <button data-carousel="next">Next</button>
-
-  <div data-carousel="pagination">
-    <button data-carousel="dot"></button>
+  <div>
+    <button data-carousel="prev">Previous</button>
+    <button data-carousel="next">Next</button>
   </div>
 </div>
 ```
 
-### CSS
+## Customization
 
-The library handles scroll behavior. You control the visuals:
+### Core Attributes
 
-```css
-/* Required: Set item dimensions */
-[data-carousel='item'] {
-  width: 300px;
-}
+Configure the carousel with data attributes on the container element:
 
-/* Required: Set spacing between items */
-[data-carousel='track'] {
-  gap: 16px;
-}
+| Attribute                | Values                           | Default   | Description                   |
+| ------------------------ | -------------------------------- | --------- | ----------------------------- |
+| `data-carousel`          | `"container"`                    | -         | Required on container element |
+| `data-carousel`          | `"track"`                        | -         | Required on track element     |
+| `data-carousel`          | `"item"`                         | -         | Required on each item element |
+| `data-carousel-align`    | `"start"` / `"center"` / `"end"` | `"start"` | Snap alignment of items       |
+| `data-carousel-keyboard` | `"true"` / `"false"`             | `"false"` | Enable keyboard navigation    |
 
-/* Optional: Style buttons and dots */
-[data-carousel='prev'],
-[data-carousel='next'] {
-  /* Your button styles */
-}
+### Navigation Elements
 
-[data-carousel='dot'] {
-  /* Your dot styles */
-}
+Optional navigation controls that work automatically when placed inside the container:
 
-[data-carousel='dot'].carousel-active {
-  /* Active dot styles */
-}
-```
+| Attribute              | Description     |
+| ---------------------- | --------------- |
+| `data-carousel="prev"` | Previous button |
+| `data-carousel="next"` | Next button     |
 
-The carousel auto-initializes on page load. No JavaScript configuration needed.
-
-## Configuration
-
-### Snap Alignment
-
-Control how items align when scrolled into view:
-
-```html
-<!-- Align to start (default) -->
-<div data-carousel="container" data-carousel-align="start">
-  <!-- Center items -->
-  <div data-carousel="container" data-carousel-align="center">
-    <!-- Align to end -->
-    <div data-carousel="container" data-carousel-align="end"></div>
-  </div>
-</div>
-```
+> [!NOTE]
+> Pagination is coming very soon. Just doing some bug testing.
 
 ### Keyboard Navigation
 
-Enable arrow key navigation:
+When enabled, `Arrow Left` and `Arrow Right` navigate between items. For those with huge keyboards, `Home` jumps to first item and `End` jumps to the last item.
+
+To enable keyboard navigation:
 
 ```html
 <div data-carousel="container" data-carousel-keyboard="true">
-  <!-- items -->
+  <!-- Rest of the track/items -->
 </div>
 ```
 
-When enabled:
+### Spacing and Positioning
 
-- `Arrow Left` / `Arrow Right` navigate between items
-- `Home` jumps to first item
-- `End` jumps to last item
+Use CSS `gap` on the `[data-carousel="track"]` to control spacing.
 
-## Spacing and Positioning
-
-Use CSS `gap` on the track to space items:
-
-```css
-[data-carousel='track'] {
-  gap: 16px;
-}
-```
-
-The library respects CSS [`scroll-padding`](https://developer.mozilla.org/en-US/docs/Web/CSS/scroll-padding) (container insets) and [`scroll-margin`](https://developer.mozilla.org/en-US/docs/Web/CSS/scroll-margin) (per-item offsets) for controlling snap positioning. Use these properties for "peeking" layouts or adjusting snap points.
-
-## Pagination
-
-Provide at least one dot element. The library duplicates it to match the number of items:
-
-```html
-<div data-carousel="pagination">
-  <button data-carousel="dot"></button>
-</div>
-```
-
-The library clones dots to match the slide count, normalizes them to `<button>` elements, adds click handlers, and applies the `.carousel-active` class to the current dot.
-
-## Responsive Behavior
-
-Item widths can change at breakpoints:
-
-```css
-[data-carousel='item'] {
-  width: 350px; /* Desktop */
-}
-
-@media (max-width: 768px) {
-  [data-carousel='item'] {
-    width: 280px; /* Tablet */
-  }
-}
-
-@media (max-width: 480px) {
-  [data-carousel='item'] {
-    width: 220px; /* Mobile */
-  }
-}
-```
-
-The library uses `ResizeObserver` to detect changes and automatically recalculates positions and boundaries.
-
-## Variable-Width Items
-
-Items can have different widths:
-
-```html
-<div data-carousel="track">
-  <div data-carousel="item" style="width: 300px;">Narrow</div>
-  <div data-carousel="item" style="width: 500px;">Wide</div>
-  <div data-carousel="item" style="width: 400px;">Medium</div>
-</div>
-```
-
-Active item detection works with mixed widths.
-
-## Multiple Carousels
-
-Run multiple independent carousels on one page:
-
-```html
-<div data-carousel="container">
-  <!-- First carousel -->
-</div>
-
-<div data-carousel="container">
-  <!-- Second carousel -->
-</div>
-```
-
-Each carousel gets a unique ID (`data-carousel-id`) for debugging.
+The library also works with CSS [`scroll-padding`](https://developer.mozilla.org/en-US/docs/Web/CSS/scroll-padding) (container insets) and [`scroll-margin`](https://developer.mozilla.org/en-US/docs/Web/CSS/scroll-margin) (per-item offsets) for controlling snap positioning. For the variants on this page, all of them have `scroll-padding` on the track element.
 
 ## State Classes
 
-The library applies functional state classes you can style:
+The library applies state classes that you can style however you want.
 
-| Class                     | Applied To | When                             |
-| ------------------------- | ---------- | -------------------------------- |
-| `.carousel-active`        | Item       | Item is currently active         |
-| `.carousel-active`        | Dot        | Dot represents active item       |
-| `.carousel-disabled`      | Button     | Button is disabled (at boundary) |
-| `.carousel-scrolling`     | Track      | User is actively scrolling       |
-| `.carousel-animating`     | Track      | Programmatic scroll in progress  |
-| `.carousel-snap-disabled` | Track      | Scroll snap temporarily disabled |
+| Class                         | Applied to                                                            |
+| ----------------------------- | --------------------------------------------------------------------- |
+| `.carousel-item-active`       | The item that is currently active (i.e. aligned)                      |
+| `.carousel-button-disabled`   | Navigation buttons at start/end boundaries                            |
+| `.carousel-scrolling`         | The track while a user or programmatic scrolling is active            |
+| `.carousel-snap-disabled`     | The track to temporarily disable scroll-snap during button navigation |
+| `.carousel-animating`         | The track during programmatic scroll animations                       |
+| `.carousel-pagination-active` | The active pagination dot                                             |
 
-Example:
+Here's an example from the prev/next buttons on all the variants on this page:
 
 ```css
-/* Fade inactive items */
-[data-carousel='item']:not(.carousel-active) {
-  opacity: 0.6;
+/* Arrow initial styles */
+.carousel_arrow {
+  cursor: pointer;
+  transition: opacity 200ms ease-in-out, color 150ms ease-in-out;
 }
 
-/* Hide disabled buttons */
-button[data-carousel].carousel-disabled {
-  opacity: 0.3;
-  pointer-events: none;
+/* For a disabled arrow */
+[data-carousel='container'] .carousel_arrow.carousel-button-disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+/* Brighten up the not-disabled arrow on hover */
+.carousel_arrow:not(.carousel-button-disabled):hover {
+  color: color-mix(in srgb, currentColor 100%, transparent);
 }
 ```
 
@@ -251,8 +205,6 @@ carousel.next().next().refresh();
 
 ### Events
 
-Listen to carousel events:
-
 ```javascript
 carousel.on('change', (e) => {
   console.log(`Active item: ${e.index}`);
@@ -281,6 +233,15 @@ container.addEventListener('carousel:change', (e) => {
   console.log(e.detail); // { carousel, index }
 });
 ```
+
+Available events:
+
+| Event         | Description            | Event Data       |
+| ------------- | ---------------------- | ---------------- |
+| `change`      | Active item changed    | `{ index }`      |
+| `scroll`      | Track scrolled         | `{ scrollLeft }` |
+| `reach-start` | Scrolled to first item | -                |
+| `reach-end`   | Scrolled to last item  | -                |
 
 ### Global Registry
 
@@ -320,105 +281,46 @@ carousel.destroy();
 const newCarousel = new Carousel(container);
 ```
 
-## Accessibility
-
-The library doesn't add ARIA roles or labels. You control all accessibility features including semantic HTML, ARIA attributes, and screen reader announcements based on your specific use case.
-
-## Performance
-
-Built-in optimizations:
-
-- Debounced scroll handling (100ms)
-- Debounced resize handling (150ms)
-- RequestAnimationFrame batching for DOM updates
-- Button cooldown (300ms) to prevent rapid clicks
-
-These values are configured in `src/config.js` and can be adjusted:
-
-```javascript
-export const TIMING = {
-  DEBOUNCE_RESIZE: 150,
-  DEBOUNCE_SCROLL: 100,
-  BUTTON_COOLDOWN: 300,
-  SNAP_DISABLE_DURATION: 50,
-};
-```
-
-## Browser Support
-
-Requires modern browsers with:
-
-- CSS Scroll Snap
-- ResizeObserver
-- Smooth scrolling
-
-Includes recent versions of Chrome, Firefox, Safari, and Edge. IE11 is not supported.
-
-## Examples
-
-See the `examples/` directory for complete demos:
-
-- `basic.html` - Simple carousel with prev/next buttons
-- `pagination.html` - Pagination dots
-- `multiple.html` - Multiple carousels on one page
-- `responsive.html` - Responsive item widths
-- `keyboard.html` - Keyboard navigation
-- `accessible.html` - Accessibility implementation example
-
-## How It Works
-
-This library is designed around native browser capabilities:
-
-- **CSS Scroll Snap** handles alignment automatically
-- **scrollIntoView()** provides smooth programmatic navigation
-- **scroll-padding** and **scroll-margin** control snap positioning
-- **JavaScript** manages state, events, and UI updates
-
-By leveraging native features, the carousel gets GPU acceleration and browser optimizations for free. Less JavaScript, better performance, smoother scrolling.
-
 ## FAQ
 
-**Why use this instead of other carousel libraries?**
+<Accordions>
 
-This library uses native browser scroll behavior instead of JavaScript transforms, making it faster and smoother with less code.
+<Accordion title="Why do you call it 'Carousel' instead of 'Slider'?">
+Great question. I called it Slider my whole life (I still do), but I learned it's not the right semantics. The browser world (like Chrome and Mozilla devs) call it "Carousel" since "Slider" is reserved for things like an [input range slider.](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/range) And I might want to make an input range slider component in the future. So I had to lock in and leave the `/slider` URL free.
+</Accordion>
 
-**Can I customize the animation duration?**
+<Accordion title="Does it work vertically?">
+Not yet. Wink.
+</Accordion>
 
-The library uses native `scroll-behavior: smooth`, so animation timing is controlled by the browser. For custom timing, you'd need to implement custom scrolling instead of using the native behavior.
-
-**Does it work vertically?**
-
-Not currently. The library is designed for horizontal scrolling only.
-
-**How do I disable buttons at boundaries?**
-
-The library automatically adds the `.carousel-disabled` class and sets the `disabled` attribute when at the start or end. Style accordingly:
+<Accordion title="How do I style my navigation buttons at the boundaries?">
+The library automatically adds the `.carousel-button-disabled` class when at the start or end. Style that class however you like.
 
 ```css
-button[data-carousel].carousel-disabled {
+button[data-carousel].carousel-button-disabled {
   opacity: 0.3;
   pointer-events: none;
 }
 ```
 
-**Can I start at a specific item?**
+</Accordion>
 
-Yes, call `goTo()` after initialization:
+<Accordion title="Can I customize the animation duration?">
+The library uses native `scroll-behavior: smooth`, so animation timing is controlled by the browser. For custom timing, you'd need to implement custom scrolling instead of using the native behavior.
+</Accordion>
 
-```javascript
-const carousel = Carousel.init('.my-carousel');
-carousel.goTo(2); // Start at third item
-```
-
-**What if my carousel is initially hidden?**
-
-The library skips calculations when `container.offsetParent === null`. Call `refresh()` when the carousel becomes visible:
+<Accordion title="What if my carousel is initially hidden?">
+Call `refresh()` when the carousel becomes visible:
 
 ```javascript
 // When showing carousel
 carousel.refresh();
 ```
 
-**How do I debug issues?**
+</Accordion>
 
-Check the console for warnings. The library logs clear messages when required elements are missing. Each carousel also has a `data-carousel-id` attribute for easier debugging in DevTools.
+<Accordion title="How do I debug issues?">
+Check the console for warnings. The library logs clear messages for the most common situations (like missing elements). Each carousel also has a `data-carousel-id` attribute for easier debugging in DevTools. If you still have questions, feel free to reach out to me.
+</Accordion>
+
+</Accordions>

@@ -14,7 +14,7 @@ export const CONFIG = {
     },
     defaults: {
       // Default speed multiplier used by loop helpers
-      speed: 0.7,
+      speed: 0.6,
       // Default to infinite repeat
       repeat: -1,
       // Start playing by default

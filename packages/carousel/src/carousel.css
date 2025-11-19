@@ -1,15 +1,38 @@
-/* Enables horizontal scrolling with scroll-snap */
-[data-carousel='track'] {
-  display: flex;
-  overflow-x: scroll;
-  scroll-snap-type: x mandatory;
-  scroll-behavior: smooth;
-  scrollbar-width: none;
-  overscroll-behavior-x: contain;
+/* Things you could change */
+:root {
+  --site-max-width: 80rem; /* your site's container width here */
+  --site-padding: 2.5rem; /* your site's padding here */
 }
 
-[data-carousel='track'].carousel-snap-disabled {
-  scroll-snap-type: none;
+@media (max-width: 767px) {
+  :root {
+    --site-padding: 1.25rem; /* your site's padding on mobile (landscape) and below */
+  }
+}
+
+/*
+*	Things for nerds
+*/
+
+/* Variables used in the `.carousel_track` `.carousel_track.is-breakout` classes */
+:root {
+  --carousel-scroll-padding: calc(
+    (100% - min(var(--site-max-width), 100% - var(--site-padding) * 2)) / 2
+  );
+  --carousel-scroll-padding-breakout: calc(
+    (100vw - min(var(--site-max-width), 100vw - var(--site-padding) * 2)) / 2
+  );
+}
+
+@media (max-width: 767px) {
+  :root {
+    --carousel-scroll-padding: calc(
+      (100% - min(var(--site-max-width), 100% - var(--site-padding) * 2)) / 2
+    );
+    --carousel-scroll-padding-breakout: calc(
+      (100vw - min(var(--site-max-width), 100vw - var(--site-padding) * 2)) / 2
+    );
+  }
 }
 
 /* Hide scrollbar in WebKit browsers */
@@ -17,14 +40,14 @@
   display: none;
 }
 
+[data-carousel='track'].carousel-snap-disabled {
+  scroll-snap-type: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   [data-carousel='track'] {
     scroll-behavior: auto !important;
   }
-}
-
-[data-carousel='item'] {
-  flex-shrink: 0;
 }
 
 /* Default alignment when no attributes set */
@@ -44,7 +67,7 @@
   scroll-snap-align: end;
 }
 
-/* Dot focus state for keyboard navigation */
+/* Pagination dot focus state for keyboard navigation */
 [data-carousel='dot']:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 2px;

@@ -1,7 +1,7 @@
 {
   "name": "carousel",
-  "version": "0.1.7",
-  "description": "A lightweight, accessible carousel component built on CSS scroll snap",
+  "version": "1.0.0",
+  "description": "A smooth scrolling slider that leverages native CSS for easy setup and styling.",
   "main": "carousel.js",
   "type": "module",
   "scripts": {
