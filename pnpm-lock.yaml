@@ -29,6 +29,8 @@ importers:
         specifier: ^3.0.0
         version: 3.13.0
 
+  packages/theme-toggle: {}
+
 packages:
 
   '@eslint-community/eslint-utils@4.9.0':

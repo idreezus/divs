@@ -1,7 +1,7 @@
 {
   "name": "theme-toggle",
   "version": "1.0.0",
-  "description": "A declarative theme toggle that separates state management from UI presentation. Zero flash, localStorage persistence, system preference sync.",
+  "description": "A vanilla JavaScript theme switcher for light, dark, and custom themes.",
   "main": "themeManager.js",
   "type": "module",
   "scripts": {
@@ -14,9 +14,7 @@
     "dark-mode",
     "light-mode",
     "toggle",
-    "vanilla-js",
-    "declarative",
-    "accessible"
+    "vanilla-js"
   ],
   "author": "Idrees Isse (https://github.com/idreezus)",
   "license": "AGPL-3.0"

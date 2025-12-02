@@ -1,6 +1,10 @@
-// Selectors for querying theme toggle elements
-export const SELECTORS = {
-  TOGGLE: '[data-theme-toggle]',
+// Data attribute names
+export const ATTRIBUTES = {
+  THEME: 'data-theme',
+  THEME_SYSTEM: 'data-theme-system',
+  TOGGLE: 'data-theme-toggle',
+  VALUE: 'data-theme-value',
+  ACTIVE: 'data-theme-active',
 };
 
 // Default configuration values
@@ -15,7 +19,7 @@ export const STORAGE = {
 };
 
 export const CONFIG = {
-  SELECTORS,
+  ATTRIBUTES,
   DEFAULTS,
   STORAGE,
 };

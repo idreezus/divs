@@ -10,8 +10,11 @@ import { CONFIG } from './config.js';
     // Available themes - extend this array for multi-theme support
     themes: CONFIG.DEFAULTS.THEMES.slice(),
 
-    // Current active theme
+    // Current effective theme (never "system")
     current: null,
+
+    // Theme source: "user" or "system"
+    source: null,
 
     // Initialization state
     initialized: false,
@@ -36,8 +39,17 @@ import { CONFIG } from './config.js';
     setTheme(theme, options = {}) {
       const { force = false } = options;
 
-      // Validate theme exists in array
-      if (this.themes.indexOf(theme) === -1) {
+      // Determine if this is system mode
+      const isSystemMode = theme === 'system';
+      const newSource = isSystemMode ? 'system' : 'user';
+
+      // Calculate effective theme
+      const newEffective = isSystemMode
+        ? this.getEffectiveTheme('system')
+        : theme;
+
+      // Validate effective theme exists (skip validation for system mode)
+      if (!isSystemMode && this.themes.indexOf(theme) === -1) {
         console.warn(
           `[ThemeManager] Theme "${theme}" not in themes array:`,
           this.themes
@@ -45,32 +57,36 @@ import { CONFIG } from './config.js';
         return this;
       }
 
-      // Skip if already on this theme (unless forced)
-      if (!force && theme === this.current) {
+      // Skip if no change (unless forced)
+      if (!force && newEffective === this.current && newSource === this.source) {
         return this;
       }
 
-      // Check if effective theme would be the same
-      const newEffective = this.getEffectiveTheme(theme);
-      const currentEffective = this.getEffectiveTheme(this.current);
-      const effectiveChanged = newEffective !== currentEffective;
+      const previousEffective = this.current;
+      const previousSource = this.source;
 
-      const previous = this.current;
-      this.current = theme;
+      this.current = newEffective;
+      this.source = newSource;
 
-      // Handle 'system' theme - resolve to actual light/dark
-      if (theme === 'system') {
-        const resolved = this.getEffectiveTheme('system');
-        document.documentElement.setAttribute('data-theme', 'system');
-        document.documentElement.setAttribute('data-theme-resolved', resolved);
+      // Update CSS class on <body> (remove old, add new)
+      if (previousEffective) {
+        document.body.classList.remove(previousEffective);
+      }
+      document.body.classList.add(newEffective);
+
+      // Set data-theme attribute on <html> (always effective theme)
+      document.documentElement.setAttribute(CONFIG.ATTRIBUTES.THEME, newEffective);
+
+      // Handle data-theme-system (boolean attribute)
+      if (isSystemMode) {
+        document.documentElement.setAttribute(CONFIG.ATTRIBUTES.THEME_SYSTEM, '');
       } else {
-        document.documentElement.setAttribute('data-theme', theme);
-        document.documentElement.removeAttribute('data-theme-resolved');
+        document.documentElement.removeAttribute(CONFIG.ATTRIBUTES.THEME_SYSTEM);
       }
 
       // Save to localStorage (with try/catch for private browsing)
       try {
-        localStorage.setItem(CONFIG.STORAGE.KEY, theme);
+        localStorage.setItem(CONFIG.STORAGE.KEY, isSystemMode ? 'system' : newEffective);
       } catch (e) {
         console.warn('[ThemeManager] localStorage unavailable');
       }
@@ -78,14 +94,16 @@ import { CONFIG } from './config.js';
       // Update all toggle buttons
       this.updateThemeButtons();
 
-      // Only dispatch event if effective theme actually changed or theme selection changed
-      if (effectiveChanged || previous !== theme) {
+      // Dispatch event if there was any change
+      const effectiveChanged = previousEffective !== newEffective;
+      if (effectiveChanged || previousSource !== newSource || force) {
         window.dispatchEvent(
           new CustomEvent('themechange', {
             detail: {
-              theme,
-              previous,
-              effectiveTheme: newEffective,
+              theme: newEffective,
+              previous: previousEffective,
+              source: newSource,
+              previousSource,
               effectiveChanged,
             },
           })
@@ -95,66 +113,94 @@ import { CONFIG } from './config.js';
       return this;
     },
 
-    // Returns the current theme
+    // Returns the current effective theme
     getTheme() {
       return this.current;
     },
 
-    // Cycles to the next theme in the array
-    toggleTheme() {
-      const currentIndex = this.themes.indexOf(this.current);
-      const nextIndex = (currentIndex + 1) % this.themes.length;
-      return this.setTheme(this.themes[nextIndex]);
+    // Returns the current source ("user" or "system")
+    getSource() {
+      return this.source;
     },
 
-    // Updates all toggle button states and attributes
+    // Cycles to the next theme (skips "system")
+    toggleTheme() {
+      // Filter out "system" from cycle
+      const cyclableThemes = this.themes.filter((t) => t !== 'system');
+
+      const currentIndex = cyclableThemes.indexOf(this.current);
+      const nextIndex =
+        currentIndex === -1 ? 0 : (currentIndex + 1) % cyclableThemes.length;
+
+      return this.setTheme(cyclableThemes[nextIndex]);
+    },
+
+    // Updates all toggle and value button states
     updateThemeButtons() {
-      const toggles = document.querySelectorAll(CONFIG.SELECTORS.TOGGLE);
+      // Handle data-theme-value buttons
+      document
+        .querySelectorAll(`[${CONFIG.ATTRIBUTES.VALUE}]`)
+        .forEach((btn) => {
+          const btnTheme = btn.getAttribute(CONFIG.ATTRIBUTES.VALUE);
 
-      toggles.forEach((toggle) => {
-        const toggleTheme = toggle.getAttribute('data-theme-toggle');
-        const isActive = toggleTheme === this.current;
-
-        // Set data attribute for CSS styling
-        toggle.setAttribute('data-theme-active', isActive ? 'true' : 'false');
-
-        // Set accessibility attributes
-        toggle.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-
-        if (toggleTheme) {
-          toggle.setAttribute('aria-label', `${toggleTheme} theme`);
-
-          // Auto-add title if not already set by developer
-          if (!toggle.hasAttribute('title')) {
-            toggle.setAttribute('title', `Switch to ${toggleTheme} theme`);
+          let isActive = false;
+          if (btnTheme === 'system') {
+            // System button is active when source is system
+            isActive = this.source === 'system';
+          } else {
+            // Theme button is active when it matches current effective theme
+            isActive = btnTheme === this.current;
           }
-        }
-      });
+
+          // Boolean attribute (present/absent)
+          if (isActive) {
+            btn.setAttribute(CONFIG.ATTRIBUTES.ACTIVE, '');
+          } else {
+            btn.removeAttribute(CONFIG.ATTRIBUTES.ACTIVE);
+          }
+
+          // Accessibility
+          btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+          if (!btn.hasAttribute('aria-label')) {
+            btn.setAttribute('aria-label', `${btnTheme} theme`);
+          }
+        });
+
+      // Handle data-theme-toggle buttons (never active)
+      document
+        .querySelectorAll(`[${CONFIG.ATTRIBUTES.TOGGLE}]`)
+        .forEach((btn) => {
+          btn.removeAttribute(CONFIG.ATTRIBUTES.ACTIVE);
+          if (!btn.hasAttribute('aria-label')) {
+            btn.setAttribute('aria-label', 'Toggle theme');
+          }
+        });
 
       return this;
     },
 
-    // Sets up toggle button click listeners
+    // Sets up toggle and value button click listeners
     _setupToggles() {
-      const toggles = document.querySelectorAll(CONFIG.SELECTORS.TOGGLE);
+      // Setup data-theme-toggle (cycle)
+      document
+        .querySelectorAll(`[${CONFIG.ATTRIBUTES.TOGGLE}]`)
+        .forEach((btn) => {
+          const listener = () => this.toggleTheme();
+          btn.addEventListener('click', listener);
+          this._toggles.push(btn);
+          this._toggleListeners.set(btn, listener);
+        });
 
-      toggles.forEach((toggle) => {
-        const toggleTheme = toggle.getAttribute('data-theme-toggle');
-
-        const listener = () => {
-          if (toggleTheme) {
-            this.setTheme(toggleTheme);
-          } else {
-            this.toggleTheme();
-          }
-        };
-
-        toggle.addEventListener('click', listener);
-
-        // Store references for cleanup
-        this._toggles.push(toggle);
-        this._toggleListeners.set(toggle, listener);
-      });
+      // Setup data-theme-value (explicit)
+      document
+        .querySelectorAll(`[${CONFIG.ATTRIBUTES.VALUE}]`)
+        .forEach((btn) => {
+          const theme = btn.getAttribute(CONFIG.ATTRIBUTES.VALUE);
+          const listener = () => this.setTheme(theme);
+          btn.addEventListener('click', listener);
+          this._toggles.push(btn);
+          this._toggleListeners.set(btn, listener);
+        });
     },
 
     // Removes toggle button click listeners
@@ -185,18 +231,24 @@ import { CONFIG } from './config.js';
           // localStorage unavailable
         }
 
-        // Use stored theme if valid, otherwise fallback to system preference
-        if (stored && this.themes.indexOf(stored) !== -1) {
+        // First visit or explicit "system" = system mode
+        const isSystemMode = !stored || stored === 'system';
+
+        if (isSystemMode) {
+          this.source = 'system';
+          this.current = this.getEffectiveTheme('system');
+        } else if (this.themes.indexOf(stored) !== -1) {
+          this.source = 'user';
           this.current = stored;
         } else {
-          this.current = window.matchMedia('(prefers-color-scheme: dark)').matches
-            ? 'dark'
-            : CONFIG.DEFAULTS.FALLBACK_THEME;
+          // Invalid stored theme - fallback to system mode
+          this.source = 'system';
+          this.current = this.getEffectiveTheme('system');
         }
 
         // Ensure DOM matches (in case headCode didn't run)
         // Use force: true to ensure initial setup completes
-        this.setTheme(this.current, { force: true });
+        this.setTheme(isSystemMode ? 'system' : this.current, { force: true });
 
         // Setup toggle button click listeners
         this._setupToggles();
@@ -217,10 +269,20 @@ import { CONFIG } from './config.js';
       this._mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
       this._mediaQueryListener = (e) => {
-        // Only react if current theme is 'system'
-        if (this.current === 'system') {
-          const effectiveTheme = e.matches ? 'dark' : 'light';
-          document.documentElement.setAttribute('data-theme-resolved', effectiveTheme);
+        // Only react if source is system
+        if (this.source === 'system') {
+          const newEffective = e.matches ? 'dark' : 'light';
+          const previousEffective = this.current;
+
+          this.current = newEffective;
+
+          // Update DOM
+          document.body.classList.remove(previousEffective);
+          document.body.classList.add(newEffective);
+          document.documentElement.setAttribute(
+            CONFIG.ATTRIBUTES.THEME,
+            newEffective
+          );
 
           // Update button states
           this.updateThemeButtons();
@@ -229,9 +291,10 @@ import { CONFIG } from './config.js';
           window.dispatchEvent(
             new CustomEvent('themechange', {
               detail: {
-                theme: 'system',
-                previous: 'system',
-                effectiveTheme,
+                theme: newEffective,
+                previous: previousEffective,
+                source: 'system',
+                previousSource: 'system',
                 effectiveChanged: true,
               },
             })
@@ -284,6 +347,7 @@ import { CONFIG } from './config.js';
 
       // Reset state
       this.current = null;
+      this.source = null;
       this.initialized = false;
 
       return this;
