@@ -1,0 +1,2293 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Theme Toggle Examples</title>
+
+    <!-- Anti-flash script - MUST be inline and synchronous, before CSS -->
+    <script>
+      (function () {
+        var theme = null;
+        try {
+          theme = localStorage.getItem('theme');
+        } catch (e) {}
+        if (!theme) {
+          theme = window.matchMedia('(prefers-color-scheme: dark)').matches
+            ? 'dark'
+            : 'light';
+        }
+        if (theme === 'system') {
+          var resolved = window.matchMedia('(prefers-color-scheme: dark)')
+            .matches
+            ? 'dark'
+            : 'light';
+          document.documentElement.setAttribute('data-theme', 'system');
+          document.documentElement.setAttribute('data-theme-resolved', resolved);
+        } else {
+          document.documentElement.setAttribute('data-theme', theme);
+        }
+      })();
+    </script>
+
+    <style>
+      /* Base theme variables */
+      :root {
+        --bg: #ffffff;
+        --bg-secondary: #f5f5f5;
+        --text: #171717;
+        --text-muted: #737373;
+        --border: #e5e5e5;
+        --primary: #667eea;
+        --primary-hover: #5568d3;
+      }
+
+      /* Dark theme */
+      [data-theme='dark'],
+      [data-theme-resolved='dark'] {
+        --bg: #0a0a0a;
+        --bg-secondary: #171717;
+        --text: #fafafa;
+        --text-muted: #a3a3a3;
+        --border: #262626;
+        --primary: #818cf8;
+        --primary-hover: #6366f1;
+      }
+
+      /* Sepia theme */
+      [data-theme='sepia'] {
+        --bg: #f4ecd8;
+        --bg-secondary: #e8dcc6;
+        --text: #5c4b37;
+        --text-muted: #7a6b5a;
+        --border: #d4c4a8;
+        --primary: #8b7355;
+        --primary-hover: #6d5a44;
+      }
+
+      /* High contrast theme */
+      [data-theme='high-contrast'] {
+        --bg: #000000;
+        --bg-secondary: #1a1a1a;
+        --text: #ffffff;
+        --text-muted: #cccccc;
+        --border: #ffffff;
+        --primary: #ffff00;
+        --primary-hover: #cccc00;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
+          'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+        padding: 24px;
+      }
+
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      header {
+        margin-bottom: 48px;
+        padding-bottom: 24px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      h1 {
+        font-size: 32px;
+        font-weight: 600;
+        margin-bottom: 12px;
+      }
+
+      .header-subtitle {
+        color: var(--text-muted);
+        font-size: 14px;
+      }
+
+      .example {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 32px;
+        overflow: hidden;
+      }
+
+      .example-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .example-number {
+        font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+        font-size: 12px;
+        color: var(--text-muted);
+        font-weight: 600;
+      }
+
+      .example-header h2 {
+        flex: 1;
+        font-size: 16px;
+        font-weight: 500;
+      }
+
+      .example-content {
+        padding: 20px;
+      }
+
+      .example-description {
+        color: var(--text-muted);
+        font-size: 13px;
+        margin-bottom: 16px;
+      }
+
+      .demo-area {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 24px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* Base button styles */
+      button {
+        padding: 10px 20px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        font-size: 14px;
+        color: var(--text);
+        cursor: pointer;
+        font-family: inherit;
+        transition: background-color 0.15s ease, border-color 0.15s ease,
+          color 0.15s ease;
+      }
+
+      button:hover {
+        background: var(--bg-secondary);
+        border-color: var(--primary);
+      }
+
+      button:active {
+        transform: scale(0.98);
+      }
+
+      /* Active toggle button state */
+      [data-theme-toggle][data-theme-active='true'] {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: white;
+      }
+
+      [data-theme-toggle][data-theme-active='true']:hover {
+        background: var(--primary-hover);
+        border-color: var(--primary-hover);
+      }
+
+      /* Icon buttons */
+      .icon-toggle {
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+      }
+
+      .icon-toggle svg {
+        width: 20px;
+        height: 20px;
+        stroke: currentColor;
+        fill: none;
+      }
+
+      /* Dynamic icon toggle - shows different icon based on theme */
+      .dynamic-icon-toggle {
+        width: 48px;
+        height: 48px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: var(--primary);
+        border-color: var(--primary);
+        color: white;
+      }
+
+      .dynamic-icon-toggle:hover {
+        background: var(--primary-hover);
+        border-color: var(--primary-hover);
+      }
+
+      .dynamic-icon-toggle svg {
+        width: 24px;
+        height: 24px;
+        stroke: currentColor;
+        fill: none;
+      }
+
+      /* Hide/show icons based on theme */
+      .dynamic-icon-toggle .icon-sun,
+      .dynamic-icon-toggle .icon-moon,
+      .dynamic-icon-toggle .icon-system {
+        display: none;
+      }
+      /* Light theme: show sun */
+      [data-theme='light'] .dynamic-icon-toggle .icon-sun {
+        display: block;
+      }
+      /* Dark theme: show moon */
+      [data-theme='dark'] .dynamic-icon-toggle .icon-moon {
+        display: block;
+      }
+      /* System theme: show system icon, or resolved icon */
+      [data-theme='system'] .dynamic-icon-toggle .icon-system {
+        display: block;
+      }
+      /* Sepia and other themes: show sun as fallback */
+      [data-theme='sepia'] .dynamic-icon-toggle .icon-sun,
+      [data-theme='high-contrast'] .dynamic-icon-toggle .icon-moon {
+        display: block;
+      }
+
+      /* Radio button style */
+      .radio-group {
+        display: flex;
+        gap: 0;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        overflow: hidden;
+      }
+
+      .radio-group button {
+        border: none;
+        border-radius: 0;
+        border-right: 1px solid var(--border);
+        padding: 10px 16px;
+      }
+
+      .radio-group button:last-child {
+        border-right: none;
+      }
+
+      .radio-group button:hover {
+        background: var(--bg-secondary);
+      }
+
+      .radio-group [data-theme-active='true'] {
+        background: var(--primary);
+        color: white;
+      }
+
+      /* Pill style */
+      .pill-group {
+        display: flex;
+        gap: 4px;
+        background: var(--bg-secondary);
+        padding: 4px;
+        border-radius: 9999px;
+        border: 1px solid var(--border);
+      }
+
+      .pill-group button {
+        border: none;
+        border-radius: 9999px;
+        padding: 8px 16px;
+        background: transparent;
+        color: var(--text-muted);
+        font-weight: 500;
+      }
+
+      .pill-group button:hover {
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      .pill-group [data-theme-active='true'] {
+        background: var(--bg);
+        color: var(--text);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Card style selector */
+      .card-group {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .card-toggle {
+        width: 100px;
+        padding: 16px 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        border-radius: 8px;
+      }
+
+      .card-toggle .preview {
+        width: 48px;
+        height: 32px;
+        border-radius: 4px;
+        border: 1px solid var(--border);
+      }
+
+      .card-toggle[data-theme-toggle='light'] .preview {
+        background: #ffffff;
+      }
+      .card-toggle[data-theme-toggle='dark'] .preview {
+        background: #0a0a0a;
+      }
+      .card-toggle[data-theme-toggle='sepia'] .preview {
+        background: #f4ecd8;
+      }
+      .card-toggle[data-theme-toggle='system'] .preview {
+        background: linear-gradient(135deg, #ffffff 50%, #0a0a0a 50%);
+      }
+
+      /* Select dropdown */
+      .theme-select {
+        padding: 10px 36px 10px 12px;
+        font-size: 14px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--bg);
+        color: var(--text);
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23737373' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+      }
+
+      .theme-select:hover {
+        border-color: var(--primary);
+      }
+
+      .theme-select:focus {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+      }
+
+      .code-block {
+        background: var(--bg);
+        padding: 12px;
+        border-radius: 4px;
+        font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+        font-size: 12px;
+        margin-top: 16px;
+        color: var(--text-muted);
+        overflow-x: auto;
+        border: 1px solid var(--border);
+        white-space: pre-wrap;
+      }
+
+      .event-log {
+        background: var(--bg);
+        padding: 12px;
+        border-radius: 4px;
+        font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+        font-size: 12px;
+        max-height: 120px;
+        overflow-y: auto;
+        margin-top: 16px;
+        color: var(--text-muted);
+        border: 1px solid var(--border);
+      }
+
+      .current-theme {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-top: 12px;
+        text-align: center;
+      }
+
+      .current-theme strong {
+        color: var(--primary);
+      }
+
+      .info-box {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 12px 16px;
+        margin-top: 16px;
+        font-size: 13px;
+      }
+
+      .info-box dt {
+        color: var(--text-muted);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+      }
+
+      .info-box dd {
+        font-weight: 500;
+        color: var(--primary);
+      }
+
+      .api-buttons {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+      }
+
+      .api-buttons button {
+        font-size: 12px;
+        padding: 6px 12px;
+      }
+
+      /* Example 16: Fade transition */
+      .fade-demo {
+        padding: 24px;
+        border-radius: 8px;
+        text-align: center;
+        background: var(--bg-secondary);
+        transition: background-color 0.5s ease, color 0.5s ease;
+      }
+
+      /* Example 17: Slide transition toggle */
+      .slide-toggle {
+        position: relative;
+        width: 60px;
+        height: 32px;
+        border-radius: 16px;
+        background: var(--border);
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        transition: background-color 0.3s ease;
+      }
+
+      .slide-toggle::after {
+        content: '';
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease;
+      }
+
+      .slide-toggle[data-is-dark='true'] {
+        background: var(--primary);
+      }
+
+      .slide-toggle[data-is-dark='true']::after {
+        transform: translateX(28px);
+      }
+
+      /* Example 18: Rotate icon animation with icon swap */
+      .rotate-toggle {
+        width: 48px;
+        height: 48px;
+        padding: 0;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--primary);
+        border-color: var(--primary);
+        color: white;
+        transition: background-color 0.3s ease;
+        overflow: hidden;
+      }
+
+      .rotate-toggle:hover {
+        background: var(--primary-hover);
+        border-color: var(--primary-hover);
+      }
+
+      .rotate-toggle svg {
+        width: 24px;
+        height: 24px;
+        stroke: currentColor;
+        fill: none;
+        position: absolute;
+        transition: transform 0.5s ease, opacity 0.25s ease;
+      }
+
+      .rotate-toggle.rotating svg {
+        transform: rotate(360deg);
+      }
+
+      /* Hide/show icons based on theme */
+      .rotate-toggle .icon-sun,
+      .rotate-toggle .icon-moon,
+      .rotate-toggle .icon-system {
+        opacity: 0;
+      }
+      [data-theme='light'] .rotate-toggle .icon-sun {
+        opacity: 1;
+      }
+      [data-theme='dark'] .rotate-toggle .icon-moon {
+        opacity: 1;
+      }
+      [data-theme='system'] .rotate-toggle .icon-system {
+        opacity: 1;
+      }
+      [data-theme='sepia'] .rotate-toggle .icon-sun {
+        opacity: 1;
+      }
+      [data-theme='high-contrast'] .rotate-toggle .icon-moon {
+        opacity: 1;
+      }
+
+      /* Example 19: Color wave animation */
+      .wave-container {
+        position: relative;
+        overflow: hidden;
+        border-radius: 8px;
+        padding: 32px;
+        background: var(--bg-secondary);
+      }
+
+      .wave-container::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: var(--primary);
+        opacity: 0.2;
+        transform: translate(-50%, -50%);
+        transition: none;
+      }
+
+      .wave-container.animating::before {
+        animation: wave-expand 0.6s ease-out forwards;
+      }
+
+      @keyframes wave-expand {
+        0% {
+          width: 0;
+          height: 0;
+          opacity: 0.3;
+        }
+        100% {
+          width: 400%;
+          height: 400%;
+          opacity: 0;
+        }
+      }
+
+      /* Example 20: Flip card animation */
+      .flip-toggle {
+        width: 80px;
+        height: 80px;
+        perspective: 1000px;
+        cursor: pointer;
+      }
+
+      .flip-toggle-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.6s;
+        transform-style: preserve-3d;
+      }
+
+      .flip-toggle.flipped .flip-toggle-inner {
+        transform: rotateY(180deg);
+      }
+
+      .flip-toggle-front,
+      .flip-toggle-back {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--border);
+        background: var(--bg);
+      }
+
+      .flip-toggle-back {
+        transform: rotateY(180deg);
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+      }
+
+      .flip-toggle svg {
+        width: 32px;
+        height: 32px;
+        stroke: currentColor;
+        fill: none;
+      }
+
+      /* ========================================
+         PAGE-WIDE TRANSITION ANIMATIONS
+         ======================================== */
+
+      /* Shared overlay base for page-wide transitions */
+      .page-transition-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        pointer-events: none;
+        z-index: 9999;
+      }
+
+      /* Example 21: Radial Circle Reveal */
+      .circle-reveal-overlay {
+        background: var(--bg);
+        clip-path: circle(0% at 50% 50%);
+        transition: clip-path 0s;
+      }
+
+      .circle-reveal-overlay.animating {
+        animation: circle-reveal 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+
+      @keyframes circle-reveal {
+        0% {
+          clip-path: circle(0% at 50% 50%);
+        }
+        100% {
+          clip-path: circle(150% at 50% 50%);
+        }
+      }
+
+      /* Example 22: Horizontal Blinds */
+      .blinds-overlay {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .blinds-overlay .blind {
+        flex: 1;
+        background: var(--bg);
+        transform: scaleY(0);
+        transform-origin: center;
+      }
+
+      .blinds-overlay.animating .blind {
+        animation: blind-reveal 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+
+      .blinds-overlay .blind:nth-child(1) { animation-delay: 0ms; }
+      .blinds-overlay .blind:nth-child(2) { animation-delay: 40ms; }
+      .blinds-overlay .blind:nth-child(3) { animation-delay: 80ms; }
+      .blinds-overlay .blind:nth-child(4) { animation-delay: 120ms; }
+      .blinds-overlay .blind:nth-child(5) { animation-delay: 160ms; }
+      .blinds-overlay .blind:nth-child(6) { animation-delay: 200ms; }
+      .blinds-overlay .blind:nth-child(7) { animation-delay: 240ms; }
+      .blinds-overlay .blind:nth-child(8) { animation-delay: 280ms; }
+
+      @keyframes blind-reveal {
+        0% {
+          transform: scaleY(0);
+        }
+        50% {
+          transform: scaleY(1);
+        }
+        100% {
+          transform: scaleY(0);
+        }
+      }
+
+      /* Example 23: Diagonal Wipe */
+      .diagonal-wipe-overlay {
+        background: var(--bg);
+        clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+      }
+
+      .diagonal-wipe-overlay.animating {
+        animation: diagonal-wipe 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+
+      @keyframes diagonal-wipe {
+        0% {
+          clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+        }
+        45% {
+          clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        }
+        55% {
+          clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        }
+        100% {
+          clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%);
+        }
+      }
+
+      /* Example 24: Crossfade with Scale */
+      .crossfade-overlay {
+        background: var(--bg);
+        opacity: 0;
+        transform: scale(1.1);
+      }
+
+      .crossfade-overlay.animating {
+        animation: crossfade-scale 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+
+      @keyframes crossfade-scale {
+        0% {
+          opacity: 0;
+          transform: scale(1.05);
+        }
+        40% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        60% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        100% {
+          opacity: 0;
+          transform: scale(0.98);
+        }
+      }
+
+      /* Example 25: Diamond Iris */
+      .diamond-iris-overlay {
+        background: var(--bg);
+        clip-path: polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%);
+      }
+
+      .diamond-iris-overlay.animating {
+        animation: diamond-iris 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+
+      @keyframes diamond-iris {
+        0% {
+          clip-path: polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%);
+        }
+        45% {
+          clip-path: polygon(50% -50%, 150% 50%, 50% 150%, -50% 50%);
+        }
+        55% {
+          clip-path: polygon(50% -50%, 150% 50%, 50% 150%, -50% 50%);
+        }
+        100% {
+          clip-path: polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%);
+        }
+      }
+
+      /* Overlay theme colors - must match main theme definitions */
+      .page-transition-overlay[data-theme='light'],
+      .page-transition-overlay[data-theme='light'] .blind {
+        background: #ffffff;
+      }
+
+      .page-transition-overlay[data-theme='dark'],
+      .page-transition-overlay[data-theme='dark'] .blind {
+        background: #0a0a0a;
+      }
+
+      .page-transition-overlay[data-theme='sepia'],
+      .page-transition-overlay[data-theme='sepia'] .blind {
+        background: #f4ecd8;
+      }
+
+      .page-transition-overlay[data-theme='high-contrast'],
+      .page-transition-overlay[data-theme='high-contrast'] .blind {
+        background: #000000;
+      }
+
+      /* Page-wide demo containers */
+      .pagewide-demo {
+        background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg) 100%);
+        border-radius: 8px;
+        padding: 32px;
+        text-align: center;
+        min-height: 120px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+      }
+
+      .pagewide-demo p {
+        color: var(--text-muted);
+        font-size: 14px;
+        max-width: 300px;
+      }
+
+      .pagewide-btn {
+        padding: 12px 24px;
+        font-size: 15px;
+        font-weight: 500;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+
+      .pagewide-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      }
+
+      .pagewide-btn:active {
+        transform: translateY(0);
+      }
+
+      /* ========================================
+         JAVASCRIPT-BASED ANIMATIONS
+         ======================================== */
+
+      /* Example 26: Particle Burst */
+      .particle-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        pointer-events: none;
+        z-index: 9998;
+      }
+
+      /* Example 27: Click Ripple */
+      .click-ripple {
+        position: fixed;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 9997;
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0.6;
+      }
+
+      .click-ripple.animating {
+        animation: click-ripple-expand 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+
+      @keyframes click-ripple-expand {
+        0% {
+          transform: translate(-50%, -50%) scale(0);
+          opacity: 0.6;
+        }
+        100% {
+          transform: translate(-50%, -50%) scale(1);
+          opacity: 0;
+        }
+      }
+
+      /* Example 28: Glitch Effect */
+      .glitch-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        pointer-events: none;
+        z-index: 9996;
+        opacity: 0;
+        mix-blend-mode: difference;
+      }
+
+      .glitch-overlay.animating {
+        animation: glitch-flash 0.4s steps(8) forwards;
+      }
+
+      @keyframes glitch-flash {
+        0%, 100% { opacity: 0; transform: translate(0, 0); }
+        10% { opacity: 1; transform: translate(-2px, 1px); background: #ff0000; }
+        20% { opacity: 0.8; transform: translate(2px, -1px); background: #00ff00; }
+        30% { opacity: 1; transform: translate(-1px, 2px); background: #0000ff; }
+        40% { opacity: 0.6; transform: translate(1px, -2px); background: #ff00ff; }
+        50% { opacity: 0.9; transform: translate(-2px, -1px); background: #00ffff; }
+        60% { opacity: 0.7; transform: translate(2px, 1px); background: #ffff00; }
+        70% { opacity: 0.5; transform: translate(0, 0); background: transparent; }
+        80%, 90% { opacity: 0; }
+      }
+
+      .js-demo-area {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        padding: 32px;
+        background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg) 100%);
+        border-radius: 8px;
+      }
+
+      .js-demo-area p {
+        color: var(--text-muted);
+        font-size: 14px;
+        text-align: center;
+        max-width: 320px;
+      }
+
+      @media (max-width: 768px) {
+        body {
+          padding: 16px;
+        }
+        h1 {
+          font-size: 24px;
+        }
+        .card-group {
+          gap: 8px;
+        }
+        .card-toggle {
+          width: 80px;
+          padding: 12px 8px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Theme Toggle Examples</h1>
+        <p class="header-subtitle">
+          Declarative theme toggle with state/UI separation. Current theme:
+          <strong id="header-theme">—</strong>
+        </p>
+      </header>
+
+      <!-- Example 1: Basic Two-Theme Toggle -->
+      <div class="example">
+        <div class="example-header">
+          <span class="example-number">01</span>
+          <h2>Basic Two-Theme Toggle</h2>
+        </div>
+        <div class="example-content">
+          <p class="example-description">
+            Simple light/dark toggle with two buttons. The active button is
+            automatically highlighted via data-theme-active attribute.
+          </p>
+          <div class="demo-area">
+            <button data-theme-toggle="light">Light</button>
+            <button data-theme-toggle="dark">Dark</button>
+          </div>
+          <div class="code-block">&lt;button data-theme-toggle="light"&gt;Light&lt;/button&gt;
+&lt;button data-theme-toggle="dark"&gt;Dark&lt;/button&gt;</div>
+        </div>
+      </div>
+
+      <!-- Example 2: Cycle Toggle Button -->
+      <div class="example">
+        <div class="example-header">
+          <span class="example-number">02</span>
+          <h2>Cycle Toggle Button</h2>
+        </div>
+        <div class="example-content">
+          <p class="example-description">
+            Single button that cycles through all available themes. Uses empty
+            data-theme-toggle attribute.
+          </p>
+          <div class="demo-area">
+            <button data-theme-toggle title="Cycle through themes">
+              Toggle Theme
+            </button>
+          </div>
+          <p class="current-theme">
+            Current: <strong id="current-theme-display">—</strong>
+          </p>
+          <div class="code-block">&lt;button data-theme-toggle&gt;Toggle Theme&lt;/button&gt;</div>
+        </div>
+      </div>
+
+      <!-- Example 3: Dynamic Icon Toggle -->
+      <div class="example">
+        <div class="example-header">
+          <span class="example-number">03</span>
+          <h2>Dynamic Icon Toggle (Single Button)</h2>
+        </div>
+        <div class="example-content">
+          <p class="example-description">
+            Single button whose icon changes based on current theme. Uses pure
+            CSS to show/hide icons - no JavaScript needed for the icon swap.
+          </p>
+          <div class="demo-area">
+            <button class="dynamic-icon-toggle" data-theme-toggle>
+              <!-- Sun icon (shown in light mode) -->
+              <svg class="icon-sun" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round">
+                <circle cx="12" cy="12" r="5" />
+                <line x1="12" y1="1" x2="12" y2="3" />
+                <line x1="12" y1="21" x2="12" y2="23" />
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                <line x1="1" y1="12" x2="3" y2="12" />
+                <line x1="21" y1="12" x2="23" y2="12" />
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+              </svg>
+              <!-- Moon icon (shown in dark mode) -->
+              <svg class="icon-moon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+              </svg>
+              <!-- System/Auto icon (shown in system mode) -->
+              <svg class="icon-system" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                <line x1="8" y1="21" x2="16" y2="21" />
+                <line x1="12" y1="17" x2="12" y2="21" />
+              </svg>
+            </button>
+          </div>
+          <div class="code-block">/* CSS controls icon visibility based on data-theme */
+.icon-sun, .icon-moon, .icon-system { display: none; }
+
+[data-theme='light'] .icon-sun { display: block; }
+[data-theme='dark'] .icon-moon { display: block; }
+[data-theme='system'] .icon-system { display: block; }</div>
+        </div>
+      </div>
+
+      <!-- Example 4: System Theme Option -->
+      <div class="example">
+        <div class="example-header">
+          <span class="example-number">04</span>
+          <h2>Three-Theme with System Option</h2>
+        </div>
+        <div class="example-content">
+          <p class="example-description">
+            Includes "System" option that follows OS preference. When system is
+            active, data-theme-resolved shows the actual theme being used.
+          </p>
+          <div class="demo-area">
+            <button data-theme-toggle="light">Light</button>
+            <button data-theme-toggle="dark">Dark</button>
+            <button data-theme-toggle="system">System</button>
+          </div>
+          <div class="info-box">
+            <dt>data-theme</dt>
+            <dd id="info-data-theme">—</dd>
+            <dt style="margin-top: 8px">data-theme-resolved</dt>
+            <dd id="info-data-resolved">—</dd>
+          </div>
+          <div class="code-block">ThemeManager.themes = ['light', 'dark', 'system'];
+
+/* CSS targets both attributes */
+[data-theme="dark"],
+[data-theme-resolved="dark"] {
+  --bg: #0a0a0a;
+}</div>
+        </div>
+      </div>
+
+      <!-- Example 5: Icon Buttons (Separate) -->
+      <div class="example">
+        <div class="example-header">
+          <span class="example-number">05</span>
+          <h2>Icon Buttons</h2>
+        </div>
+        <div class="example-content">
+          <p class="example-description">
+            Circular icon buttons for light and dark themes. Active state is
+            styled via CSS using the data-theme-active attribute.
+          </p>
+          <div class="demo-area">
+            <button
+              class="icon-toggle"
+              data-theme-toggle="light"
+              aria-label="Light theme"
+            >
+              <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round">
+                <circle cx="12" cy="12" r="5" />
+                <line x1="12" y1="1" x2="12" y2="3" />
+                <line x1="12" y1="21" x2="12" y2="23" />
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                <line x1="1" y1="12" x2="3" y2="12" />
+                <line x1="21" y1="12" x2="23" y2="12" />
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+              </svg>
+            </button>
+            <button
+              class="icon-toggle"
+              data-theme-toggle="dark"
+              aria-label="Dark theme"
+            >
+              <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+              </svg>
+            </button>
+          </div>
+          <div class="code-block">.icon-toggle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+}
+
+[data-theme-active="true"] {
+  background: var(--primary);
+  color: white;
+}</div>
+        </div>
+      </div>
+
+      <!-- Example 6: Radio Button Style -->
+      <div class="example">
+        <div class="example-header">
+          <span class="example-number">06</span>
+          <h2>Radio Button Style</h2>
+        </div>
+        <div class="example-content">
+          <p class="example-description">
+            Segmented control / radio button style toggle group.
+          </p>
+          <div class="demo-area">
+            <div class="radio-group">
+              <button data-theme-toggle="light">Light</button>
+              <button data-theme-toggle="dark">Dark</button>
+              <button data-theme-toggle="system">Auto</button>
+            </div>
+          </div>
+          <div class="code-block">.radio-group {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}</div>
+        </div>
+      </div>
+
+      <!-- Example 7: Pill Style -->
+      <div class="example">
+        <div class="example-header">
+          <span class="example-number">07</span>
+          <h2>Pill Style Toggle</h2>
+        </div>
+        <div class="example-content">
+          <p class="example-description">
+            iOS-style pill toggle with smooth active indicator.
+          </p>
+          <div class="demo-area">
+            <div class="pill-group">
+              <button data-theme-toggle="light">Light</button>
+              <button data-theme-toggle="dark">Dark</button>
+            </div>
+          </div>
+          <div class="code-block">.pill-group {
+  background: var(--bg-secondary);
+  padding: 4px;
+  border-radius: 9999px;
+}</div>
+        </div>
+      </div>
+
+      <!-- Example 8: Card Style Selector -->
+      <div class="example">
+        <div class="example-header">
+          <span class="example-number">08</span>
+          <h2>Card Style Selector</h2>
+        </div>
+        <div class="example-content">
+          <p class="example-description">
+            Theme cards with preview swatches. Shows how to build more elaborate
+            theme pickers.
+          </p>
+          <div class="demo-area">
+            <div class="card-group">
+              <button class="card-toggle" data-theme-toggle="light">
+                <span class="preview"></span>
+                <span>Light</span>
+              </button>
+              <button class="card-toggle" data-theme-toggle="dark">
+                <span class="preview"></span>
+                <span>Dark</span>
+              </button>
+              <button class="card-toggle" data-theme-toggle="sepia">
+                <span class="preview"></span>
+                <span>Sepia</span>
+              </button>
+              <button class="card-toggle" data-theme-toggle="system">
+                <span class="preview"></span>
+                <span>System</span>
+              </button>
+            </div>
+          </div>
+          <div class="code-block">.card-toggle[data-theme-toggle="dark"] .preview {
+  background: #0a0a0a;
+}
+.card-toggle[data-theme-toggle="system"] .preview {
+  background: linear-gradient(135deg, #fff 50%, #0a0a0a 50%);
+}</div>
+        </div>
+      </div>
+
+      <!-- Example 9: Select Dropdown -->
+      <div class="example">
+        <div class="example-header">
+          <span class="example-number">09</span>
+          <h2>Select Dropdown</h2>
+        </div>
+        <div class="example-content">
+          <p class="example-description">
+            Native &lt;select&gt; dropdown for theme selection. Requires a small
+            amount of JavaScript to sync with ThemeManager.
+          </p>
+          <div class="demo-area">
+            <select class="theme-select" id="theme-select">
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+              <option value="system">System</option>
+              <option value="sepia">Sepia</option>
+            </select>
+          </div>
+          <div class="code-block">document.getElementById('theme-select')
+  .addEventListener('change', function(e) {
+    ThemeManager.setTheme(e.target.value);
+  });</div>
+        </div>
+      </div>
+
+      <!-- Example 10: Multiple Toggle Groups -->
+      <div class="example">
+        <div class="example-header">
+          <span class="example-number">10</span>
+          <h2>Multiple Toggle Groups</h2>
+        </div>
+        <div class="example-content">
+          <p class="example-description">
+            Multiple sets of theme toggles on the same page. All stay in sync
+            automatically - clicking any toggle updates all others.
+          </p>
+          <div class="demo-area" style="flex-direction: column; gap: 20px">
+            <div style="display: flex; gap: 8px">
+              <button data-theme-toggle="light">Light</button>
+              <button data-theme-toggle="dark">Dark</button>
+            </div>
+            <div class="radio-group">
+              <button data-theme-toggle="light">Light</button>
+              <button data-theme-toggle="dark">Dark</button>
+            </div>
+            <div class="pill-group">
+              <button data-theme-toggle="light">Light</button>
+              <button data-theme-toggle="dark">Dark</button>
+            </div>
+          </div>
+          <div class="code-block">/* All toggle groups sync automatically via updateThemeButtons() */</div>
+        </div>
+      </div>
+
+      <!-- Example 11: Programmatic API -->
+      <div class="example">
+        <div class="example-header">
+          <span class="example-number">11</span>
+          <h2>Programmatic API</h2>
+        </div>
+        <div class="example-content">
+          <p class="example-description">
+            Control themes programmatically via the ThemeManager API.
+          </p>
+          <div class="demo-area" style="flex-direction: column; gap: 12px">
+            <div class="api-buttons">
+              <button onclick="ThemeManager.setTheme('light')">
+                setTheme('light')
+              </button>
+              <button onclick="ThemeManager.setTheme('dark')">
+                setTheme('dark')
+              </button>
+              <button onclick="ThemeManager.toggleTheme()">toggleTheme()</button>
+            </div>
+            <div class="info-box" style="margin: 0; width: 100%">
+              <dt>ThemeManager.getTheme()</dt>
+              <dd id="api-current-theme">—</dd>
+              <dt style="margin-top: 8px">ThemeManager.themes</dt>
+              <dd id="api-themes-array">—</dd>
+            </div>
+          </div>
+          <div class="code-block">ThemeManager.setTheme('dark');
+ThemeManager.toggleTheme();
+console.log(ThemeManager.getTheme()); // 'dark'</div>
+        </div>
+      </div>
+
+      <!-- Example 12: Event Handling -->
+      <div class="example">
+        <div class="example-header">
+          <span class="example-number">12</span>
+          <h2>Event Handling</h2>
+        </div>
+        <div class="example-content">
+          <p class="example-description">
+            Listen to the 'themechange' event for custom logic or animations.
+            The event includes details about effective theme changes.
+          </p>
+          <div class="demo-area">
+            <button data-theme-toggle="light">Light</button>
+            <button data-theme-toggle="dark">Dark</button>
+            <button data-theme-toggle="system">System</button>
+            <button data-theme-toggle="sepia">Sepia</button>
+          </div>
+          <div class="event-log" id="event-log">Waiting for theme changes...</div>
+          <div class="code-block">window.addEventListener('themechange', function(e) {
+  console.log('Theme:', e.detail.theme);
+  console.log('Previous:', e.detail.previous);
+  console.log('Effective:', e.detail.effectiveTheme);
+  console.log('Changed:', e.detail.effectiveChanged);
+});</div>
+        </div>
+      </div>
+
+      <!-- Example 13: No Transition When Same -->
+      <div class="example">
+        <div class="example-header">
+          <span class="example-number">13</span>
+          <h2>Smart Theme Switching</h2>
+        </div>
+        <div class="example-content">
+          <p class="example-description">
+            Clicking an already-active theme does nothing. Switching between
+            themes with the same effective value (e.g., light → system when
+            system preference is light) still updates the selection but notes
+            that the effective theme didn't change.
+          </p>
+          <div class="demo-area">
+            <button data-theme-toggle="light">Light</button>
+            <button data-theme-toggle="dark">Dark</button>
+            <button data-theme-toggle="system">System</button>
+          </div>
+          <div class="info-box">
+            <dt>Last click result</dt>
+            <dd id="click-result">Click a button...</dd>
+          </div>
+          <div class="code-block">// Clicking 'light' when already on 'light' = no event fired
+// Clicking 'system' when system=light and on 'light':
+//   - Theme selection changes
+//   - effectiveChanged = false</div>
+        </div>
+      </div>
+
+      <!-- Example 14: localStorage Persistence -->
+      <div class="example">
+        <div class="example-header">
+          <span class="example-number">14</span>
+          <h2>localStorage Persistence</h2>
+        </div>
+        <div class="example-content">
+          <p class="example-description">
+            Theme selection persists across page reloads via localStorage.
+            Change the theme, then refresh the page.
+          </p>
+          <div class="demo-area">
+            <button data-theme-toggle="light">Light</button>
+            <button data-theme-toggle="dark">Dark</button>
+            <button data-theme-toggle="sepia">Sepia</button>
+          </div>
+          <div class="api-buttons" style="justify-content: center">
+            <button onclick="localStorage.removeItem('theme'); location.reload()">
+              Clear localStorage & Reload
+            </button>
+          </div>
+          <div class="info-box">
+            <dt>localStorage.getItem('theme')</dt>
+            <dd id="storage-value">—</dd>
+          </div>
+        </div>
+      </div>
+
+      <!-- Example 15: Extended Themes Array -->
+      <div class="example">
+        <div class="example-header">
+          <span class="example-number">15</span>
+          <h2>Extended Themes (4+ Options)</h2>
+        </div>
+        <div class="example-content">
+          <p class="example-description">
+            ThemeManager supports any number of themes. Just extend the themes
+            array and add corresponding CSS.
+          </p>
+          <div class="demo-area">
+            <button data-theme-toggle="light">Light</button>
+            <button data-theme-toggle="dark">Dark</button>
+            <button data-theme-toggle="sepia">Sepia</button>
+            <button data-theme-toggle="high-contrast">High Contrast</button>
+          </div>
+          <div class="code-block">ThemeManager.themes = ['light', 'dark', 'sepia', 'high-contrast'];
+
+[data-theme="high-contrast"] {
+  --bg: #000000;
+  --text: #ffffff;
+  --primary: #ffff00;
+}</div>
+        </div>
+      </div>
+
+      <!-- Example 16: CSS Fade Transitions -->
+      <div class="example">
+        <div class="example-header">
+          <span class="example-number">16</span>
+          <h2>CSS Fade Transitions</h2>
+        </div>
+        <div class="example-content">
+          <p class="example-description">
+            Smooth color transitions using pure CSS. The background and text
+            colors fade between themes using CSS transitions on custom properties.
+          </p>
+          <div class="demo-area">
+            <div class="fade-demo" style="width: 100%;">
+              <p style="margin-bottom: 12px; font-size: 18px; font-weight: 500;">This box fades smoothly</p>
+              <p style="color: var(--text-muted);">Watch the colors transition when you change themes</p>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px; justify-content: center; margin-top: 16px;">
+            <button data-theme-toggle="light">Light</button>
+            <button data-theme-toggle="dark">Dark</button>
+            <button data-theme-toggle="sepia">Sepia</button>
+          </div>
+          <div class="code-block">.fade-demo {
+  transition: background-color 0.5s ease, color 0.5s ease;
+}</div>
+        </div>
+      </div>
+
+      <!-- Example 17: iOS-Style Slide Toggle -->
+      <div class="example">
+        <div class="example-header">
+          <span class="example-number">17</span>
+          <h2>iOS-Style Slide Toggle</h2>
+        </div>
+        <div class="example-content">
+          <p class="example-description">
+            Classic iOS switch-style toggle with smooth sliding animation.
+            Uses CSS pseudo-elements and transitions.
+          </p>
+          <div class="demo-area">
+            <span style="color: var(--text-muted); font-size: 14px;">Light</span>
+            <button class="slide-toggle" id="ios-slide-toggle" aria-label="Toggle dark mode"></button>
+            <span style="color: var(--text-muted); font-size: 14px;">Dark</span>
+          </div>
+          <div class="code-block">.slide-toggle::after {
+  transition: transform 0.3s ease;
+}
+.slide-toggle[data-theme-active='true']::after {
+  transform: translateX(28px);
+}</div>
+        </div>
+      </div>
+
+      <!-- Example 18: Rotating Icon Animation -->
+      <div class="example">
+        <div class="example-header">
+          <span class="example-number">18</span>
+          <h2>Rotating Icon with Magic Swap</h2>
+        </div>
+        <div class="example-content">
+          <p class="example-description">
+            Icon spins 360 degrees and seamlessly transforms into the next theme's
+            icon mid-rotation. The rotation masks the icon swap, creating a magical effect.
+          </p>
+          <div class="demo-area">
+            <button class="rotate-toggle" id="rotate-toggle" data-theme-toggle>
+              <!-- Sun icon -->
+              <svg class="icon-sun" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round">
+                <circle cx="12" cy="12" r="5" />
+                <line x1="12" y1="1" x2="12" y2="3" />
+                <line x1="12" y1="21" x2="12" y2="23" />
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                <line x1="1" y1="12" x2="3" y2="12" />
+                <line x1="21" y1="12" x2="23" y2="12" />
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+              </svg>
+              <!-- Moon icon -->
+              <svg class="icon-moon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+              </svg>
+              <!-- System icon -->
+              <svg class="icon-system" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                <line x1="8" y1="21" x2="16" y2="21" />
+                <line x1="12" y1="17" x2="12" y2="21" />
+              </svg>
+            </button>
+          </div>
+          <div class="code-block">/* Icons swap via opacity during rotation */
+.rotate-toggle svg { opacity: 0; transition: opacity 0.25s; }
+[data-theme='light'] .icon-sun { opacity: 1; }
+[data-theme='dark'] .icon-moon { opacity: 1; }
+[data-theme='system'] .icon-system { opacity: 1; }</div>
+        </div>
+      </div>
+
+      <!-- Example 19: Ripple/Wave Effect -->
+      <div class="example">
+        <div class="example-header">
+          <span class="example-number">19</span>
+          <h2>Ripple/Wave Effect</h2>
+        </div>
+        <div class="example-content">
+          <p class="example-description">
+            A color wave radiates outward from the center when the theme changes.
+            Uses CSS pseudo-element animation triggered by JavaScript.
+          </p>
+          <div class="demo-area" style="padding: 0;">
+            <div class="wave-container" id="wave-container" style="width: 100%; display: flex; gap: 12px; justify-content: center; align-items: center;">
+              <button data-theme-toggle="light">Light</button>
+              <button data-theme-toggle="dark">Dark</button>
+              <button data-theme-toggle="sepia">Sepia</button>
+            </div>
+          </div>
+          <div class="code-block">@keyframes wave-expand {
+  0% { width: 0; height: 0; opacity: 0.3; }
+  100% { width: 400%; height: 400%; opacity: 0; }
+}</div>
+        </div>
+      </div>
+
+      <!-- Example 20: 3D Flip Card -->
+      <div class="example">
+        <div class="example-header">
+          <span class="example-number">20</span>
+          <h2>3D Flip Card Animation</h2>
+        </div>
+        <div class="example-content">
+          <p class="example-description">
+            Card flips in 3D space to reveal the alternate theme. Uses CSS
+            3D transforms with perspective and backface-visibility.
+          </p>
+          <div class="demo-area">
+            <div class="flip-toggle" id="flip-toggle">
+              <div class="flip-toggle-inner">
+                <div class="flip-toggle-front">
+                  <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round">
+                    <circle cx="12" cy="12" r="5" />
+                    <line x1="12" y1="1" x2="12" y2="3" />
+                    <line x1="12" y1="21" x2="12" y2="23" />
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                    <line x1="1" y1="12" x2="3" y2="12" />
+                    <line x1="21" y1="12" x2="23" y2="12" />
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                  </svg>
+                </div>
+                <div class="flip-toggle-back">
+                  <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="code-block">.flip-toggle-inner {
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+.flip-toggle.flipped .flip-toggle-inner {
+  transform: rotateY(180deg);
+}</div>
+        </div>
+      </div>
+
+      <!-- Example 21: Radial Circle Reveal -->
+      <div class="example">
+        <div class="example-header">
+          <span class="example-number">21</span>
+          <h2>Radial Circle Reveal</h2>
+        </div>
+        <div class="example-content">
+          <p class="example-description">
+            Full-page circular reveal animation that expands from the center of the screen.
+            Uses CSS clip-path with a circle() function for smooth, GPU-accelerated performance.
+          </p>
+          <div class="demo-area" style="padding: 0;">
+            <div class="pagewide-demo" style="width: 100%;">
+              <p>The new theme color expands outward in a perfect circle, creating an elegant portal-like effect</p>
+              <button class="pagewide-btn" id="circle-reveal-btn">
+                Toggle with Circle Reveal
+              </button>
+            </div>
+          </div>
+          <div class="code-block">@keyframes circle-reveal {
+  0%   { clip-path: circle(0% at 50% 50%); }
+  100% { clip-path: circle(150% at 50% 50%); }
+}</div>
+        </div>
+      </div>
+
+      <!-- Example 22: Horizontal Blinds -->
+      <div class="example">
+        <div class="example-header">
+          <span class="example-number">22</span>
+          <h2>Venetian Blinds</h2>
+        </div>
+        <div class="example-content">
+          <p class="example-description">
+            Cinematic horizontal blinds effect with staggered timing. Each strip animates
+            in sequence, creating a sophisticated window blind transition reminiscent of film noir.
+          </p>
+          <div class="demo-area" style="padding: 0;">
+            <div class="pagewide-demo" style="width: 100%;">
+              <p>Eight horizontal strips reveal the new theme with cascading timing delays</p>
+              <button class="pagewide-btn" id="blinds-reveal-btn">
+                Toggle with Blinds
+              </button>
+            </div>
+          </div>
+          <div class="code-block">.blind:nth-child(1) { animation-delay: 0ms; }
+.blind:nth-child(2) { animation-delay: 40ms; }
+/* ... staggered delays create wave effect */</div>
+        </div>
+      </div>
+
+      <!-- Example 23: Diagonal Wipe -->
+      <div class="example">
+        <div class="example-header">
+          <span class="example-number">23</span>
+          <h2>Diagonal Wipe</h2>
+        </div>
+        <div class="example-content">
+          <p class="example-description">
+            A sleek diagonal sweep that wipes across the entire viewport. The animation
+            uses clip-path polygons with precise timing for a professional broadcast-quality transition.
+          </p>
+          <div class="demo-area" style="padding: 0;">
+            <div class="pagewide-demo" style="width: 100%;">
+              <p>Watch as the new theme sweeps in from the left edge and exits to the right</p>
+              <button class="pagewide-btn" id="diagonal-wipe-btn">
+                Toggle with Diagonal Wipe
+              </button>
+            </div>
+          </div>
+          <div class="code-block">@keyframes diagonal-wipe {
+  0%   { clip-path: polygon(0 0, 0 0, 0 100%, 0 100%); }
+  50%  { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+  100% { clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%); }
+}</div>
+        </div>
+      </div>
+
+      <!-- Example 24: Crossfade with Scale -->
+      <div class="example">
+        <div class="example-header">
+          <span class="example-number">24</span>
+          <h2>Cinematic Crossfade</h2>
+        </div>
+        <div class="example-content">
+          <p class="example-description">
+            Elegant film-style crossfade with subtle scale animation. The new theme fades
+            in while gently zooming, creating a dreamy, high-end transition effect.
+          </p>
+          <div class="demo-area" style="padding: 0;">
+            <div class="pagewide-demo" style="width: 100%;">
+              <p>A subtle zoom accompanies the fade, adding depth and cinematic quality</p>
+              <button class="pagewide-btn" id="crossfade-btn">
+                Toggle with Crossfade
+              </button>
+            </div>
+          </div>
+          <div class="code-block">@keyframes crossfade-scale {
+  0%   { opacity: 0; transform: scale(1.05); }
+  40%  { opacity: 1; transform: scale(1); }
+  60%  { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.98); }
+}</div>
+        </div>
+      </div>
+
+      <!-- Example 25: Diamond Iris -->
+      <div class="example">
+        <div class="example-header">
+          <span class="example-number">25</span>
+          <h2>Diamond Iris</h2>
+        </div>
+        <div class="example-content">
+          <p class="example-description">
+            Classic cinema iris transition with a diamond shape. Inspired by silent film
+            transitions, the diamond expands from the center and contracts to complete the reveal.
+          </p>
+          <div class="demo-area" style="padding: 0;">
+            <div class="pagewide-demo" style="width: 100%;">
+              <p>A diamond-shaped window opens to reveal the new theme, then closes elegantly</p>
+              <button class="pagewide-btn" id="diamond-iris-btn">
+                Toggle with Diamond Iris
+              </button>
+            </div>
+          </div>
+          <div class="code-block">@keyframes diamond-iris {
+  0%   { clip-path: polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%); }
+  50%  { clip-path: polygon(50% -50%, 150% 50%, 50% 150%, -50% 50%); }
+  100% { clip-path: polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%); }
+}</div>
+        </div>
+      </div>
+
+      <!-- Example 26: Particle Burst (JavaScript) -->
+      <div class="example">
+        <div class="example-header">
+          <span class="example-number">26</span>
+          <h2>Particle Burst (JavaScript)</h2>
+        </div>
+        <div class="example-content">
+          <p class="example-description">
+            Canvas-based particle explosion that bursts from the button when clicked.
+            Uses requestAnimationFrame for smooth 60fps animation with physics-based motion.
+          </p>
+          <div class="demo-area" style="padding: 0;">
+            <div class="js-demo-area" style="width: 100%;">
+              <p>Click the button to trigger a burst of particles in the new theme's color</p>
+              <button class="pagewide-btn" id="particle-burst-btn">
+                Toggle with Particles
+              </button>
+            </div>
+          </div>
+          <div class="code-block">// Create particles on theme change
+var particles = [];
+for (var i = 0; i < 50; i++) {
+  particles.push({
+    x: centerX, y: centerY,
+    vx: (Math.random() - 0.5) * 15,
+    vy: (Math.random() - 0.5) * 15,
+    life: 1
+  });
+}
+// Animate with requestAnimationFrame</div>
+        </div>
+      </div>
+
+      <!-- Example 27: Click Position Ripple (JavaScript) -->
+      <div class="example">
+        <div class="example-header">
+          <span class="example-number">27</span>
+          <h2>Click Position Ripple (JavaScript)</h2>
+        </div>
+        <div class="example-content">
+          <p class="example-description">
+            Ripple effect that emanates from the exact click position rather than a fixed point.
+            JavaScript captures the click coordinates and creates a dynamically positioned element.
+          </p>
+          <div class="demo-area" style="padding: 0;">
+            <div class="js-demo-area" style="width: 100%;">
+              <p>The ripple originates from wherever you click the button</p>
+              <button class="pagewide-btn" id="click-ripple-btn">
+                Toggle with Click Ripple
+              </button>
+            </div>
+          </div>
+          <div class="code-block">button.addEventListener('click', function(e) {
+  var ripple = document.createElement('div');
+  ripple.style.left = e.clientX + 'px';
+  ripple.style.top = e.clientY + 'px';
+  ripple.style.width = ripple.style.height =
+    Math.max(window.innerWidth, window.innerHeight) * 2 + 'px';
+  // Animate and cleanup
+});</div>
+        </div>
+      </div>
+
+      <!-- Example 28: Glitch Effect (JavaScript) -->
+      <div class="example">
+        <div class="example-header">
+          <span class="example-number">28</span>
+          <h2>Glitch Effect (JavaScript)</h2>
+        </div>
+        <div class="example-content">
+          <p class="example-description">
+            Cyberpunk-style glitch effect with RGB color separation and screen shake.
+            JavaScript coordinates the timing of multiple overlays for maximum impact.
+          </p>
+          <div class="demo-area" style="padding: 0;">
+            <div class="js-demo-area" style="width: 100%;">
+              <p>A brief digital glitch distorts the screen during the theme transition</p>
+              <button class="pagewide-btn" id="glitch-btn">
+                Toggle with Glitch
+              </button>
+            </div>
+          </div>
+          <div class="code-block">// Trigger glitch animation
+glitchOverlay.classList.add('animating');
+
+// Brief screen shake via transform
+document.body.style.transform = 'translate(-2px, 1px)';
+setTimeout(function() {
+  document.body.style.transform = '';
+}, 50);</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page-wide transition overlays -->
+    <div id="circle-reveal-overlay" class="page-transition-overlay circle-reveal-overlay"></div>
+    <div id="blinds-overlay" class="page-transition-overlay blinds-overlay">
+      <div class="blind"></div>
+      <div class="blind"></div>
+      <div class="blind"></div>
+      <div class="blind"></div>
+      <div class="blind"></div>
+      <div class="blind"></div>
+      <div class="blind"></div>
+      <div class="blind"></div>
+    </div>
+    <div id="diagonal-wipe-overlay" class="page-transition-overlay diagonal-wipe-overlay"></div>
+    <div id="crossfade-overlay" class="page-transition-overlay crossfade-overlay"></div>
+    <div id="diamond-iris-overlay" class="page-transition-overlay diamond-iris-overlay"></div>
+
+    <!-- JavaScript animation elements -->
+    <canvas id="particle-canvas" class="particle-canvas"></canvas>
+    <div id="glitch-overlay" class="glitch-overlay"></div>
+
+    <!-- Main ThemeManager script -->
+    <script type="module" src="./src/themeManager.js"></script>
+
+    <script type="module">
+      // Wait for ThemeManager to initialize
+      function waitForThemeManager(callback) {
+        if (window.ThemeManager && window.ThemeManager.current) {
+          callback();
+        } else {
+          setTimeout(function () {
+            waitForThemeManager(callback);
+          }, 50);
+        }
+      }
+
+      waitForThemeManager(function () {
+        // Extend themes to include all options
+        ThemeManager.themes = [
+          'light',
+          'dark',
+          'system',
+          'sepia',
+          'high-contrast',
+        ];
+
+        // Update theme buttons after extending themes
+        ThemeManager.updateThemeButtons();
+
+        // Update all displays
+        function updateDisplays() {
+          var theme = ThemeManager.current;
+          var effective = ThemeManager.getEffectiveTheme(theme);
+
+          document.getElementById('header-theme').textContent = theme;
+          document.getElementById('current-theme-display').textContent = theme;
+          document.getElementById('info-data-theme').textContent =
+            document.documentElement.getAttribute('data-theme') || '(not set)';
+          document.getElementById('info-data-resolved').textContent =
+            document.documentElement.getAttribute('data-theme-resolved') ||
+            '(not set)';
+          document.getElementById('api-current-theme').textContent = theme;
+          document.getElementById('api-themes-array').textContent =
+            JSON.stringify(ThemeManager.themes);
+          document.getElementById('storage-value').textContent =
+            localStorage.getItem('theme') || '(not set)';
+
+          // Update select dropdown
+          var select = document.getElementById('theme-select');
+          if (select) {
+            select.value = theme;
+          }
+        }
+
+        updateDisplays();
+
+        // Event log for Example 12
+        var eventLog = document.getElementById('event-log');
+        var logEntries = [];
+        var clickResult = document.getElementById('click-result');
+        var lastTheme = ThemeManager.current;
+
+        window.addEventListener('themechange', function (e) {
+          updateDisplays();
+
+          // Log the event
+          var timestamp = new Date().toLocaleTimeString();
+          var entry =
+            timestamp +
+            ' | ' +
+            e.detail.previous +
+            ' → ' +
+            e.detail.theme +
+            ' | effective: ' +
+            e.detail.effectiveTheme +
+            ' | changed: ' +
+            e.detail.effectiveChanged;
+          logEntries.unshift(entry);
+          eventLog.textContent = logEntries.slice(0, 8).join('\n');
+
+          // Update click result
+          if (e.detail.effectiveChanged) {
+            clickResult.textContent =
+              'Theme changed: ' +
+              e.detail.previous +
+              ' → ' +
+              e.detail.theme +
+              ' (visual change)';
+          } else {
+            clickResult.textContent =
+              'Selection changed: ' +
+              e.detail.previous +
+              ' → ' +
+              e.detail.theme +
+              ' (no visual change)';
+          }
+
+          lastTheme = e.detail.theme;
+        });
+
+        // Track clicks that don't fire events (same theme)
+        document.querySelectorAll('[data-theme-toggle]').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var btnTheme = btn.getAttribute('data-theme-toggle');
+            if (btnTheme && btnTheme === ThemeManager.current) {
+              clickResult.textContent = 'Clicked "' + btnTheme + '" - already active, no change';
+            }
+          });
+        });
+
+        // Select dropdown handler
+        document
+          .getElementById('theme-select')
+          .addEventListener('change', function (e) {
+            ThemeManager.setTheme(e.target.value);
+          });
+
+        // Example 17: iOS slide toggle
+        var iosSlideToggle = document.getElementById('ios-slide-toggle');
+        if (iosSlideToggle) {
+          // Set initial state based on effective theme
+          function updateSlideToggle() {
+            var isDark = ThemeManager.getEffectiveTheme(ThemeManager.current) === 'dark';
+            iosSlideToggle.setAttribute('data-is-dark', isDark ? 'true' : 'false');
+          }
+          updateSlideToggle();
+
+          iosSlideToggle.addEventListener('click', function () {
+            var isDark = ThemeManager.getEffectiveTheme(ThemeManager.current) === 'dark';
+            ThemeManager.setTheme(isDark ? 'light' : 'dark');
+          });
+
+          window.addEventListener('themechange', updateSlideToggle);
+        }
+
+        // Example 18: Rotating icon animation
+        var rotateToggle = document.getElementById('rotate-toggle');
+        if (rotateToggle) {
+          rotateToggle.addEventListener('click', function () {
+            rotateToggle.classList.add('rotating');
+            setTimeout(function () {
+              rotateToggle.classList.remove('rotating');
+            }, 500);
+          });
+        }
+
+        // Example 19: Wave effect - trigger on theme change
+        var waveContainer = document.getElementById('wave-container');
+        if (waveContainer) {
+          waveContainer.querySelectorAll('button').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              waveContainer.classList.remove('animating');
+              // Force reflow to restart animation
+              void waveContainer.offsetWidth;
+              waveContainer.classList.add('animating');
+              setTimeout(function () {
+                waveContainer.classList.remove('animating');
+              }, 600);
+            });
+          });
+        }
+
+        // Example 20: Flip card toggle
+        var flipToggle = document.getElementById('flip-toggle');
+        var isFlipped = ThemeManager.current === 'dark';
+        if (flipToggle) {
+          // Set initial state
+          if (isFlipped) {
+            flipToggle.classList.add('flipped');
+          }
+
+          flipToggle.addEventListener('click', function () {
+            isFlipped = !isFlipped;
+            flipToggle.classList.toggle('flipped');
+            ThemeManager.setTheme(isFlipped ? 'dark' : 'light');
+          });
+
+          // Sync flip state on theme change
+          window.addEventListener('themechange', function (e) {
+            var shouldBeFlipped = e.detail.theme === 'dark';
+            if (shouldBeFlipped !== isFlipped) {
+              isFlipped = shouldBeFlipped;
+              flipToggle.classList.toggle('flipped', isFlipped);
+            }
+          });
+        }
+
+        // ========================================
+        // PAGE-WIDE TRANSITION HANDLERS
+        // ========================================
+
+        // Helper function for page-wide transitions
+        function triggerPageTransition(overlayId, duration, midpointDelay) {
+          var overlay = document.getElementById(overlayId);
+          if (!overlay) return;
+
+          // Determine next theme
+          var currentTheme = ThemeManager.current;
+          var effectiveTheme = ThemeManager.getEffectiveTheme(currentTheme);
+          var nextTheme = effectiveTheme === 'dark' ? 'light' : 'dark';
+
+          // Pre-set the overlay to the NEW theme's colors
+          // We do this by temporarily applying the next theme's data attribute
+          overlay.setAttribute('data-theme', nextTheme);
+
+          // Force a reflow and start animation
+          void overlay.offsetWidth;
+          overlay.classList.add('animating');
+
+          // Change the actual theme at the midpoint of the animation
+          setTimeout(function () {
+            ThemeManager.setTheme(nextTheme);
+          }, midpointDelay);
+
+          // Clean up after animation completes
+          setTimeout(function () {
+            overlay.classList.remove('animating');
+            overlay.removeAttribute('data-theme');
+          }, duration);
+        }
+
+        // Example 21: Circle Reveal
+        var circleRevealBtn = document.getElementById('circle-reveal-btn');
+        if (circleRevealBtn) {
+          circleRevealBtn.addEventListener('click', function () {
+            triggerPageTransition('circle-reveal-overlay', 800, 400);
+          });
+        }
+
+        // Example 22: Venetian Blinds
+        var blindsBtn = document.getElementById('blinds-reveal-btn');
+        if (blindsBtn) {
+          blindsBtn.addEventListener('click', function () {
+            triggerPageTransition('blinds-overlay', 900, 350);
+          });
+        }
+
+        // Example 23: Diagonal Wipe
+        var diagonalWipeBtn = document.getElementById('diagonal-wipe-btn');
+        if (diagonalWipeBtn) {
+          diagonalWipeBtn.addEventListener('click', function () {
+            triggerPageTransition('diagonal-wipe-overlay', 700, 350);
+          });
+        }
+
+        // Example 24: Crossfade
+        var crossfadeBtn = document.getElementById('crossfade-btn');
+        if (crossfadeBtn) {
+          crossfadeBtn.addEventListener('click', function () {
+            triggerPageTransition('crossfade-overlay', 600, 300);
+          });
+        }
+
+        // Example 25: Diamond Iris
+        var diamondIrisBtn = document.getElementById('diamond-iris-btn');
+        if (diamondIrisBtn) {
+          diamondIrisBtn.addEventListener('click', function () {
+            triggerPageTransition('diamond-iris-overlay', 800, 400);
+          });
+        }
+
+        // ========================================
+        // JAVASCRIPT-BASED ANIMATION HANDLERS
+        // ========================================
+
+        // Example 26: Particle Burst
+        var particleCanvas = document.getElementById('particle-canvas');
+        var particleBtn = document.getElementById('particle-burst-btn');
+
+        if (particleCanvas && particleBtn) {
+          var ctx = particleCanvas.getContext('2d');
+          var particles = [];
+          var animationId = null;
+
+          // Resize canvas to window
+          function resizeCanvas() {
+            particleCanvas.width = window.innerWidth;
+            particleCanvas.height = window.innerHeight;
+          }
+          resizeCanvas();
+          window.addEventListener('resize', resizeCanvas);
+
+          // Particle class
+          function Particle(x, y, color) {
+            this.x = x;
+            this.y = y;
+            this.color = color;
+            this.size = Math.random() * 8 + 4;
+            var angle = Math.random() * Math.PI * 2;
+            var speed = Math.random() * 12 + 6;
+            this.vx = Math.cos(angle) * speed;
+            this.vy = Math.sin(angle) * speed;
+            this.gravity = 0.3;
+            this.friction = 0.98;
+            this.life = 1;
+            this.decay = Math.random() * 0.02 + 0.015;
+          }
+
+          Particle.prototype.update = function () {
+            this.vx *= this.friction;
+            this.vy *= this.friction;
+            this.vy += this.gravity;
+            this.x += this.vx;
+            this.y += this.vy;
+            this.life -= this.decay;
+            this.size *= 0.97;
+          };
+
+          Particle.prototype.draw = function () {
+            ctx.save();
+            ctx.globalAlpha = this.life;
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          };
+
+          function animateParticles() {
+            ctx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+
+            particles = particles.filter(function (p) {
+              p.update();
+              p.draw();
+              return p.life > 0;
+            });
+
+            if (particles.length > 0) {
+              animationId = requestAnimationFrame(animateParticles);
+            }
+          }
+
+          particleBtn.addEventListener('click', function (e) {
+            // Get button center position
+            var rect = particleBtn.getBoundingClientRect();
+            var centerX = rect.left + rect.width / 2;
+            var centerY = rect.top + rect.height / 2;
+
+            // Determine next theme color
+            var effectiveTheme = ThemeManager.getEffectiveTheme(ThemeManager.current);
+            var nextTheme = effectiveTheme === 'dark' ? 'light' : 'dark';
+            var color = nextTheme === 'dark' ? '#818cf8' : '#667eea';
+
+            // Create particles
+            for (var i = 0; i < 60; i++) {
+              particles.push(new Particle(centerX, centerY, color));
+            }
+
+            // Start animation if not running
+            if (!animationId) {
+              animateParticles();
+            }
+
+            // Toggle theme
+            ThemeManager.setTheme(nextTheme);
+          });
+        }
+
+        // Example 27: Click Position Ripple
+        var clickRippleBtn = document.getElementById('click-ripple-btn');
+
+        if (clickRippleBtn) {
+          clickRippleBtn.addEventListener('click', function (e) {
+            // Create ripple element
+            var ripple = document.createElement('div');
+            ripple.className = 'click-ripple';
+
+            // Position at click location
+            ripple.style.left = e.clientX + 'px';
+            ripple.style.top = e.clientY + 'px';
+
+            // Size to cover entire viewport
+            var size = Math.max(window.innerWidth, window.innerHeight) * 2.5;
+            ripple.style.width = size + 'px';
+            ripple.style.height = size + 'px';
+
+            // Set color based on next theme
+            var effectiveTheme = ThemeManager.getEffectiveTheme(ThemeManager.current);
+            var nextTheme = effectiveTheme === 'dark' ? 'light' : 'dark';
+            ripple.style.background = nextTheme === 'dark' ? '#0a0a0a' : '#ffffff';
+
+            document.body.appendChild(ripple);
+
+            // Trigger animation
+            void ripple.offsetWidth;
+            ripple.classList.add('animating');
+
+            // Change theme at midpoint
+            setTimeout(function () {
+              ThemeManager.setTheme(nextTheme);
+            }, 300);
+
+            // Cleanup
+            setTimeout(function () {
+              ripple.remove();
+            }, 800);
+          });
+        }
+
+        // Example 28: Glitch Effect
+        var glitchBtn = document.getElementById('glitch-btn');
+        var glitchOverlay = document.getElementById('glitch-overlay');
+
+        if (glitchBtn && glitchOverlay) {
+          glitchBtn.addEventListener('click', function () {
+            // Trigger glitch overlay
+            glitchOverlay.classList.add('animating');
+
+            // Screen shake sequence
+            var shakeSequence = [
+              { x: -3, y: 2 },
+              { x: 2, y: -1 },
+              { x: -1, y: 3 },
+              { x: 3, y: -2 },
+              { x: 0, y: 0 },
+            ];
+
+            shakeSequence.forEach(function (pos, i) {
+              setTimeout(function () {
+                document.body.style.transform =
+                  'translate(' + pos.x + 'px, ' + pos.y + 'px)';
+              }, i * 50);
+            });
+
+            // Toggle theme during glitch
+            setTimeout(function () {
+              var effectiveTheme = ThemeManager.getEffectiveTheme(ThemeManager.current);
+              ThemeManager.setTheme(effectiveTheme === 'dark' ? 'light' : 'dark');
+            }, 200);
+
+            // Cleanup
+            setTimeout(function () {
+              glitchOverlay.classList.remove('animating');
+              document.body.style.transform = '';
+            }, 400);
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

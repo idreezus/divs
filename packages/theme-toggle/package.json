@@ -1,0 +1,23 @@
+{
+  "name": "theme-toggle",
+  "version": "1.0.0",
+  "description": "A declarative theme toggle that separates state management from UI presentation. Zero flash, localStorage persistence, system preference sync.",
+  "main": "themeManager.js",
+  "type": "module",
+  "scripts": {
+    "build": "rollup -c",
+    "build:watch": "rollup -c --watch",
+    "release": "BUILD_MODE=release rollup -c"
+  },
+  "keywords": [
+    "theme",
+    "dark-mode",
+    "light-mode",
+    "toggle",
+    "vanilla-js",
+    "declarative",
+    "accessible"
+  ],
+  "author": "Idrees Isse (https://github.com/idreezus)",
+  "license": "AGPL-3.0"
+}
