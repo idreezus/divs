@@ -9,1338 +9,3287 @@
     <script>
       (function () {
         var stored = null;
-        try { stored = localStorage.getItem('theme'); } catch (e) {}
+        try {
+          stored = localStorage.getItem('theme');
+        } catch (e) {}
         var theme = stored || 'system';
-        var effectiveTheme = theme === 'system'
-          ? window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-          : theme;
+        var effectiveTheme =
+          theme === 'system'
+            ? window.matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'dark'
+              : 'light'
+            : theme;
         document.documentElement.classList.add(effectiveTheme);
         document.documentElement.setAttribute('data-theme', theme);
       })();
     </script>
 
     <style>
-      /* ─── Theme Variables ─────────────────────────────────────────────────── */
+      /* ═══════════════════════════════════════════════════════════════════════════
+         THEME VARIABLES - Neutral Palette (Vercel/Apple-inspired)
+         ═══════════════════════════════════════════════════════════════════════════ */
       :root {
         --bg: #ffffff;
-        --bg-secondary: #f5f5f5;
-        --text: #171717;
-        --text-muted: #737373;
-        --border: #e5e5e5;
-        --primary: #667eea;
-        --primary-hover: #5568d3;
+        --bg-secondary: #f5f5f7;
+        --bg-tertiary: #e5e5e7;
+        --text: #1d1d1f;
+        --text-secondary: color-mix(in srgb, var(--text) 55%, transparent);
+        --border: color-mix(in srgb, var(--text) 18%, transparent);
+        --border-hover: color-mix(in srgb, var(--text) 35%, transparent);
+        --primary: #0071e3;
+        --primary-hover: #0077ed;
+        --shadow: rgba(0, 0, 0, 0.08);
+        --shadow-lg: rgba(0, 0, 0, 0.12);
+        --code-bg: #f5f5f7;
       }
 
       .dark {
-        --bg: #0a0a0a;
-        --bg-secondary: #171717;
-        --text: #fafafa;
-        --text-muted: #a3a3a3;
-        --border: #262626;
-        --primary: #818cf8;
-        --primary-hover: #6366f1;
-      }
-
-      .sepia {
-        --bg: #f4ecd8;
-        --bg-secondary: #e8dcc6;
-        --text: #5c4b37;
-        --text-muted: #7a6b5a;
-        --border: #d4c4a8;
-        --primary: #8b7355;
-        --primary-hover: #6d5a44;
-      }
-
-      .high-contrast {
         --bg: #000000;
-        --bg-secondary: #1a1a1a;
-        --text: #ffffff;
-        --text-muted: #cccccc;
-        --border: #ffffff;
-        --primary: #ffff00;
-        --primary-hover: #cccc00;
+        --bg-secondary: #1c1c1e;
+        --bg-tertiary: #2c2c2e;
+        --text: #f5f5f7;
+        --text-secondary: color-mix(in srgb, var(--text) 60%, transparent);
+        --border: color-mix(in srgb, var(--text) 20%, transparent);
+        --border-hover: color-mix(in srgb, var(--text) 40%, transparent);
+        --primary: #0a84ff;
+        --primary-hover: #409cff;
+        --shadow: rgba(0, 0, 0, 0.3);
+        --shadow-lg: rgba(0, 0, 0, 0.5);
+        --code-bg: #1c1c1e;
       }
 
-      /* ─── Base Styles ─────────────────────────────────────────────────────── */
-      * { margin: 0; padding: 0; box-sizing: border-box; }
+      /* ═══════════════════════════════════════════════════════════════════════════
+         GLOBAL STYLES
+         ═══════════════════════════════════════════════════════════════════════════ */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
       body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text',
+          'Segoe UI', Roboto, sans-serif;
         background: var(--bg);
         color: var(--text);
-        line-height: 1.6;
-        padding: 24px;
+        line-height: 1.5;
+        transition: background-color 0.3s ease, color 0.3s ease;
       }
 
-      .container { max-width: 900px; margin: 0 auto; }
-
-      header {
-        margin-bottom: 48px;
-        padding-bottom: 24px;
+      .page-header {
+        text-align: center;
+        padding: 5rem 1.5rem 3.75rem;
         border-bottom: 1px solid var(--border);
       }
 
-      h1 { font-size: 32px; font-weight: 600; margin-bottom: 12px; }
-      .header-subtitle { color: var(--text-muted); font-size: 14px; }
+      .page-header h1 {
+        font-size: 3rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        margin-bottom: 1rem;
+      }
 
+      .page-header p {
+        font-size: 1.125rem;
+        color: var(--text-secondary);
+        max-width: 37.5rem;
+        margin: 0 auto;
+      }
+
+      .page-header .current-theme {
+        margin-top: 1rem;
+        font-size: 0.875rem;
+      }
+
+      .page-header .current-theme strong {
+        color: var(--primary);
+      }
+
+      .container {
+        max-width: 56.25rem;
+        margin: 0 auto;
+        padding: 2.5rem 1.5rem 6.25rem;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════════
+         EXAMPLE CARD STYLES
+         ═══════════════════════════════════════════════════════════════════════════ */
       .example {
-        background: var(--bg-secondary);
+        background: var(--bg);
         border: 1px solid var(--border);
-        border-radius: 8px;
-        margin-bottom: 32px;
+        border-radius: 1rem;
+        margin-bottom: 2.5rem;
         overflow: hidden;
+        transition: border-color 0.3s ease;
       }
 
       .example-header {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 16px 20px;
+        padding: 1.5rem 1.75rem 1.25rem;
         border-bottom: 1px solid var(--border);
       }
 
       .example-number {
-        font-family: 'SF Mono', 'Monaco', monospace;
-        font-size: 12px;
-        color: var(--text-muted);
+        font-size: 0.75rem;
         font-weight: 600;
+        color: var(--primary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
       }
 
-      .example-header h2 { flex: 1; font-size: 16px; font-weight: 500; }
-      .example-content { padding: 20px; }
-      .example-description { color: var(--text-muted); font-size: 13px; margin-bottom: 16px; }
-
-      .demo-area {
-        background: var(--bg);
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        padding: 24px;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-        align-items: center;
-        justify-content: center;
+      .example-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.375rem;
       }
 
-      /* ─── Base Button ─────────────────────────────────────────────────────── */
-      button {
-        padding: 10px 20px;
-        background: var(--bg);
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        font-size: 14px;
-        color: var(--text);
-        cursor: pointer;
-        font-family: inherit;
-        transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+      .example-description {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
       }
 
-      button:hover { background: var(--bg-secondary); border-color: var(--primary); }
-      button:active { transform: scale(0.98); }
-
-      /* ─── Two-Button Active States (class-based) ──────────────────────────── */
-      .dark .btn-light,
-      .light .btn-dark,
-      .sepia .btn-light,
-      .sepia .btn-dark,
-      .high-contrast .btn-light,
-      .high-contrast .btn-dark {
-        background: var(--bg);
-        border-color: var(--border);
-        color: var(--text);
-      }
-
-      .light .btn-light,
-      .dark .btn-dark,
-      .sepia .btn-sepia,
-      .high-contrast .btn-high-contrast {
-        background: var(--primary);
-        border-color: var(--primary);
-        color: white;
-      }
-
-      /* ─── Three-Button Active States (attribute-based) ───────────────────── */
-      [data-theme='light'] .btn-light-attr,
-      [data-theme='dark'] .btn-dark-attr,
-      [data-theme='sepia'] .btn-sepia-attr,
-      [data-theme='system'] .btn-system-attr {
-        background: var(--primary);
-        border-color: var(--primary);
-        color: white;
-      }
-
-      /* ─── Icon Buttons ────────────────────────────────────────────────────── */
-      .icon-toggle {
-        width: 44px;
-        height: 44px;
-        padding: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-      }
-
-      .icon-toggle svg {
-        width: 20px;
-        height: 20px;
-        stroke: currentColor;
-        fill: none;
-      }
-
-      .light .icon-toggle.btn-light,
-      .dark .icon-toggle.btn-dark {
-        background: var(--primary);
-        border-color: var(--primary);
-        color: white;
-      }
-
-      /* ─── Dynamic Icon Toggle ─────────────────────────────────────────────── */
-      .dynamic-icon-toggle {
-        width: 48px;
-        height: 48px;
-        padding: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        background: var(--primary);
-        border-color: var(--primary);
-        color: white;
-      }
-
-      .dynamic-icon-toggle:hover {
-        background: var(--primary-hover);
-        border-color: var(--primary-hover);
-      }
-
-      .dynamic-icon-toggle svg {
-        width: 24px;
-        height: 24px;
-        stroke: currentColor;
-        fill: none;
-      }
-
-      .dynamic-icon-toggle .icon-sun,
-      .dynamic-icon-toggle .icon-moon { display: none; }
-      .light .dynamic-icon-toggle .icon-sun,
-      .sepia .dynamic-icon-toggle .icon-sun { display: block; }
-      .dark .dynamic-icon-toggle .icon-moon,
-      .high-contrast .dynamic-icon-toggle .icon-moon { display: block; }
-
-      /* ─── Radio Button Style ──────────────────────────────────────────────── */
-      .radio-group {
-        display: flex;
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        overflow: hidden;
-      }
-
-      .radio-group button {
-        border: none;
-        border-radius: 0;
-        border-right: 1px solid var(--border);
-        padding: 10px 16px;
-      }
-
-      .radio-group button:last-child { border-right: none; }
-
-      [data-theme='light'] .radio-group .btn-light-attr,
-      [data-theme='dark'] .radio-group .btn-dark-attr,
-      [data-theme='system'] .radio-group .btn-system-attr {
-        background: var(--primary);
-        color: white;
-      }
-
-      /* ─── Pill Style ──────────────────────────────────────────────────────── */
-      .pill-group {
-        display: flex;
-        gap: 4px;
-        background: var(--bg-secondary);
-        padding: 4px;
-        border-radius: 9999px;
-        border: 1px solid var(--border);
-      }
-
-      .pill-group button.btn-light,
-      .pill-group button.btn-dark {
-        border: none;
-        border-radius: 9999px;
-        padding: 8px 16px;
-        background: transparent;
-        color: var(--text-muted);
-        font-weight: 500;
-      }
-
-      .pill-group button:hover { background: var(--bg); color: var(--text); }
-
-      .light .pill-group button.btn-light,
-      .dark .pill-group button.btn-dark {
-        background: var(--bg);
-        color: var(--text);
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      }
-
-      /* ─── Card Style ──────────────────────────────────────────────────────── */
-      .card-group { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
-
-      .card-toggle {
-        width: 100px;
-        padding: 16px 12px;
+      .example-preview {
+        padding: 3rem 1.75rem;
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 8px;
-        border-radius: 8px;
+        justify-content: center;
+        gap: 1rem;
+        background: var(--bg-secondary);
+        min-height: 8.75rem;
       }
 
-      .card-toggle .preview {
-        width: 48px;
-        height: 32px;
-        border-radius: 4px;
+      .example-code {
+        border-top: 1px solid var(--border);
+      }
+
+      .example-code summary {
+        padding: 0.875rem 1.75rem;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+        cursor: pointer;
+        user-select: none;
+        transition: color 0.2s;
+      }
+
+      .example-code summary:hover {
+        color: var(--text);
+      }
+
+      .example-code pre {
+        margin: 0;
+        padding: 1.25rem 1.75rem 1.5rem;
+        background: var(--code-bg);
+        overflow-x: auto;
+        font-size: 0.8125rem;
+        line-height: 1.6;
+        border-top: 1px solid var(--border);
+      }
+
+      .example-code code {
+        font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+        color: var(--text);
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════════
+         COMMON BUTTON RESET
+         ═══════════════════════════════════════════════════════════════════════════ */
+      button {
+        font-family: inherit;
+        cursor: pointer;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════════
+         TOGGLE 1: Simple Text Toggle
+         ═══════════════════════════════════════════════════════════════════════════ */
+      .toggle-1 {
+        display: flex;
+        gap: 0.25rem;
+        background: var(--bg-tertiary);
+        padding: 0.25rem;
+        border-radius: 0.5rem;
+      }
+
+      .toggle-1 button {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        border: none;
+        background: transparent;
+        color: var(--text-secondary);
+        border-radius: 0.375rem;
+        transition: all 0.2s ease;
+      }
+
+      .toggle-1 button:hover {
+        color: var(--text);
+      }
+
+      .light .toggle-1 .btn-light,
+      .dark .toggle-1 .btn-dark {
+        background: var(--bg);
+        color: var(--text);
+        box-shadow: 0 1px 3px var(--shadow);
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════════
+         TOGGLE 2: Icon Only Toggle
+         ═══════════════════════════════════════════════════════════════════════════ */
+      .toggle-2 {
+        width: 2.5rem;
+        height: 2.5rem;
+        border: none;
+        background: var(--bg-tertiary);
+        border-radius: 0.625rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+      }
+
+      .toggle-2:hover {
+        transform: scale(1.05);
+      }
+
+      .toggle-2 svg {
+        width: 1.25rem;
+        height: 1.25rem;
+        stroke: var(--text);
+        fill: none;
+        transition: transform 0.3s ease;
+      }
+
+      .toggle-2:hover svg {
+        transform: rotate(15deg);
+      }
+
+      .toggle-2 .icon-sun,
+      .toggle-2 .icon-moon {
+        display: none;
+      }
+
+      .light .toggle-2 .icon-moon {
+        display: block;
+      }
+      .dark .toggle-2 .icon-sun {
+        display: block;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════════
+         TOGGLE 3: Pill with Slider
+         ═══════════════════════════════════════════════════════════════════════════ */
+      .toggle-3 {
+        display: flex;
+        position: relative;
+        background: var(--bg-tertiary);
+        padding: 0.25rem;
+        border-radius: 1.25rem;
+        width: 10rem;
+      }
+
+      .toggle-3::before {
+        content: '';
+        position: absolute;
+        top: 0.25rem;
+        left: 0.25rem;
+        width: calc(50% - 0.25rem);
+        height: calc(100% - 0.5rem);
+        background: var(--bg);
+        border-radius: 1rem;
+        box-shadow: 0 2px 4px var(--shadow);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .dark .toggle-3::before {
+        transform: translateX(100%);
+      }
+
+      .toggle-3 button {
+        flex: 1;
+        padding: 0.5rem 1rem;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        border: none;
+        background: transparent;
+        color: var(--text-secondary);
+        border-radius: 1rem;
+        position: relative;
+        z-index: 1;
+        transition: color 0.2s;
+      }
+
+      .light .toggle-3 .btn-light,
+      .dark .toggle-3 .btn-dark {
+        color: var(--text);
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════════
+         TOGGLE 4: Dropdown Selector
+         ═══════════════════════════════════════════════════════════════════════════ */
+      .toggle-4-wrapper {
+        position: relative;
+      }
+
+      .toggle-4 {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.625rem 0.875rem;
+        font-size: 0.875rem;
+        font-weight: 500;
         border: 1px solid var(--border);
+        background: var(--bg);
+        color: var(--text);
+        border-radius: 0.625rem;
+        transition: all 0.2s;
       }
 
-      .card-toggle[data-theme-value='light'] .preview { background: #ffffff; }
-      .card-toggle[data-theme-value='dark'] .preview { background: #0a0a0a; }
-      .card-toggle[data-theme-value='sepia'] .preview { background: #f4ecd8; }
-      .card-toggle[data-theme-value='system'] .preview { background: linear-gradient(135deg, #fff 50%, #0a0a0a 50%); }
+      .toggle-4:hover {
+        border-color: var(--border-hover);
+      }
 
-      [data-theme='light'] .card-toggle.btn-light-attr,
-      [data-theme='dark'] .card-toggle.btn-dark-attr,
-      [data-theme='sepia'] .card-toggle.btn-sepia-attr,
-      [data-theme='system'] .card-toggle.btn-system-attr {
+      .toggle-4 svg {
+        width: 1rem;
+        height: 1rem;
+        stroke: currentColor;
+        fill: none;
+      }
+
+      .toggle-4-dropdown {
+        position: absolute;
+        top: calc(100% + 0.5rem);
+        left: 0;
+        min-width: 10rem;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 0.75rem;
+        box-shadow: 0 0.5rem 1.875rem var(--shadow-lg);
+        padding: 0.375rem;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-0.25rem);
+        transition: all 0.2s ease;
+        z-index: 100;
+      }
+
+      .toggle-4-wrapper:focus-within .toggle-4-dropdown,
+      .toggle-4-wrapper:hover .toggle-4-dropdown {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
+
+      .toggle-4-dropdown button {
+        display: flex;
+        align-items: center;
+        gap: 0.625rem;
+        width: 100%;
+        padding: 0.625rem 0.75rem;
+        font-size: 0.875rem;
+        border: none;
+        background: transparent;
+        color: var(--text);
+        border-radius: 0.5rem;
+        transition: background 0.15s;
+      }
+
+      .toggle-4-dropdown button:hover {
+        background: var(--bg-secondary);
+      }
+
+      .toggle-4-dropdown svg {
+        width: 1rem;
+        height: 1rem;
+        color: var(--text-secondary);
+        stroke: currentColor;
+        fill: none;
+      }
+
+      .toggle-4-dropdown .check {
+        margin-left: auto;
+        opacity: 0;
+      }
+
+      [data-theme='light'] .toggle-4-dropdown .btn-light .check,
+      [data-theme='dark'] .toggle-4-dropdown .btn-dark .check,
+      [data-theme='system'] .toggle-4-dropdown .btn-system .check {
+        opacity: 1;
+        color: var(--primary);
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════════
+         TOGGLE 5: Segmented Control (3 options)
+         ═══════════════════════════════════════════════════════════════════════════ */
+      .toggle-5 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        position: relative;
+        background: var(--bg-tertiary);
+        padding: 0.25rem;
+        border-radius: 0.625rem;
+      }
+
+      .toggle-5::before {
+        content: '';
+        position: absolute;
+        top: 0.25rem;
+        bottom: 0.25rem;
+        left: 0.25rem;
+        width: calc((100% - 0.5rem) / 3);
+        background: var(--bg);
+        border-radius: 0.4375rem;
+        box-shadow: 0 1px 3px var(--shadow);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      [data-theme='dark'] .toggle-5::before {
+        transform: translateX(100%);
+      }
+
+      [data-theme='system'] .toggle-5::before {
+        transform: translateX(200%);
+      }
+
+      .toggle-5 button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.375rem;
+        padding: 0.5rem 0.875rem;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        border: none;
+        background: transparent;
+        color: var(--text-secondary);
+        border-radius: 0.4375rem;
+        position: relative;
+        z-index: 1;
+        transition: color 0.2s ease;
+      }
+
+      .toggle-5 button:hover {
+        color: var(--text);
+      }
+
+      .toggle-5 svg {
+        width: 0.875rem;
+        height: 0.875rem;
+        stroke: currentColor;
+        fill: none;
+      }
+
+      [data-theme='light'] .toggle-5 .btn-light,
+      [data-theme='dark'] .toggle-5 .btn-dark,
+      [data-theme='system'] .toggle-5 .btn-system {
+        color: var(--text);
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════════
+         TOGGLE 6: Minimal Icon (Ghost Button)
+         ═══════════════════════════════════════════════════════════════════════════ */
+      .toggle-6 {
+        width: 2.25rem;
+        height: 2.25rem;
+        border: none;
+        background: transparent;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+      }
+
+      .toggle-6:hover {
+        background: var(--bg-tertiary);
+      }
+
+      .toggle-6 svg {
+        width: 1.25rem;
+        height: 1.25rem;
+        color: var(--text-secondary);
+        stroke: currentColor;
+        fill: none;
+        transition: color 0.2s;
+      }
+
+      .toggle-6:hover svg {
+        color: var(--text);
+      }
+
+      .toggle-6 .icon-sun,
+      .toggle-6 .icon-moon {
+        display: none;
+      }
+
+      .light .toggle-6 .icon-moon {
+        display: block;
+      }
+      .dark .toggle-6 .icon-sun {
+        display: block;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════════
+         TOGGLE 7: iOS Switch Toggle
+         ═══════════════════════════════════════════════════════════════════════════ */
+      .toggle-7 {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .toggle-7 span {
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+        transition: color 0.2s;
+      }
+
+      .light .toggle-7 .label-light {
+        color: var(--text);
+      }
+      .dark .toggle-7 .label-dark {
+        color: var(--text);
+      }
+
+      .toggle-7-switch {
+        position: relative;
+        width: 2.75rem;
+        height: 1.625rem;
+        background: var(--bg-tertiary);
+        border: none;
+        border-radius: 0.8125rem;
+        transition: background 0.3s;
+      }
+
+      .dark .toggle-7-switch {
         background: var(--primary);
-        border-color: var(--primary);
-        color: white;
       }
 
-      /* ─── Select Dropdown ─────────────────────────────────────────────────── */
-      .theme-select {
-        padding: 10px 36px 10px 12px;
-        font-size: 14px;
+      .toggle-7-switch::after {
+        content: '';
+        position: absolute;
+        top: 0.1875rem;
+        left: 0.1875rem;
+        width: 1.25rem;
+        height: 1.25rem;
+        background: var(--bg);
+        border-radius: 50%;
+        box-shadow: 0 2px 4px var(--shadow);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .dark .toggle-7-switch::after {
+        transform: translateX(1.125rem);
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════════
+         TOGGLE 8: Radio Pills
+         ═══════════════════════════════════════════════════════════════════════════ */
+      .toggle-8 {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .toggle-8 label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.625rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+        background: var(--bg);
         border: 1px solid var(--border);
-        border-radius: 6px;
+        border-radius: 6.25rem;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .toggle-8 label:hover {
+        border-color: var(--border-hover);
+      }
+
+      .toggle-8 input {
+        display: none;
+      }
+
+      .toggle-8 .radio-dot {
+        width: 1rem;
+        height: 1rem;
+        border: 2px solid var(--border);
+        border-radius: 50%;
+        position: relative;
+        transition: border-color 0.2s;
+      }
+
+      .toggle-8 .radio-dot::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0.5rem;
+        height: 0.5rem;
+        background: var(--primary);
+        border-radius: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        transition: transform 0.2s;
+      }
+
+      .light .toggle-8 .radio-light .radio-dot,
+      .dark .toggle-8 .radio-dark .radio-dot {
+        border-color: var(--primary);
+      }
+
+      .light .toggle-8 .radio-light .radio-dot::after,
+      .dark .toggle-8 .radio-dark .radio-dot::after {
+        transform: translate(-50%, -50%) scale(1);
+      }
+
+      .light .toggle-8 .radio-light,
+      .dark .toggle-8 .radio-dark {
+        color: var(--text);
+        border-color: var(--primary);
+        background: color-mix(in srgb, var(--primary) 8%, transparent);
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════════
+         TOGGLE 9: Text + Icon Button
+         ═══════════════════════════════════════════════════════════════════════════ */
+      .toggle-9 {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.625rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        color: var(--text);
+        border-radius: 0.625rem;
+        transition: all 0.2s;
+      }
+
+      .toggle-9:hover {
+        background: var(--bg-secondary);
+      }
+
+      .toggle-9 svg {
+        width: 1rem;
+        height: 1rem;
+        stroke: currentColor;
+        fill: none;
+      }
+
+      .toggle-9 .icon-sun,
+      .toggle-9 .icon-moon,
+      .toggle-9 .label-light,
+      .toggle-9 .label-dark {
+        display: none;
+      }
+
+      .light .toggle-9 .icon-sun {
+        display: block;
+      }
+      .light .toggle-9 .label-light {
+        display: inline;
+      }
+      .dark .toggle-9 .icon-moon {
+        display: block;
+      }
+      .dark .toggle-9 .label-dark {
+        display: inline;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════════
+         TOGGLE 10: Animated Icon
+         ═══════════════════════════════════════════════════════════════════════════ */
+      .toggle-10 {
+        width: 2.75rem;
+        height: 2.75rem;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        border-radius: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        overflow: hidden;
+      }
+
+      .toggle-10:hover {
+        border-color: var(--border-hover);
+      }
+
+      .toggle-10-icons {
+        position: relative;
+        width: 1.375rem;
+        height: 1.375rem;
+      }
+
+      .toggle-10 svg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 1.375rem;
+        height: 1.375rem;
+        stroke: var(--text);
+        fill: none;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .toggle-10 .icon-sun {
+        transform: rotate(-90deg) scale(0);
+        opacity: 0;
+      }
+
+      .toggle-10 .icon-moon {
+        transform: rotate(0) scale(1);
+        opacity: 1;
+      }
+
+      .dark .toggle-10 .icon-sun {
+        transform: rotate(0) scale(1);
+        opacity: 1;
+      }
+
+      .dark .toggle-10 .icon-moon {
+        transform: rotate(90deg) scale(0);
+        opacity: 0;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════════
+         TOGGLE 11: Compact Pill (Icon Only)
+         ═══════════════════════════════════════════════════════════════════════════ */
+      .toggle-11 {
+        display: flex;
+        position: relative;
+        background: var(--bg-tertiary);
+        padding: 0.1875rem;
+        border-radius: 6.25rem;
+      }
+
+      .toggle-11::before {
+        content: '';
+        position: absolute;
+        top: 0.1875rem;
+        left: 0.1875rem;
+        width: 2rem;
+        height: 2rem;
+        background: var(--bg);
+        border-radius: 50%;
+        box-shadow: 0 1px 3px var(--shadow);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .dark .toggle-11::before {
+        transform: translateX(2rem);
+      }
+
+      .toggle-11 button {
+        width: 2rem;
+        height: 2rem;
+        border: none;
+        background: transparent;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        z-index: 1;
+        transition: all 0.2s ease;
+      }
+
+      .toggle-11 svg {
+        width: 1rem;
+        height: 1rem;
+        color: var(--text-secondary);
+        stroke: currentColor;
+        fill: none;
+        transition: color 0.2s;
+      }
+
+      .light .toggle-11 .btn-light svg,
+      .dark .toggle-11 .btn-dark svg {
+        color: var(--text);
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════════
+         TOGGLE 12: Text Link
+         ═══════════════════════════════════════════════════════════════════════════ */
+      .toggle-12 {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+        background: none;
+        border: none;
+        padding: 0.25rem 0;
+        border-bottom: 1px dashed var(--border);
+        transition: all 0.2s;
+      }
+
+      .toggle-12:hover {
+        color: var(--text);
+        border-color: var(--text);
+      }
+
+      .toggle-12 .label-light,
+      .toggle-12 .label-dark {
+        display: none;
+      }
+
+      .light .toggle-12 .label-dark {
+        display: inline;
+      }
+      .dark .toggle-12 .label-light {
+        display: inline;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════════
+         TOGGLE 13: Grid Selector
+         ═══════════════════════════════════════════════════════════════════════════ */
+      .toggle-13 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+        padding: 0.5rem;
+        background: var(--bg-secondary);
+        border-radius: 0.75rem;
+      }
+
+      .toggle-13 button {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.75rem 1rem;
+        border: 1px solid transparent;
+        background: transparent;
+        border-radius: 0.625rem;
+        transition: all 0.2s;
+      }
+
+      .toggle-13 button:hover {
+        background: var(--bg);
+      }
+
+      .toggle-13 svg {
+        width: 1.25rem;
+        height: 1.25rem;
+        color: var(--text-secondary);
+        stroke: currentColor;
+        fill: none;
+      }
+
+      .toggle-13 span {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+      }
+
+      [data-theme='light'] .toggle-13 .btn-light,
+      [data-theme='dark'] .toggle-13 .btn-dark,
+      [data-theme='system'] .toggle-13 .btn-system {
+        background: var(--bg);
+        border-color: var(--primary);
+      }
+
+      [data-theme='light'] .toggle-13 .btn-light svg,
+      [data-theme='dark'] .toggle-13 .btn-dark svg,
+      [data-theme='system'] .toggle-13 .btn-system svg {
+        color: var(--primary);
+      }
+
+      [data-theme='light'] .toggle-13 .btn-light span,
+      [data-theme='dark'] .toggle-13 .btn-dark span,
+      [data-theme='system'] .toggle-13 .btn-system span {
+        color: var(--text);
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════════
+         TOGGLE 14: Underline Tabs
+         ═══════════════════════════════════════════════════════════════════════════ */
+      .toggle-14 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        position: relative;
+        border-bottom: 1px solid var(--border);
+        width: 7.5rem;
+      }
+
+      .toggle-14::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        width: 50%;
+        height: 0.125rem;
+        background: var(--text);
+        border-radius: 1px;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .dark .toggle-14::after {
+        transform: translateX(100%);
+      }
+
+      .toggle-14 button {
+        padding: 0.5rem 0;
+        font-size: 0.875rem;
+        font-weight: 500;
+        border: none;
+        background: transparent;
+        color: var(--text-secondary);
+        transition: color 0.2s;
+        text-align: center;
+      }
+
+      .toggle-14 button:hover {
+        color: var(--text);
+      }
+
+      .light .toggle-14 .btn-light,
+      .dark .toggle-14 .btn-dark {
+        color: var(--text);
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════════
+         TOGGLE 15: Select Dropdown
+         ═══════════════════════════════════════════════════════════════════════════ */
+      .toggle-15 {
+        padding: 0.625rem 2.25rem 0.625rem 0.75rem;
+        font-size: 0.875rem;
+        font-family: inherit;
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
         background: var(--bg);
         color: var(--text);
         cursor: pointer;
         appearance: none;
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23737373' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
         background-repeat: no-repeat;
-        background-position: right 10px center;
+        background-position: right 0.625rem center;
+        transition: border-color 0.2s;
       }
 
-      .theme-select:hover { border-color: var(--primary); }
+      .toggle-15:hover {
+        border-color: var(--border-hover);
+      }
 
-      /* ─── Utility Components ──────────────────────────────────────────────── */
-      .code-block {
-        background: var(--bg);
-        padding: 12px;
-        border-radius: 4px;
-        font-family: 'SF Mono', 'Monaco', monospace;
-        font-size: 12px;
-        margin-top: 16px;
-        color: var(--text-muted);
+      /* ═══════════════════════════════════════════════════════════════════════════
+         TOGGLE 16: Outlined Pill
+         ═══════════════════════════════════════════════════════════════════════════ */
+      .toggle-16 {
+        display: flex;
+        gap: 0.25rem;
+        padding: 0.25rem;
         border: 1px solid var(--border);
-        white-space: pre-wrap;
-        overflow-x: auto;
+        border-radius: 0.5rem;
       }
 
-      .event-log {
+      .toggle-16 button {
+        padding: 0.5rem 1rem;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        border: none;
+        background: transparent;
+        color: var(--text-secondary);
+        border-radius: 0.375rem;
+        transition: all 0.2s ease;
+      }
+
+      .toggle-16 button:hover {
+        color: var(--text);
+      }
+
+      .light .toggle-16 .btn-light,
+      .dark .toggle-16 .btn-dark {
+        background: var(--bg-tertiary);
+        color: var(--text);
+        font-weight: 600;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════════
+         TOGGLE 17: Icon Badge
+         ═══════════════════════════════════════════════════════════════════════════ */
+      .toggle-17 {
+        width: 2rem;
+        height: 2rem;
+        border: none;
+        background: var(--bg-secondary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+      }
+
+      .toggle-17:hover {
+        background: var(--bg-tertiary);
+      }
+
+      .toggle-17 svg {
+        width: 0.875rem;
+        height: 0.875rem;
+        color: var(--text-secondary);
+        stroke: currentColor;
+        fill: none;
+        transition: color 0.2s;
+      }
+
+      .toggle-17:hover svg {
+        color: var(--text);
+      }
+
+      .toggle-17 .icon-sun,
+      .toggle-17 .icon-moon {
+        display: none;
+      }
+
+      .light .toggle-17 .icon-moon {
+        display: block;
+      }
+      .dark .toggle-17 .icon-sun {
+        display: block;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════════
+         TOGGLE 18: Settings Row
+         ═══════════════════════════════════════════════════════════════════════════ */
+      .toggle-18 {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        max-width: 20rem;
+        padding: 0.875rem 1rem;
         background: var(--bg);
-        padding: 12px;
-        border-radius: 4px;
-        font-family: 'SF Mono', 'Monaco', monospace;
-        font-size: 12px;
-        max-height: 120px;
-        overflow-y: auto;
-        margin-top: 16px;
-        color: var(--text-muted);
         border: 1px solid var(--border);
+        border-radius: 0.75rem;
       }
 
-      .current-theme { font-size: 13px; color: var(--text-muted); margin-top: 12px; text-align: center; }
-      .current-theme strong { color: var(--primary); }
+      .toggle-18-label {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .toggle-18-label svg {
+        width: 1.25rem;
+        height: 1.25rem;
+        color: var(--text-secondary);
+        stroke: currentColor;
+        fill: none;
+      }
+
+      .toggle-18-label span {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--text);
+      }
+
+      .toggle-18-switch {
+        position: relative;
+        width: 2.5rem;
+        height: 1.5rem;
+        background: var(--bg-tertiary);
+        border: none;
+        border-radius: 0.75rem;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+
+      .dark .toggle-18-switch {
+        background: var(--primary);
+      }
+
+      .toggle-18-switch::after {
+        content: '';
+        position: absolute;
+        top: 0.125rem;
+        left: 0.125rem;
+        width: 1.25rem;
+        height: 1.25rem;
+        background: var(--bg);
+        border-radius: 50%;
+        box-shadow: 0 1px 3px var(--shadow);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .dark .toggle-18-switch::after {
+        transform: translateX(1rem);
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════════
+         TOGGLE 19: Stacked Buttons
+         ═══════════════════════════════════════════════════════════════════════════ */
+      .toggle-19 {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        background: var(--bg-secondary);
+        padding: 0.25rem;
+        border-radius: 0.625rem;
+      }
+
+      .toggle-19 button {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        border: none;
+        background: transparent;
+        color: var(--text-secondary);
+        border-radius: 0.5rem;
+        transition: all 0.15s ease;
+        text-align: left;
+      }
+
+      .toggle-19 button:hover {
+        color: var(--text);
+      }
+
+      .toggle-19 svg {
+        width: 1rem;
+        height: 1rem;
+        stroke: currentColor;
+        fill: none;
+        flex-shrink: 0;
+      }
+
+      [data-theme='light'] .toggle-19 .btn-light,
+      [data-theme='dark'] .toggle-19 .btn-dark,
+      [data-theme='system'] .toggle-19 .btn-system {
+        background: var(--bg);
+        color: var(--text);
+        box-shadow: 0 1px 2px var(--shadow);
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════════
+         TOGGLE 20: Monochrome Chips
+         ═══════════════════════════════════════════════════════════════════════════ */
+      .toggle-20 {
+        display: flex;
+        gap: 0.375rem;
+      }
+
+      .toggle-20 button {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        border: none;
+        background: var(--bg-secondary);
+        color: var(--text-secondary);
+        border-radius: 6.25rem;
+        transition: all 0.15s ease;
+      }
+
+      .toggle-20 button:hover {
+        background: var(--bg-tertiary);
+        color: var(--text);
+      }
+
+      .light .toggle-20 .btn-light,
+      .dark .toggle-20 .btn-dark {
+        background: var(--text);
+        color: var(--bg);
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════════
+         TOGGLE 21: Subtle Toggle
+         ═══════════════════════════════════════════════════════════════════════════ */
+      .toggle-21 {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.375rem 0.5rem;
+        background: transparent;
+        border: none;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+
+      .toggle-21:hover {
+        background: var(--bg-secondary);
+      }
+
+      .toggle-21-indicator {
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 50%;
+        background: var(--text-secondary);
+        transition: background 0.2s;
+      }
+
+      .dark .toggle-21-indicator {
+        background: var(--primary);
+      }
+
+      .toggle-21 span {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+        transition: color 0.2s;
+      }
+
+      .toggle-21:hover span {
+        color: var(--text);
+      }
+
+      .toggle-21 .label-light,
+      .toggle-21 .label-dark {
+        display: none;
+      }
+
+      .light .toggle-21 .label-dark {
+        display: inline;
+      }
+      .dark .toggle-21 .label-light {
+        display: inline;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════════
+         TOGGLE 22: Inline Text Link
+         ═══════════════════════════════════════════════════════════════════════════ */
+      .toggle-22 {
+        display: inline-flex;
+        gap: 0.125rem;
+        font-size: 0.8125rem;
+      }
+
+      .toggle-22 button {
+        padding: 0;
+        background: transparent;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: color 0.15s;
+      }
+
+      .toggle-22 button:hover {
+        color: var(--text);
+      }
+
+      .light .toggle-22 .btn-light,
+      .dark .toggle-22 .btn-dark {
+        color: var(--text);
+        font-weight: 600;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+
+      .toggle-22 .separator {
+        color: var(--text-secondary);
+        user-select: none;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════════
+         TOGGLE 23: Underline Tab
+         ═══════════════════════════════════════════════════════════════════════════ */
+      .toggle-23 {
+        display: flex;
+        gap: 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .toggle-23 button {
+        position: relative;
+        padding: 0.625rem 1rem;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        background: transparent;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: color 0.15s;
+      }
+
+      .toggle-23 button::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: transparent;
+        transition: background 0.15s;
+      }
+
+      .toggle-23 button:hover {
+        color: var(--text);
+      }
+
+      .light .toggle-23 .btn-light,
+      .dark .toggle-23 .btn-dark {
+        color: var(--text);
+      }
+
+      .light .toggle-23 .btn-light::after,
+      .dark .toggle-23 .btn-dark::after {
+        background: var(--text);
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════════
+         TOGGLE 24: Compact Dot Indicator
+         ═══════════════════════════════════════════════════════════════════════════ */
+      .toggle-24 {
+        display: flex;
+        align-items: center;
+        gap: 0.625rem;
+        padding: 0.375rem 0.625rem;
+        background: var(--bg-secondary);
+        border-radius: 1rem;
+      }
+
+      .toggle-24 button {
+        position: relative;
+        width: 0.5rem;
+        height: 0.5rem;
+        padding: 0;
+        background: var(--text-secondary);
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        opacity: 0.4;
+      }
+
+      .toggle-24 button:hover {
+        opacity: 0.7;
+      }
+
+      .light .toggle-24 .btn-light,
+      .dark .toggle-24 .btn-dark {
+        opacity: 1;
+        transform: scale(1.3);
+        background: var(--text);
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════════
+         TOGGLE 25: Ghost Buttons
+         ═══════════════════════════════════════════════════════════════════════════ */
+      .toggle-25 {
+        display: flex;
+        gap: 0.375rem;
+      }
+
+      .toggle-25 button {
+        padding: 0.5rem 0.875rem;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 0.375rem;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+
+      .toggle-25 button:hover {
+        color: var(--text);
+        border-color: var(--border);
+      }
+
+      .light .toggle-25 .btn-light,
+      .dark .toggle-25 .btn-dark {
+        color: var(--text);
+        font-weight: 600;
+        background: var(--bg-tertiary);
+        border-color: var(--border);
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════════
+         TOGGLE 26: Minimal Switch
+         ═══════════════════════════════════════════════════════════════════════════ */
+      .toggle-26 {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .toggle-26-track {
+        position: relative;
+        width: 2.25rem;
+        height: 1.25rem;
+        background: var(--bg-tertiary);
+        border: none;
+        border-radius: 0.625rem;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      .toggle-26-track::after {
+        content: '';
+        position: absolute;
+        top: 0.1875rem;
+        left: 0.1875rem;
+        width: 0.875rem;
+        height: 0.875rem;
+        background: var(--bg);
+        border-radius: 50%;
+        transition: transform 0.2s ease;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      }
+
+      .dark .toggle-26-track::after {
+        transform: translateX(1rem);
+      }
+
+      .toggle-26-label {
+        font-size: 0.8125rem;
+        color: var(--text-secondary);
+        user-select: none;
+      }
+
+      .toggle-26 .label-light,
+      .toggle-26 .label-dark {
+        display: none;
+      }
+
+      .light .toggle-26 .label-light {
+        display: inline;
+      }
+      .dark .toggle-26 .label-dark {
+        display: inline;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════════
+         TOGGLE 27: Token Buttons
+         ═══════════════════════════════════════════════════════════════════════════ */
+      .toggle-27 {
+        display: flex;
+        gap: 0.25rem;
+      }
+
+      .toggle-27 button {
+        width: 1.75rem;
+        height: 1.75rem;
+        padding: 0;
+        font-size: 0.6875rem;
+        font-weight: 600;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 0.25rem;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+
+      .toggle-27 button:hover {
+        border-color: var(--border-hover);
+        color: var(--text);
+      }
+
+      .light .toggle-27 .btn-light,
+      .dark .toggle-27 .btn-dark {
+        background: var(--text);
+        border-color: var(--text);
+        color: var(--bg);
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════════
+         API DEMO STYLES
+         ═══════════════════════════════════════════════════════════════════════════ */
+      .api-buttons {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .api-buttons button {
+        font-size: 0.75rem;
+        padding: 0.375rem 0.75rem;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        color: var(--text);
+        border-radius: 0.375rem;
+        font-family: 'SF Mono', 'Fira Code', monospace;
+        transition: all 0.15s;
+      }
+
+      .api-buttons button:hover {
+        background: var(--bg-secondary);
+        border-color: var(--border-hover);
+      }
 
       .info-box {
         background: var(--bg);
         border: 1px solid var(--border);
-        border-radius: 6px;
-        padding: 12px 16px;
-        margin-top: 16px;
-        font-size: 13px;
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+        font-size: 0.8125rem;
+        width: 100%;
+        max-width: 20rem;
       }
 
-      .info-box dt { color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-      .info-box dd { font-weight: 500; color: var(--primary); }
+      .info-box dt {
+        color: var(--text-secondary);
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.25rem;
+      }
 
-      .api-buttons { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
-      .api-buttons button { font-size: 12px; padding: 6px 12px; }
+      .info-box dd {
+        font-weight: 500;
+        color: var(--primary);
+        font-family: 'SF Mono', 'Fira Code', monospace;
+      }
 
-      /* ─── Example 16: Fade Transition ─────────────────────────────────────── */
+      .info-box dd + dt {
+        margin-top: 0.75rem;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════════
+         EVENT LOG STYLES
+         ═══════════════════════════════════════════════════════════════════════════ */
+      .event-log {
+        background: var(--bg);
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        font-family: 'SF Mono', 'Fira Code', monospace;
+        font-size: 0.75rem;
+        max-height: 7.5rem;
+        overflow-y: auto;
+        color: var(--text-secondary);
+        border: 1px solid var(--border);
+        width: 100%;
+        max-width: 28rem;
+        white-space: pre-wrap;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════════
+         FADE DEMO
+         ═══════════════════════════════════════════════════════════════════════════ */
       .fade-demo {
-        padding: 24px;
-        border-radius: 8px;
+        padding: 2rem;
+        border-radius: 0.75rem;
         text-align: center;
-        background: var(--bg-secondary);
+        background: var(--bg-tertiary);
         transition: background-color 0.5s ease, color 0.5s ease;
-      }
-
-      /* ─── Example 17: iOS Slide Toggle (Pure CSS) ─────────────────────────── */
-      .slide-toggle {
-        position: relative;
-        width: 60px;
-        height: 32px;
-        border-radius: 16px;
-        background: var(--border);
-        border: none;
-        cursor: pointer;
-        padding: 0;
-        transition: background-color 0.3s ease;
-      }
-
-      .slide-toggle::after {
-        content: '';
-        position: absolute;
-        top: 4px;
-        left: 4px;
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        background: white;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        transition: transform 0.3s ease;
-      }
-
-      .dark .slide-toggle {
-        background: var(--primary);
-      }
-
-      .dark .slide-toggle::after {
-        transform: translateX(28px);
-      }
-
-      /* ─── Example 18: Rotating Icon ───────────────────────────────────────── */
-      .rotate-toggle {
-        width: 48px;
-        height: 48px;
-        padding: 0;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: var(--primary);
-        border-color: var(--primary);
-        color: white;
-        overflow: hidden;
-      }
-
-      .rotate-toggle:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
-
-      .rotate-toggle svg {
-        width: 24px;
-        height: 24px;
-        stroke: currentColor;
-        fill: none;
-        position: absolute;
-        transition: transform 0.5s ease, opacity 0.25s ease;
-        opacity: 0;
-      }
-
-      .rotate-toggle.rotating svg { transform: rotate(360deg); }
-
-      .light .rotate-toggle .icon-sun,
-      .sepia .rotate-toggle .icon-sun { opacity: 1; }
-      .dark .rotate-toggle .icon-moon,
-      .high-contrast .rotate-toggle .icon-moon { opacity: 1; }
-
-      /* ─── Example 19: Wave Effect ─────────────────────────────────────────── */
-      .wave-container {
-        position: relative;
-        overflow: hidden;
-        border-radius: 8px;
-        padding: 32px;
-        background: var(--bg-secondary);
-      }
-
-      .wave-container::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 0;
-        height: 0;
-        border-radius: 50%;
-        background: var(--primary);
-        opacity: 0.2;
-        transform: translate(-50%, -50%);
-      }
-
-      .wave-container.animating::before {
-        animation: wave-expand 0.6s ease-out forwards;
-      }
-
-      @keyframes wave-expand {
-        0% { width: 0; height: 0; opacity: 0.3; }
-        100% { width: 400%; height: 400%; opacity: 0; }
-      }
-
-      /* ─── Example 20: Flip Card (Pure CSS) ────────────────────────────────── */
-      .flip-toggle {
-        width: 80px;
-        height: 80px;
-        perspective: 1000px;
-        cursor: pointer;
-      }
-
-      .flip-toggle-inner {
-        position: relative;
         width: 100%;
-        height: 100%;
-        transition: transform 0.6s;
-        transform-style: preserve-3d;
+        max-width: 24rem;
       }
 
-      .dark .flip-toggle-inner { transform: rotateY(180deg); }
+      .fade-demo h3 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
 
-      .flip-toggle-front,
-      .flip-toggle-back {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        backface-visibility: hidden;
-        border-radius: 8px;
+      .fade-demo p {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+      }
+
+      .fade-buttons {
         display: flex;
-        align-items: center;
+        gap: 0.5rem;
         justify-content: center;
+        margin-top: 1rem;
+      }
+
+      .fade-buttons button {
+        padding: 0.5rem 1rem;
+        font-size: 0.8125rem;
+        font-weight: 500;
         border: 1px solid var(--border);
         background: var(--bg);
+        color: var(--text);
+        border-radius: 0.375rem;
+        transition: all 0.2s;
       }
 
-      .flip-toggle-back {
-        transform: rotateY(180deg);
+      .fade-buttons button:hover {
+        border-color: var(--border-hover);
+      }
+
+      .light .fade-buttons .btn-light,
+      .dark .fade-buttons .btn-dark {
         background: var(--primary);
-        color: white;
         border-color: var(--primary);
-      }
-
-      .flip-toggle svg { width: 32px; height: 32px; stroke: currentColor; fill: none; }
-
-      /* ─── Page Transition Overlays ────────────────────────────────────────── */
-      .page-transition-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        pointer-events: none;
-        z-index: 9999;
-      }
-
-      .circle-reveal-overlay { clip-path: circle(0% at 50% 50%); }
-      .circle-reveal-overlay.animating { animation: circle-reveal 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-      @keyframes circle-reveal {
-        0% { clip-path: circle(0% at 50% 50%); }
-        100% { clip-path: circle(150% at 50% 50%); }
-      }
-
-      .blinds-overlay { display: flex; flex-direction: column; }
-      .blinds-overlay .blind { flex: 1; transform: scaleY(0); transform-origin: center; }
-      .blinds-overlay.animating .blind { animation: blind-reveal 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-      .blinds-overlay .blind:nth-child(1) { animation-delay: 0ms; }
-      .blinds-overlay .blind:nth-child(2) { animation-delay: 40ms; }
-      .blinds-overlay .blind:nth-child(3) { animation-delay: 80ms; }
-      .blinds-overlay .blind:nth-child(4) { animation-delay: 120ms; }
-      .blinds-overlay .blind:nth-child(5) { animation-delay: 160ms; }
-      .blinds-overlay .blind:nth-child(6) { animation-delay: 200ms; }
-      .blinds-overlay .blind:nth-child(7) { animation-delay: 240ms; }
-      .blinds-overlay .blind:nth-child(8) { animation-delay: 280ms; }
-      @keyframes blind-reveal {
-        0% { transform: scaleY(0); }
-        50% { transform: scaleY(1); }
-        100% { transform: scaleY(0); }
-      }
-
-      .diagonal-wipe-overlay { clip-path: polygon(0 0, 0 0, 0 100%, 0 100%); }
-      .diagonal-wipe-overlay.animating { animation: diagonal-wipe 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-      @keyframes diagonal-wipe {
-        0% { clip-path: polygon(0 0, 0 0, 0 100%, 0 100%); }
-        45% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
-        55% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
-        100% { clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%); }
-      }
-
-      .crossfade-overlay { opacity: 0; transform: scale(1.1); }
-      .crossfade-overlay.animating { animation: crossfade-scale 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-      @keyframes crossfade-scale {
-        0% { opacity: 0; transform: scale(1.05); }
-        40% { opacity: 1; transform: scale(1); }
-        60% { opacity: 1; transform: scale(1); }
-        100% { opacity: 0; transform: scale(0.98); }
-      }
-
-      .diamond-iris-overlay { clip-path: polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%); }
-      .diamond-iris-overlay.animating { animation: diamond-iris 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-      @keyframes diamond-iris {
-        0% { clip-path: polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%); }
-        45% { clip-path: polygon(50% -50%, 150% 50%, 50% 150%, -50% 50%); }
-        55% { clip-path: polygon(50% -50%, 150% 50%, 50% 150%, -50% 50%); }
-        100% { clip-path: polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%); }
-      }
-
-      /* Overlay theme colors */
-      .page-transition-overlay[data-theme='light'],
-      .page-transition-overlay[data-theme='light'] .blind { background: #ffffff; }
-      .page-transition-overlay[data-theme='dark'],
-      .page-transition-overlay[data-theme='dark'] .blind { background: #0a0a0a; }
-      .page-transition-overlay[data-theme='sepia'],
-      .page-transition-overlay[data-theme='sepia'] .blind { background: #f4ecd8; }
-
-      .pagewide-demo {
-        background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg) 100%);
-        border-radius: 8px;
-        padding: 32px;
-        text-align: center;
-        min-height: 120px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 16px;
-      }
-
-      .pagewide-demo p { color: var(--text-muted); font-size: 14px; max-width: 300px; }
-
-      .pagewide-btn {
-        padding: 12px 24px;
-        font-size: 15px;
-        font-weight: 500;
-        background: var(--primary);
         color: white;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: transform 0.15s, box-shadow 0.15s;
       }
 
-      .pagewide-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); }
+      /* ═══════════════════════════════════════════════════════════════════════════
+         RESPONSIVE
+         ═══════════════════════════════════════════════════════════════════════════ */
+      @media (max-width: 48rem) {
+        .page-header {
+          padding: 3rem 1rem 2rem;
+        }
 
-      /* JS Animation Elements */
-      .particle-canvas {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        pointer-events: none;
-        z-index: 9998;
-      }
+        .page-header h1 {
+          font-size: 2rem;
+        }
 
-      .click-ripple {
-        position: fixed;
-        border-radius: 50%;
-        pointer-events: none;
-        z-index: 9997;
-        transform: translate(-50%, -50%) scale(0);
-        opacity: 0.6;
-      }
+        .container {
+          padding: 1.5rem 1rem 4rem;
+        }
 
-      .click-ripple.animating { animation: click-ripple-expand 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-      @keyframes click-ripple-expand {
-        0% { transform: translate(-50%, -50%) scale(0); opacity: 0.6; }
-        100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
-      }
+        .example-preview {
+          padding: 2rem 1rem;
+        }
 
-      .glitch-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        pointer-events: none;
-        z-index: 9996;
-        opacity: 0;
-        mix-blend-mode: difference;
-      }
-
-      .glitch-overlay.animating { animation: glitch-flash 0.4s steps(8) forwards; }
-      @keyframes glitch-flash {
-        0%, 100% { opacity: 0; }
-        10% { opacity: 1; transform: translate(-2px, 1px); background: #ff0000; }
-        20% { opacity: 0.8; transform: translate(2px, -1px); background: #00ff00; }
-        30% { opacity: 1; transform: translate(-1px, 2px); background: #0000ff; }
-        50% { opacity: 0.9; transform: translate(-2px, -1px); background: #00ffff; }
-        70% { opacity: 0.5; transform: translate(0, 0); }
-      }
-
-      .js-demo-area {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 16px;
-        padding: 32px;
-        background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg) 100%);
-        border-radius: 8px;
-      }
-
-      .js-demo-area p { color: var(--text-muted); font-size: 14px; text-align: center; max-width: 320px; }
-
-      @media (max-width: 768px) {
-        body { padding: 16px; }
-        h1 { font-size: 24px; }
-        .card-group { gap: 8px; }
-        .card-toggle { width: 80px; padding: 12px 8px; }
+        .toggle-13 {
+          grid-template-columns: repeat(2, 1fr);
+        }
       }
     </style>
   </head>
   <body>
-    <div class="container">
-      <header>
-        <h1>Theme Toggle Examples</h1>
-        <p class="header-subtitle">
-          Declarative theme toggle. Current: <strong id="header-theme">—</strong>
-          <span id="header-user-theme" style="color: var(--text-muted);"></span>
-        </p>
-      </header>
+    <header class="page-header">
+      <h1>Theme Toggle</h1>
+      <p>
+        A collection of minimal, elegant theme toggle patterns. Pure CSS active
+        states with declarative data attributes.
+      </p>
+      <p class="current-theme">
+        Current: <strong id="header-theme">—</strong
+        ><span id="header-user-theme"></span>
+      </p>
+    </header>
 
-      <!-- Example 1: Basic Two-Theme Toggle -->
-      <div class="example">
-        <div class="example-header">
-          <span class="example-number">01</span>
-          <h2>Basic Two-Theme Toggle</h2>
-        </div>
-        <div class="example-content">
+    <main class="container">
+      <!-- Example 1: Simple Text Toggle -->
+      <article class="example">
+        <header class="example-header">
+          <div class="example-number">Example 01</div>
+          <h2 class="example-title">Simple Text Toggle</h2>
           <p class="example-description">
-            Simple light/dark toggle. Active state styled via CSS classes (no JS needed).
+            Clean text buttons in a pill container. Active state styled via CSS
+            class on &lt;html&gt;.
           </p>
-          <div class="demo-area">
+        </header>
+        <div class="example-preview">
+          <div class="toggle-1">
             <button class="btn-light" data-theme-value="light">Light</button>
             <button class="btn-dark" data-theme-value="dark">Dark</button>
           </div>
-          <div class="code-block">/* Active states via CSS class on &lt;html&gt; */
-.light .btn-light { background: var(--primary); color: white; }
-.dark .btn-dark { background: var(--primary); color: white; }</div>
         </div>
-      </div>
+        <details class="example-code">
+          <summary>View Code</summary>
+          <pre><code>&lt;div class="toggle-1"&gt;
+  &lt;button class="btn-light" data-theme-value="light"&gt;Light&lt;/button&gt;
+  &lt;button class="btn-dark" data-theme-value="dark"&gt;Dark&lt;/button&gt;
+&lt;/div&gt;
 
-      <!-- Example 2: Cycle Toggle Button -->
-      <div class="example">
-        <div class="example-header">
-          <span class="example-number">02</span>
-          <h2>Cycle Toggle Button</h2>
-        </div>
-        <div class="example-content">
+/* Active states via CSS class on &lt;html&gt; */
+.light .toggle-1 .btn-light,
+.dark .toggle-1 .btn-dark {
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: 0 1px 3px var(--shadow);
+}</code></pre>
+        </details>
+      </article>
+
+      <!-- Example 2: Icon Only Toggle -->
+      <article class="example">
+        <header class="example-header">
+          <div class="example-number">Example 02</div>
+          <h2 class="example-title">Icon Only Toggle</h2>
           <p class="example-description">
-            Single button that cycles through all themes (except "system").
+            Minimal icon button that swaps between sun and moon. Uses
+            data-theme-toggle to cycle.
           </p>
-          <div class="demo-area">
-            <button data-theme-toggle>Toggle Theme</button>
+        </header>
+        <div class="example-preview">
+          <button class="toggle-2" data-theme-toggle aria-label="Toggle theme">
+            <svg
+              class="icon-sun"
+              viewBox="0 0 24 24"
+              stroke-width="2"
+              stroke-linecap="round"
+            >
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <svg
+              class="icon-moon"
+              viewBox="0 0 24 24"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </button>
+        </div>
+        <details class="example-code">
+          <summary>View Code</summary>
+          <pre><code>&lt;button class="toggle-2" data-theme-toggle&gt;
+  &lt;svg class="icon-sun"&gt;...&lt;/svg&gt;
+  &lt;svg class="icon-moon"&gt;...&lt;/svg&gt;
+&lt;/button&gt;
+
+/* Icon swap via CSS */
+.toggle-2 .icon-sun,
+.toggle-2 .icon-moon { display: none; }
+.light .toggle-2 .icon-moon { display: block; }
+.dark .toggle-2 .icon-sun { display: block; }</code></pre>
+        </details>
+      </article>
+
+      <!-- Example 3: Pill with Slider -->
+      <article class="example">
+        <header class="example-header">
+          <div class="example-number">Example 03</div>
+          <h2 class="example-title">Pill with Slider</h2>
+          <p class="example-description">
+            Smooth sliding indicator using CSS transforms. No JavaScript for the
+            animation.
+          </p>
+        </header>
+        <div class="example-preview">
+          <div class="toggle-3">
+            <button class="btn-light" data-theme-value="light">Light</button>
+            <button class="btn-dark" data-theme-value="dark">Dark</button>
           </div>
-          <p class="current-theme">Current: <strong id="current-theme-display">—</strong></p>
-          <div class="code-block">&lt;button data-theme-toggle&gt;Toggle Theme&lt;/button&gt;</div>
         </div>
-      </div>
+        <details class="example-code">
+          <summary>View Code</summary>
+          <pre><code>&lt;div class="toggle-3"&gt;
+  &lt;button class="btn-light" data-theme-value="light"&gt;Light&lt;/button&gt;
+  &lt;button class="btn-dark" data-theme-value="dark"&gt;Dark&lt;/button&gt;
+&lt;/div&gt;
 
-      <!-- Example 3: Dynamic Icon Toggle -->
-      <div class="example">
-        <div class="example-header">
-          <span class="example-number">03</span>
-          <h2>Dynamic Icon Toggle</h2>
-        </div>
-        <div class="example-content">
+.toggle-3::before {
+  content: '';
+  position: absolute;
+  width: calc(50% - 0.25rem);
+  background: var(--bg);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dark .toggle-3::before {
+  transform: translateX(100%);
+}</code></pre>
+        </details>
+      </article>
+
+      <!-- Example 4: Dropdown Selector -->
+      <article class="example">
+        <header class="example-header">
+          <div class="example-number">Example 04</div>
+          <h2 class="example-title">Dropdown Selector</h2>
           <p class="example-description">
-            Icon changes based on current theme. Pure CSS - no JavaScript for the icon swap.
+            Hover-activated dropdown with system theme option. Checkmarks show
+            active state.
           </p>
-          <div class="demo-area">
-            <button class="dynamic-icon-toggle" data-theme-toggle>
-              <svg class="icon-sun" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round">
-                <circle cx="12" cy="12" r="5" />
-                <line x1="12" y1="1" x2="12" y2="3" />
-                <line x1="12" y1="21" x2="12" y2="23" />
-                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-                <line x1="1" y1="12" x2="3" y2="12" />
-                <line x1="21" y1="12" x2="23" y2="12" />
-                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+        </header>
+        <div class="example-preview">
+          <div class="toggle-4-wrapper">
+            <button class="toggle-4">
+              <svg
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="12" r="3"></circle>
+                <path
+                  d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+                ></path>
               </svg>
-              <svg class="icon-moon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+              Theme
+              <svg
+                viewBox="0 0 24 24"
+                width="12"
+                height="12"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="6 9 12 15 18 9"></polyline>
               </svg>
             </button>
+            <div class="toggle-4-dropdown">
+              <button class="btn-light" data-theme-value="light">
+                <svg
+                  viewBox="0 0 24 24"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                >
+                  <circle cx="12" cy="12" r="5"></circle>
+                  <line x1="12" y1="1" x2="12" y2="3"></line>
+                  <line x1="12" y1="21" x2="12" y2="23"></line>
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                  <line x1="1" y1="12" x2="3" y2="12"></line>
+                  <line x1="21" y1="12" x2="23" y2="12"></line>
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                Light
+                <svg
+                  class="check"
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </button>
+              <button class="btn-dark" data-theme-value="dark">
+                <svg
+                  viewBox="0 0 24 24"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+                  ></path>
+                </svg>
+                Dark
+                <svg
+                  class="check"
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </button>
+              <button class="btn-system" data-theme-value="system">
+                <svg
+                  viewBox="0 0 24 24"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                  <line x1="8" y1="21" x2="16" y2="21"></line>
+                  <line x1="12" y1="17" x2="12" y2="21"></line>
+                </svg>
+                System
+                <svg
+                  class="check"
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </button>
+            </div>
           </div>
-          <div class="code-block">.icon-sun, .icon-moon { display: none; }
-.light .icon-sun { display: block; }
-.dark .icon-moon { display: block; }</div>
         </div>
-      </div>
+        <details class="example-code">
+          <summary>View Code</summary>
+          <pre><code>&lt;div class="toggle-4-wrapper"&gt;
+  &lt;button class="toggle-4"&gt;Theme ▼&lt;/button&gt;
+  &lt;div class="toggle-4-dropdown"&gt;
+    &lt;button class="btn-light" data-theme-value="light"&gt;Light ✓&lt;/button&gt;
+    &lt;button class="btn-dark" data-theme-value="dark"&gt;Dark ✓&lt;/button&gt;
+    &lt;button class="btn-system" data-theme-value="system"&gt;System ✓&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
 
-      <!-- Example 4: Three-Theme with System -->
-      <div class="example">
-        <div class="example-header">
-          <span class="example-number">04</span>
-          <h2>Three-Theme with System Option</h2>
-        </div>
-        <div class="example-content">
+/* Show checkmark via data-theme attribute */
+[data-theme="light"] .toggle-4-dropdown .btn-light .check,
+[data-theme="dark"] .toggle-4-dropdown .btn-dark .check,
+[data-theme="system"] .toggle-4-dropdown .btn-system .check {
+  opacity: 1;
+}</code></pre>
+        </details>
+      </article>
+
+      <!-- Example 5: Segmented Control -->
+      <article class="example">
+        <header class="example-header">
+          <div class="example-number">Example 05</div>
+          <h2 class="example-title">Segmented Control</h2>
           <p class="example-description">
-            When using a System button, check data-theme attribute (user's choice) for active states.
+            Three-option control with icons. Uses data-theme attribute for
+            system option active state.
           </p>
-          <div class="demo-area">
-            <button class="btn-light-attr" data-theme-value="light">Light</button>
-            <button class="btn-dark-attr" data-theme-value="dark">Dark</button>
-            <button class="btn-system-attr" data-theme-value="system">System</button>
-          </div>
-          <div class="info-box">
-            <dt>data-theme (user's choice)</dt>
-            <dd id="info-data-theme">—</dd>
-            <dt style="margin-top: 8px">Effective theme (class)</dt>
-            <dd id="info-effective">—</dd>
-          </div>
-          <div class="code-block">/* data-theme = user's choice (can be "system") */
-[data-theme="system"] .btn-system { background: var(--primary); }
-[data-theme="dark"] .btn-dark { background: var(--primary); }
-[data-theme="light"] .btn-light { background: var(--primary); }</div>
-        </div>
-      </div>
-
-      <!-- Example 5: Icon Buttons -->
-      <div class="example">
-        <div class="example-header">
-          <span class="example-number">05</span>
-          <h2>Icon Buttons</h2>
-        </div>
-        <div class="example-content">
-          <p class="example-description">Circular icon buttons with CSS-based active states.</p>
-          <div class="demo-area">
-            <button class="icon-toggle btn-light" data-theme-value="light" aria-label="Light theme">
+        </header>
+        <div class="example-preview">
+          <div class="toggle-5">
+            <button class="btn-light" data-theme-value="light">
               <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round">
-                <circle cx="12" cy="12" r="5" />
-                <line x1="12" y1="1" x2="12" y2="3" />
-                <line x1="12" y1="21" x2="12" y2="23" />
-                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-                <line x1="1" y1="12" x2="3" y2="12" />
-                <line x1="21" y1="12" x2="23" y2="12" />
-                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+              </svg>
+              Light
+            </button>
+            <button class="btn-dark" data-theme-value="dark">
+              <svg
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+                ></path>
+              </svg>
+              Dark
+            </button>
+            <button class="btn-system" data-theme-value="system">
+              <svg
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+              </svg>
+              System
+            </button>
+          </div>
+        </div>
+        <details class="example-code">
+          <summary>View Code</summary>
+          <pre><code>&lt;div class="toggle-5"&gt;
+  &lt;button class="btn-light" data-theme-value="light"&gt;☀ Light&lt;/button&gt;
+  &lt;button class="btn-dark" data-theme-value="dark"&gt;☾ Dark&lt;/button&gt;
+  &lt;button class="btn-system" data-theme-value="system"&gt;⎚ System&lt;/button&gt;
+&lt;/div&gt;
+
+/* Use data-theme for system option */
+[data-theme="light"] .toggle-5 .btn-light,
+[data-theme="dark"] .toggle-5 .btn-dark,
+[data-theme="system"] .toggle-5 .btn-system {
+  background: var(--bg);
+  box-shadow: 0 1px 3px var(--shadow);
+}</code></pre>
+        </details>
+      </article>
+
+      <!-- Example 6: Minimal Icon -->
+      <article class="example">
+        <header class="example-header">
+          <div class="example-number">Example 06</div>
+          <h2 class="example-title">Minimal Icon</h2>
+          <p class="example-description">
+            Ghost button with subtle hover background. Perfect for headers and
+            toolbars.
+          </p>
+        </header>
+        <div class="example-preview">
+          <button class="toggle-6" data-theme-toggle aria-label="Toggle theme">
+            <svg
+              class="icon-sun"
+              viewBox="0 0 24 24"
+              stroke-width="2"
+              stroke-linecap="round"
+            >
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <svg
+              class="icon-moon"
+              viewBox="0 0 24 24"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </button>
+        </div>
+        <details class="example-code">
+          <summary>View Code</summary>
+          <pre><code>&lt;button class="toggle-6" data-theme-toggle&gt;
+  &lt;svg class="icon-sun"&gt;...&lt;/svg&gt;
+  &lt;svg class="icon-moon"&gt;...&lt;/svg&gt;
+&lt;/button&gt;
+
+.toggle-6 {
+  background: transparent;
+  border: none;
+}
+
+.toggle-6:hover {
+  background: var(--bg-tertiary);
+}
+
+.toggle-6 svg { color: var(--text-secondary); }
+.toggle-6:hover svg { color: var(--text); }</code></pre>
+        </details>
+      </article>
+
+      <!-- Example 7: iOS Switch Toggle -->
+      <article class="example">
+        <header class="example-header">
+          <div class="example-number">Example 07</div>
+          <h2 class="example-title">iOS Switch Toggle</h2>
+          <p class="example-description">
+            Classic iOS-style switch with labels. State syncs via CSS class – no
+            JS needed for animation.
+          </p>
+        </header>
+        <div class="example-preview">
+          <div class="toggle-7">
+            <span class="label-light">Light</span>
+            <button
+              class="toggle-7-switch"
+              data-theme-toggle
+              aria-label="Toggle theme"
+            ></button>
+            <span class="label-dark">Dark</span>
+          </div>
+        </div>
+        <details class="example-code">
+          <summary>View Code</summary>
+          <pre><code>&lt;div class="toggle-7"&gt;
+  &lt;span class="label-light"&gt;Light&lt;/span&gt;
+  &lt;button class="toggle-7-switch" data-theme-toggle&gt;&lt;/button&gt;
+  &lt;span class="label-dark"&gt;Dark&lt;/span&gt;
+&lt;/div&gt;
+
+.toggle-7-switch {
+  width: 2.75rem;
+  height: 1.625rem;
+  background: var(--bg-tertiary);
+  border-radius: 0.8125rem;
+}
+
+.dark .toggle-7-switch {
+  background: var(--primary);
+}
+
+.toggle-7-switch::after {
+  content: '';
+  width: 1.25rem;
+  height: 1.25rem;
+  background: var(--bg);
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+}
+
+.dark .toggle-7-switch::after {
+  transform: translateX(1.125rem);
+}</code></pre>
+        </details>
+      </article>
+
+      <!-- Example 8: Radio Pills -->
+      <article class="example">
+        <header class="example-header">
+          <div class="example-number">Example 08</div>
+          <h2 class="example-title">Radio Pills</h2>
+          <p class="example-description">
+            Radio-style pills with visual dot indicators. Click triggers theme
+            change via data attribute.
+          </p>
+        </header>
+        <div class="example-preview">
+          <div class="toggle-8">
+            <label class="radio-light" data-theme-value="light">
+              <span class="radio-dot"></span>
+              Light
+            </label>
+            <label class="radio-dark" data-theme-value="dark">
+              <span class="radio-dot"></span>
+              Dark
+            </label>
+          </div>
+        </div>
+        <details class="example-code">
+          <summary>View Code</summary>
+          <pre><code>&lt;div class="toggle-8"&gt;
+  &lt;label class="radio-light" data-theme-value="light"&gt;
+    &lt;span class="radio-dot"&gt;&lt;/span&gt;
+    Light
+  &lt;/label&gt;
+  &lt;label class="radio-dark" data-theme-value="dark"&gt;
+    &lt;span class="radio-dot"&gt;&lt;/span&gt;
+    Dark
+  &lt;/label&gt;
+&lt;/div&gt;
+
+.light .toggle-8 .radio-light,
+.dark .toggle-8 .radio-dark {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+}
+
+.light .toggle-8 .radio-light .radio-dot::after,
+.dark .toggle-8 .radio-dark .radio-dot::after {
+  transform: translate(-50%, -50%) scale(1);
+}</code></pre>
+        </details>
+      </article>
+
+      <!-- Example 9: Text + Icon Button -->
+      <article class="example">
+        <header class="example-header">
+          <div class="example-number">Example 09</div>
+          <h2 class="example-title">Text + Icon Button</h2>
+          <p class="example-description">
+            Bordered button showing current theme with matching icon. Labels
+            swap via CSS.
+          </p>
+        </header>
+        <div class="example-preview">
+          <button class="toggle-9" data-theme-toggle>
+            <svg
+              class="icon-sun"
+              viewBox="0 0 24 24"
+              stroke-width="2"
+              stroke-linecap="round"
+            >
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <svg
+              class="icon-moon"
+              viewBox="0 0 24 24"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+            <span class="label-light">Light</span>
+            <span class="label-dark">Dark</span>
+          </button>
+        </div>
+        <details class="example-code">
+          <summary>View Code</summary>
+          <pre><code>&lt;button class="toggle-9" data-theme-toggle&gt;
+  &lt;svg class="icon-sun"&gt;...&lt;/svg&gt;
+  &lt;svg class="icon-moon"&gt;...&lt;/svg&gt;
+  &lt;span class="label-light"&gt;Light&lt;/span&gt;
+  &lt;span class="label-dark"&gt;Dark&lt;/span&gt;
+&lt;/button&gt;
+
+/* Show appropriate icon and label */
+.toggle-9 .icon-sun, .toggle-9 .label-light,
+.toggle-9 .icon-moon, .toggle-9 .label-dark { display: none; }
+
+.light .toggle-9 .icon-sun { display: block; }
+.light .toggle-9 .label-light { display: inline; }
+.dark .toggle-9 .icon-moon { display: block; }
+.dark .toggle-9 .label-dark { display: inline; }</code></pre>
+        </details>
+      </article>
+
+      <!-- Example 10: Animated Icon -->
+      <article class="example">
+        <header class="example-header">
+          <div class="example-number">Example 10</div>
+          <h2 class="example-title">Animated Icon</h2>
+          <p class="example-description">
+            Rotating and scaling icon transition. Pure CSS animation triggered
+            by theme class change.
+          </p>
+        </header>
+        <div class="example-preview">
+          <button class="toggle-10" data-theme-toggle aria-label="Toggle theme">
+            <div class="toggle-10-icons">
+              <svg
+                class="icon-sun"
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                stroke-linecap="round"
+              >
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+              </svg>
+              <svg
+                class="icon-moon"
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+                ></path>
+              </svg>
+            </div>
+          </button>
+        </div>
+        <details class="example-code">
+          <summary>View Code</summary>
+          <pre><code>&lt;button class="toggle-10" data-theme-toggle&gt;
+  &lt;div class="toggle-10-icons"&gt;
+    &lt;svg class="icon-sun"&gt;...&lt;/svg&gt;
+    &lt;svg class="icon-moon"&gt;...&lt;/svg&gt;
+  &lt;/div&gt;
+&lt;/button&gt;
+
+.toggle-10 svg {
+  position: absolute;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toggle-10 .icon-sun {
+  transform: rotate(-90deg) scale(0);
+  opacity: 0;
+}
+
+.dark .toggle-10 .icon-sun {
+  transform: rotate(0) scale(1);
+  opacity: 1;
+}
+
+.dark .toggle-10 .icon-moon {
+  transform: rotate(90deg) scale(0);
+  opacity: 0;
+}</code></pre>
+        </details>
+      </article>
+
+      <!-- Example 11: Compact Pill -->
+      <article class="example">
+        <header class="example-header">
+          <div class="example-number">Example 11</div>
+          <h2 class="example-title">Compact Pill</h2>
+          <p class="example-description">
+            Ultra-minimal icon-only pill toggle. Active button gets elevated
+            background.
+          </p>
+        </header>
+        <div class="example-preview">
+          <div class="toggle-11">
+            <button
+              class="btn-light"
+              data-theme-value="light"
+              aria-label="Light theme"
+            >
+              <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
               </svg>
             </button>
-            <button class="icon-toggle btn-dark" data-theme-value="dark" aria-label="Dark theme">
-              <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            <button
+              class="btn-dark"
+              data-theme-value="dark"
+              aria-label="Dark theme"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+                ></path>
               </svg>
             </button>
           </div>
-          <div class="code-block">.light .icon-toggle.btn-light { background: var(--primary); }
-.dark .icon-toggle.btn-dark { background: var(--primary); }</div>
         </div>
-      </div>
+        <details class="example-code">
+          <summary>View Code</summary>
+          <pre><code>&lt;div class="toggle-11"&gt;
+  &lt;button class="btn-light" data-theme-value="light"&gt;☀&lt;/button&gt;
+  &lt;button class="btn-dark" data-theme-value="dark"&gt;☾&lt;/button&gt;
+&lt;/div&gt;
 
-      <!-- Example 6: Radio Button Style -->
-      <div class="example">
-        <div class="example-header">
-          <span class="example-number">06</span>
-          <h2>Radio Button Style</h2>
+.toggle-11 {
+  display: flex;
+  background: var(--bg-tertiary);
+  padding: 0.1875rem;
+  border-radius: 6.25rem;
+}
+
+.light .toggle-11 .btn-light,
+.dark .toggle-11 .btn-dark {
+  background: var(--bg);
+  box-shadow: 0 1px 3px var(--shadow);
+}</code></pre>
+        </details>
+      </article>
+
+      <!-- Example 12: Text Link -->
+      <article class="example">
+        <header class="example-header">
+          <div class="example-number">Example 12</div>
+          <h2 class="example-title">Text Link</h2>
+          <p class="example-description">
+            Underlined text link showing the action. Minimal footprint for
+            inline use.
+          </p>
+        </header>
+        <div class="example-preview">
+          <button class="toggle-12" data-theme-toggle>
+            <span class="label-light">Switch to light</span>
+            <span class="label-dark">Switch to dark</span>
+          </button>
         </div>
-        <div class="example-content">
-          <p class="example-description">Segmented control with three options including System.</p>
-          <div class="demo-area">
-            <div class="radio-group">
-              <button class="btn-light-attr" data-theme-value="light">Light</button>
-              <button class="btn-dark-attr" data-theme-value="dark">Dark</button>
-              <button class="btn-system-attr" data-theme-value="system">Auto</button>
-            </div>
+        <details class="example-code">
+          <summary>View Code</summary>
+          <pre><code>&lt;button class="toggle-12" data-theme-toggle&gt;
+  &lt;span class="label-light"&gt;Switch to light&lt;/span&gt;
+  &lt;span class="label-dark"&gt;Switch to dark&lt;/span&gt;
+&lt;/button&gt;
+
+.toggle-12 {
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  border-bottom: 1px dashed var(--border);
+}
+
+.toggle-12:hover {
+  color: var(--text);
+  border-color: var(--text);
+}
+
+.light .toggle-12 .label-dark { display: inline; }
+.dark .toggle-12 .label-light { display: inline; }</code></pre>
+        </details>
+      </article>
+
+      <!-- Example 13: Grid Selector -->
+      <article class="example">
+        <header class="example-header">
+          <div class="example-number">Example 13</div>
+          <h2 class="example-title">Grid Selector</h2>
+          <p class="example-description">
+            Card-style grid with icons and labels. Great for settings pages with
+            system option.
+          </p>
+        </header>
+        <div class="example-preview">
+          <div class="toggle-13">
+            <button class="btn-light" data-theme-value="light">
+              <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+              </svg>
+              <span>Light</span>
+            </button>
+            <button class="btn-dark" data-theme-value="dark">
+              <svg
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+                ></path>
+              </svg>
+              <span>Dark</span>
+            </button>
+            <button class="btn-system" data-theme-value="system">
+              <svg
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+              </svg>
+              <span>System</span>
+            </button>
           </div>
-          <div class="code-block">[data-theme='light'] .radio-group .btn-light-attr { background: var(--primary); }
-[data-theme='system'] .radio-group .btn-system-attr { background: var(--primary); }</div>
         </div>
-      </div>
+        <details class="example-code">
+          <summary>View Code</summary>
+          <pre><code>&lt;div class="toggle-13"&gt;
+  &lt;button class="btn-light" data-theme-value="light"&gt;☀ Light&lt;/button&gt;
+  &lt;button class="btn-dark" data-theme-value="dark"&gt;☾ Dark&lt;/button&gt;
+  &lt;button class="btn-system" data-theme-value="system"&gt;⎚ System&lt;/button&gt;
+&lt;/div&gt;
 
-      <!-- Example 7: Pill Style -->
-      <div class="example">
-        <div class="example-header">
-          <span class="example-number">07</span>
-          <h2>Pill Style Toggle</h2>
-        </div>
-        <div class="example-content">
-          <p class="example-description">iOS-style pill toggle (two-button, class-based active).</p>
-          <div class="demo-area">
-            <div class="pill-group">
-              <button class="btn-light" data-theme-value="light">Light</button>
-              <button class="btn-dark" data-theme-value="dark">Dark</button>
-            </div>
-          </div>
-          <div class="code-block">.light .pill-group .btn-light { background: var(--bg); box-shadow: ...; }
-.dark .pill-group .btn-dark { background: var(--bg); box-shadow: ...; }</div>
-        </div>
-      </div>
+[data-theme="light"] .toggle-13 .btn-light,
+[data-theme="dark"] .toggle-13 .btn-dark,
+[data-theme="system"] .toggle-13 .btn-system {
+  background: var(--bg);
+  border-color: var(--primary);
+}</code></pre>
+        </details>
+      </article>
 
-      <!-- Example 8: Card Style Selector -->
-      <div class="example">
-        <div class="example-header">
-          <span class="example-number">08</span>
-          <h2>Card Style Selector</h2>
-        </div>
-        <div class="example-content">
-          <p class="example-description">Theme cards with preview swatches. Uses attribute-based active states.</p>
-          <div class="demo-area">
-            <div class="card-group">
-              <button class="card-toggle btn-light-attr" data-theme-value="light">
-                <span class="preview"></span><span>Light</span>
-              </button>
-              <button class="card-toggle btn-dark-attr" data-theme-value="dark">
-                <span class="preview"></span><span>Dark</span>
-              </button>
-              <button class="card-toggle btn-sepia-attr" data-theme-value="sepia">
-                <span class="preview"></span><span>Sepia</span>
-              </button>
-              <button class="card-toggle btn-system-attr" data-theme-value="system">
-                <span class="preview"></span><span>System</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Example 9: Select Dropdown -->
-      <div class="example">
-        <div class="example-header">
-          <span class="example-number">09</span>
-          <h2>Select Dropdown</h2>
-        </div>
-        <div class="example-content">
-          <p class="example-description">Native &lt;select&gt; requires minimal JS to sync with ThemeManager.</p>
-          <div class="demo-area">
-            <select class="theme-select" id="theme-select">
-              <option value="light">Light</option>
-              <option value="dark">Dark</option>
-              <option value="system">System</option>
-              <option value="sepia">Sepia</option>
-            </select>
-          </div>
-          <div class="code-block">select.addEventListener('change', e => ThemeManager.setTheme(e.target.value));</div>
-        </div>
-      </div>
-
-      <!-- Example 10: Multiple Toggle Groups -->
-      <div class="example">
-        <div class="example-header">
-          <span class="example-number">10</span>
-          <h2>Multiple Toggle Groups</h2>
-        </div>
-        <div class="example-content">
-          <p class="example-description">All groups sync automatically via CSS (no JS coordination needed).</p>
-          <div class="demo-area" style="flex-direction: column; gap: 20px">
-            <div style="display: flex; gap: 8px">
-              <button class="btn-light" data-theme-value="light">Light</button>
-              <button class="btn-dark" data-theme-value="dark">Dark</button>
-            </div>
-            <div class="radio-group">
-              <button class="btn-light-attr" data-theme-value="light">Light</button>
-              <button class="btn-dark-attr" data-theme-value="dark">Dark</button>
-              <button class="btn-system-attr" data-theme-value="system">Auto</button>
-            </div>
-            <div class="pill-group">
-              <button class="btn-light" data-theme-value="light">Light</button>
-              <button class="btn-dark" data-theme-value="dark">Dark</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Example 11: Programmatic API -->
-      <div class="example">
-        <div class="example-header">
-          <span class="example-number">11</span>
-          <h2>Programmatic API</h2>
-        </div>
-        <div class="example-content">
-          <p class="example-description">Control themes via JavaScript API.</p>
-          <div class="demo-area" style="flex-direction: column; gap: 12px">
-            <div class="api-buttons">
-              <button onclick="ThemeManager.setTheme('light')">setTheme('light')</button>
-              <button onclick="ThemeManager.setTheme('dark')">setTheme('dark')</button>
-              <button onclick="ThemeManager.setTheme('system')">setTheme('system')</button>
-              <button onclick="ThemeManager.toggleTheme()">toggleTheme()</button>
-            </div>
-            <div class="info-box" style="margin: 0; width: 100%">
-              <dt>ThemeManager.current (effective)</dt>
-              <dd id="api-current-theme">—</dd>
-              <dt style="margin-top: 8px">ThemeManager.theme (user's choice)</dt>
-              <dd id="api-user-theme">—</dd>
-              <dt style="margin-top: 8px">ThemeManager.themes</dt>
-              <dd id="api-themes-array">—</dd>
-            </div>
-          </div>
-          <div class="code-block">ThemeManager.setTheme('dark');     // user chose dark
-ThemeManager.setTheme('system');   // user chose system
-ThemeManager.current;              // effective theme ("light" or "dark")
-ThemeManager.theme;                // user's choice ("system", "dark", etc.)</div>
-        </div>
-      </div>
-
-      <!-- Example 12: Event Handling -->
-      <div class="example">
-        <div class="example-header">
-          <span class="example-number">12</span>
-          <h2>Event Handling</h2>
-        </div>
-        <div class="example-content">
-          <p class="example-description">Listen to 'themechange' events for custom logic.</p>
-          <div class="demo-area">
-            <button class="btn-light-attr" data-theme-value="light">Light</button>
-            <button class="btn-dark-attr" data-theme-value="dark">Dark</button>
-            <button class="btn-system-attr" data-theme-value="system">System</button>
-            <button class="btn-sepia-attr" data-theme-value="sepia">Sepia</button>
-          </div>
-          <div class="event-log" id="event-log">Waiting for theme changes...</div>
-          <div class="code-block">window.addEventListener('themechange', e => {
-  e.detail.theme;           // effective theme
-  e.detail.userTheme;       // user's choice (can be "system")
-  e.detail.effectiveChanged;// did visual appearance change?
-});</div>
-        </div>
-      </div>
-
-      <!-- Example 13: localStorage Persistence -->
-      <div class="example">
-        <div class="example-header">
-          <span class="example-number">13</span>
-          <h2>localStorage Persistence</h2>
-        </div>
-        <div class="example-content">
-          <p class="example-description">User's choice persists via localStorage.</p>
-          <div class="demo-area">
+      <!-- Example 14: Underline Tabs -->
+      <article class="example">
+        <header class="example-header">
+          <div class="example-number">Example 14</div>
+          <h2 class="example-title">Underline Tabs</h2>
+          <p class="example-description">
+            Tab-style navigation with underline indicator. Active tab styled via
+            class.
+          </p>
+        </header>
+        <div class="example-preview">
+          <div class="toggle-14">
             <button class="btn-light" data-theme-value="light">Light</button>
             <button class="btn-dark" data-theme-value="dark">Dark</button>
-            <button class="btn-sepia-attr" data-theme-value="sepia">Sepia</button>
           </div>
-          <div class="api-buttons" style="justify-content: center">
-            <button onclick="localStorage.removeItem('theme'); location.reload()">Clear localStorage & Reload</button>
+        </div>
+        <details class="example-code">
+          <summary>View Code</summary>
+          <pre><code>&lt;div class="toggle-14"&gt;
+  &lt;button class="btn-light" data-theme-value="light"&gt;Light&lt;/button&gt;
+  &lt;button class="btn-dark" data-theme-value="dark"&gt;Dark&lt;/button&gt;
+&lt;/div&gt;
+
+.toggle-14 button::after {
+  content: '';
+  position: absolute;
+  bottom: -0.1875rem;
+  height: 0.125rem;
+  background: currentColor;
+  transform: scaleX(0);
+  transition: transform 0.2s ease;
+}
+
+.light .toggle-14 .btn-light::after,
+.dark .toggle-14 .btn-dark::after {
+  transform: scaleX(1);
+}</code></pre>
+        </details>
+      </article>
+
+      <!-- Example 15: Select Dropdown -->
+      <article class="example">
+        <header class="example-header">
+          <div class="example-number">Example 15</div>
+          <h2 class="example-title">Select Dropdown</h2>
+          <p class="example-description">
+            Native &lt;select&gt; element. Requires minimal JS to sync with
+            ThemeManager.
+          </p>
+        </header>
+        <div class="example-preview">
+          <select class="toggle-15" id="theme-select">
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+            <option value="system">System</option>
+          </select>
+        </div>
+        <details class="example-code">
+          <summary>View Code</summary>
+          <pre><code>&lt;select class="toggle-15" id="theme-select"&gt;
+  &lt;option value="light"&gt;Light&lt;/option&gt;
+  &lt;option value="dark"&gt;Dark&lt;/option&gt;
+  &lt;option value="system"&gt;System&lt;/option&gt;
+&lt;/select&gt;
+
+// Sync select with ThemeManager
+const select = document.getElementById('theme-select');
+select.addEventListener('change', e => ThemeManager.setTheme(e.target.value));
+
+// Update select when theme changes
+window.addEventListener('themechange', e => {
+  select.value = e.detail.userTheme;
+});</code></pre>
+        </details>
+      </article>
+
+      <!-- Example 16: Programmatic API -->
+      <article class="example">
+        <header class="example-header">
+          <div class="example-number">Example 16</div>
+          <h2 class="example-title">Programmatic API</h2>
+          <p class="example-description">
+            Control themes via JavaScript API. Useful for integrating with other
+            systems.
+          </p>
+        </header>
+        <div class="example-preview">
+          <div class="api-buttons">
+            <button onclick="ThemeManager.setTheme('light')">
+              setTheme('light')
+            </button>
+            <button onclick="ThemeManager.setTheme('dark')">
+              setTheme('dark')
+            </button>
+            <button onclick="ThemeManager.setTheme('system')">
+              setTheme('system')
+            </button>
+            <button onclick="ThemeManager.toggleTheme()">toggleTheme()</button>
           </div>
           <div class="info-box">
-            <dt>localStorage.getItem('theme')</dt>
-            <dd id="storage-value">—</dd>
+            <dt>ThemeManager.current</dt>
+            <dd id="api-current-theme">—</dd>
+            <dt>ThemeManager.theme</dt>
+            <dd id="api-user-theme">—</dd>
+            <dt>ThemeManager.themes</dt>
+            <dd id="api-themes-array">—</dd>
           </div>
         </div>
-      </div>
+        <details class="example-code">
+          <summary>View Code</summary>
+          <pre><code>// Set theme explicitly
+ThemeManager.setTheme('dark');
 
-      <!-- Example 14: Extended Themes -->
-      <div class="example">
-        <div class="example-header">
-          <span class="example-number">14</span>
-          <h2>Extended Themes (4+ Options)</h2>
-        </div>
-        <div class="example-content">
-          <p class="example-description">Support any number of themes by extending ThemeManager.themes.</p>
-          <div class="demo-area">
-            <button class="btn-light-attr" data-theme-value="light">Light</button>
-            <button class="btn-dark-attr" data-theme-value="dark">Dark</button>
-            <button class="btn-sepia-attr" data-theme-value="sepia">Sepia</button>
-            <button data-theme-value="high-contrast">High Contrast</button>
-          </div>
-          <div class="code-block">ThemeManager.themes = ['light', 'dark', 'sepia', 'high-contrast'];
+// Set to follow system preference
+ThemeManager.setTheme('system');
 
-.high-contrast { --bg: #000; --text: #fff; --primary: #ff0; }</div>
-        </div>
-      </div>
+// Get current effective theme (never "system")
+ThemeManager.current; // "dark"
 
-      <!-- Example 15: CSS Fade Transitions -->
-      <div class="example">
-        <div class="example-header">
-          <span class="example-number">15</span>
-          <h2>CSS Fade Transitions</h2>
-        </div>
-        <div class="example-content">
-          <p class="example-description">Smooth color transitions using pure CSS transitions.</p>
-          <div class="demo-area">
-            <div class="fade-demo" style="width: 100%;">
-              <p style="margin-bottom: 12px; font-size: 18px; font-weight: 500;">This box fades smoothly</p>
-              <p style="color: var(--text-muted);">Watch the colors transition</p>
-            </div>
-          </div>
-          <div style="display: flex; gap: 8px; justify-content: center; margin-top: 16px;">
-            <button class="btn-light" data-theme-value="light">Light</button>
-            <button class="btn-dark" data-theme-value="dark">Dark</button>
-            <button class="btn-sepia-attr" data-theme-value="sepia">Sepia</button>
-          </div>
-          <div class="code-block">.fade-demo { transition: background-color 0.5s, color 0.5s; }</div>
-        </div>
-      </div>
+// Get user's choice (can be "system")
+ThemeManager.theme; // "system"
 
-      <!-- Example 16: iOS-Style Slide Toggle (Pure CSS) -->
-      <div class="example">
-        <div class="example-header">
-          <span class="example-number">16</span>
-          <h2>iOS-Style Slide Toggle (Pure CSS)</h2>
-        </div>
-        <div class="example-content">
+// Cycle to next theme (skips "system")
+ThemeManager.toggleTheme();
+
+// Available themes
+ThemeManager.themes; // ["light", "dark", ...]</code></pre>
+        </details>
+      </article>
+
+      <!-- Example 17: Event Handling -->
+      <article class="example">
+        <header class="example-header">
+          <div class="example-number">Example 17</div>
+          <h2 class="example-title">Event Handling</h2>
           <p class="example-description">
-            Classic iOS switch - no JavaScript needed! State syncs via CSS class on &lt;html&gt;.
+            Listen to 'themechange' events for custom logic and animations.
           </p>
-          <div class="demo-area">
-            <span style="color: var(--text-muted); font-size: 14px;">Light</span>
-            <button class="slide-toggle" data-theme-toggle aria-label="Toggle dark mode"></button>
-            <span style="color: var(--text-muted); font-size: 14px;">Dark</span>
-          </div>
-          <div class="code-block">.slide-toggle { background: var(--border); }
-.dark .slide-toggle { background: var(--primary); }
-.dark .slide-toggle::after { transform: translateX(28px); }</div>
-        </div>
-      </div>
-
-      <!-- Example 17: Rotating Icon -->
-      <div class="example">
-        <div class="example-header">
-          <span class="example-number">17</span>
-          <h2>Rotating Icon Animation</h2>
-        </div>
-        <div class="example-content">
-          <p class="example-description">Icon rotates on click, swaps mid-rotation via CSS opacity.</p>
-          <div class="demo-area">
-            <button class="rotate-toggle" id="rotate-toggle" data-theme-toggle>
-              <svg class="icon-sun" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round">
-                <circle cx="12" cy="12" r="5" />
-                <line x1="12" y1="1" x2="12" y2="3" />
-                <line x1="12" y1="21" x2="12" y2="23" />
-                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-                <line x1="1" y1="12" x2="3" y2="12" />
-                <line x1="21" y1="12" x2="23" y2="12" />
-                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+        </header>
+        <div class="example-preview">
+          <div class="toggle-5">
+            <button class="btn-light" data-theme-value="light">
+              <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
               </svg>
-              <svg class="icon-moon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+              Light
+            </button>
+            <button class="btn-dark" data-theme-value="dark">
+              <svg
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+                ></path>
               </svg>
+              Dark
+            </button>
+            <button class="btn-system" data-theme-value="system">
+              <svg
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+              </svg>
+              System
             </button>
           </div>
-          <div class="code-block">.rotate-toggle svg { opacity: 0; transition: opacity 0.25s; }
-.light .rotate-toggle .icon-sun { opacity: 1; }
-.dark .rotate-toggle .icon-moon { opacity: 1; }
-.rotate-toggle.rotating svg { transform: rotate(360deg); }</div>
+          <div class="event-log" id="event-log">
+            Waiting for theme changes...
+          </div>
         </div>
-      </div>
+        <details class="example-code">
+          <summary>View Code</summary>
+          <pre><code>window.addEventListener('themechange', e => {
+  console.log('Effective:', e.detail.theme);      // "dark"
+  console.log('Previous:', e.detail.previous);    // "light"
+  console.log('User chose:', e.detail.userTheme); // "system"
+  console.log('Changed:', e.detail.effectiveChanged); // true
+});
 
-      <!-- Example 18: Wave Effect -->
-      <div class="example">
-        <div class="example-header">
-          <span class="example-number">18</span>
-          <h2>Ripple/Wave Effect</h2>
-        </div>
-        <div class="example-content">
-          <p class="example-description">Color wave radiates from center (needs JS to trigger animation).</p>
-          <div class="demo-area" style="padding: 0;">
-            <div class="wave-container" id="wave-container" style="width: 100%; display: flex; gap: 12px; justify-content: center; align-items: center;">
-              <button class="btn-light-attr" data-theme-value="light">Light</button>
-              <button class="btn-dark-attr" data-theme-value="dark">Dark</button>
-              <button class="btn-sepia-attr" data-theme-value="sepia">Sepia</button>
+// Event detail properties:
+// - theme: current effective theme (never "system")
+// - previous: previous effective theme
+// - userTheme: user's choice (can be "system")
+// - previousUserTheme: previous user's choice
+// - effectiveChanged: did visual appearance change?</code></pre>
+        </details>
+      </article>
+
+      <!-- Example 18: CSS Fade Transitions -->
+      <article class="example">
+        <header class="example-header">
+          <div class="example-number">Example 18</div>
+          <h2 class="example-title">CSS Fade Transitions</h2>
+          <p class="example-description">
+            Smooth color transitions using pure CSS. No JavaScript animation
+            needed.
+          </p>
+        </header>
+        <div class="example-preview">
+          <div class="fade-demo">
+            <h3>Smooth Transitions</h3>
+            <p>Watch the colors fade between themes</p>
+            <div class="fade-buttons">
+              <button class="btn-light" data-theme-value="light">Light</button>
+              <button class="btn-dark" data-theme-value="dark">Dark</button>
             </div>
           </div>
         </div>
-      </div>
+        <details class="example-code">
+          <summary>View Code</summary>
+          <pre><code>.fade-demo {
+  background: var(--bg-tertiary);
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
 
-      <!-- Example 19: 3D Flip Card (Pure CSS) -->
-      <div class="example">
-        <div class="example-header">
-          <span class="example-number">19</span>
-          <h2>3D Flip Card (Pure CSS)</h2>
-        </div>
-        <div class="example-content">
-          <p class="example-description">Card flips in 3D space. State syncs via CSS - no JavaScript needed!</p>
-          <div class="demo-area">
-            <div class="flip-toggle" data-theme-toggle>
-              <div class="flip-toggle-inner">
-                <div class="flip-toggle-front">
-                  <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round">
-                    <circle cx="12" cy="12" r="5" />
-                    <line x1="12" y1="1" x2="12" y2="3" />
-                    <line x1="12" y1="21" x2="12" y2="23" />
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-                    <line x1="1" y1="12" x2="3" y2="12" />
-                    <line x1="21" y1="12" x2="23" y2="12" />
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-                  </svg>
-                </div>
-                <div class="flip-toggle-back">
-                  <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="code-block">.flip-toggle-inner { transition: transform 0.6s; transform-style: preserve-3d; }
-.dark .flip-toggle-inner { transform: rotateY(180deg); }</div>
-        </div>
-      </div>
+/* Add transition to body for full-page fade */
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
 
-      <!-- Example 20: Circle Reveal -->
-      <div class="example">
-        <div class="example-header">
-          <span class="example-number">20</span>
-          <h2>Radial Circle Reveal</h2>
-        </div>
-        <div class="example-content">
-          <p class="example-description">Full-page circular reveal using CSS clip-path.</p>
-          <div class="demo-area" style="padding: 0;">
-            <div class="pagewide-demo" style="width: 100%;">
-              <p>New theme expands outward in a circle</p>
-              <button class="pagewide-btn" id="circle-reveal-btn">Toggle with Circle Reveal</button>
-            </div>
+/* Or target specific elements */
+.card, .button, .nav {
+  transition: background-color 0.3s ease,
+              color 0.3s ease,
+              border-color 0.3s ease;
+}</code></pre>
+        </details>
+      </article>
+
+      <!-- Example 19: Outlined Pill -->
+      <article class="example">
+        <header class="example-header">
+          <div class="example-number">Example 19</div>
+          <h2 class="example-title">Outlined Pill</h2>
+          <p class="example-description">
+            Bordered container with subtle active states. Clean alternative to
+            filled pills.
+          </p>
+        </header>
+        <div class="example-preview">
+          <div class="toggle-16">
+            <button class="btn-light" data-theme-value="light">Light</button>
+            <button class="btn-dark" data-theme-value="dark">Dark</button>
           </div>
         </div>
-      </div>
+        <details class="example-code">
+          <summary>View Code</summary>
+          <pre><code>&lt;div class="toggle-16"&gt;
+  &lt;button class="btn-light" data-theme-value="light"&gt;Light&lt;/button&gt;
+  &lt;button class="btn-dark" data-theme-value="dark"&gt;Dark&lt;/button&gt;
+&lt;/div&gt;
 
-      <!-- Example 21: Venetian Blinds -->
-      <div class="example">
-        <div class="example-header">
-          <span class="example-number">21</span>
-          <h2>Venetian Blinds</h2>
+.toggle-16 {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+}
+
+.light .toggle-16 .btn-light,
+.dark .toggle-16 .btn-dark {
+  background: var(--bg-secondary);
+  color: var(--text);
+}</code></pre>
+        </details>
+      </article>
+
+      <!-- Example 20: Icon Badge -->
+      <article class="example">
+        <header class="example-header">
+          <div class="example-number">Example 20</div>
+          <h2 class="example-title">Icon Badge</h2>
+          <p class="example-description">
+            Compact circular badge. Perfect for tight spaces like avatars or
+            status bars.
+          </p>
+        </header>
+        <div class="example-preview">
+          <button class="toggle-17" data-theme-toggle aria-label="Toggle theme">
+            <svg
+              class="icon-sun"
+              viewBox="0 0 24 24"
+              stroke-width="2"
+              stroke-linecap="round"
+            >
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <svg
+              class="icon-moon"
+              viewBox="0 0 24 24"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </button>
         </div>
-        <div class="example-content">
-          <p class="example-description">Horizontal blinds with staggered timing.</p>
-          <div class="demo-area" style="padding: 0;">
-            <div class="pagewide-demo" style="width: 100%;">
-              <p>Eight strips reveal with cascading timing</p>
-              <button class="pagewide-btn" id="blinds-reveal-btn">Toggle with Blinds</button>
+        <details class="example-code">
+          <summary>View Code</summary>
+          <pre><code>&lt;button class="toggle-17" data-theme-toggle&gt;
+  &lt;svg class="icon-sun"&gt;...&lt;/svg&gt;
+  &lt;svg class="icon-moon"&gt;...&lt;/svg&gt;
+&lt;/button&gt;
+
+.toggle-17 {
+  width: 2rem;
+  height: 2rem;
+  background: var(--bg-secondary);
+  border-radius: 50%;
+}
+
+.toggle-17:hover {
+  background: var(--bg-tertiary);
+}</code></pre>
+        </details>
+      </article>
+
+      <!-- Example 21: Settings Row -->
+      <article class="example">
+        <header class="example-header">
+          <div class="example-number">Example 21</div>
+          <h2 class="example-title">Settings Row</h2>
+          <p class="example-description">
+            Full-width settings item with label and switch. Ideal for
+            preferences panels.
+          </p>
+        </header>
+        <div class="example-preview">
+          <div class="toggle-18">
+            <div class="toggle-18-label">
+              <svg
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+                ></path>
+              </svg>
+              <span>Dark Mode</span>
             </div>
+            <button
+              class="toggle-18-switch"
+              data-theme-toggle
+              aria-label="Toggle dark mode"
+            ></button>
           </div>
         </div>
-      </div>
+        <details class="example-code">
+          <summary>View Code</summary>
+          <pre><code>&lt;div class="toggle-18"&gt;
+  &lt;div class="toggle-18-label"&gt;
+    &lt;svg&gt;...&lt;/svg&gt;
+    &lt;span&gt;Dark Mode&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;button class="toggle-18-switch" data-theme-toggle&gt;&lt;/button&gt;
+&lt;/div&gt;
 
-      <!-- Example 22: Diagonal Wipe -->
-      <div class="example">
-        <div class="example-header">
-          <span class="example-number">22</span>
-          <h2>Diagonal Wipe</h2>
-        </div>
-        <div class="example-content">
-          <p class="example-description">Diagonal sweep across the viewport.</p>
-          <div class="demo-area" style="padding: 0;">
-            <div class="pagewide-demo" style="width: 100%;">
-              <button class="pagewide-btn" id="diagonal-wipe-btn">Toggle with Diagonal Wipe</button>
-            </div>
+.toggle-18-switch {
+  width: 2.5rem;
+  height: 1.5rem;
+  background: var(--bg-tertiary);
+  border-radius: 0.75rem;
+}
+
+.dark .toggle-18-switch {
+  background: var(--primary);
+}</code></pre>
+        </details>
+      </article>
+
+      <!-- Example 22: Stacked Buttons -->
+      <article class="example">
+        <header class="example-header">
+          <div class="example-number">Example 22</div>
+          <h2 class="example-title">Stacked Buttons</h2>
+          <p class="example-description">
+            Vertical button group with icons. Great for sidebars and narrow
+            spaces.
+          </p>
+        </header>
+        <div class="example-preview">
+          <div class="toggle-19">
+            <button class="btn-light" data-theme-value="light">
+              <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+              </svg>
+              Light
+            </button>
+            <button class="btn-dark" data-theme-value="dark">
+              <svg
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+                ></path>
+              </svg>
+              Dark
+            </button>
+            <button class="btn-system" data-theme-value="system">
+              <svg
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+              </svg>
+              System
+            </button>
           </div>
         </div>
-      </div>
+        <details class="example-code">
+          <summary>View Code</summary>
+          <pre><code>&lt;div class="toggle-19"&gt;
+  &lt;button class="btn-light" data-theme-value="light"&gt;☀ Light&lt;/button&gt;
+  &lt;button class="btn-dark" data-theme-value="dark"&gt;☾ Dark&lt;/button&gt;
+  &lt;button class="btn-system" data-theme-value="system"&gt;⎚ System&lt;/button&gt;
+&lt;/div&gt;
 
-      <!-- Example 23: Crossfade -->
-      <div class="example">
-        <div class="example-header">
-          <span class="example-number">23</span>
-          <h2>Cinematic Crossfade</h2>
-        </div>
-        <div class="example-content">
-          <p class="example-description">Film-style crossfade with subtle scale.</p>
-          <div class="demo-area" style="padding: 0;">
-            <div class="pagewide-demo" style="width: 100%;">
-              <button class="pagewide-btn" id="crossfade-btn">Toggle with Crossfade</button>
-            </div>
+.toggle-19 {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-secondary);
+  border-radius: 0.625rem;
+}
+
+[data-theme="light"] .toggle-19 .btn-light,
+[data-theme="dark"] .toggle-19 .btn-dark,
+[data-theme="system"] .toggle-19 .btn-system {
+  background: var(--bg);
+  box-shadow: 0 1px 2px var(--shadow);
+}</code></pre>
+        </details>
+      </article>
+
+      <!-- Example 23: Monochrome Chips -->
+      <article class="example">
+        <header class="example-header">
+          <div class="example-number">Example 23</div>
+          <h2 class="example-title">Monochrome Chips</h2>
+          <p class="example-description">
+            High-contrast chip buttons that invert on selection. Bold and
+            decisive.
+          </p>
+        </header>
+        <div class="example-preview">
+          <div class="toggle-20">
+            <button class="btn-light" data-theme-value="light">Light</button>
+            <button class="btn-dark" data-theme-value="dark">Dark</button>
           </div>
         </div>
-      </div>
+        <details class="example-code">
+          <summary>View Code</summary>
+          <pre><code>&lt;div class="toggle-20"&gt;
+  &lt;button class="btn-light" data-theme-value="light"&gt;Light&lt;/button&gt;
+  &lt;button class="btn-dark" data-theme-value="dark"&gt;Dark&lt;/button&gt;
+&lt;/div&gt;
 
-      <!-- Example 24: Diamond Iris -->
-      <div class="example">
-        <div class="example-header">
-          <span class="example-number">24</span>
-          <h2>Diamond Iris</h2>
+.toggle-20 button {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border-radius: 6.25rem;
+}
+
+.light .toggle-20 .btn-light,
+.dark .toggle-20 .btn-dark {
+  background: var(--text);
+  color: var(--bg);
+}</code></pre>
+        </details>
+      </article>
+
+      <!-- Example 24: Subtle Toggle -->
+      <article class="example">
+        <header class="example-header">
+          <div class="example-number">Example 24</div>
+          <h2 class="example-title">Subtle Toggle</h2>
+          <p class="example-description">
+            Minimal status indicator with text. Unobtrusive for footers and
+            secondary UI.
+          </p>
+        </header>
+        <div class="example-preview">
+          <button class="toggle-21" data-theme-toggle>
+            <span class="toggle-21-indicator"></span>
+            <span class="label-light">Light mode</span>
+            <span class="label-dark">Dark mode</span>
+          </button>
         </div>
-        <div class="example-content">
-          <p class="example-description">Cinema iris transition with diamond shape.</p>
-          <div class="demo-area" style="padding: 0;">
-            <div class="pagewide-demo" style="width: 100%;">
-              <button class="pagewide-btn" id="diamond-iris-btn">Toggle with Diamond Iris</button>
-            </div>
+        <details class="example-code">
+          <summary>View Code</summary>
+          <pre><code>&lt;button class="toggle-21" data-theme-toggle&gt;
+  &lt;span class="toggle-21-indicator"&gt;&lt;/span&gt;
+  &lt;span class="label-light"&gt;Light mode&lt;/span&gt;
+  &lt;span class="label-dark"&gt;Dark mode&lt;/span&gt;
+&lt;/button&gt;
+
+.toggle-21-indicator {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--text-secondary);
+}
+
+.dark .toggle-21-indicator {
+  background: var(--primary);
+}</code></pre>
+        </details>
+      </article>
+
+      <!-- Example 25: Inline Text Link -->
+      <article class="example">
+        <header class="example-header">
+          <div class="example-number">Example 25</div>
+          <h2 class="example-title">Inline Text Link</h2>
+          <p class="example-description">
+            Text-only toggle for inline use. Active state uses underline
+            decoration.
+          </p>
+        </header>
+        <div class="example-preview">
+          <div class="toggle-22">
+            <button class="btn-light" data-theme-value="light">Light</button>
+            <span class="separator">/</span>
+            <button class="btn-dark" data-theme-value="dark">Dark</button>
           </div>
         </div>
-      </div>
+        <details class="example-code">
+          <summary>View Code</summary>
+          <pre><code>&lt;div class="toggle-22"&gt;
+  &lt;button class="btn-light" data-theme-value="light"&gt;Light&lt;/button&gt;
+  &lt;span class="separator"&gt;/&lt;/span&gt;
+  &lt;button class="btn-dark" data-theme-value="dark"&gt;Dark&lt;/button&gt;
+&lt;/div&gt;
 
-      <!-- Example 25: Particle Burst -->
-      <div class="example">
-        <div class="example-header">
-          <span class="example-number">25</span>
-          <h2>Particle Burst (Canvas)</h2>
-        </div>
-        <div class="example-content">
-          <p class="example-description">Canvas-based particle explosion.</p>
-          <div class="demo-area" style="padding: 0;">
-            <div class="js-demo-area" style="width: 100%;">
-              <button class="pagewide-btn" id="particle-burst-btn">Toggle with Particles</button>
-            </div>
+.toggle-22 button {
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+}
+
+.light .toggle-22 .btn-light,
+.dark .toggle-22 .btn-dark {
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: underline;
+}</code></pre>
+        </details>
+      </article>
+
+      <!-- Example 26: Underline Tab -->
+      <article class="example">
+        <header class="example-header">
+          <div class="example-number">Example 26</div>
+          <h2 class="example-title">Underline Tab</h2>
+          <p class="example-description">
+            Tab-style toggle with animated underline indicator. Clean navigation
+            pattern.
+          </p>
+        </header>
+        <div class="example-preview">
+          <div class="toggle-23">
+            <button class="btn-light" data-theme-value="light">Light</button>
+            <button class="btn-dark" data-theme-value="dark">Dark</button>
           </div>
         </div>
-      </div>
+        <details class="example-code">
+          <summary>View Code</summary>
+          <pre><code>&lt;div class="toggle-23"&gt;
+  &lt;button class="btn-light" data-theme-value="light"&gt;Light&lt;/button&gt;
+  &lt;button class="btn-dark" data-theme-value="dark"&gt;Dark&lt;/button&gt;
+&lt;/div&gt;
 
-      <!-- Example 26: Click Ripple -->
-      <div class="example">
-        <div class="example-header">
-          <span class="example-number">26</span>
-          <h2>Click Position Ripple</h2>
-        </div>
-        <div class="example-content">
-          <p class="example-description">Ripple emanates from click position.</p>
-          <div class="demo-area" style="padding: 0;">
-            <div class="js-demo-area" style="width: 100%;">
-              <button class="pagewide-btn" id="click-ripple-btn">Toggle with Click Ripple</button>
-            </div>
+.toggle-23 {
+  border-bottom: 1px solid var(--border);
+}
+
+.toggle-23 button::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+}
+
+.light .toggle-23 .btn-light::after,
+.dark .toggle-23 .btn-dark::after {
+  background: var(--text);
+}</code></pre>
+        </details>
+      </article>
+
+      <!-- Example 27: Compact Dot Indicator -->
+      <article class="example">
+        <header class="example-header">
+          <div class="example-number">Example 27</div>
+          <h2 class="example-title">Compact Dot Indicator</h2>
+          <p class="example-description">
+            Minimal dot-based selection. Active dot scales up for emphasis.
+          </p>
+        </header>
+        <div class="example-preview">
+          <div class="toggle-24">
+            <button
+              class="btn-light"
+              data-theme-value="light"
+              aria-label="Light theme"
+            ></button>
+            <button
+              class="btn-dark"
+              data-theme-value="dark"
+              aria-label="Dark theme"
+            ></button>
           </div>
         </div>
-      </div>
+        <details class="example-code">
+          <summary>View Code</summary>
+          <pre><code>&lt;div class="toggle-24"&gt;
+  &lt;button class="btn-light" data-theme-value="light"&gt;&lt;/button&gt;
+  &lt;button class="btn-dark" data-theme-value="dark"&gt;&lt;/button&gt;
+&lt;/div&gt;
 
-      <!-- Example 27: Glitch Effect -->
-      <div class="example">
-        <div class="example-header">
-          <span class="example-number">27</span>
-          <h2>Glitch Effect</h2>
-        </div>
-        <div class="example-content">
-          <p class="example-description">Cyberpunk-style glitch with RGB separation.</p>
-          <div class="demo-area" style="padding: 0;">
-            <div class="js-demo-area" style="width: 100%;">
-              <button class="pagewide-btn" id="glitch-btn">Toggle with Glitch</button>
-            </div>
+.toggle-24 {
+  padding: 0.375rem 0.625rem;
+  background: var(--bg-secondary);
+  border-radius: 1rem;
+}
+
+.toggle-24 button {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  opacity: 0.4;
+}
+
+.light .toggle-24 .btn-light,
+.dark .toggle-24 .btn-dark {
+  opacity: 1;
+  transform: scale(1.3);
+}</code></pre>
+        </details>
+      </article>
+
+      <!-- Example 28: Ghost Buttons -->
+      <article class="example">
+        <header class="example-header">
+          <div class="example-number">Example 28</div>
+          <h2 class="example-title">Ghost Buttons</h2>
+          <p class="example-description">
+            Transparent buttons with border on hover. Active state fills with
+            background.
+          </p>
+        </header>
+        <div class="example-preview">
+          <div class="toggle-25">
+            <button class="btn-light" data-theme-value="light">Light</button>
+            <button class="btn-dark" data-theme-value="dark">Dark</button>
           </div>
         </div>
-      </div>
-    </div>
+        <details class="example-code">
+          <summary>View Code</summary>
+          <pre><code>&lt;div class="toggle-25"&gt;
+  &lt;button class="btn-light" data-theme-value="light"&gt;Light&lt;/button&gt;
+  &lt;button class="btn-dark" data-theme-value="dark"&gt;Dark&lt;/button&gt;
+&lt;/div&gt;
 
-    <!-- Page-wide transition overlays -->
-    <div id="circle-reveal-overlay" class="page-transition-overlay circle-reveal-overlay"></div>
-    <div id="blinds-overlay" class="page-transition-overlay blinds-overlay">
-      <div class="blind"></div><div class="blind"></div><div class="blind"></div><div class="blind"></div>
-      <div class="blind"></div><div class="blind"></div><div class="blind"></div><div class="blind"></div>
-    </div>
-    <div id="diagonal-wipe-overlay" class="page-transition-overlay diagonal-wipe-overlay"></div>
-    <div id="crossfade-overlay" class="page-transition-overlay crossfade-overlay"></div>
-    <div id="diamond-iris-overlay" class="page-transition-overlay diamond-iris-overlay"></div>
-    <canvas id="particle-canvas" class="particle-canvas"></canvas>
-    <div id="glitch-overlay" class="glitch-overlay"></div>
+.toggle-25 button {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+}
+
+.toggle-25 button:hover {
+  border-color: var(--border);
+}
+
+.light .toggle-25 .btn-light,
+.dark .toggle-25 .btn-dark {
+  font-weight: 600;
+  background: var(--bg-tertiary);
+  border-color: var(--border);
+}</code></pre>
+        </details>
+      </article>
+
+      <!-- Example 29: Minimal Switch -->
+      <article class="example">
+        <header class="example-header">
+          <div class="example-number">Example 29</div>
+          <h2 class="example-title">Minimal Switch</h2>
+          <p class="example-description">
+            iOS-style toggle switch. Pure CSS with smooth thumb animation.
+          </p>
+        </header>
+        <div class="example-preview">
+          <div class="toggle-26">
+            <button
+              class="toggle-26-track"
+              data-theme-toggle
+              aria-label="Toggle theme"
+            ></button>
+            <span class="toggle-26-label">
+              <span class="label-light">Light mode</span>
+              <span class="label-dark">Dark mode</span>
+            </span>
+          </div>
+        </div>
+        <details class="example-code">
+          <summary>View Code</summary>
+          <pre><code>&lt;div class="toggle-26"&gt;
+  &lt;button class="toggle-26-track" data-theme-toggle&gt;&lt;/button&gt;
+  &lt;span class="toggle-26-label"&gt;
+    &lt;span class="label-light"&gt;Light mode&lt;/span&gt;
+    &lt;span class="label-dark"&gt;Dark mode&lt;/span&gt;
+  &lt;/span&gt;
+&lt;/div&gt;
+
+.toggle-26 .label-light,
+.toggle-26 .label-dark { display: none; }
+
+.light .toggle-26 .label-light { display: inline; }
+.dark .toggle-26 .label-dark { display: inline; }</code></pre>
+        </details>
+      </article>
+
+      <!-- Example 30: Token Buttons -->
+      <article class="example">
+        <header class="example-header">
+          <div class="example-number">Example 30</div>
+          <h2 class="example-title">Token Buttons</h2>
+          <p class="example-description">
+            Compact square buttons with inverted active state. Great for
+            toolbars.
+          </p>
+        </header>
+        <div class="example-preview">
+          <div class="toggle-27">
+            <button class="btn-light" data-theme-value="light">Lt</button>
+            <button class="btn-dark" data-theme-value="dark">Dk</button>
+          </div>
+        </div>
+        <details class="example-code">
+          <summary>View Code</summary>
+          <pre><code>&lt;div class="toggle-27"&gt;
+  &lt;button class="btn-light" data-theme-value="light"&gt;Lt&lt;/button&gt;
+  &lt;button class="btn-dark" data-theme-value="dark"&gt;Dk&lt;/button&gt;
+&lt;/div&gt;
+
+.toggle-27 button {
+  width: 1.75rem;
+  height: 1.75rem;
+  font-size: 0.6875rem;
+  border: 1px solid var(--border);
+}
+
+.light .toggle-27 .btn-light,
+.dark .toggle-27 .btn-dark {
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--bg);
+}</code></pre>
+        </details>
+      </article>
+    </main>
 
     <!-- Main ThemeManager script -->
     <script type="module" src="./src/theme-toggle.js"></script>
 
     <script type="module">
-      // Extend themes
-      ThemeManager.themes = ['light', 'dark', 'sepia', 'high-contrast'];
-      ThemeManager.refresh();
-
-      // Update displays
+      // Update header display
       function updateDisplays() {
         const effective = ThemeManager.current;
         const userTheme = ThemeManager.theme;
 
         document.getElementById('header-theme').textContent = effective;
-        document.getElementById('header-user-theme').textContent = userTheme === 'system' ? ' (system)' : '';
-        document.getElementById('current-theme-display').textContent = effective;
-        document.getElementById('info-data-theme').textContent = userTheme;
-        document.getElementById('info-effective').textContent = effective;
+        document.getElementById('header-user-theme').textContent =
+          userTheme === 'system' ? ' (system)' : '';
+
+        // Update API demo
         document.getElementById('api-current-theme').textContent = effective;
         document.getElementById('api-user-theme').textContent = userTheme;
-        document.getElementById('api-themes-array').textContent = JSON.stringify(ThemeManager.themes);
-        document.getElementById('storage-value').textContent = localStorage.getItem('theme') || '(not set)';
+        document.getElementById('api-themes-array').textContent =
+          JSON.stringify(ThemeManager.themes);
 
         // Sync select dropdown
         const select = document.getElementById('theme-select');
@@ -1353,143 +3302,26 @@ ThemeManager.theme;                // user's choice ("system", "dark", etc.)</di
       const eventLog = document.getElementById('event-log');
       const logEntries = [];
 
-      window.addEventListener('themechange', e => {
+      window.addEventListener('themechange', (e) => {
         updateDisplays();
-        const entry = `${new Date().toLocaleTimeString()} | ${e.detail.previous} → ${e.detail.theme} | user: ${e.detail.userTheme} | changed: ${e.detail.effectiveChanged}`;
+
+        const time = new Date().toLocaleTimeString('en-US', {
+          hour12: false,
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        });
+        const entry = `${time} | ${e.detail.previous} → ${e.detail.theme} | user: ${e.detail.userTheme}`;
         logEntries.unshift(entry);
-        eventLog.textContent = logEntries.slice(0, 8).join('\n');
+        eventLog.textContent = logEntries.slice(0, 6).join('\n');
       });
 
-      // Select dropdown
-      document.getElementById('theme-select').addEventListener('change', e => {
-        ThemeManager.setTheme(e.target.value);
-      });
-
-      // Rotating icon animation
-      const rotateToggle = document.getElementById('rotate-toggle');
-      if (rotateToggle) {
-        rotateToggle.addEventListener('click', () => {
-          rotateToggle.classList.add('rotating');
-          setTimeout(() => rotateToggle.classList.remove('rotating'), 500);
+      // Select dropdown sync
+      document
+        .getElementById('theme-select')
+        .addEventListener('change', (e) => {
+          ThemeManager.setTheme(e.target.value);
         });
-      }
-
-      // Wave effect
-      const waveContainer = document.getElementById('wave-container');
-      if (waveContainer) {
-        waveContainer.querySelectorAll('button').forEach(btn => {
-          btn.addEventListener('click', () => {
-            waveContainer.classList.remove('animating');
-            void waveContainer.offsetWidth;
-            waveContainer.classList.add('animating');
-            setTimeout(() => waveContainer.classList.remove('animating'), 600);
-          });
-        });
-      }
-
-      // Page transitions helper
-      function triggerPageTransition(overlayId, duration, midpointDelay) {
-        const overlay = document.getElementById(overlayId);
-        if (!overlay) return;
-        const nextTheme = ThemeManager.current === 'dark' ? 'light' : 'dark';
-        overlay.setAttribute('data-theme', nextTheme);
-        void overlay.offsetWidth;
-        overlay.classList.add('animating');
-        setTimeout(() => ThemeManager.setTheme(nextTheme), midpointDelay);
-        setTimeout(() => { overlay.classList.remove('animating'); overlay.removeAttribute('data-theme'); }, duration);
-      }
-
-      document.getElementById('circle-reveal-btn')?.addEventListener('click', () => triggerPageTransition('circle-reveal-overlay', 800, 400));
-      document.getElementById('blinds-reveal-btn')?.addEventListener('click', () => triggerPageTransition('blinds-overlay', 900, 350));
-      document.getElementById('diagonal-wipe-btn')?.addEventListener('click', () => triggerPageTransition('diagonal-wipe-overlay', 700, 350));
-      document.getElementById('crossfade-btn')?.addEventListener('click', () => triggerPageTransition('crossfade-overlay', 600, 300));
-      document.getElementById('diamond-iris-btn')?.addEventListener('click', () => triggerPageTransition('diamond-iris-overlay', 800, 400));
-
-      // Particle burst
-      const particleCanvas = document.getElementById('particle-canvas');
-      const particleBtn = document.getElementById('particle-burst-btn');
-      if (particleCanvas && particleBtn) {
-        const ctx = particleCanvas.getContext('2d');
-        let particles = [];
-        const resize = () => { particleCanvas.width = innerWidth; particleCanvas.height = innerHeight; };
-        resize();
-        addEventListener('resize', resize);
-
-        function Particle(x, y, color) {
-          this.x = x; this.y = y; this.color = color;
-          this.size = Math.random() * 8 + 4;
-          const angle = Math.random() * Math.PI * 2;
-          const speed = Math.random() * 12 + 6;
-          this.vx = Math.cos(angle) * speed;
-          this.vy = Math.sin(angle) * speed;
-          this.life = 1;
-          this.decay = Math.random() * 0.02 + 0.015;
-        }
-        Particle.prototype.update = function() {
-          this.vx *= 0.98; this.vy *= 0.98; this.vy += 0.3;
-          this.x += this.vx; this.y += this.vy;
-          this.life -= this.decay; this.size *= 0.97;
-        };
-        Particle.prototype.draw = function() {
-          ctx.save();
-          ctx.globalAlpha = this.life;
-          ctx.fillStyle = this.color;
-          ctx.beginPath();
-          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
-        };
-
-        let animId = null;
-        function animate() {
-          ctx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
-          particles = particles.filter(p => { p.update(); p.draw(); return p.life > 0; });
-          if (particles.length > 0) animId = requestAnimationFrame(animate);
-          else animId = null;
-        }
-
-        particleBtn.addEventListener('click', e => {
-          const rect = particleBtn.getBoundingClientRect();
-          const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
-          const nextTheme = ThemeManager.current === 'dark' ? 'light' : 'dark';
-          const color = nextTheme === 'dark' ? '#818cf8' : '#667eea';
-          for (let i = 0; i < 60; i++) particles.push(new Particle(cx, cy, color));
-          if (!animId) animate();
-          ThemeManager.setTheme(nextTheme);
-        });
-      }
-
-      // Click ripple
-      document.getElementById('click-ripple-btn')?.addEventListener('click', e => {
-        const ripple = document.createElement('div');
-        ripple.className = 'click-ripple';
-        ripple.style.left = e.clientX + 'px';
-        ripple.style.top = e.clientY + 'px';
-        const size = Math.max(innerWidth, innerHeight) * 2.5;
-        ripple.style.width = size + 'px';
-        ripple.style.height = size + 'px';
-        const nextTheme = ThemeManager.current === 'dark' ? 'light' : 'dark';
-        ripple.style.background = nextTheme === 'dark' ? '#0a0a0a' : '#ffffff';
-        document.body.appendChild(ripple);
-        void ripple.offsetWidth;
-        ripple.classList.add('animating');
-        setTimeout(() => ThemeManager.setTheme(nextTheme), 300);
-        setTimeout(() => ripple.remove(), 800);
-      });
-
-      // Glitch
-      const glitchBtn = document.getElementById('glitch-btn');
-      const glitchOverlay = document.getElementById('glitch-overlay');
-      if (glitchBtn && glitchOverlay) {
-        glitchBtn.addEventListener('click', () => {
-          glitchOverlay.classList.add('animating');
-          [{x:-3,y:2},{x:2,y:-1},{x:-1,y:3},{x:3,y:-2},{x:0,y:0}].forEach((p, i) => {
-            setTimeout(() => { document.body.style.transform = `translate(${p.x}px,${p.y}px)`; }, i * 50);
-          });
-          setTimeout(() => ThemeManager.setTheme(ThemeManager.current === 'dark' ? 'light' : 'dark'), 200);
-          setTimeout(() => { glitchOverlay.classList.remove('animating'); document.body.style.transform = ''; }, 400);
-        });
-      }
     </script>
   </body>
 </html>
