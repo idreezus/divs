@@ -23,8 +23,8 @@ npm run release
 
 The build system uses Rollup and creates:
 
-- `headCode.js` and `headCode.min.js` - Anti-flash script for `<head>`
-- `themeManager.js` and `themeManager.min.js` - Main library bundle
+- `head-code.js` and `head-code.min.js` - Anti-flash script for `<head>`
+- `theme-toggle.js` and `theme-toggle.min.js` - Main library bundle
 
 Build output paths:
 
@@ -37,13 +37,13 @@ Build output paths:
 
 ```
 src/
-├── headCode.js      # Anti-flash script (inline <head>, runs synchronously)
-└── themeManager.js  # Entry point (auto-init + expose window.ThemeManager)
+├── head-code.js     # Anti-flash script (inline <head>, runs synchronously)
+└── theme-toggle.js  # Entry point (auto-init + expose window.ThemeManager)
 ```
 
 ### Core Components
 
-**headCode.js**
+**head-code.js**
 
 - Runs synchronously in `<head>` before CSS loads
 - Prevents theme flash by setting class on `<html>` immediately
@@ -52,7 +52,7 @@ src/
 - Sets `data-theme` attribute for user's choice (can be "system")
 - Self-contained (no imports) for inline use
 
-**themeManager.js**
+**theme-toggle.js**
 
 - Main ThemeManager object with all public methods
 - Auto-initializes on DOMContentLoaded
@@ -180,5 +180,5 @@ window.addEventListener('themechange', (e) => {
 - IIFE pattern to avoid global pollution
 - All methods return `ThemeManager` for chaining
 - `try/catch` around localStorage for private browsing mode
-- `headCode.js` must stay self-contained (storage key duplicated intentionally)
+- `head-code.js` must stay self-contained (storage key duplicated intentionally)
 - CSS handles button active states - no JavaScript involvement

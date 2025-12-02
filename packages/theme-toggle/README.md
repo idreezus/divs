@@ -90,7 +90,7 @@ Mark your buttons with data attributes:
 Copy & paste this script in your Page Settings **Before `</body>` tag**
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/idreezus/divs@v1.0.0/dist/theme-toggle/v1.0.0/themeManager.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/idreezus/divs@v1.0.0/dist/theme-toggle/v1.0.0/theme-toggle.min.js"></script>
 ```
 
 </Step>

@@ -36,18 +36,18 @@ const banner = `/*!
  */
 `;
 
-// Helper function to create output configurations for headCode.js
+// Helper function to create output configurations for head-code.js
 function createHeadCodeOutputs(basePath) {
   return [
     {
-      file: `${basePath}headCode.js`,
+      file: `${basePath}head-code.js`,
       format: 'iife',
       name: 'ThemeHeadCode',
       sourcemap: false,
       banner: banner,
     },
     {
-      file: `${basePath}headCode.min.js`,
+      file: `${basePath}head-code.min.js`,
       format: 'iife',
       name: 'ThemeHeadCode',
       sourcemap: false,
@@ -57,18 +57,18 @@ function createHeadCodeOutputs(basePath) {
   ];
 }
 
-// Helper function to create output configurations for themeManager.js
-function createThemeManagerOutputs(basePath) {
+// Helper function to create output configurations for theme-toggle.js
+function createThemeToggleOutputs(basePath) {
   return [
     {
-      file: `${basePath}themeManager.js`,
+      file: `${basePath}theme-toggle.js`,
       format: 'iife',
       name: 'ThemeManager',
       sourcemap: true,
       banner: banner,
     },
     {
-      file: `${basePath}themeManager.min.js`,
+      file: `${basePath}theme-toggle.min.js`,
       format: 'iife',
       name: 'ThemeManager',
       sourcemap: true,
@@ -78,16 +78,16 @@ function createThemeManagerOutputs(basePath) {
   ];
 }
 
-// Configuration for the headCode bundle (anti-flash script)
+// Configuration for the head-code bundle (anti-flash script)
 const headCodeConfig = {
-  input: 'src/headCode.js',
+  input: 'src/head-code.js',
   output: outputPaths.flatMap(createHeadCodeOutputs),
 };
 
-// Configuration for the themeManager bundle (main library)
-const themeManagerConfig = {
-  input: 'src/themeManager.js',
-  output: outputPaths.flatMap(createThemeManagerOutputs),
+// Configuration for the theme-toggle bundle (main library)
+const themeToggleConfig = {
+  input: 'src/theme-toggle.js',
+  output: outputPaths.flatMap(createThemeToggleOutputs),
 };
 
-export default [headCodeConfig, themeManagerConfig];
+export default [headCodeConfig, themeToggleConfig];

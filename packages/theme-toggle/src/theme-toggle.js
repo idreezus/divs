@@ -192,7 +192,7 @@
 
         this.current = this.getEffectiveTheme(this.theme);
 
-        // Ensure DOM matches (in case headCode didn't run)
+        // Ensure DOM matches (in case head-code didn't run)
         this.setTheme(this.theme, { force: true });
 
         // Setup toggle button click listeners
