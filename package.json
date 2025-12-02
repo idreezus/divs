@@ -12,12 +12,12 @@
     "dev:carousel": "pnpm --filter carousel build:watch",
     "release": "pnpm -r release",
     "release:marquee": "pnpm --filter marquee release",
-    "release:carousel": "pnpm --filter carousel release"
+    "release:carousel": "pnpm --filter carousel release",
+    "release:theme-toggle": "pnpm --filter theme-toggle release"
   },
   "keywords": [
     "components",
     "library",
-    "cdn",
     "webflow"
   ],
   "author": "Idrees Isse (https://github.com/idreezus)",

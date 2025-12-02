@@ -1,4 +1,4 @@
-# divs
+# <divs>
 
 Monorepo for [Divs by Idreezus](https://divs.idreezus.com) — a component library for Webflow and other no-code platforms.
 
@@ -17,6 +17,10 @@ GSAP-powered marquee component for seamless infinite scrolling. Features truly c
 Lightweight, CSS-first carousel library built on native scroll snap for smooth GPU-accelerated scrolling. Zero dependencies with simple data-attribute configuration, auto-generated pagination dots, optional keyboard navigation, and support for variable-width items. Features responsive design with automatic recalculation, chainable programmatic API, event system, and state classes for custom styling. Perfect for product showcases, image galleries, testimonials, and card carousels.
 
 **[Documentation](https://divs.idreezus.com/components/carousel)**
+
+### Theme Toggle
+
+A lightweight, zero-dependency theme engine that combines a flicker‑free head script with a small, CSS‑driven API for building light, dark, and custom themes. It keeps state and UI separate: the library manages system sync, localStorage, and ARIA state, while you define the look and feel with your own tokens and transitions. Data attributes power buttons and toggles automatically (with active states), and a refreshable JS API makes it straightforward to integrate in SPAs and dynamic sites.
 
 ## License
 
