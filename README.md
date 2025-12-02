@@ -1,4 +1,4 @@
-# divs
+# <divs>
 
 Monorepo for [Divs by Idreezus](https://divs.idreezus.com) — a component library for Webflow and other no-code platforms.
 

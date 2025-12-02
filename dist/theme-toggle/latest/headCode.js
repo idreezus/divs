@@ -14,7 +14,6 @@
 
   // Anti-flash: inline in <head> before stylesheets
   (() => {
-
     const STORAGE_KEY = 'theme';
     let stored = null;
 
@@ -22,26 +21,22 @@
       stored = localStorage.getItem(STORAGE_KEY);
     } catch (e) {}
 
-    // First visit or explicit "system" = system mode
-    const isSystemSource = !stored || stored === 'system';
+    // User's choice: stored value or default to "system"
+    const theme = stored || 'system';
 
     // Calculate effective theme
-    let effectiveTheme;
-    if (isSystemSource) {
-      effectiveTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light';
-    } else {
-      effectiveTheme = stored;
-    }
+    const effectiveTheme =
+      theme === 'system'
+        ? window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? 'dark'
+          : 'light'
+        : theme;
 
-    // Set data-theme to effective theme (never "system")
-    document.documentElement.setAttribute('data-theme', effectiveTheme);
+    // Set class on <html> for effective theme (CSS targeting)
+    document.documentElement.classList.add(effectiveTheme);
 
-    // Set boolean data-theme-system when source is system
-    if (isSystemSource) {
-      document.documentElement.setAttribute('data-theme-system', '');
-    }
+    // Set data-theme attribute for user's choice (can be "system")
+    document.documentElement.setAttribute('data-theme', theme);
   })();
 
 })();
