@@ -80,13 +80,16 @@
         this.current = newEffective;
         this.theme = newTheme;
 
-        // Update class on <body> (remove old, add new)
+        // Update class on <html> and <body> (remove old, add new)
         if (previousEffective) {
+          document.documentElement.classList.remove(previousEffective);
           document.body.classList.remove(previousEffective);
         }
+        document.documentElement.classList.add(newEffective);
         document.body.classList.add(newEffective);
 
         // Set data-theme attribute to user's choice (can be "system")
+        document.documentElement.setAttribute(ATTR_THEME, newTheme);
         document.body.setAttribute(ATTR_THEME, newTheme);
 
         // Save user's choice to localStorage
@@ -246,7 +249,9 @@
 
             this.current = newEffective;
 
-            // Update class on <body>
+            // Update class on <html> and <body>
+            document.documentElement.classList.remove(previousEffective);
+            document.documentElement.classList.add(newEffective);
             document.body.classList.remove(previousEffective);
             document.body.classList.add(newEffective);
 

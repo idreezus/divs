@@ -57,11 +57,11 @@ Copy & paste this script in your Page Settings **Inside `<head>` tag** at the ve
             : 'light'
           : theme;
 
-      // Set class on <body> for effective theme (CSS targeting)
-      document.body.classList.add(effectiveTheme);
+      // Set class on <html> for effective theme (CSS targeting)
+      document.documentElement.classList.add(effectiveTheme);
 
       // Set data-theme attribute for user's choice (can be "system")
-      document.body.setAttribute('data-theme', theme);
+      document.documentElement.setAttribute('data-theme', theme);
     })();
   })();
 </script>
@@ -103,16 +103,18 @@ Otherwise, mark your buttons with data attributes:
 
 The script handles automatic theme detection from a user's system preferences. If the user selects a different theme on your site, the script handles "remembering" that preference for the future (by using the browser's `localStorage`).
 
-There are two attributes added to the `<body>` element:
+There are two attributes added to both the `<html>` and `<body>` elements:
 
-1. **A CSS class** on the `<body>` element that marks the actual visual theme (e.g. `.light`, `.dark`, `.sepia`, etc – but never "system").
+1. **A CSS class** (e.g. `.light`, `.dark`, `.sepia`, etc – but never "system") that marks the actual visual theme.
 2. The `[data-theme]` attribute that denotes what the user selected (e.g. `[data-theme='system']`, `[data-theme='light']`, `[data-theme='dark']`, etc.)
+
+Both elements receive the same class and attribute. The `<html>` element is set first by the head script for anti-flash (since it exists before `<body>`), then the main script keeps both in sync. This dual approach ensures CSS selectors work regardless of whether you're using CSS variables (which cascade from `<html>`) or applying styles directly to `<body>` (common in Webflow).
 
 This is what enables CSS states and animations without any JavaScript like "show a different icon when the user chose system preference" or "move the toggle to the right when it's dark mode".
 
 ### Preventing FOUC
 
-The inline `<head>` script reads `localStorage` (or defaults to "system"), then immediately sets the theme class on the `<body>`. This prevents the flash of wrong-themed content or FOUC as they call it.
+The inline `<head>` script reads `localStorage` (or defaults to "system"), then immediately sets the theme class on `<html>`. Since `<html>` exists before `<body>` is even parsed, this prevents the flash of wrong-themed content (FOUC). The main script then syncs both `<html>` and `<body>` once the page loads.
 
 ### How Preferences Persist
 
@@ -376,11 +378,11 @@ window.addEventListener('themechange', (e) => {
 <Accordions>
 
 <Accordion title="Why do I need two scripts?">
-The script in the `<head>` must run before CSS loads to prevent theme flicker. The main script handles everything else and can load at the end of `<body>`. They're separate because inline `<head>` scripts should be minimal.
+The script in the `<head>` must run before CSS loads to prevent theme flicker – it sets the theme class on `<html>` immediately. The main script handles everything else (keeping `<html>` and `<body>` in sync, toggle buttons, system preference changes) and can load at the end of `<body>`. They're separate because inline `<head>` scripts should be minimal.
 </Accordion>
 
 <Accordion title="What's the difference between class and data-theme?">
-The class on `<body>` (e.g., `dark`) is the **effective theme** – what's visually shown. The `data-theme` attribute is the **user's choice** – what they selected. When the user chooses "system", the class will be "light" or "dark" (based on OS), but `data-theme` will be "system".
+The class (e.g., `dark`) is the **effective theme** – what's visually shown. The `data-theme` attribute is the **user's choice** – what they selected. When the user chooses "system", the class will be "light" or "dark" (based on OS), but `data-theme` will be "system". Both are applied to `<html>` and `<body>`.
 </Accordion>
 
 <Accordion title="Can I use this with server-side rendering?">
