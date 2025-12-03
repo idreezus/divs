@@ -69,14 +69,14 @@
       this.current = newEffective;
       this.theme = newTheme;
 
-      // Update class on <html> (remove old, add new)
+      // Update class on <body> (remove old, add new)
       if (previousEffective) {
-        document.documentElement.classList.remove(previousEffective);
+        document.body.classList.remove(previousEffective);
       }
-      document.documentElement.classList.add(newEffective);
+      document.body.classList.add(newEffective);
 
       // Set data-theme attribute to user's choice (can be "system")
-      document.documentElement.setAttribute(ATTR_THEME, newTheme);
+      document.body.setAttribute(ATTR_THEME, newTheme);
 
       // Save user's choice to localStorage
       try {
@@ -221,9 +221,9 @@
 
           this.current = newEffective;
 
-          // Update class on <html>
-          document.documentElement.classList.remove(previousEffective);
-          document.documentElement.classList.add(newEffective);
+          // Update class on <body>
+          document.body.classList.remove(previousEffective);
+          document.body.classList.add(newEffective);
 
           // Dispatch event for developer animations
           window.dispatchEvent(

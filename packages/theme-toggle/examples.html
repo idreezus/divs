@@ -7,20 +7,30 @@
 
     <!-- Anti-flash script - MUST be inline and synchronous, before CSS -->
     <script>
-      (function () {
-        var stored = null;
+      (() => {
+        const STORAGE_KEY = 'theme';
+        let stored = null;
+
         try {
-          stored = localStorage.getItem('theme');
+          stored = localStorage.getItem(STORAGE_KEY);
         } catch (e) {}
-        var theme = stored || 'system';
-        var effectiveTheme =
+
+        // User's choice: stored value or default to "system"
+        const theme = stored || 'system';
+
+        // Calculate effective theme
+        const effectiveTheme =
           theme === 'system'
             ? window.matchMedia('(prefers-color-scheme: dark)').matches
               ? 'dark'
               : 'light'
             : theme;
-        document.documentElement.classList.add(effectiveTheme);
-        document.documentElement.setAttribute('data-theme', theme);
+
+        // Set class on <body> for effective theme (CSS targeting)
+        document.body.classList.add(effectiveTheme);
+
+        // Set data-theme attribute for user's choice (can be "system")
+        document.body.setAttribute('data-theme', theme);
       })();
     </script>
 

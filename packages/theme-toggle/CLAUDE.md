@@ -46,9 +46,9 @@ src/
 **head-code.js**
 
 - Runs synchronously in `<head>` before CSS loads
-- Prevents theme flash by setting class on `<html>` immediately
+- Prevents theme flash by setting class on `<body>` immediately
 - Reads localStorage (defaults to "system" if empty)
-- Sets class on `<html>` for effective theme (e.g., `dark`, `light`)
+- Sets class on `<body>` for effective theme (e.g., `dark`, `light`)
 - Sets `data-theme` attribute for user's choice (can be "system")
 - Self-contained (no imports) for inline use
 
@@ -57,8 +57,8 @@ src/
 - Main ThemeManager object with all public methods
 - Auto-initializes on DOMContentLoaded
 - Tracks two state properties: `current` (effective theme) and `theme` (user's choice)
-- Sets class on `<html>` for effective theme
-- Sets `data-theme` on `<html>` for user's choice
+- Sets class on `<body>` for effective theme
+- Sets `data-theme` on `<body>` for user's choice
 - Dispatches `themechange` events for developer animations
 - Supports cleanup via `destroy()` and dynamic refresh via `refresh()`
 - Config constants inlined at top: `ATTR_THEME`, `ATTR_TOGGLE`, `ATTR_VALUE`, `STORAGE_KEY`, `DEFAULT_THEMES`
@@ -68,7 +68,7 @@ src/
 **State/UI Separation**
 
 - Script adds NO inline styles
-- Script adds theme class (e.g., `light`, `dark`) to `<html>` only
+- Script adds theme class (e.g., `light`, `dark`) to `<body>` only
 - Script defines NO colors/variables
 - Developer has full styling control via CSS and events
 
@@ -80,15 +80,15 @@ src/
 **Data Flow**
 
 1. `data-theme-value="dark"` on button → click sets `theme` to `dark`
-2. `data-theme="dark"` set on `<html>` (user's choice)
-3. Class `dark` added to `<html>` (effective theme)
+2. `data-theme="dark"` set on `<body>` (user's choice)
+3. Class `dark` added to `<body>` (effective theme)
 4. CSS can target `.dark` or `[data-theme="dark"]`
 
 **System Theme Handling**
 
 - First-time visitors (no localStorage) = system mode (`theme = "system"`)
 - `data-theme` shows user's choice (can be "system")
-- Class on `<html>` shows effective theme (light/dark based on OS)
+- Class on `<body>` shows effective theme (light/dark based on OS)
 - When user chose system, theme updates automatically with OS preference changes
 
 ## Data Attributes
@@ -98,7 +98,7 @@ src/
 - `data-theme-toggle` - Cycles through all themes except "system"
 - `data-theme-value="X"` - Sets theme to X (can be light, dark, system, sepia, etc.)
 
-**On `<html>`:**
+**On `<body>`:**
 
 - `data-theme` - User's choice (can be "system", "light", "dark", etc.)
 - Class (e.g., `dark`, `light`) - Effective theme for CSS targeting

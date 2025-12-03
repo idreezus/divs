@@ -32,11 +32,11 @@
           : 'light'
         : theme;
 
-    // Set class on <html> for effective theme (CSS targeting)
-    document.documentElement.classList.add(effectiveTheme);
+    // Set class on <body> for effective theme (CSS targeting)
+    document.body.classList.add(effectiveTheme);
 
     // Set data-theme attribute for user's choice (can be "system")
-    document.documentElement.setAttribute('data-theme', theme);
+    document.body.setAttribute('data-theme', theme);
   })();
 
 })();

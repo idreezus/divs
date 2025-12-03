@@ -36,8 +36,8 @@ Copy & paste this script in your Page Settings **Inside `<head>` tag** (before a
           : 'light'
         : theme;
 
-    document.documentElement.classList.add(effectiveTheme);
-    document.documentElement.setAttribute('data-theme', theme);
+    document.body.classList.add(effectiveTheme);
+    document.body.setAttribute('data-theme', theme);
   })();
 </script>
 ```
@@ -48,7 +48,7 @@ Copy & paste this script in your Page Settings **Inside `<head>` tag** (before a
 </Step>
 
 <Step number="2" title="Add Theme CSS Variables">
-Define your theme colors using CSS custom properties. Target themes via class on `<html>`:
+Define your theme colors using CSS custom properties. Target themes via class on `<body>`:
 
 ```css
 :root {
@@ -111,13 +111,13 @@ This dual-state model enables CSS patterns like "show a different icon when the 
 
 ### Anti-Flash Script
 
-The inline `<head>` script runs synchronously before CSS loads. It reads localStorage (or defaults to "system"), then immediately sets the class on `<html>`. This prevents the flash of wrong-themed content.
+The inline `<head>` script runs synchronously before CSS loads. It reads localStorage (or defaults to "system"), then immediately sets the class on `<body>`. This prevents the flash of wrong-themed content.
 
 ### System Theme Behavior
 
 First-time visitors (no localStorage) are treated as using system preference:
 
-- Class on `<html>` shows effective theme (light or dark based on OS)
+- Class on `<body>` shows effective theme (light or dark based on OS)
 - `data-theme="system"` indicates they're in system mode
 - Theme updates automatically when OS preference changes
 
@@ -144,14 +144,14 @@ To return to system preference, click a button with `data-theme-value="system"`.
 
 The script automatically manages:
 
-| Element  | What's Set                       | Description                            |
-| -------- | -------------------------------- | -------------------------------------- |
-| `<html>` | Class (e.g., `dark`)             | Effective theme for CSS styling        |
-| `<html>` | `data-theme` attribute           | User's choice (can be "system")        |
+| Element  | What's Set             | Description                     |
+| -------- | ---------------------- | ------------------------------- |
+| `<body>` | Class (e.g., `dark`)   | Effective theme for CSS styling |
+| `<body>` | `data-theme` attribute | User's choice (can be "system") |
 
 ### CSS Targeting
 
-Target themes via class on `<html>`:
+Target themes via class on `<body>`:
 
 ```css
 /* Light theme (default) */
@@ -242,8 +242,7 @@ Show different UI elements based on the user's choice:
 }
 ```
 
-> [!NOTE]
-> `data-theme-toggle` buttons are action buttons (cycle to next theme), not state indicators. Style them differently from value buttons.
+> [!NOTE] > `data-theme-toggle` buttons are action buttons (cycle to next theme), not state indicators. Style them differently from value buttons.
 
 ### Adding Transitions
 
@@ -366,13 +365,13 @@ window.addEventListener('themechange', (e) => {
 
 ### Event Detail Properties
 
-| Property             | Type      | Description                             |
-| -------------------- | --------- | --------------------------------------- |
-| `theme`              | `string`  | Current effective theme                 |
-| `previous`           | `string`  | Previous effective theme                |
-| `userTheme`          | `string`  | User's choice (can be "system")         |
-| `previousUserTheme`  | `string`  | Previous user's choice                  |
-| `effectiveChanged`   | `boolean` | `true` if the visual appearance changed |
+| Property            | Type      | Description                             |
+| ------------------- | --------- | --------------------------------------- |
+| `theme`             | `string`  | Current effective theme                 |
+| `previous`          | `string`  | Previous effective theme                |
+| `userTheme`         | `string`  | User's choice (can be "system")         |
+| `previousUserTheme` | `string`  | Previous user's choice                  |
+| `effectiveChanged`  | `boolean` | `true` if the visual appearance changed |
 
 ---
 
@@ -385,7 +384,7 @@ The anti-flash script must run synchronously in `<head>` before CSS loads to pre
 </Accordion>
 
 <Accordion title="What's the difference between class and data-theme?">
-The class on `<html>` (e.g., `dark`) is the **effective theme** – what's visually shown. The `data-theme` attribute is the **user's choice** – what they selected. When the user chooses "system", the class will be "light" or "dark" (based on OS), but `data-theme` will be "system".
+The class on `<body>` (e.g., `dark`) is the **effective theme** – what's visually shown. The `data-theme` attribute is the **user's choice** – what they selected. When the user chooses "system", the class will be "light" or "dark" (based on OS), but `data-theme` will be "system".
 </Accordion>
 
 <Accordion title="Why doesn't the toggle button have an active state?">
