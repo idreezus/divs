@@ -22,6 +22,8 @@ Lightweight, CSS-first carousel library built on native scroll snap for smooth G
 
 A lightweight, zero-dependency theme engine that combines a flicker‑free head script with a small, CSS‑driven API for building light, dark, and custom themes. It keeps state and UI separate: the library manages system sync, localStorage, and ARIA state, while you define the look and feel with your own tokens and transitions. Data attributes power buttons and toggles automatically (with active states), and a refreshable JS API makes it straightforward to integrate in SPAs and dynamic sites.
 
+**[Documentation](https://divs.idreezus.com/components/theme-toggle)**
+
 ## License
 
 AGPL-3.0

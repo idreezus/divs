@@ -103,6 +103,22 @@ src/
 - `data-theme` - User's choice (can be "system", "light", "dark", etc.)
 - Class (e.g., `dark`, `light`) - Effective theme for CSS targeting
 
+## Automatic Accessibility
+
+ThemeManager automatically adds accessibility attributes to buttons if not already present:
+
+**Toggle buttons** (`data-theme-toggle`):
+
+- `aria-label="Switch color theme"`
+- `title="Switch color theme"`
+
+**Value buttons** (`data-theme-value="X"`):
+
+- `aria-label="Switch to X color theme"`
+- `title="Switch to X color theme"`
+
+Developers can opt-out by setting these attributes themselves - existing attributes are respected.
+
 ## Public API
 
 ```javascript

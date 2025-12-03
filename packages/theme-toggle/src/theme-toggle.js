@@ -1,15 +1,12 @@
-// Theme Manager - Declarative theme toggle with state management
-// Core script handles state/logic only - developers control styling via CSS
-
 (() => {
-  // ─── Config ────────────────────────────────────────────────────────────────
+  // Config
   const ATTR_THEME = 'data-theme';
   const ATTR_TOGGLE = 'data-theme-toggle';
   const ATTR_VALUE = 'data-theme-value';
   const STORAGE_KEY = 'theme';
   const DEFAULT_THEMES = ['light', 'dark'];
 
-  // ─── Theme Manager ─────────────────────────────────────────────────────────
+  // Theme Manager
   const ThemeManager = {
     // Available themes - extend this array for multi-theme support
     themes: DEFAULT_THEMES.slice(),
@@ -131,10 +128,21 @@
       return this.setTheme(cyclableThemes[nextIndex]);
     },
 
+    // Adds accessibility attributes if not already present
+    _addA11yAttributes(btn, label) {
+      if (!btn.hasAttribute('aria-label')) {
+        btn.setAttribute('aria-label', label);
+      }
+      if (!btn.hasAttribute('title')) {
+        btn.setAttribute('title', label);
+      }
+    },
+
     // Sets up toggle and value button click listeners
     _setupToggles() {
       // Setup data-theme-toggle (cycle)
       document.querySelectorAll(`[${ATTR_TOGGLE}]`).forEach((btn) => {
+        this._addA11yAttributes(btn, 'Switch color theme');
         const listener = () => this.toggleTheme();
         btn.addEventListener('click', listener);
         this._toggles.push(btn);
@@ -144,6 +152,7 @@
       // Setup data-theme-value (explicit)
       document.querySelectorAll(`[${ATTR_VALUE}]`).forEach((btn) => {
         const theme = btn.getAttribute(ATTR_VALUE);
+        this._addA11yAttributes(btn, `Switch to ${theme} color theme`);
         const listener = () => this.setTheme(theme);
         btn.addEventListener('click', listener);
         this._toggles.push(btn);
@@ -166,7 +175,9 @@
     // Initializes ThemeManager and attaches event listeners
     init() {
       if (this.initialized) {
-        console.warn('[ThemeManager] Already initialized. Call destroy() first.');
+        console.warn(
+          '[ThemeManager] Already initialized. Call destroy() first.'
+        );
         return this;
       }
 
@@ -246,7 +257,10 @@
     // Removes system preference change listener
     _teardownSystemSync() {
       if (this._mediaQuery && this._mediaQueryListener) {
-        this._mediaQuery.removeEventListener('change', this._mediaQueryListener);
+        this._mediaQuery.removeEventListener(
+          'change',
+          this._mediaQueryListener
+        );
         this._mediaQuery = null;
         this._mediaQueryListener = null;
       }
