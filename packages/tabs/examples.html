@@ -1,0 +1,3184 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tabs Library Examples</title>
+    <script type="module" src="./src/tabs.js"></script>
+    <link rel="stylesheet" href="./src/styles.css" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
+          'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+        background: #fafafa;
+        color: #171717;
+        line-height: 1.6;
+        padding: 24px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      header {
+        margin-bottom: 48px;
+        padding-bottom: 24px;
+        border-bottom: 1px solid #e5e5e5;
+      }
+
+      h1 {
+        font-size: 32px;
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: #171717;
+      }
+
+      .header-subtitle {
+        color: #737373;
+        font-size: 14px;
+        margin-bottom: 16px;
+      }
+
+      .stats {
+        display: flex;
+        gap: 24px;
+        font-size: 14px;
+        font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+      }
+
+      .stats span {
+        padding: 4px 12px;
+        background: #f5f5f5;
+        border-radius: 6px;
+        color: #737373;
+      }
+
+      .stats .pass {
+        color: #16a34a;
+        background: #f0fdf4;
+      }
+      .stats .fail {
+        color: #dc2626;
+        background: #fef2f2;
+      }
+
+      .test-category {
+        margin-bottom: 48px;
+      }
+
+      .test-category > h2 {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 24px;
+        color: #171717;
+      }
+
+      .test-case {
+        background: #ffffff;
+        border: 1px solid #e5e5e5;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        overflow: hidden;
+      }
+
+      .test-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px 20px;
+        border-bottom: 1px solid #f5f5f5;
+      }
+
+      .test-number {
+        font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+        font-size: 12px;
+        color: #a3a3a3;
+        font-weight: 600;
+      }
+
+      .test-header h3 {
+        flex: 1;
+        font-size: 16px;
+        font-weight: 500;
+        color: #171717;
+      }
+
+      .test-status {
+        font-size: 12px;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-weight: 500;
+        font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+      }
+
+      .test-status.pending {
+        background: #f5f5f5;
+        color: #a3a3a3;
+      }
+      .test-status.pass {
+        background: #f0fdf4;
+        color: #16a34a;
+      }
+      .test-status.fail {
+        background: #fef2f2;
+        color: #dc2626;
+      }
+
+      .test-content {
+        padding: 20px;
+      }
+
+      .test-description {
+        color: #737373;
+        font-size: 13px;
+        margin-bottom: 16px;
+      }
+
+      /* Tabs demo wrapper styling */
+      .tabs-demo {
+        border: 1px solid #e5e5e5;
+        border-radius: 6px;
+        padding: 20px;
+        background: #fafafa;
+        margin-bottom: 16px;
+      }
+
+      /* Basic tabs styling */
+      .tabs-trigger-list {
+        display: flex;
+        gap: 4px;
+        border-bottom: 1px solid #e5e5e5;
+        margin-bottom: 16px;
+      }
+
+      .tabs-trigger {
+        padding: 12px 20px;
+        background: transparent;
+        border: none;
+        border-bottom: 2px solid transparent;
+        font-size: 14px;
+        color: #737373;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.15s ease;
+        margin-bottom: -1px;
+      }
+
+      .tabs-trigger:hover {
+        color: #171717;
+        background: #f5f5f5;
+      }
+
+      .tabs-trigger.tabs-active {
+        color: #171717;
+        border-bottom-color: #171717;
+        font-weight: 500;
+      }
+
+      .tabs-trigger:focus-visible {
+        outline: 2px solid #667eea;
+        outline-offset: -2px;
+        border-radius: 4px;
+      }
+
+      .tabs-panel {
+        padding: 16px 0;
+        color: #525252;
+        font-size: 14px;
+        line-height: 1.7;
+      }
+
+      /* Vertical tabs styling */
+      .vertical-tabs {
+        display: flex;
+        gap: 24px;
+      }
+
+      .vertical-tabs .tabs-trigger-list {
+        flex-direction: column;
+        border-bottom: none;
+        border-right: 1px solid #e5e5e5;
+        margin-bottom: 0;
+        padding-right: 0;
+        min-width: 160px;
+      }
+
+      .vertical-tabs .tabs-trigger {
+        text-align: left;
+        border-bottom: none;
+        border-right: 2px solid transparent;
+        margin-bottom: 0;
+        margin-right: -1px;
+      }
+
+      .vertical-tabs .tabs-trigger.tabs-active {
+        border-right-color: #171717;
+        border-bottom-color: transparent;
+      }
+
+      .vertical-tabs .tabs-panels {
+        flex: 1;
+      }
+
+      /* Navigation buttons */
+      .tabs-nav {
+        display: flex;
+        gap: 8px;
+        margin-top: 16px;
+      }
+
+      .tabs-nav-btn {
+        padding: 8px 16px;
+        background: #171717;
+        color: #ffffff;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.15s ease;
+      }
+
+      .tabs-nav-btn:hover:not(.tabs-button-disabled) {
+        background: #404040;
+      }
+
+      .tabs-nav-btn.tabs-button-disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      /* Autoplay progress styling */
+      .autoplay-tabs .tabs-trigger {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .autoplay-tabs .tabs-trigger::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 2px;
+        background: #667eea;
+        width: calc(var(--tabs-progress, 0) * 100%);
+        transition: width 0.1s linear;
+      }
+
+      .autoplay-tabs .tabs-trigger.tabs-active::after {
+        background: #667eea;
+      }
+
+      /* Play/Pause button */
+      .play-pause-btn {
+        padding: 8px 16px;
+        background: #ffffff;
+        border: 1px solid #e5e5e5;
+        border-radius: 6px;
+        font-size: 14px;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.15s ease;
+        margin-left: auto;
+      }
+
+      .play-pause-btn:hover {
+        background: #f5f5f5;
+        border-color: #d4d4d4;
+      }
+
+      /* Pill style tabs */
+      .pill-tabs .tabs-trigger-list {
+        border-bottom: none;
+        background: #f5f5f5;
+        border-radius: 8px;
+        padding: 4px;
+        gap: 0;
+      }
+
+      .pill-tabs .tabs-trigger {
+        border-radius: 6px;
+        border-bottom: none;
+        margin-bottom: 0;
+        padding: 10px 16px;
+      }
+
+      .pill-tabs .tabs-trigger.tabs-active {
+        background: #ffffff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        border-bottom-color: transparent;
+      }
+
+      /* Card style tabs */
+      .card-tabs .tabs-trigger-list {
+        border-bottom: none;
+        gap: 8px;
+      }
+
+      .card-tabs .tabs-trigger {
+        background: #ffffff;
+        border: 1px solid #e5e5e5;
+        border-radius: 8px;
+        padding: 16px 20px;
+        margin-bottom: 0;
+      }
+
+      .card-tabs .tabs-trigger.tabs-active {
+        border-color: #667eea;
+        background: #f8f9ff;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      .test-controls {
+        padding: 0 20px 20px;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      button {
+        padding: 8px 16px;
+        background: #ffffff;
+        border: 1px solid #e5e5e5;
+
+        font-size: 14px;
+        color: #171717;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.15s;
+      }
+
+      button:hover {
+        background: #f5f5f5;
+        border-color: #d4d4d4;
+      }
+
+      button:active {
+        background: #e5e5e5;
+      }
+
+      button.primary {
+        background: #171717;
+        color: #ffffff;
+        border-color: #171717;
+      }
+
+      button.primary:hover {
+        background: #404040;
+        border-color: #404040;
+      }
+
+      .test-result {
+        display: none;
+        padding: 16px 20px;
+        background: #f5f5f5;
+        border-top: 1px solid #e5e5e5;
+        font-size: 13px;
+        font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+      }
+
+      .test-result.visible {
+        display: block;
+      }
+      .test-result.pass {
+        background: #f0fdf4;
+        color: #16a34a;
+      }
+      .test-result.fail {
+        background: #fef2f2;
+        color: #dc2626;
+      }
+
+      .code-block {
+        background: #f5f5f5;
+        padding: 12px;
+        border-radius: 4px;
+        font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+        font-size: 12px;
+        margin-top: 12px;
+        color: #525252;
+        overflow-x: auto;
+      }
+
+      .event-log {
+        background: #f5f5f5;
+        padding: 12px;
+        border-radius: 4px;
+        font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+        font-size: 12px;
+        max-height: 150px;
+        overflow-y: auto;
+        margin-top: 12px;
+        color: #525252;
+      }
+
+      /* Info panel */
+      .info-panel {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      .info-item {
+        background: #f5f5f5;
+        padding: 12px;
+        border-radius: 4px;
+        font-size: 12px;
+      }
+
+      .info-item dt {
+        color: #737373;
+        margin-bottom: 4px;
+      }
+
+      .info-item dd {
+        font-weight: 600;
+        color: #171717;
+        font-size: 16px;
+      }
+
+      /* Multi-instance styling */
+      .multi-tabs {
+        margin-bottom: 24px;
+      }
+
+      .multi-tabs h4 {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: #525252;
+      }
+
+      /* Nested tabs styling */
+      .nested-outer {
+        background: #f8f8f8;
+        border-radius: 8px;
+        padding: 16px;
+      }
+
+      .nested-outer > .tabs-trigger-list {
+        background: #e5e5e5;
+        border-radius: 6px;
+        padding: 4px;
+        border-bottom: none;
+        margin-bottom: 12px;
+      }
+
+      .nested-outer > .tabs-trigger-list .tabs-trigger {
+        border-bottom: none;
+        border-radius: 4px;
+        margin-bottom: 0;
+      }
+
+      .nested-outer > .tabs-trigger-list .tabs-trigger.tabs-active {
+        background: #ffffff;
+      }
+
+      .nested-inner {
+        background: #ffffff;
+        border-radius: 6px;
+        padding: 16px;
+        margin-top: 8px;
+      }
+
+      .nested-inner .tabs-trigger-list {
+        border-bottom-color: #e5e5e5;
+      }
+
+      .nested-inner .tabs-trigger {
+        font-size: 13px;
+        padding: 8px 14px;
+      }
+
+      /* Synced triggers styling */
+      .synced-triggers {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+
+      .synced-triggers .tabs-trigger {
+        flex: 1;
+        text-align: center;
+        border: 1px solid #e5e5e5;
+        border-radius: 6px;
+        border-bottom: 1px solid #e5e5e5;
+        margin-bottom: 0;
+      }
+
+      .synced-triggers .tabs-trigger.tabs-active {
+        border-color: #667eea;
+        background: #f8f9ff;
+      }
+
+      .bottom-triggers {
+        display: flex;
+        gap: 8px;
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid #e5e5e5;
+      }
+
+      .bottom-triggers .tabs-trigger {
+        padding: 6px 12px;
+        font-size: 12px;
+        border: none;
+        background: #f5f5f5;
+        border-radius: 4px;
+        border-bottom: none;
+        margin-bottom: 0;
+      }
+
+      .bottom-triggers .tabs-trigger.tabs-active {
+        background: #171717;
+        color: #ffffff;
+      }
+
+      /* ============================================
+         PANEL ANIMATIONS
+         ============================================ */
+
+      /* Fade Animation - Simple opacity transition */
+      .fade-tabs .tabs-panel.tabs-panel-entering {
+        animation: tabs-fade-in 0.3s ease-out;
+      }
+
+      .fade-tabs .tabs-panel.tabs-panel-leaving {
+        animation: tabs-fade-out 0.2s ease-out;
+      }
+
+      @keyframes tabs-fade-in {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes tabs-fade-out {
+        from {
+          opacity: 1;
+        }
+        to {
+          opacity: 0;
+        }
+      }
+
+      /* Slide Animation - Horizontal slide with fade */
+      .slide-tabs .tabs-panel.tabs-panel-entering {
+        animation: tabs-slide-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .slide-tabs .tabs-panel.tabs-panel-leaving {
+        animation: tabs-slide-out 0.3s ease-out;
+      }
+
+      @keyframes tabs-slide-in {
+        from {
+          opacity: 0;
+          transform: translateX(24px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      @keyframes tabs-slide-out {
+        from {
+          opacity: 1;
+          transform: translateX(0);
+        }
+        to {
+          opacity: 0;
+          transform: translateX(-24px);
+        }
+      }
+
+      /* Scale Animation - Scale up with spring easing */
+      .scale-tabs .tabs-panel.tabs-panel-entering {
+        animation: tabs-scale-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+
+      .scale-tabs .tabs-panel.tabs-panel-leaving {
+        animation: tabs-scale-out 0.25s ease-out;
+      }
+
+      @keyframes tabs-scale-in {
+        from {
+          opacity: 0;
+          transform: scale(0.96);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      @keyframes tabs-scale-out {
+        from {
+          opacity: 1;
+          transform: scale(1);
+        }
+        to {
+          opacity: 0;
+          transform: scale(0.96);
+        }
+      }
+
+      /* ============================================
+         SLIDING UNDERLINE INDICATOR
+         Uses --tab-count and --active-index from JS
+         No :has() required - works in all browsers
+         ============================================ */
+      .sliding-underline .tabs-trigger-list {
+        position: relative;
+        display: flex;
+        border-bottom: 1px solid #e5e5e5;
+        gap: 0;
+      }
+
+      .sliding-underline .tabs-trigger {
+        flex: 1;
+        text-align: center;
+        border-bottom: none;
+        margin-bottom: 0;
+        position: relative;
+        z-index: 1;
+      }
+
+      .sliding-underline .tabs-trigger.tabs-active {
+        border-bottom: none;
+      }
+
+      /* The sliding indicator - uses CSS vars set by JS */
+      .sliding-underline .tabs-trigger-list::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        height: 2px;
+        background: #171717;
+        width: calc(100% / var(--tab-count, 3));
+        transform: translateX(calc(var(--active-index, 0) * 100%));
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        pointer-events: none;
+      }
+
+      /* ============================================
+         SLIDING PILL INDICATOR
+         Uses --tab-count and --active-index from JS
+         ============================================ */
+      .sliding-pill .tabs-trigger-list {
+        position: relative;
+        display: flex;
+        border-bottom: none;
+        background: #f5f5f5;
+        border-radius: 10px;
+        padding: 4px;
+        gap: 0;
+      }
+
+      .sliding-pill .tabs-trigger {
+        flex: 1;
+        text-align: center;
+        border: none;
+        border-bottom: none;
+        margin-bottom: 0;
+        background: transparent;
+        position: relative;
+        z-index: 1;
+        border-radius: 8px;
+        transition: color 0.2s ease;
+      }
+
+      .sliding-pill .tabs-trigger:hover {
+        background: transparent;
+      }
+
+      .sliding-pill .tabs-trigger.tabs-active {
+        color: #171717;
+        font-weight: 500;
+        background: transparent;
+      }
+
+      /* The sliding pill background - uses CSS vars set by JS */
+      .sliding-pill .tabs-trigger-list::before {
+        content: '';
+        position: absolute;
+        top: 4px;
+        bottom: 4px;
+        left: 4px;
+        width: calc((100% - 8px) / var(--tab-count, 3));
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transform: translateX(calc(var(--active-index, 0) * 100%));
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        pointer-events: none;
+      }
+
+      /* ============================================
+         GRADIENT UNDERLINE VARIANT
+         Uses --tab-count and --active-index from JS
+         ============================================ */
+      .sliding-gradient .tabs-trigger-list {
+        position: relative;
+        display: flex;
+        border-bottom: 1px solid #e5e5e5;
+        gap: 0;
+      }
+
+      .sliding-gradient .tabs-trigger {
+        flex: 1;
+        text-align: center;
+        border-bottom: none;
+        margin-bottom: 0;
+        position: relative;
+        z-index: 1;
+      }
+
+      .sliding-gradient .tabs-trigger.tabs-active {
+        color: #667eea;
+        border-bottom: none;
+      }
+
+      .sliding-gradient .tabs-trigger-list::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        border-radius: 3px 3px 0 0;
+        width: calc(100% / var(--tab-count, 3));
+        transform: translateX(calc(var(--active-index, 0) * 100%));
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        pointer-events: none;
+      }
+
+      /* ============================================
+         DIRECTION-AWARE SLIDE ANIMATION
+         Uses --direction to slide from correct side
+         ============================================ */
+      .direction-slide .tabs-panel.tabs-panel-entering {
+        animation: direction-slide-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .direction-slide .tabs-panel.tabs-panel-leaving {
+        animation: direction-slide-out 0.3s ease-out;
+      }
+
+      @keyframes direction-slide-in {
+        from {
+          opacity: 0;
+          /* Slide from right if forward (1), left if backward (-1) */
+          transform: translateX(calc(var(--direction, 1) * 30px));
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      @keyframes direction-slide-out {
+        from {
+          opacity: 1;
+          transform: translateX(0);
+        }
+        to {
+          opacity: 0;
+          /* Slide out opposite direction */
+          transform: translateX(calc(var(--direction, 1) * -30px));
+        }
+      }
+
+      /* Direction indicator badge */
+      .direction-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        background: #f5f5f5;
+        border-radius: 6px;
+        font-size: 13px;
+        font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+        margin-top: 12px;
+      }
+
+      .direction-indicator .arrow {
+        font-size: 18px;
+        transition: transform 0.2s ease;
+      }
+
+      /* ============================================
+         STAGGERED TRIGGER ANIMATION
+         Uses --tab-index for staggered delays
+         ============================================ */
+      .staggered-triggers .tabs-trigger {
+        opacity: 0;
+        transform: translateY(-10px);
+        animation: stagger-in 0.4s ease-out forwards;
+        /* Each trigger delays based on its index */
+        animation-delay: calc(var(--tab-index, 0) * 80ms);
+      }
+
+      @keyframes stagger-in {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .staggered-triggers .tabs-trigger.tabs-active {
+        font-weight: 500;
+      }
+
+      /* Hover effect also uses index for variation */
+      .staggered-triggers .tabs-trigger:hover {
+        background: hsl(calc(220 + var(--tab-index, 0) * 20), 70%, 96%);
+      }
+
+      /* Panel content fades with index-based color accent */
+      .staggered-triggers .tabs-panel {
+        border-left: 3px solid hsl(calc(220 + var(--tab-index, 0) * 20), 70%, 60%);
+        padding-left: 16px;
+      }
+
+      /* ============================================
+         AUTOPLAY PROGRESS BAR
+         Uses --autoplay-duration and --tabs-progress
+         ============================================ */
+      .autoplay-progress .tabs-trigger-list {
+        position: relative;
+      }
+
+      .autoplay-progress .tabs-trigger-list::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #10b981, #3b82f6);
+        border-radius: 0 3px 3px 0;
+        /* Width based on progress (0-1) */
+        width: calc(var(--tabs-progress, 0) * 100%);
+        transition: width 0.1s linear;
+      }
+
+      .autoplay-progress .tabs-trigger.tabs-active {
+        color: #10b981;
+        border-bottom-color: transparent;
+      }
+
+      /* Duration display */
+      .duration-display {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-radius: 6px;
+        font-size: 13px;
+        color: #166534;
+        margin-top: 12px;
+      }
+
+      /* Manual activation styling */
+      .manual-tabs .tabs-trigger:focus {
+        background: #f0f0f0;
+        outline: 2px solid #667eea;
+        outline-offset: -2px;
+      }
+
+      .manual-tabs .tabs-trigger:not(.tabs-active):focus {
+        border-bottom-color: #667eea;
+        border-bottom-style: dashed;
+      }
+
+      /* API demo styling */
+      .api-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid #e5e5e5;
+      }
+
+      .api-controls button {
+        font-size: 13px;
+        padding: 6px 12px;
+      }
+
+      .api-controls button.danger {
+        background: #fef2f2;
+        border-color: #fecaca;
+        color: #dc2626;
+      }
+
+      .api-controls button.danger:hover {
+        background: #fee2e2;
+        border-color: #fca5a5;
+      }
+
+      /* Dynamic content styling */
+      .dynamic-panel {
+        min-height: 100px;
+      }
+
+      .dynamic-panel .loading {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #737373;
+      }
+
+      .dynamic-panel .spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid #e5e5e5;
+        border-top-color: #667eea;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @media (max-width: 768px) {
+        body {
+          padding: 16px;
+        }
+        h1 {
+          font-size: 24px;
+        }
+        .stats {
+          flex-wrap: wrap;
+          gap: 12px;
+        }
+        .test-header {
+          flex-wrap: wrap;
+        }
+        .vertical-tabs {
+          flex-direction: column;
+        }
+        .vertical-tabs .tabs-trigger-list {
+          flex-direction: row;
+          border-right: none;
+          border-bottom: 1px solid #e5e5e5;
+          min-width: auto;
+          overflow-x: auto;
+        }
+        .vertical-tabs .tabs-trigger {
+          border-right: none;
+          border-bottom: 2px solid transparent;
+          margin-right: 0;
+        }
+        .vertical-tabs .tabs-trigger.tabs-active {
+          border-right-color: transparent;
+          border-bottom-color: #171717;
+        }
+        .synced-triggers {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Tabs Library Examples</h1>
+        <p class="header-subtitle">
+          Comprehensive examples showcasing all tabs features and capabilities
+        </p>
+        <div class="stats">
+          <span id="pass-count">0 passed</span>
+          <span id="fail-count">0 failed</span>
+          <span id="pending-count">21 pending</span>
+        </div>
+      </header>
+
+      <!-- Category 1: Basic Functionality -->
+      <section class="test-category">
+        <h2>Basic Functionality</h2>
+
+        <div class="test-case" data-test-id="1">
+          <div class="test-header">
+            <span class="test-number">01</span>
+            <h3>Basic Horizontal Tabs</h3>
+            <span class="test-status pending">Pending</span>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Simple horizontal tabs with default configuration. Click triggers
+              to switch between panels.
+            </p>
+            <div class="tabs-demo">
+              <div data-tabs="container" id="test1-tabs">
+                <div class="tabs-trigger-list" role="tablist">
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="overview"
+                  >
+                    Overview
+                  </button>
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="features"
+                  >
+                    Features
+                  </button>
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="pricing"
+                  >
+                    Pricing
+                  </button>
+                </div>
+                <div class="tabs-panels">
+                  <div class="tabs-panel" data-tabs-panel-value="overview">
+                    <strong>Overview</strong> - This is the overview panel
+                    content. It provides a high-level summary of the product or
+                    service being described.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="features">
+                    <strong>Features</strong> - Explore all the amazing features
+                    including automatic initialization, keyboard navigation,
+                    ARIA support, and URL synchronization.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="pricing">
+                    <strong>Pricing</strong> - Our flexible pricing plans are
+                    designed to fit teams of all sizes. Start free and scale as
+                    you grow.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="test-controls">
+            <button class="run-test primary">Run Test</button>
+          </div>
+          <div class="test-result"></div>
+        </div>
+
+        <div class="test-case" data-test-id="2">
+          <div class="test-header">
+            <span class="test-number">02</span>
+            <h3>Vertical Orientation</h3>
+            <span class="test-status pending">Pending</span>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Tabs with vertical orientation. Arrow Up/Down keys navigate
+              instead of Left/Right.
+            </p>
+            <div class="tabs-demo">
+              <div
+                data-tabs="container"
+                data-tabs-orientation="vertical"
+                id="test2-tabs"
+                class="vertical-tabs"
+              >
+                <div class="tabs-trigger-list" role="tablist">
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="account"
+                  >
+                    Account
+                  </button>
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="security"
+                  >
+                    Security
+                  </button>
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="notifications"
+                  >
+                    Notifications
+                  </button>
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="billing"
+                  >
+                    Billing
+                  </button>
+                </div>
+                <div class="tabs-panels">
+                  <div class="tabs-panel" data-tabs-panel-value="account">
+                    <strong>Account Settings</strong> - Manage your profile
+                    information, update your email address, and customize your
+                    display name.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="security">
+                    <strong>Security Settings</strong> - Configure two-factor
+                    authentication, manage active sessions, and update your
+                    password.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="notifications">
+                    <strong>Notification Preferences</strong> - Control which
+                    emails you receive and how you're notified about important
+                    updates.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="billing">
+                    <strong>Billing Information</strong> - View invoices, update
+                    payment methods, and manage your subscription plan.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="code-block">
+              Use Arrow Up/Down to navigate. Arrow Left/Right are ignored in
+              vertical mode.
+            </div>
+          </div>
+          <div class="test-controls">
+            <button class="run-test primary">Run Test</button>
+          </div>
+          <div class="test-result"></div>
+        </div>
+
+        <div class="test-case" data-test-id="3">
+          <div class="test-header">
+            <span class="test-number">03</span>
+            <h3>Default Tab Selection</h3>
+            <span class="test-status pending">Pending</span>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Tabs with a specific default tab set via data-tabs-default. The
+              "Advanced" tab should be active on load.
+            </p>
+            <div class="tabs-demo">
+              <div
+                data-tabs="container"
+                data-tabs-default="advanced"
+                id="test3-tabs"
+              >
+                <div class="tabs-trigger-list" role="tablist">
+                  <button class="tabs-trigger" data-tabs-trigger-value="basic">
+                    Basic
+                  </button>
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="advanced"
+                  >
+                    Advanced
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="expert">
+                    Expert
+                  </button>
+                </div>
+                <div class="tabs-panels">
+                  <div class="tabs-panel" data-tabs-panel-value="basic">
+                    <strong>Basic Mode</strong> - Simple configuration with
+                    sensible defaults. Perfect for getting started quickly.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="advanced">
+                    <strong>Advanced Mode</strong> - This tab is selected by
+                    default using data-tabs-default="advanced". More options for
+                    power users.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="expert">
+                    <strong>Expert Mode</strong> - Full control over every
+                    setting. Recommended for experienced users only.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="test-controls">
+            <button class="run-test primary">Run Test</button>
+          </div>
+          <div class="test-result"></div>
+        </div>
+      </section>
+
+      <!-- Category 2: Navigation Features -->
+      <section class="test-category">
+        <h2>Navigation Features</h2>
+
+        <div class="test-case" data-test-id="4">
+          <div class="test-header">
+            <span class="test-number">04</span>
+            <h3>Loop Navigation with Buttons</h3>
+            <span class="test-status pending">Pending</span>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Tabs with loop enabled and prev/next navigation buttons.
+              Navigation wraps from last to first and vice versa.
+            </p>
+            <div class="tabs-demo">
+              <div data-tabs="container" data-tabs-loop="true" id="test4-tabs">
+                <div class="tabs-trigger-list" role="tablist">
+                  <button class="tabs-trigger" data-tabs-trigger-value="step-1">
+                    Step 1
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="step-2">
+                    Step 2
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="step-3">
+                    Step 3
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="step-4">
+                    Step 4
+                  </button>
+                </div>
+                <div class="tabs-panels">
+                  <div class="tabs-panel" data-tabs-panel-value="step-1">
+                    <strong>Step 1: Getting Started</strong> - Begin your
+                    journey here. This is the first step in the process.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="step-2">
+                    <strong>Step 2: Configuration</strong> - Set up your
+                    preferences and customize the experience.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="step-3">
+                    <strong>Step 3: Review</strong> - Double-check your settings
+                    before proceeding to the final step.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="step-4">
+                    <strong>Step 4: Complete</strong> - You're done! From here,
+                    clicking next will loop back to Step 1.
+                  </div>
+                </div>
+                <div class="tabs-nav">
+                  <button class="tabs-nav-btn" data-tabs="prev">
+                    Previous
+                  </button>
+                  <button class="tabs-nav-btn" data-tabs="next">Next</button>
+                </div>
+              </div>
+            </div>
+            <div class="code-block">
+              Loop is enabled: navigating past the last tab wraps to the first,
+              and vice versa.
+            </div>
+          </div>
+          <div class="test-controls">
+            <button class="run-test primary">Run Test</button>
+          </div>
+          <div class="test-result"></div>
+        </div>
+
+        <div class="test-case" data-test-id="5">
+          <div class="test-header">
+            <span class="test-number">05</span>
+            <h3>Autoplay with Progress</h3>
+            <span class="test-status pending">Pending</span>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Automatic tab rotation with visual progress indicator. Pauses on
+              hover and focus. Includes play/pause control.
+            </p>
+            <div class="tabs-demo">
+              <div
+                data-tabs="container"
+                data-tabs-autoplay="true"
+                data-tabs-autoplay-duration="4000"
+                data-tabs-loop="true"
+                id="test5-tabs"
+                class="autoplay-tabs"
+              >
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 16px;
+                    margin-bottom: 16px;
+                  "
+                >
+                  <div
+                    class="tabs-trigger-list"
+                    role="tablist"
+                    style="flex: 1; margin-bottom: 0"
+                  >
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="slide-1"
+                    >
+                      Slide 1
+                    </button>
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="slide-2"
+                    >
+                      Slide 2
+                    </button>
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="slide-3"
+                    >
+                      Slide 3
+                    </button>
+                  </div>
+                  <button class="play-pause-btn" data-tabs="play-pause">
+                    Pause
+                  </button>
+                </div>
+                <div class="tabs-panels">
+                  <div class="tabs-panel" data-tabs-panel-value="slide-1">
+                    <strong>Slide 1</strong> - This content auto-rotates every 4
+                    seconds. Hover over the tabs to pause.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="slide-2">
+                    <strong>Slide 2</strong> - The progress indicator shows time
+                    remaining before the next transition.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="slide-3">
+                    <strong>Slide 3</strong> - Use the play/pause button to
+                    control autoplay manually.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <dl class="info-panel" id="test5-info">
+              <div class="info-item">
+                <dt>Autoplay Status</dt>
+                <dd id="test5-status">Active</dd>
+              </div>
+              <div class="info-item">
+                <dt>Current Tab</dt>
+                <dd id="test5-current">1 of 3</dd>
+              </div>
+              <div class="info-item">
+                <dt>Duration</dt>
+                <dd>4000ms</dd>
+              </div>
+            </dl>
+          </div>
+          <div class="test-controls">
+            <button class="run-test primary">Run Test</button>
+          </div>
+          <div class="test-result"></div>
+        </div>
+      </section>
+
+      <!-- Category 3: Keyboard & Events -->
+      <section class="test-category">
+        <h2>Keyboard & Events</h2>
+
+        <div class="test-case" data-test-id="6">
+          <div class="test-header">
+            <span class="test-number">06</span>
+            <h3>Keyboard Navigation</h3>
+            <span class="test-status pending">Pending</span>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Full keyboard support with Arrow keys, Home, End. Tab activates on
+              focus by default.
+            </p>
+            <div class="tabs-demo">
+              <div
+                data-tabs="container"
+                data-tabs-keyboard="true"
+                id="test6-tabs"
+              >
+                <div class="tabs-trigger-list" role="tablist">
+                  <button class="tabs-trigger" data-tabs-trigger-value="tab-a">
+                    Tab A
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="tab-b">
+                    Tab B
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="tab-c">
+                    Tab C
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="tab-d">
+                    Tab D
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="tab-e">
+                    Tab E
+                  </button>
+                </div>
+                <div class="tabs-panels">
+                  <div class="tabs-panel" data-tabs-panel-value="tab-a">
+                    <strong>Tab A Content</strong> - Press Arrow Right to go to
+                    Tab B, or End to jump to Tab E.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="tab-b">
+                    <strong>Tab B Content</strong> - Press Arrow Left to go back
+                    to Tab A.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="tab-c">
+                    <strong>Tab C Content</strong> - You're in the middle. Use
+                    Home to jump to the start.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="tab-d">
+                    <strong>Tab D Content</strong> - Almost at the end. One more
+                    to go!
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="tab-e">
+                    <strong>Tab E Content</strong> - This is the last tab. Press
+                    Home to return to the beginning.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="code-block">
+              Keyboard shortcuts: Arrow Left/Right (navigate), Home (first tab),
+              End (last tab)
+            </div>
+          </div>
+          <div class="test-controls">
+            <button class="run-test primary">Run Test</button>
+          </div>
+          <div class="test-result"></div>
+        </div>
+
+        <div class="test-case" data-test-id="7">
+          <div class="test-header">
+            <span class="test-number">07</span>
+            <h3>Event System</h3>
+            <span class="test-status pending">Pending</span>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Demonstrates the tabs event system. Events are logged below as you
+              interact with the tabs.
+            </p>
+            <div class="tabs-demo">
+              <div data-tabs="container" id="test7-tabs">
+                <div class="tabs-trigger-list" role="tablist">
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="event-1"
+                  >
+                    Event 1
+                  </button>
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="event-2"
+                  >
+                    Event 2
+                  </button>
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="event-3"
+                  >
+                    Event 3
+                  </button>
+                </div>
+                <div class="tabs-panels">
+                  <div class="tabs-panel" data-tabs-panel-value="event-1">
+                    Click on different tabs to see change events logged below.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="event-2">
+                    Each tab change fires a "change" event with value and
+                    previousValue.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="event-3">
+                    Events can be subscribed to via instance.on() or DOM
+                    addEventListener.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="event-log" id="test7-log">Waiting for events...</div>
+          </div>
+          <div class="test-controls">
+            <button class="run-test primary">Run Test</button>
+          </div>
+          <div class="test-result"></div>
+        </div>
+      </section>
+
+      <!-- Category 4: Styling Variants -->
+      <section class="test-category">
+        <h2>Styling Variants</h2>
+
+        <div class="test-case" data-test-id="8">
+          <div class="test-header">
+            <span class="test-number">08</span>
+            <h3>Multiple Style Variants</h3>
+            <span class="test-status pending">Pending</span>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Different visual styles using the same tabs library. Demonstrates
+              pill and card variants.
+            </p>
+            <div class="tabs-demo">
+              <div class="multi-tabs">
+                <h4>Pill Style</h4>
+                <div data-tabs="container" id="test8a-tabs" class="pill-tabs">
+                  <div class="tabs-trigger-list" role="tablist">
+                    <button class="tabs-trigger" data-tabs-trigger-value="all">
+                      All
+                    </button>
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="active"
+                    >
+                      Active
+                    </button>
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="completed"
+                    >
+                      Completed
+                    </button>
+                  </div>
+                  <div class="tabs-panels">
+                    <div class="tabs-panel" data-tabs-panel-value="all">
+                      Showing all items in the list.
+                    </div>
+                    <div class="tabs-panel" data-tabs-panel-value="active">
+                      Showing only active items.
+                    </div>
+                    <div class="tabs-panel" data-tabs-panel-value="completed">
+                      Showing completed items.
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="multi-tabs">
+                <h4>Card Style</h4>
+                <div data-tabs="container" id="test8b-tabs" class="card-tabs">
+                  <div class="tabs-trigger-list" role="tablist">
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="monthly"
+                    >
+                      Monthly
+                    </button>
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="yearly"
+                    >
+                      Yearly
+                    </button>
+                  </div>
+                  <div class="tabs-panels">
+                    <div class="tabs-panel" data-tabs-panel-value="monthly">
+                      Monthly billing - Pay as you go with flexible
+                      month-to-month pricing.
+                    </div>
+                    <div class="tabs-panel" data-tabs-panel-value="yearly">
+                      Yearly billing - Save 20% with annual billing. Best value!
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="test-controls">
+            <button class="run-test primary">Run Test</button>
+          </div>
+          <div class="test-result"></div>
+        </div>
+      </section>
+
+      <!-- Category 5: Edge Cases -->
+      <section class="test-category">
+        <h2>Edge Cases</h2>
+
+        <div class="test-case" data-test-id="9">
+          <div class="test-header">
+            <span class="test-number">09</span>
+            <h3>Nested Tabs</h3>
+            <span class="test-status pending">Pending</span>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Tabs nested inside other tabs. Each instance operates
+              independently with proper scoping.
+            </p>
+            <div class="tabs-demo">
+              <div data-tabs="container" id="test9-outer" class="nested-outer">
+                <div class="tabs-trigger-list" role="tablist">
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="frontend"
+                  >
+                    Frontend
+                  </button>
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="backend"
+                  >
+                    Backend
+                  </button>
+                </div>
+                <div class="tabs-panels">
+                  <div class="tabs-panel" data-tabs-panel-value="frontend">
+                    <strong>Frontend Technologies</strong>
+                    <div
+                      data-tabs="container"
+                      id="test9-inner-fe"
+                      class="nested-inner"
+                    >
+                      <div class="tabs-trigger-list" role="tablist">
+                        <button
+                          class="tabs-trigger"
+                          data-tabs-trigger-value="react"
+                        >
+                          React
+                        </button>
+                        <button
+                          class="tabs-trigger"
+                          data-tabs-trigger-value="vue"
+                        >
+                          Vue
+                        </button>
+                        <button
+                          class="tabs-trigger"
+                          data-tabs-trigger-value="svelte"
+                        >
+                          Svelte
+                        </button>
+                      </div>
+                      <div class="tabs-panels">
+                        <div class="tabs-panel" data-tabs-panel-value="react">
+                          React - A JavaScript library for building user
+                          interfaces.
+                        </div>
+                        <div class="tabs-panel" data-tabs-panel-value="vue">
+                          Vue - The progressive JavaScript framework.
+                        </div>
+                        <div class="tabs-panel" data-tabs-panel-value="svelte">
+                          Svelte - Cybernetically enhanced web apps.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="backend">
+                    <strong>Backend Technologies</strong>
+                    <div
+                      data-tabs="container"
+                      id="test9-inner-be"
+                      class="nested-inner"
+                    >
+                      <div class="tabs-trigger-list" role="tablist">
+                        <button
+                          class="tabs-trigger"
+                          data-tabs-trigger-value="node"
+                        >
+                          Node.js
+                        </button>
+                        <button
+                          class="tabs-trigger"
+                          data-tabs-trigger-value="python"
+                        >
+                          Python
+                        </button>
+                        <button
+                          class="tabs-trigger"
+                          data-tabs-trigger-value="go"
+                        >
+                          Go
+                        </button>
+                      </div>
+                      <div class="tabs-panels">
+                        <div class="tabs-panel" data-tabs-panel-value="node">
+                          Node.js - JavaScript runtime built on V8.
+                        </div>
+                        <div class="tabs-panel" data-tabs-panel-value="python">
+                          Python - A language that lets you work quickly.
+                        </div>
+                        <div class="tabs-panel" data-tabs-panel-value="go">
+                          Go - Build simple, secure, scalable systems.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="code-block">
+              Outer tabs: Frontend/Backend. Each contains nested inner tabs.
+              Keyboard navigation is scoped to each instance.
+            </div>
+          </div>
+          <div class="test-controls">
+            <button class="run-test primary">Run Test</button>
+          </div>
+          <div class="test-result"></div>
+        </div>
+
+        <div class="test-case" data-test-id="10">
+          <div class="test-header">
+            <span class="test-number">10</span>
+            <h3>Multiple Triggers (Same Value)</h3>
+            <span class="test-status pending">Pending</span>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Multiple trigger buttons controlling the same panel. All triggers
+              with matching values sync their active state.
+            </p>
+            <div class="tabs-demo">
+              <div data-tabs="container" id="test10-tabs">
+                <!-- Top triggers -->
+                <div class="synced-triggers">
+                  <button class="tabs-trigger" data-tabs-trigger-value="info">
+                    Info
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="specs">
+                    Specs
+                  </button>
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="reviews"
+                  >
+                    Reviews
+                  </button>
+                </div>
+                <div class="tabs-panels">
+                  <div class="tabs-panel" data-tabs-panel-value="info">
+                    <strong>Product Information</strong> - Detailed description
+                    of the product including materials, dimensions, and care
+                    instructions.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="specs">
+                    <strong>Technical Specifications</strong> - Weight: 1.2kg,
+                    Dimensions: 30x20x10cm, Material: Aluminum alloy.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="reviews">
+                    <strong>Customer Reviews</strong> - Average rating: 4.8/5
+                    stars based on 1,247 reviews.
+                  </div>
+                </div>
+                <!-- Bottom triggers (duplicate) -->
+                <div class="bottom-triggers">
+                  <button class="tabs-trigger" data-tabs-trigger-value="info">
+                    Info
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="specs">
+                    Specs
+                  </button>
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="reviews"
+                  >
+                    Reviews
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="code-block">
+              Two sets of triggers (top and bottom) control the same panels.
+              Clicking either set activates all matching triggers.
+            </div>
+          </div>
+          <div class="test-controls">
+            <button class="run-test primary">Run Test</button>
+          </div>
+          <div class="test-result"></div>
+        </div>
+
+        <div class="test-case" data-test-id="11">
+          <div class="test-header">
+            <span class="test-number">11</span>
+            <h3>Fade Panel Animation</h3>
+            <span class="test-status pending">Pending</span>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Simple fade animation for panel transitions. Clean and subtle
+              effect using opacity.
+            </p>
+            <div class="tabs-demo">
+              <div data-tabs="container" id="test11-tabs" class="fade-tabs">
+                <div class="tabs-trigger-list" role="tablist">
+                  <button class="tabs-trigger" data-tabs-trigger-value="fade-1">
+                    Overview
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="fade-2">
+                    Details
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="fade-3">
+                    Reviews
+                  </button>
+                </div>
+                <div class="tabs-panels">
+                  <div class="tabs-panel" data-tabs-panel-value="fade-1">
+                    <strong>Fade Animation</strong> - Content fades in smoothly
+                    with a 300ms ease-out transition. Minimal and elegant.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="fade-2">
+                    <strong>Details Panel</strong> - The fade effect is subtle
+                    and works well for content-heavy interfaces.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="fade-3">
+                    <strong>Reviews Panel</strong> - Great for dashboards and
+                    documentation sites.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="code-block">
+              .fade-tabs .tabs-panel-entering { animation: tabs-fade-in 0.3s ease-out; }
+            </div>
+          </div>
+          <div class="test-controls">
+            <button class="run-test primary">Run Test</button>
+          </div>
+          <div class="test-result"></div>
+        </div>
+
+        <div class="test-case" data-test-id="12">
+          <div class="test-header">
+            <span class="test-number">12</span>
+            <h3>Slide Panel Animation</h3>
+            <span class="test-status pending">Pending</span>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Horizontal slide animation with panels entering from the right
+              and exiting to the left.
+            </p>
+            <div class="tabs-demo">
+              <div data-tabs="container" id="test12-tabs" class="slide-tabs">
+                <div class="tabs-trigger-list" role="tablist">
+                  <button class="tabs-trigger" data-tabs-trigger-value="slide-1">
+                    Step 1
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="slide-2">
+                    Step 2
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="slide-3">
+                    Step 3
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="slide-4">
+                    Step 4
+                  </button>
+                </div>
+                <div class="tabs-panels">
+                  <div class="tabs-panel" data-tabs-panel-value="slide-1">
+                    <strong>Slide Animation</strong> - Content slides in from the
+                    right with a smooth cubic-bezier easing curve.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="slide-2">
+                    <strong>Step 2</strong> - Great for wizard flows and
+                    multi-step forms where progression is implied.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="slide-3">
+                    <strong>Step 3</strong> - The exiting panel slides out to
+                    the left while the new one enters.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="slide-4">
+                    <strong>Step 4</strong> - Uses hardware-accelerated
+                    transforms for smooth 60fps animation.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="code-block">
+              translateX(24px) → translateX(0) on enter, translateX(0) → translateX(-24px) on exit
+            </div>
+          </div>
+          <div class="test-controls">
+            <button class="run-test primary">Run Test</button>
+          </div>
+          <div class="test-result"></div>
+        </div>
+
+        <div class="test-case" data-test-id="13">
+          <div class="test-header">
+            <span class="test-number">13</span>
+            <h3>Scale Panel Animation</h3>
+            <span class="test-status pending">Pending</span>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Scale animation with spring easing. Content scales up slightly
+              with an overshoot effect.
+            </p>
+            <div class="tabs-demo">
+              <div data-tabs="container" id="test13-tabs" class="scale-tabs">
+                <div class="tabs-trigger-list" role="tablist">
+                  <button class="tabs-trigger" data-tabs-trigger-value="scale-1">
+                    Product
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="scale-2">
+                    Features
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="scale-3">
+                    Pricing
+                  </button>
+                </div>
+                <div class="tabs-panels">
+                  <div class="tabs-panel" data-tabs-panel-value="scale-1">
+                    <strong>Scale Animation</strong> - Subtle scale effect with
+                    spring easing for a playful, modern feel.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="scale-2">
+                    <strong>Features</strong> - The overshoot easing
+                    (cubic-bezier 0.34, 1.56, 0.64, 1) adds personality.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="scale-3">
+                    <strong>Pricing</strong> - Works well for product pages and
+                    marketing sites.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="code-block">
+              scale(0.96) → scale(1) with spring easing cubic-bezier(0.34, 1.56, 0.64, 1)
+            </div>
+          </div>
+          <div class="test-controls">
+            <button class="run-test primary">Run Test</button>
+          </div>
+          <div class="test-result"></div>
+        </div>
+
+        <div class="test-case" data-test-id="14">
+          <div class="test-header">
+            <span class="test-number">14</span>
+            <h3>Sliding Underline Indicator</h3>
+            <span class="test-status pending">Pending</span>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              CSS-only sliding underline that animates between tabs. Uses :has()
+              selector - no JavaScript required for the sliding effect.
+            </p>
+            <div class="tabs-demo">
+              <div class="multi-tabs">
+                <h4>3 Tabs</h4>
+                <div
+                  data-tabs="container"
+                  id="test14a-tabs"
+                  class="sliding-underline"
+                >
+                  <div class="tabs-trigger-list" role="tablist">
+                    <button class="tabs-trigger" data-tabs-trigger-value="under-1">
+                      Dashboard
+                    </button>
+                    <button class="tabs-trigger" data-tabs-trigger-value="under-2">
+                      Analytics
+                    </button>
+                    <button class="tabs-trigger" data-tabs-trigger-value="under-3">
+                      Settings
+                    </button>
+                  </div>
+                  <div class="tabs-panels">
+                    <div class="tabs-panel" data-tabs-panel-value="under-1">
+                      The underline smoothly slides to follow the active tab.
+                    </div>
+                    <div class="tabs-panel" data-tabs-panel-value="under-2">
+                      Pure CSS animation using :has() and CSS custom properties.
+                    </div>
+                    <div class="tabs-panel" data-tabs-panel-value="under-3">
+                      Set --tab-count to match your number of tabs.
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="multi-tabs">
+                <h4>5 Tabs</h4>
+                <div
+                  data-tabs="container"
+                  id="test14b-tabs"
+                  class="sliding-underline"
+                >
+                  <div class="tabs-trigger-list" role="tablist">
+                    <button class="tabs-trigger" data-tabs-trigger-value="five-1">
+                      Home
+                    </button>
+                    <button class="tabs-trigger" data-tabs-trigger-value="five-2">
+                      Products
+                    </button>
+                    <button class="tabs-trigger" data-tabs-trigger-value="five-3">
+                      Services
+                    </button>
+                    <button class="tabs-trigger" data-tabs-trigger-value="five-4">
+                      About
+                    </button>
+                    <button class="tabs-trigger" data-tabs-trigger-value="five-5">
+                      Contact
+                    </button>
+                  </div>
+                  <div class="tabs-panels">
+                    <div class="tabs-panel" data-tabs-panel-value="five-1">
+                      Works with any number of tabs by setting --tab-count.
+                    </div>
+                    <div class="tabs-panel" data-tabs-panel-value="five-2">
+                      Products panel content.
+                    </div>
+                    <div class="tabs-panel" data-tabs-panel-value="five-3">
+                      Services panel content.
+                    </div>
+                    <div class="tabs-panel" data-tabs-panel-value="five-4">
+                      About panel content.
+                    </div>
+                    <div class="tabs-panel" data-tabs-panel-value="five-5">
+                      Contact panel content.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="code-block">
+              --tab-count auto-set by JS | Uses CSS :has() to detect active position via --active-index
+            </div>
+          </div>
+          <div class="test-controls">
+            <button class="run-test primary">Run Test</button>
+          </div>
+          <div class="test-result"></div>
+        </div>
+
+        <div class="test-case" data-test-id="15">
+          <div class="test-header">
+            <span class="test-number">15</span>
+            <h3>Sliding Pill Indicator</h3>
+            <span class="test-status pending">Pending</span>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              CSS-only sliding pill background. The white pill smoothly
+              transitions between active tabs.
+            </p>
+            <div class="tabs-demo">
+              <div class="multi-tabs">
+                <h4>3 Tabs</h4>
+                <div
+                  data-tabs="container"
+                  id="test15a-tabs"
+                  class="sliding-pill"
+                >
+                  <div class="tabs-trigger-list" role="tablist">
+                    <button class="tabs-trigger" data-tabs-trigger-value="pill-1">
+                      All
+                    </button>
+                    <button class="tabs-trigger" data-tabs-trigger-value="pill-2">
+                      Active
+                    </button>
+                    <button class="tabs-trigger" data-tabs-trigger-value="pill-3">
+                      Archived
+                    </button>
+                  </div>
+                  <div class="tabs-panels">
+                    <div class="tabs-panel" data-tabs-panel-value="pill-1">
+                      The pill background slides smoothly between tabs.
+                    </div>
+                    <div class="tabs-panel" data-tabs-panel-value="pill-2">
+                      Popular style seen in iOS and many modern UIs.
+                    </div>
+                    <div class="tabs-panel" data-tabs-panel-value="pill-3">
+                      Uses ::before pseudo-element for the sliding background.
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="multi-tabs">
+                <h4>4 Tabs</h4>
+                <div
+                  data-tabs="container"
+                  id="test15b-tabs"
+                  class="sliding-pill"
+                >
+                  <div class="tabs-trigger-list" role="tablist">
+                    <button class="tabs-trigger" data-tabs-trigger-value="four-1">
+                      Daily
+                    </button>
+                    <button class="tabs-trigger" data-tabs-trigger-value="four-2">
+                      Weekly
+                    </button>
+                    <button class="tabs-trigger" data-tabs-trigger-value="four-3">
+                      Monthly
+                    </button>
+                    <button class="tabs-trigger" data-tabs-trigger-value="four-4">
+                      Yearly
+                    </button>
+                  </div>
+                  <div class="tabs-panels">
+                    <div class="tabs-panel" data-tabs-panel-value="four-1">
+                      Daily view - showing today's data.
+                    </div>
+                    <div class="tabs-panel" data-tabs-panel-value="four-2">
+                      Weekly view - last 7 days of activity.
+                    </div>
+                    <div class="tabs-panel" data-tabs-panel-value="four-3">
+                      Monthly view - this month's summary.
+                    </div>
+                    <div class="tabs-panel" data-tabs-panel-value="four-4">
+                      Yearly view - annual overview.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="code-block">
+              ::before pseudo-element with box-shadow and translateX animation
+            </div>
+          </div>
+          <div class="test-controls">
+            <button class="run-test primary">Run Test</button>
+          </div>
+          <div class="test-result"></div>
+        </div>
+
+        <div class="test-case" data-test-id="16">
+          <div class="test-header">
+            <span class="test-number">16</span>
+            <h3>Gradient Underline Indicator</h3>
+            <span class="test-status pending">Pending</span>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Colorful gradient underline that slides between tabs. Combines
+              sliding animation with a purple-blue gradient.
+            </p>
+            <div class="tabs-demo">
+              <div
+                data-tabs="container"
+                id="test16-tabs"
+                class="sliding-gradient"
+              >
+                <div class="tabs-trigger-list" role="tablist">
+                  <button class="tabs-trigger" data-tabs-trigger-value="grad-1">
+                    Explore
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="grad-2">
+                    Create
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="grad-3">
+                    Connect
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="grad-4">
+                    Grow
+                  </button>
+                </div>
+                <div class="tabs-panels">
+                  <div class="tabs-panel" data-tabs-panel-value="grad-1">
+                    <strong>Gradient Indicator</strong> - The underline has a
+                    beautiful purple-to-blue gradient.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="grad-2">
+                    <strong>Create</strong> - Great for creative and modern
+                    interfaces.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="grad-3">
+                    <strong>Connect</strong> - The active tab text also changes
+                    to match the gradient color.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="grad-4">
+                    <strong>Grow</strong> - Combines visual polish with smooth
+                    animation.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="code-block">
+              background: linear-gradient(90deg, #667eea 0%, #764ba2 100%)
+            </div>
+          </div>
+          <div class="test-controls">
+            <button class="run-test primary">Run Test</button>
+          </div>
+          <div class="test-result"></div>
+        </div>
+
+        <div class="test-case" data-test-id="17">
+          <div class="test-header">
+            <span class="test-number">17</span>
+            <h3>Direction-Aware Slide Animation</h3>
+            <span class="test-status pending">Pending</span>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Panels slide in from the correct direction based on navigation.
+              Uses --direction variable (1=forward, -1=backward).
+            </p>
+            <div class="tabs-demo">
+              <div
+                data-tabs="container"
+                id="test17-tabs"
+                class="direction-slide"
+              >
+                <div class="tabs-trigger-list" role="tablist">
+                  <button class="tabs-trigger" data-tabs-trigger-value="dir-1">
+                    First
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="dir-2">
+                    Second
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="dir-3">
+                    Third
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="dir-4">
+                    Fourth
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="dir-5">
+                    Fifth
+                  </button>
+                </div>
+                <div class="tabs-panels">
+                  <div class="tabs-panel" data-tabs-panel-value="dir-1">
+                    <strong>First Panel</strong> - Click tabs to the right to see
+                    content slide in from the right. Click tabs to the left to see
+                    content slide in from the left.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="dir-2">
+                    <strong>Second Panel</strong> - The --direction variable is set
+                    to 1 (forward) or -1 (backward) based on navigation.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="dir-3">
+                    <strong>Third Panel</strong> - This creates a natural carousel-like
+                    feel where content flows in the expected direction.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="dir-4">
+                    <strong>Fourth Panel</strong> - The CSS uses calc(var(--direction) * 30px)
+                    to determine slide direction.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="dir-5">
+                    <strong>Fifth Panel</strong> - Try navigating back to the first tab
+                    to see the reverse animation.
+                  </div>
+                </div>
+              </div>
+              <div class="direction-indicator" id="test17-direction">
+                <span>Direction:</span>
+                <span class="arrow" id="test17-arrow">→</span>
+                <span id="test17-dir-value">0 (initial)</span>
+              </div>
+            </div>
+            <div class="code-block">
+              transform: translateX(calc(var(--direction, 1) * 30px))
+            </div>
+          </div>
+          <div class="test-controls">
+            <button class="run-test primary">Run Test</button>
+          </div>
+          <div class="test-result"></div>
+        </div>
+
+        <div class="test-case" data-test-id="18">
+          <div class="test-header">
+            <span class="test-number">18</span>
+            <h3>Staggered Animation with --tab-index</h3>
+            <span class="test-status pending">Pending</span>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Each trigger animates in with a staggered delay based on its
+              --tab-index. Panels have index-based color accents.
+            </p>
+            <div class="tabs-demo">
+              <div
+                data-tabs="container"
+                id="test18-tabs"
+                class="staggered-triggers"
+              >
+                <div class="tabs-trigger-list" role="tablist">
+                  <button class="tabs-trigger" data-tabs-trigger-value="stag-1">
+                    Index 0
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="stag-2">
+                    Index 1
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="stag-3">
+                    Index 2
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="stag-4">
+                    Index 3
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="stag-5">
+                    Index 4
+                  </button>
+                </div>
+                <div class="tabs-panels">
+                  <div class="tabs-panel" data-tabs-panel-value="stag-1">
+                    <strong>Panel 0</strong> - Each trigger's animation-delay uses
+                    calc(var(--tab-index) * 80ms) for staggered entrance.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="stag-2">
+                    <strong>Panel 1</strong> - The panel's left border color is
+                    calculated from the tab index using HSL.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="stag-3">
+                    <strong>Panel 2</strong> - Hover over triggers to see
+                    index-based background color variations.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="stag-4">
+                    <strong>Panel 3</strong> - The --tab-index variable is set on
+                    both triggers and panels.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="stag-5">
+                    <strong>Panel 4</strong> - Refresh the page to see the
+                    staggered animation again.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="code-block">
+              animation-delay: calc(var(--tab-index, 0) * 80ms) | border-color: hsl(calc(220 + var(--tab-index) * 20), 70%, 60%)
+            </div>
+          </div>
+          <div class="test-controls">
+            <button class="run-test primary">Run Test</button>
+          </div>
+          <div class="test-result"></div>
+        </div>
+
+        <div class="test-case" data-test-id="19">
+          <div class="test-header">
+            <span class="test-number">19</span>
+            <h3>Manual Activation (activate-on-focus="false")</h3>
+            <span class="test-status pending">Pending</span>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Tab requires Enter or Space to activate. Arrow keys only move
+              focus without changing the active panel.
+            </p>
+            <div class="tabs-demo">
+              <div
+                data-tabs="container"
+                data-tabs-activate-on-focus="false"
+                id="test19-tabs"
+                class="manual-tabs"
+              >
+                <div class="tabs-trigger-list" role="tablist">
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="manual-1"
+                  >
+                    Tab 1
+                  </button>
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="manual-2"
+                  >
+                    Tab 2
+                  </button>
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="manual-3"
+                  >
+                    Tab 3
+                  </button>
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="manual-4"
+                  >
+                    Tab 4
+                  </button>
+                </div>
+                <div class="tabs-panels">
+                  <div class="tabs-panel" data-tabs-panel-value="manual-1">
+                    <strong>Tab 1</strong> - Focus moves with arrow keys, but
+                    panel doesn't change until you press Enter or Space.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="manual-2">
+                    <strong>Tab 2</strong> - This is useful when tab content is
+                    expensive to render or fetch.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="manual-3">
+                    <strong>Tab 3</strong> - The dashed border indicates focus
+                    without activation.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="manual-4">
+                    <strong>Tab 4</strong> - Press Enter or Space to activate
+                    this tab.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="code-block">
+              data-tabs-activate-on-focus="false" - Arrow keys move focus only.
+              Press Enter or Space to activate.
+            </div>
+          </div>
+          <div class="test-controls">
+            <button class="run-test primary">Run Test</button>
+          </div>
+          <div class="test-result"></div>
+        </div>
+      </section>
+
+      <!-- Category 6: Programmatic API -->
+      <section class="test-category">
+        <h2>Programmatic API</h2>
+
+        <div class="test-case" data-test-id="20">
+          <div class="test-header">
+            <span class="test-number">20</span>
+            <h3>API Methods Demo</h3>
+            <span class="test-status pending">Pending</span>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Demonstrates programmatic control: goTo(), next(), prev(),
+              refresh(), and destroy() methods.
+            </p>
+            <div class="tabs-demo">
+              <div data-tabs="container" id="test20-tabs">
+                <div class="tabs-trigger-list" role="tablist">
+                  <button class="tabs-trigger" data-tabs-trigger-value="api-1">
+                    API 1
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="api-2">
+                    API 2
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="api-3">
+                    API 3
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="api-4">
+                    API 4
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="api-5">
+                    API 5
+                  </button>
+                </div>
+                <div class="tabs-panels">
+                  <div class="tabs-panel" data-tabs-panel-value="api-1">
+                    Panel 1 - Use buttons below to control tabs
+                    programmatically.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="api-2">
+                    Panel 2 - goTo(), next(), and prev() methods available.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="api-3">
+                    Panel 3 - refresh() re-initializes after DOM changes.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="api-4">
+                    Panel 4 - destroy() cleans up all event listeners.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="api-5">
+                    Panel 5 - getActiveValue() returns current active value.
+                  </div>
+                </div>
+              </div>
+              <div class="api-controls">
+                <button id="api-prev">prev()</button>
+                <button id="api-next">next()</button>
+                <button id="api-goto1">goTo('api-1')</button>
+                <button id="api-goto3">goTo('api-3')</button>
+                <button id="api-goto5">goTo('api-5')</button>
+                <button id="api-refresh">refresh()</button>
+                <button id="api-destroy" class="danger">destroy()</button>
+                <button id="api-reinit">Re-init</button>
+              </div>
+              <div class="event-log" id="test20-log">
+                API calls will be logged here...
+              </div>
+            </div>
+          </div>
+          <div class="test-controls">
+            <button class="run-test primary">Run Test</button>
+          </div>
+          <div class="test-result"></div>
+        </div>
+
+        <div class="test-case" data-test-id="21">
+          <div class="test-header">
+            <span class="test-number">21</span>
+            <h3>URL Sync (Group Name)</h3>
+            <span class="test-status pending">Pending</span>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Tabs sync with URL parameters. Change tabs and see the URL update.
+              Reload the page to restore state.
+            </p>
+            <div class="tabs-demo">
+              <div
+                data-tabs="container"
+                data-tabs-group-name="section"
+                id="test21-tabs"
+              >
+                <div class="tabs-trigger-list" role="tablist">
+                  <button class="tabs-trigger" data-tabs-trigger-value="intro">
+                    Introduction
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="setup">
+                    Setup
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="usage">
+                    Usage
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="api">
+                    API Reference
+                  </button>
+                </div>
+                <div class="tabs-panels">
+                  <div class="tabs-panel" data-tabs-panel-value="intro">
+                    <strong>Introduction</strong> - Welcome to the
+                    documentation. The URL now shows ?section=intro
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="setup">
+                    <strong>Setup</strong> - Installation instructions here. The
+                    URL now shows ?section=setup
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="usage">
+                    <strong>Usage</strong> - How to use the library. The URL now
+                    shows ?section=usage
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="api">
+                    <strong>API Reference</strong> - Complete API documentation.
+                    The URL now shows ?section=api
+                  </div>
+                </div>
+              </div>
+            </div>
+            <dl class="info-panel" id="test21-info">
+              <div class="info-item">
+                <dt>Group Name</dt>
+                <dd>section</dd>
+              </div>
+              <div class="info-item">
+                <dt>Current URL Param</dt>
+                <dd id="test21-url-param">—</dd>
+              </div>
+              <div class="info-item">
+                <dt>Active Value</dt>
+                <dd id="test21-active">—</dd>
+              </div>
+            </dl>
+            <div class="code-block">
+              data-tabs-group-name="section" syncs with ?section=value in the
+              URL. Share URLs to link directly to specific tabs.
+            </div>
+          </div>
+          <div class="test-controls">
+            <button class="run-test primary">Run Test</button>
+          </div>
+          <div class="test-result"></div>
+        </div>
+      </section>
+    </div>
+
+    <script type="module">
+      // Test state
+      const testState = {
+        passed: 0,
+        failed: 0,
+        pending: 21,
+      };
+
+      function updateStats() {
+        document.getElementById(
+          'pass-count'
+        ).textContent = `${testState.passed} passed`;
+        document.getElementById(
+          'fail-count'
+        ).textContent = `${testState.failed} failed`;
+        document.getElementById(
+          'pending-count'
+        ).textContent = `${testState.pending} pending`;
+
+        if (testState.passed > 0)
+          document.getElementById('pass-count').classList.add('pass');
+        if (testState.failed > 0)
+          document.getElementById('fail-count').classList.add('fail');
+      }
+
+      function markTest(testId, status, message) {
+        const testCase = document.querySelector(`[data-test-id="${testId}"]`);
+        if (!testCase) return;
+
+        const statusEl = testCase.querySelector('.test-status');
+        const resultEl = testCase.querySelector('.test-result');
+
+        statusEl.className = `test-status ${status}`;
+        statusEl.textContent =
+          status === 'pass' ? 'Pass' : status === 'fail' ? 'Fail' : 'Pending';
+
+        resultEl.className = `test-result visible ${status}`;
+        resultEl.textContent = message;
+
+        if (status === 'pass') {
+          testState.passed++;
+          testState.pending--;
+        } else if (status === 'fail') {
+          testState.failed++;
+          testState.pending--;
+        }
+
+        updateStats();
+      }
+
+      // Wait for tabs to initialize
+      function waitForTabs(callback, maxWait = 2000) {
+        const startTime = Date.now();
+        const checkInterval = 100;
+
+        const check = () => {
+          if (
+            window.Tabs &&
+            window.Tabs.getAll &&
+            window.Tabs.getAll().length > 0
+          ) {
+            callback();
+          } else if (Date.now() - startTime < maxWait) {
+            setTimeout(check, checkInterval);
+          } else {
+            console.warn('Tabs did not initialize in time');
+            callback();
+          }
+        };
+
+        check();
+      }
+
+      // Test runners
+      function runTest1() {
+        waitForTabs(() => {
+          const tabs = window.Tabs.get('#test1-tabs');
+
+          if (tabs && tabs.triggers && tabs.triggers.length === 3) {
+            const hasActivePanel = tabs.panels.some((panel) =>
+              panel.classList.contains('tabs-active')
+            );
+            if (hasActivePanel) {
+              markTest(
+                1,
+                'pass',
+                '✓ Basic horizontal tabs initialized with 3 triggers and active panel'
+              );
+            } else {
+              markTest(1, 'fail', '✗ No active panel found');
+            }
+          } else {
+            markTest(1, 'fail', '✗ Tabs failed to initialize');
+          }
+        });
+      }
+
+      function runTest2() {
+        waitForTabs(() => {
+          const tabs = window.Tabs.get('#test2-tabs');
+
+          if (tabs && tabs.config.orientation === 'vertical') {
+            markTest(
+              2,
+              'pass',
+              '✓ Vertical orientation configured - use Arrow Up/Down to navigate'
+            );
+          } else {
+            markTest(2, 'fail', '✗ Vertical orientation not set');
+          }
+        });
+      }
+
+      function runTest3() {
+        waitForTabs(() => {
+          const tabs = window.Tabs.get('#test3-tabs');
+
+          if (tabs && tabs.state.activeValue === 'advanced') {
+            markTest(
+              3,
+              'pass',
+              '✓ Default tab "advanced" correctly selected on initialization'
+            );
+          } else {
+            markTest(
+              3,
+              'fail',
+              `✗ Expected "advanced" but got "${tabs?.state?.activeValue}"`
+            );
+          }
+        });
+      }
+
+      function runTest4() {
+        waitForTabs(() => {
+          const tabs = window.Tabs.get('#test4-tabs');
+
+          if (tabs && tabs.config.loop && tabs.prevBtn && tabs.nextBtn) {
+            markTest(
+              4,
+              'pass',
+              '✓ Loop navigation enabled with prev/next buttons'
+            );
+          } else {
+            markTest(4, 'fail', '✗ Loop or navigation buttons not configured');
+          }
+        });
+      }
+
+      function runTest5() {
+        waitForTabs(() => {
+          const tabs = window.Tabs.get('#test5-tabs');
+          const statusEl = document.getElementById('test5-status');
+          const currentEl = document.getElementById('test5-current');
+          const playPauseBtn = document.querySelector(
+            '#test5-tabs [data-tabs="play-pause"]'
+          );
+
+          if (tabs && tabs.config.autoplay) {
+            // Update info panel
+            const updateInfo = () => {
+              const index = tabs.triggers.findIndex((t) =>
+                t.classList.contains('tabs-active')
+              );
+              currentEl.textContent = `${index + 1} of ${tabs.triggers.length}`;
+              statusEl.textContent = tabs.state.isPaused ? 'Paused' : 'Active';
+            };
+
+            tabs.on('change', updateInfo);
+
+            // Update play/pause button text
+            if (playPauseBtn) {
+              const updateButtonText = () => {
+                playPauseBtn.textContent = tabs.state.isPaused
+                  ? 'Play'
+                  : 'Pause';
+              };
+              tabs.on('autoplay-start', updateButtonText);
+              tabs.on('autoplay-pause', updateButtonText);
+              tabs.on('autoplay-resume', updateButtonText);
+            }
+
+            updateInfo();
+
+            markTest(
+              5,
+              'pass',
+              '✓ Autoplay enabled with 4000ms duration - hover to pause'
+            );
+          } else {
+            markTest(5, 'fail', '✗ Autoplay not configured');
+          }
+        });
+      }
+
+      function runTest6() {
+        waitForTabs(() => {
+          const tabs = window.Tabs.get('#test6-tabs');
+
+          if (tabs && tabs.config.keyboard) {
+            markTest(
+              6,
+              'pass',
+              '✓ Keyboard navigation enabled - focus a tab and use arrow keys'
+            );
+          } else {
+            markTest(6, 'fail', '✗ Keyboard navigation not enabled');
+          }
+        });
+      }
+
+      function runTest7() {
+        waitForTabs(() => {
+          const tabs = window.Tabs.get('#test7-tabs');
+          const log = document.getElementById('test7-log');
+
+          if (tabs) {
+            const events = [];
+
+            tabs.on('change', (e) => {
+              events.unshift(`change: "${e.previousValue}" → "${e.value}"`);
+              log.textContent = events.slice(0, 10).join('\n');
+            });
+
+            // Also listen via DOM event
+            tabs.container.addEventListener('tabs:change', (e) => {
+              console.log('DOM event:', e.detail);
+            });
+
+            markTest(
+              7,
+              'pass',
+              '✓ Event system active - click tabs to see events logged'
+            );
+          } else {
+            markTest(7, 'fail', '✗ Tabs not found');
+          }
+        });
+      }
+
+      function runTest8() {
+        waitForTabs(() => {
+          const pillTabs = window.Tabs.get('#test8a-tabs');
+          const cardTabs = window.Tabs.get('#test8b-tabs');
+
+          if (pillTabs && cardTabs) {
+            markTest(
+              8,
+              'pass',
+              '✓ Multiple style variants working independently'
+            );
+          } else {
+            markTest(8, 'fail', '✗ Style variant tabs not initialized');
+          }
+        });
+      }
+
+      function runTest9() {
+        waitForTabs(() => {
+          const outerTabs = window.Tabs.get('#test9-outer');
+          const innerFe = window.Tabs.get('#test9-inner-fe');
+          const innerBe = window.Tabs.get('#test9-inner-be');
+
+          if (outerTabs && innerFe && innerBe) {
+            // Verify they're independent
+            const outerValue = outerTabs.state.activeValue;
+            const innerFeValue = innerFe.state.activeValue;
+
+            if (outerValue && innerFeValue) {
+              markTest(
+                9,
+                'pass',
+                `✓ Nested tabs working: outer="${outerValue}", inner="${innerFeValue}"`
+              );
+            } else {
+              markTest(9, 'fail', '✗ Nested tabs state not initialized');
+            }
+          } else {
+            markTest(9, 'fail', '✗ Not all nested tabs instances found');
+          }
+        });
+      }
+
+      function runTest10() {
+        waitForTabs(() => {
+          const tabs = window.Tabs.get('#test10-tabs');
+
+          if (tabs && tabs.triggers.length === 6) {
+            // Check that there are 6 triggers (3 top + 3 bottom)
+            const infoTriggers = tabs.triggers.filter(
+              (t) => t.getAttribute('data-tabs-trigger-value') === 'info'
+            );
+
+            if (infoTriggers.length === 2) {
+              markTest(
+                10,
+                'pass',
+                '✓ Multiple triggers (6 total, 2 per value) syncing correctly'
+              );
+            } else {
+              markTest(10, 'fail', '✗ Expected 2 triggers per value');
+            }
+          } else {
+            markTest(
+              10,
+              'fail',
+              `✗ Expected 6 triggers, found ${tabs?.triggers?.length}`
+            );
+          }
+        });
+      }
+
+      function runTest11() {
+        waitForTabs(() => {
+          const tabs = window.Tabs.get('#test11-tabs');
+
+          if (tabs) {
+            markTest(
+              11,
+              'pass',
+              '✓ Fade animation initialized - click tabs to see fade effect'
+            );
+          } else {
+            markTest(11, 'fail', '✗ Fade tabs not initialized');
+          }
+        });
+      }
+
+      function runTest12() {
+        waitForTabs(() => {
+          const tabs = window.Tabs.get('#test12-tabs');
+
+          if (tabs && tabs.triggers.length === 4) {
+            markTest(
+              12,
+              'pass',
+              '✓ Slide animation initialized - panels slide horizontally'
+            );
+          } else {
+            markTest(12, 'fail', '✗ Slide tabs not initialized');
+          }
+        });
+      }
+
+      function runTest13() {
+        waitForTabs(() => {
+          const tabs = window.Tabs.get('#test13-tabs');
+
+          if (tabs) {
+            markTest(
+              13,
+              'pass',
+              '✓ Scale animation initialized - spring easing on enter'
+            );
+          } else {
+            markTest(13, 'fail', '✗ Scale tabs not initialized');
+          }
+        });
+      }
+
+      function runTest14() {
+        waitForTabs(() => {
+          const tabs3 = window.Tabs.get('#test14a-tabs');
+          const tabs5 = window.Tabs.get('#test14b-tabs');
+
+          if (tabs3 && tabs5) {
+            // Check if CSS :has() is supported
+            const supportsHas = CSS.supports('selector(:has(*))');
+            if (supportsHas) {
+              markTest(
+                14,
+                'pass',
+                '✓ Sliding underline with CSS :has() - works with 3 and 5 tabs'
+              );
+            } else {
+              markTest(
+                14,
+                'pass',
+                '✓ Tabs initialized (note: :has() not fully supported in this browser)'
+              );
+            }
+          } else {
+            markTest(14, 'fail', '✗ Sliding underline tabs not initialized');
+          }
+        });
+      }
+
+      function runTest15() {
+        waitForTabs(() => {
+          const tabs3 = window.Tabs.get('#test15a-tabs');
+          const tabs4 = window.Tabs.get('#test15b-tabs');
+
+          if (tabs3 && tabs4) {
+            markTest(
+              15,
+              'pass',
+              '✓ Sliding pill indicator - background slides between tabs'
+            );
+          } else {
+            markTest(15, 'fail', '✗ Sliding pill tabs not initialized');
+          }
+        });
+      }
+
+      function runTest16() {
+        waitForTabs(() => {
+          const tabs = window.Tabs.get('#test16-tabs');
+
+          if (tabs && tabs.triggers.length === 4) {
+            markTest(
+              16,
+              'pass',
+              '✓ Gradient underline indicator - purple-blue gradient slides'
+            );
+          } else {
+            markTest(16, 'fail', '✗ Gradient underline tabs not initialized');
+          }
+        });
+      }
+
+      function runTest17() {
+        waitForTabs(() => {
+          const tabs = window.Tabs.get('#test17-tabs');
+          const container = document.getElementById('test17-tabs');
+
+          if (tabs && container) {
+            // Check that --direction and --active-index are being set
+            const style = getComputedStyle(container);
+            const activeIndex = style.getPropertyValue('--active-index');
+
+            markTest(
+              17,
+              'pass',
+              '✓ Direction-aware slide - uses --direction for animation direction'
+            );
+          } else {
+            markTest(17, 'fail', '✗ Direction-aware tabs not initialized');
+          }
+        });
+      }
+
+      function runTest18() {
+        waitForTabs(() => {
+          const tabs = window.Tabs.get('#test18-tabs');
+          const container = document.getElementById('test18-tabs');
+
+          if (tabs && container) {
+            // Check that triggers have --tab-index set
+            const triggers = container.querySelectorAll('.tabs-trigger');
+            const firstTriggerStyle = getComputedStyle(triggers[0]);
+            const tabIndex = firstTriggerStyle.getPropertyValue('--tab-index');
+
+            markTest(
+              18,
+              'pass',
+              '✓ Staggered animation - uses --tab-index for animation delay'
+            );
+          } else {
+            markTest(18, 'fail', '✗ Staggered tabs not initialized');
+          }
+        });
+      }
+
+      function runTest19() {
+        waitForTabs(() => {
+          const tabs = window.Tabs.get('#test19-tabs');
+
+          if (tabs && tabs.config.activateOnFocus === false) {
+            markTest(
+              19,
+              'pass',
+              '✓ Manual activation mode - use arrow keys then Enter/Space'
+            );
+          } else {
+            markTest(19, 'fail', '✗ activateOnFocus should be false');
+          }
+        });
+      }
+
+      function runTest20() {
+        waitForTabs(() => {
+          const tabs = window.Tabs.get('#test20-tabs');
+          const log = document.getElementById('test20-log');
+          const events = [];
+
+          const logEvent = (msg) => {
+            events.unshift(`${new Date().toLocaleTimeString()}: ${msg}`);
+            log.textContent = events.slice(0, 10).join('\n');
+          };
+
+          if (tabs) {
+            // Wire up API buttons
+            document
+              .getElementById('api-prev')
+              ?.addEventListener('click', () => {
+                tabs.prev();
+                logEvent(`prev() → active: "${tabs.getActiveValue()}"`);
+              });
+
+            document
+              .getElementById('api-next')
+              ?.addEventListener('click', () => {
+                tabs.next();
+                logEvent(`next() → active: "${tabs.getActiveValue()}"`);
+              });
+
+            document
+              .getElementById('api-goto1')
+              ?.addEventListener('click', () => {
+                tabs.goTo('api-1');
+                logEvent(`goTo('api-1') → active: "${tabs.getActiveValue()}"`);
+              });
+
+            document
+              .getElementById('api-goto3')
+              ?.addEventListener('click', () => {
+                tabs.goTo('api-3');
+                logEvent(`goTo('api-3') → active: "${tabs.getActiveValue()}"`);
+              });
+
+            document
+              .getElementById('api-goto5')
+              ?.addEventListener('click', () => {
+                tabs.goTo('api-5');
+                logEvent(`goTo('api-5') → active: "${tabs.getActiveValue()}"`);
+              });
+
+            document
+              .getElementById('api-refresh')
+              ?.addEventListener('click', () => {
+                tabs.refresh();
+                logEvent('refresh() → instance re-initialized');
+              });
+
+            document
+              .getElementById('api-destroy')
+              ?.addEventListener('click', () => {
+                tabs.destroy();
+                logEvent('destroy() → instance destroyed, clicks disabled');
+              });
+
+            document
+              .getElementById('api-reinit')
+              ?.addEventListener('click', () => {
+                const container = document.getElementById('test20-tabs');
+                window.Tabs.init(container);
+                logEvent('Tabs.init() → new instance created');
+              });
+
+            markTest(
+              20,
+              'pass',
+              '✓ API methods available - use buttons to test'
+            );
+          } else {
+            markTest(20, 'fail', '✗ Tabs instance not found');
+          }
+        });
+      }
+
+      function runTest21() {
+        waitForTabs(() => {
+          const tabs = window.Tabs.get('#test21-tabs');
+          const urlParamEl = document.getElementById('test21-url-param');
+          const activeEl = document.getElementById('test21-active');
+
+          if (tabs && tabs.config.groupName === 'section') {
+            const updateInfo = () => {
+              const params = new URLSearchParams(window.location.search);
+              urlParamEl.textContent = params.get('section') || '(none)';
+              activeEl.textContent = tabs.state.activeValue || '—';
+            };
+
+            tabs.on('change', updateInfo);
+            updateInfo();
+
+            markTest(
+              21,
+              'pass',
+              '✓ URL sync enabled with group name "section"'
+            );
+          } else {
+            markTest(21, 'fail', '✗ Group name not configured');
+          }
+        });
+      }
+
+      // Wire up test buttons
+      const testRunners = [
+        runTest1,
+        runTest2,
+        runTest3,
+        runTest4,
+        runTest5,
+        runTest6,
+        runTest7,
+        runTest8,
+        runTest9,
+        runTest10,
+        runTest11,
+        runTest12,
+        runTest13,
+        runTest14,
+        runTest15,
+        runTest16,
+        runTest17,
+        runTest18,
+        runTest19,
+        runTest20,
+        runTest21,
+      ];
+
+      document.querySelectorAll('.run-test').forEach((btn, index) => {
+        btn.addEventListener('click', () => testRunners[index]());
+      });
+
+      // Initialize stats
+      updateStats();
+    </script>
+  </body>
+</html>

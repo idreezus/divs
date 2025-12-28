@@ -1,0 +1,71 @@
+/* Tabs default styles */
+
+/* Panel visibility - hidden by default, shown when active */
+[data-tabs-panel-value] {
+  display: none;
+}
+
+[data-tabs-panel-value].tabs-active {
+  display: block;
+}
+
+/* Panel transition animations */
+.tabs-panel-entering {
+  animation: tabs-fade-in var(--tabs-transition-duration, 200ms) ease-out;
+}
+
+.tabs-panel-leaving {
+  animation: tabs-fade-out var(--tabs-transition-duration, 200ms) ease-out;
+}
+
+@keyframes tabs-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes tabs-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Reduced motion: disable animations */
+@media (prefers-reduced-motion: reduce) {
+  .tabs-panel-entering,
+  .tabs-panel-leaving {
+    animation: none;
+  }
+}
+
+/* Trigger focus state for keyboard navigation */
+[data-tabs-trigger-value]:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* Navigation button disabled state */
+[data-tabs="prev"].tabs-button-disabled,
+[data-tabs="next"].tabs-button-disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Screen reader only utility */
+.tabs-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

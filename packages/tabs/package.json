@@ -1,0 +1,23 @@
+{
+  "name": "tabs",
+  "version": "1.0.0",
+  "description": "An accessible, keyboard-navigable tabs component with autoplay support.",
+  "main": "tabs.js",
+  "type": "module",
+  "scripts": {
+    "build": "rollup -c",
+    "build:watch": "rollup -c --watch",
+    "release": "BUILD_MODE=release rollup -c"
+  },
+  "keywords": [
+    "tabs",
+    "tabpanel",
+    "webflow",
+    "vanilla-js",
+    "accessible",
+    "a11y",
+    "autoplay"
+  ],
+  "author": "Idrees Isse (https://github.com/idreezus)",
+  "license": "AGPL-3.0"
+}
