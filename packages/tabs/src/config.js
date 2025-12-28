@@ -56,11 +56,11 @@ export const CLASSES = {
 // CSS custom properties
 export const CSS_VARS = {
   PROGRESS: '--tabs-progress',
-  TAB_COUNT: '--tab-count',
-  TAB_INDEX: '--tab-index',
-  ACTIVE_INDEX: '--active-index',
-  AUTOPLAY_DURATION: '--autoplay-duration',
-  DIRECTION: '--direction',
+  TAB_COUNT: '--tabs-count',
+  TAB_INDEX: '--tabs-index',
+  ACTIVE_INDEX: '--tabs-active-index',
+  AUTOPLAY_DURATION: '--tabs-autoplay-duration',
+  DIRECTION: '--tabs-direction',
 };
 
 // Default configuration values

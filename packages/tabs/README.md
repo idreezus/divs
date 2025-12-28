@@ -30,7 +30,10 @@ Paste this script into your Page Settings "Before `</body>` tag".
 Put the required styling on your page. Either an Embed element that's placed anywhere on your page, or your Page Settings "Inside `<head>` tag".
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/idreezus/divs@tabs-v1.0.0/dist/tabs/v1.0.0/tabs.css">
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/gh/idreezus/divs@tabs-v1.0.0/dist/tabs/v1.0.0/tabs.css"
+/>
 ```
 
 </Step>
@@ -86,90 +89,90 @@ Three elements are required:
 
 ### Container Configuration
 
-| Attribute | Values | Default | Description |
-| --- | --- | --- | --- |
-| `data-tabs` | `"container"` | - | Required on container element |
-| `data-tabs-default` | any value | first trigger | Initial active tab value |
-| `data-tabs-group-name` | string | - | URL parameter name for deep linking |
-| `data-tabs-orientation` | `"horizontal"` / `"vertical"` | `"horizontal"` | Arrow key navigation direction |
-| `data-tabs-activate-on-focus` | `"true"` / `"false"` | `"true"` | Activate tab on arrow key focus |
-| `data-tabs-loop` | `"true"` / `"false"` | `"false"` | Loop keyboard navigation |
-| `data-tabs-keyboard` | `"true"` / `"false"` | `"true"` | Enable keyboard navigation |
+| Attribute                     | Values                        | Default        | Description                         |
+| ----------------------------- | ----------------------------- | -------------- | ----------------------------------- |
+| `data-tabs`                   | `"container"`                 | -              | Required on container element       |
+| `data-tabs-default`           | any value                     | first trigger  | Initial active tab value            |
+| `data-tabs-group-name`        | string                        | -              | URL parameter name for deep linking |
+| `data-tabs-orientation`       | `"horizontal"` / `"vertical"` | `"horizontal"` | Arrow key navigation direction      |
+| `data-tabs-activate-on-focus` | `"true"` / `"false"`          | `"true"`       | Activate tab on arrow key focus     |
+| `data-tabs-loop`              | `"true"` / `"false"`          | `"false"`      | Loop keyboard navigation            |
+| `data-tabs-keyboard`          | `"true"` / `"false"`          | `"true"`       | Enable keyboard navigation          |
 
 ### Autoplay Configuration
 
-| Attribute | Values | Default | Description |
-| --- | --- | --- | --- |
-| `data-tabs-autoplay` | `"true"` / `"false"` | `"false"` | Enable autoplay |
-| `data-tabs-autoplay-duration` | milliseconds | `5000` | Time per tab |
-| `data-tabs-autoplay-pause-hover` | `"true"` / `"false"` | `"true"` | Pause on hover |
-| `data-tabs-autoplay-pause-focus` | `"true"` / `"false"` | `"true"` | Pause on focus |
+| Attribute                        | Values               | Default   | Description     |
+| -------------------------------- | -------------------- | --------- | --------------- |
+| `data-tabs-autoplay`             | `"true"` / `"false"` | `"false"` | Enable autoplay |
+| `data-tabs-autoplay-duration`    | milliseconds         | `5000`    | Time per tab    |
+| `data-tabs-autoplay-pause-hover` | `"true"` / `"false"` | `"true"`  | Pause on hover  |
+| `data-tabs-autoplay-pause-focus` | `"true"` / `"false"` | `"true"`  | Pause on focus  |
 
 ### Content Linking
 
-| Attribute | Description |
-| --- | --- |
-| `data-tabs-trigger-value` | Value that links trigger to its panel |
-| `data-tabs-panel-value` | Value that links panel to its trigger(s) |
+| Attribute                 | Description                              |
+| ------------------------- | ---------------------------------------- |
+| `data-tabs-trigger-value` | Value that links trigger to its panel    |
+| `data-tabs-panel-value`   | Value that links panel to its trigger(s) |
 
 ### Navigation Elements
 
 Optional controls that work automatically when placed inside the container:
 
-| Attribute | Description |
-| --- | --- |
-| `data-tabs="prev"` | Previous tab button |
-| `data-tabs="next"` | Next tab button |
+| Attribute                | Description            |
+| ------------------------ | ---------------------- |
+| `data-tabs="prev"`       | Previous tab button    |
+| `data-tabs="next"`       | Next tab button        |
 | `data-tabs="play-pause"` | Toggle autoplay button |
 
 ## State Classes
 
 The library applies state classes that you can style however you want.
 
-| Class | Applied to |
-| --- | --- |
-| `.tabs-active` | Active trigger and panel |
-| `.tabs-inactive` | Inactive triggers and panels |
-| `.tabs-transitioning` | Container during tab transitions |
-| `.tabs-panel-entering` | Panel that is becoming active |
-| `.tabs-panel-leaving` | Panel that is becoming inactive |
-| `.tabs-button-disabled` | Prev/next buttons at boundaries |
-| `.tabs-autoplay-active` | Container when autoplay is running |
-| `.tabs-autoplay-paused` | Container when autoplay is paused |
-| `.tabs-reduced-motion` | Container when reduced motion is preferred |
+| Class                   | Applied to                                 |
+| ----------------------- | ------------------------------------------ |
+| `.tabs-active`          | Active trigger and panel                   |
+| `.tabs-inactive`        | Inactive triggers and panels               |
+| `.tabs-transitioning`   | Container during tab transitions           |
+| `.tabs-panel-entering`  | Panel that is becoming active              |
+| `.tabs-panel-leaving`   | Panel that is becoming inactive            |
+| `.tabs-button-disabled` | Prev/next buttons at boundaries            |
+| `.tabs-autoplay-active` | Container when autoplay is running         |
+| `.tabs-autoplay-paused` | Container when autoplay is paused          |
+| `.tabs-reduced-motion`  | Container when reduced motion is preferred |
 
 ### CSS Custom Properties
 
-| Property | Applied to | Description |
-| --- | --- | --- |
-| `--tabs-progress` | Active trigger | Autoplay progress (0-1) |
-| `--tab-count` | Container | Total number of tabs |
-| `--tab-index` | Triggers & panels | Zero-based index of each element |
-| `--active-index` | Container | Index of currently active tab |
-| `--direction` | Container | Navigation direction: `1` (forward), `-1` (backward), `0` (initial) |
-| `--autoplay-duration` | Container | Autoplay duration with unit (e.g., `5000ms`) |
+| Property                   | Applied to        | Description                                                         |
+| -------------------------- | ----------------- | ------------------------------------------------------------------- |
+| `--tabs-progress`          | Active trigger    | Autoplay progress (0-1)                                             |
+| `--tabs-count`             | Container         | Total number of tabs                                                |
+| `--tabs-index`             | Triggers & panels | Zero-based index of each element                                    |
+| `--tabs-active-index`      | Container         | Index of currently active tab                                       |
+| `--tabs-direction`         | Container         | Navigation direction: `1` (forward), `-1` (backward), `0` (initial) |
+| `--tabs-autoplay-duration` | Container         | Autoplay duration with unit (e.g., `5000ms`)                        |
 
 These enable powerful CSS-only effects:
 
 ```css
 /* Staggered entrance animations */
 .tabs-panel > * {
-  animation-delay: calc(var(--tab-index) * 50ms);
+  animation-delay: calc(var(--tabs-index) * 50ms);
 }
 
 /* Sliding indicator based on active tab */
 .indicator {
-  transform: translateX(calc(var(--active-index) * 100%));
+  transform: translateX(calc(var(--tabs-active-index) * 100%));
 }
 
 /* Directional slide transitions */
 .tabs-panel-entering {
-  animation: var(--direction, 1) > 0 ? slideFromRight : slideFromLeft;
+  animation: var(--tabs-direction, 1) > 0 ? slideFromRight : slideFromLeft;
 }
 
 /* Progress bar synced to autoplay */
 .progress-bar {
-  animation: progress var(--autoplay-duration) linear;
+  animation: progress var(--tabs-autoplay-duration) linear;
 }
 ```
 
@@ -186,14 +189,14 @@ const tabs = window.Tabs.init('[data-tabs="container"]');
 ### Instance Methods
 
 ```javascript
-tabs.goTo('tab-two');    // Go to specific tab by value
-tabs.next();             // Go to next tab
-tabs.prev();             // Go to previous tab
-tabs.play();             // Start autoplay
-tabs.pause();            // Pause autoplay
-tabs.refresh();          // Re-initialize after DOM changes
-tabs.destroy();          // Clean up and remove listeners
-tabs.getActiveValue();   // Returns current active value
+tabs.goTo('tab-two'); // Go to specific tab by value
+tabs.next(); // Go to next tab
+tabs.prev(); // Go to previous tab
+tabs.play(); // Start autoplay
+tabs.pause(); // Pause autoplay
+tabs.refresh(); // Re-initialize after DOM changes
+tabs.destroy(); // Clean up and remove listeners
+tabs.getActiveValue(); // Returns current active value
 ```
 
 All methods are chainable (except getActiveValue and destroy):
@@ -232,11 +235,11 @@ container.addEventListener('tabs:change', (e) => {
 
 Available events:
 
-| Event | Description | Event Data |
-| --- | --- | --- |
-| `change` | Active tab changed | `{ value, previousValue }` |
-| `autoplay-start` | Autoplay started/resumed | `{ value }` |
-| `autoplay-pause` | Autoplay paused | `{ value, progress }` |
+| Event            | Description              | Event Data                 |
+| ---------------- | ------------------------ | -------------------------- |
+| `change`         | Active tab changed       | `{ value, previousValue }` |
+| `autoplay-start` | Autoplay started/resumed | `{ value }`                |
+| `autoplay-pause` | Autoplay paused          | `{ value, progress }`      |
 
 ### Global API
 
@@ -274,7 +277,7 @@ Now `?section=pricing` in the URL will activate the "pricing" tab on page load, 
 Use the `data-tabs-default` attribute:
 
 ```html
-<div data-tabs="container" data-tabs-default="pricing">
+<div data-tabs="container" data-tabs-default="pricing"></div>
 ```
 
 Priority order: URL parameter > `data-tabs-default` > first trigger.

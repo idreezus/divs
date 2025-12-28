@@ -637,7 +637,7 @@
 
       /* ============================================
          SLIDING UNDERLINE INDICATOR
-         Uses --tab-count and --active-index from JS
+         Uses --tabs-count and --tabs-active-index from JS
          No :has() required - works in all browsers
          ============================================ */
       .sliding-underline .tabs-trigger-list {
@@ -668,15 +668,15 @@
         left: 0;
         height: 2px;
         background: #171717;
-        width: calc(100% / var(--tab-count, 3));
-        transform: translateX(calc(var(--active-index, 0) * 100%));
+        width: calc(100% / var(--tabs-count, 3));
+        transform: translateX(calc(var(--tabs-active-index, 0) * 100%));
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         pointer-events: none;
       }
 
       /* ============================================
          SLIDING PILL INDICATOR
-         Uses --tab-count and --active-index from JS
+         Uses --tabs-count and --tabs-active-index from JS
          ============================================ */
       .sliding-pill .tabs-trigger-list {
         position: relative;
@@ -718,18 +718,18 @@
         top: 4px;
         bottom: 4px;
         left: 4px;
-        width: calc((100% - 8px) / var(--tab-count, 3));
+        width: calc((100% - 8px) / var(--tabs-count, 3));
         background: #ffffff;
         border-radius: 8px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        transform: translateX(calc(var(--active-index, 0) * 100%));
+        transform: translateX(calc(var(--tabs-active-index, 0) * 100%));
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         pointer-events: none;
       }
 
       /* ============================================
          GRADIENT UNDERLINE VARIANT
-         Uses --tab-count and --active-index from JS
+         Uses --tabs-count and --tabs-active-index from JS
          ============================================ */
       .sliding-gradient .tabs-trigger-list {
         position: relative;
@@ -760,15 +760,15 @@
         height: 3px;
         background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
         border-radius: 3px 3px 0 0;
-        width: calc(100% / var(--tab-count, 3));
-        transform: translateX(calc(var(--active-index, 0) * 100%));
+        width: calc(100% / var(--tabs-count, 3));
+        transform: translateX(calc(var(--tabs-active-index, 0) * 100%));
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         pointer-events: none;
       }
 
       /* ============================================
          DIRECTION-AWARE SLIDE ANIMATION
-         Uses --direction to slide from correct side
+         Uses --tabs-direction to slide from correct side
          ============================================ */
       .direction-slide .tabs-panel.tabs-panel-entering {
         animation: direction-slide-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -782,7 +782,7 @@
         from {
           opacity: 0;
           /* Slide from right if forward (1), left if backward (-1) */
-          transform: translateX(calc(var(--direction, 1) * 30px));
+          transform: translateX(calc(var(--tabs-direction, 1) * 30px));
         }
         to {
           opacity: 1;
@@ -798,7 +798,7 @@
         to {
           opacity: 0;
           /* Slide out opposite direction */
-          transform: translateX(calc(var(--direction, 1) * -30px));
+          transform: translateX(calc(var(--tabs-direction, 1) * -30px));
         }
       }
 
@@ -822,14 +822,14 @@
 
       /* ============================================
          STAGGERED TRIGGER ANIMATION
-         Uses --tab-index for staggered delays
+         Uses --tabs-index for staggered delays
          ============================================ */
       .staggered-triggers .tabs-trigger {
         opacity: 0;
         transform: translateY(-10px);
         animation: stagger-in 0.4s ease-out forwards;
         /* Each trigger delays based on its index */
-        animation-delay: calc(var(--tab-index, 0) * 80ms);
+        animation-delay: calc(var(--tabs-index, 0) * 80ms);
       }
 
       @keyframes stagger-in {
@@ -845,18 +845,19 @@
 
       /* Hover effect also uses index for variation */
       .staggered-triggers .tabs-trigger:hover {
-        background: hsl(calc(220 + var(--tab-index, 0) * 20), 70%, 96%);
+        background: hsl(calc(220 + var(--tabs-index, 0) * 20), 70%, 96%);
       }
 
       /* Panel content fades with index-based color accent */
       .staggered-triggers .tabs-panel {
-        border-left: 3px solid hsl(calc(220 + var(--tab-index, 0) * 20), 70%, 60%);
+        border-left: 3px solid
+          hsl(calc(220 + var(--tabs-index, 0) * 20), 70%, 60%);
         padding-left: 16px;
       }
 
       /* ============================================
          AUTOPLAY PROGRESS BAR
-         Uses --autoplay-duration and --tabs-progress
+         Uses --tabs-autoplay-duration and --tabs-progress
          ============================================ */
       .autoplay-progress .tabs-trigger-list {
         position: relative;
@@ -1826,7 +1827,8 @@
               </div>
             </div>
             <div class="code-block">
-              .fade-tabs .tabs-panel-entering { animation: tabs-fade-in 0.3s ease-out; }
+              .fade-tabs .tabs-panel-entering { animation: tabs-fade-in 0.3s
+              ease-out; }
             </div>
           </div>
           <div class="test-controls">
@@ -1843,29 +1845,41 @@
           </div>
           <div class="test-content">
             <p class="test-description">
-              Horizontal slide animation with panels entering from the right
-              and exiting to the left.
+              Horizontal slide animation with panels entering from the right and
+              exiting to the left.
             </p>
             <div class="tabs-demo">
               <div data-tabs="container" id="test12-tabs" class="slide-tabs">
                 <div class="tabs-trigger-list" role="tablist">
-                  <button class="tabs-trigger" data-tabs-trigger-value="slide-1">
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="slide-1"
+                  >
                     Step 1
                   </button>
-                  <button class="tabs-trigger" data-tabs-trigger-value="slide-2">
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="slide-2"
+                  >
                     Step 2
                   </button>
-                  <button class="tabs-trigger" data-tabs-trigger-value="slide-3">
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="slide-3"
+                  >
                     Step 3
                   </button>
-                  <button class="tabs-trigger" data-tabs-trigger-value="slide-4">
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="slide-4"
+                  >
                     Step 4
                   </button>
                 </div>
                 <div class="tabs-panels">
                   <div class="tabs-panel" data-tabs-panel-value="slide-1">
-                    <strong>Slide Animation</strong> - Content slides in from the
-                    right with a smooth cubic-bezier easing curve.
+                    <strong>Slide Animation</strong> - Content slides in from
+                    the right with a smooth cubic-bezier easing curve.
                   </div>
                   <div class="tabs-panel" data-tabs-panel-value="slide-2">
                     <strong>Step 2</strong> - Great for wizard flows and
@@ -1883,7 +1897,8 @@
               </div>
             </div>
             <div class="code-block">
-              translateX(24px) → translateX(0) on enter, translateX(0) → translateX(-24px) on exit
+              translateX(24px) → translateX(0) on enter, translateX(0) →
+              translateX(-24px) on exit
             </div>
           </div>
           <div class="test-controls">
@@ -1906,13 +1921,22 @@
             <div class="tabs-demo">
               <div data-tabs="container" id="test13-tabs" class="scale-tabs">
                 <div class="tabs-trigger-list" role="tablist">
-                  <button class="tabs-trigger" data-tabs-trigger-value="scale-1">
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="scale-1"
+                  >
                     Product
                   </button>
-                  <button class="tabs-trigger" data-tabs-trigger-value="scale-2">
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="scale-2"
+                  >
                     Features
                   </button>
-                  <button class="tabs-trigger" data-tabs-trigger-value="scale-3">
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="scale-3"
+                  >
                     Pricing
                   </button>
                 </div>
@@ -1933,7 +1957,8 @@
               </div>
             </div>
             <div class="code-block">
-              scale(0.96) → scale(1) with spring easing cubic-bezier(0.34, 1.56, 0.64, 1)
+              scale(0.96) → scale(1) with spring easing cubic-bezier(0.34, 1.56,
+              0.64, 1)
             </div>
           </div>
           <div class="test-controls">
@@ -1962,13 +1987,22 @@
                   class="sliding-underline"
                 >
                   <div class="tabs-trigger-list" role="tablist">
-                    <button class="tabs-trigger" data-tabs-trigger-value="under-1">
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="under-1"
+                    >
                       Dashboard
                     </button>
-                    <button class="tabs-trigger" data-tabs-trigger-value="under-2">
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="under-2"
+                    >
                       Analytics
                     </button>
-                    <button class="tabs-trigger" data-tabs-trigger-value="under-3">
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="under-3"
+                    >
                       Settings
                     </button>
                   </div>
@@ -1980,7 +2014,7 @@
                       Pure CSS animation using :has() and CSS custom properties.
                     </div>
                     <div class="tabs-panel" data-tabs-panel-value="under-3">
-                      Set --tab-count to match your number of tabs.
+                      Set --tabs-count to match your number of tabs.
                     </div>
                   </div>
                 </div>
@@ -1993,25 +2027,40 @@
                   class="sliding-underline"
                 >
                   <div class="tabs-trigger-list" role="tablist">
-                    <button class="tabs-trigger" data-tabs-trigger-value="five-1">
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="five-1"
+                    >
                       Home
                     </button>
-                    <button class="tabs-trigger" data-tabs-trigger-value="five-2">
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="five-2"
+                    >
                       Products
                     </button>
-                    <button class="tabs-trigger" data-tabs-trigger-value="five-3">
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="five-3"
+                    >
                       Services
                     </button>
-                    <button class="tabs-trigger" data-tabs-trigger-value="five-4">
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="five-4"
+                    >
                       About
                     </button>
-                    <button class="tabs-trigger" data-tabs-trigger-value="five-5">
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="five-5"
+                    >
                       Contact
                     </button>
                   </div>
                   <div class="tabs-panels">
                     <div class="tabs-panel" data-tabs-panel-value="five-1">
-                      Works with any number of tabs by setting --tab-count.
+                      Works with any number of tabs by setting --tabs-count.
                     </div>
                     <div class="tabs-panel" data-tabs-panel-value="five-2">
                       Products panel content.
@@ -2030,7 +2079,8 @@
               </div>
             </div>
             <div class="code-block">
-              --tab-count auto-set by JS | Uses CSS :has() to detect active position via --active-index
+              --tabs-count auto-set by JS | Uses CSS :has() to detect active
+              position via --tabs-active-index
             </div>
           </div>
           <div class="test-controls">
@@ -2059,13 +2109,22 @@
                   class="sliding-pill"
                 >
                   <div class="tabs-trigger-list" role="tablist">
-                    <button class="tabs-trigger" data-tabs-trigger-value="pill-1">
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="pill-1"
+                    >
                       All
                     </button>
-                    <button class="tabs-trigger" data-tabs-trigger-value="pill-2">
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="pill-2"
+                    >
                       Active
                     </button>
-                    <button class="tabs-trigger" data-tabs-trigger-value="pill-3">
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="pill-3"
+                    >
                       Archived
                     </button>
                   </div>
@@ -2090,16 +2149,28 @@
                   class="sliding-pill"
                 >
                   <div class="tabs-trigger-list" role="tablist">
-                    <button class="tabs-trigger" data-tabs-trigger-value="four-1">
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="four-1"
+                    >
                       Daily
                     </button>
-                    <button class="tabs-trigger" data-tabs-trigger-value="four-2">
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="four-2"
+                    >
                       Weekly
                     </button>
-                    <button class="tabs-trigger" data-tabs-trigger-value="four-3">
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="four-3"
+                    >
                       Monthly
                     </button>
-                    <button class="tabs-trigger" data-tabs-trigger-value="four-4">
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="four-4"
+                    >
                       Yearly
                     </button>
                   </div>
@@ -2200,7 +2271,7 @@
           <div class="test-content">
             <p class="test-description">
               Panels slide in from the correct direction based on navigation.
-              Uses --direction variable (1=forward, -1=backward).
+              Uses --tabs-direction variable (1=forward, -1=backward).
             </p>
             <div class="tabs-demo">
               <div
@@ -2227,25 +2298,28 @@
                 </div>
                 <div class="tabs-panels">
                   <div class="tabs-panel" data-tabs-panel-value="dir-1">
-                    <strong>First Panel</strong> - Click tabs to the right to see
-                    content slide in from the right. Click tabs to the left to see
-                    content slide in from the left.
+                    <strong>First Panel</strong> - Click tabs to the right to
+                    see content slide in from the right. Click tabs to the left
+                    to see content slide in from the left.
                   </div>
                   <div class="tabs-panel" data-tabs-panel-value="dir-2">
-                    <strong>Second Panel</strong> - The --direction variable is set
-                    to 1 (forward) or -1 (backward) based on navigation.
+                    <strong>Second Panel</strong> - The --tabs-direction
+                    variable is set to 1 (forward) or -1 (backward) based on
+                    navigation.
                   </div>
                   <div class="tabs-panel" data-tabs-panel-value="dir-3">
-                    <strong>Third Panel</strong> - This creates a natural carousel-like
-                    feel where content flows in the expected direction.
+                    <strong>Third Panel</strong> - This creates a natural
+                    carousel-like feel where content flows in the expected
+                    direction.
                   </div>
                   <div class="tabs-panel" data-tabs-panel-value="dir-4">
-                    <strong>Fourth Panel</strong> - The CSS uses calc(var(--direction) * 30px)
-                    to determine slide direction.
+                    <strong>Fourth Panel</strong> - The CSS uses
+                    calc(var(--tabs-direction) * 30px) to determine slide
+                    direction.
                   </div>
                   <div class="tabs-panel" data-tabs-panel-value="dir-5">
-                    <strong>Fifth Panel</strong> - Try navigating back to the first tab
-                    to see the reverse animation.
+                    <strong>Fifth Panel</strong> - Try navigating back to the
+                    first tab to see the reverse animation.
                   </div>
                 </div>
               </div>
@@ -2256,7 +2330,7 @@
               </div>
             </div>
             <div class="code-block">
-              transform: translateX(calc(var(--direction, 1) * 30px))
+              transform: translateX(calc(var(--tabs-direction, 1) * 30px))
             </div>
           </div>
           <div class="test-controls">
@@ -2268,13 +2342,13 @@
         <div class="test-case" data-test-id="18">
           <div class="test-header">
             <span class="test-number">18</span>
-            <h3>Staggered Animation with --tab-index</h3>
+            <h3>Staggered Animation with --tabs-index</h3>
             <span class="test-status pending">Pending</span>
           </div>
           <div class="test-content">
             <p class="test-description">
               Each trigger animates in with a staggered delay based on its
-              --tab-index. Panels have index-based color accents.
+              --tabs-index. Panels have index-based color accents.
             </p>
             <div class="tabs-demo">
               <div
@@ -2301,8 +2375,8 @@
                 </div>
                 <div class="tabs-panels">
                   <div class="tabs-panel" data-tabs-panel-value="stag-1">
-                    <strong>Panel 0</strong> - Each trigger's animation-delay uses
-                    calc(var(--tab-index) * 80ms) for staggered entrance.
+                    <strong>Panel 0</strong> - Each trigger's animation-delay
+                    uses calc(var(--tabs-index) * 80ms) for staggered entrance.
                   </div>
                   <div class="tabs-panel" data-tabs-panel-value="stag-2">
                     <strong>Panel 1</strong> - The panel's left border color is
@@ -2313,8 +2387,8 @@
                     index-based background color variations.
                   </div>
                   <div class="tabs-panel" data-tabs-panel-value="stag-4">
-                    <strong>Panel 3</strong> - The --tab-index variable is set on
-                    both triggers and panels.
+                    <strong>Panel 3</strong> - The --tabs-index variable is set
+                    on both triggers and panels.
                   </div>
                   <div class="tabs-panel" data-tabs-panel-value="stag-5">
                     <strong>Panel 4</strong> - Refresh the page to see the
@@ -2324,7 +2398,8 @@
               </div>
             </div>
             <div class="code-block">
-              animation-delay: calc(var(--tab-index, 0) * 80ms) | border-color: hsl(calc(220 + var(--tab-index) * 20), 70%, 60%)
+              animation-delay: calc(var(--tabs-index, 0) * 80ms) | border-color:
+              hsl(calc(220 + var(--tabs-index) * 20), 70%, 60%)
             </div>
           </div>
           <div class="test-controls">
@@ -2987,14 +3062,14 @@
           const container = document.getElementById('test17-tabs');
 
           if (tabs && container) {
-            // Check that --direction and --active-index are being set
+            // Check that --tabs-direction and --tabs-active-index are being set
             const style = getComputedStyle(container);
-            const activeIndex = style.getPropertyValue('--active-index');
+            const activeIndex = style.getPropertyValue('--tabs-active-index');
 
             markTest(
               17,
               'pass',
-              '✓ Direction-aware slide - uses --direction for animation direction'
+              '✓ Direction-aware slide - uses --tabs-direction for animation direction'
             );
           } else {
             markTest(17, 'fail', '✗ Direction-aware tabs not initialized');
@@ -3008,15 +3083,15 @@
           const container = document.getElementById('test18-tabs');
 
           if (tabs && container) {
-            // Check that triggers have --tab-index set
+            // Check that triggers have --tabs-index set
             const triggers = container.querySelectorAll('.tabs-trigger');
             const firstTriggerStyle = getComputedStyle(triggers[0]);
-            const tabIndex = firstTriggerStyle.getPropertyValue('--tab-index');
+            const tabIndex = firstTriggerStyle.getPropertyValue('--tabs-index');
 
             markTest(
               18,
               'pass',
-              '✓ Staggered animation - uses --tab-index for animation delay'
+              '✓ Staggered animation - uses --tabs-index for animation delay'
             );
           } else {
             markTest(18, 'fail', '✗ Staggered tabs not initialized');
