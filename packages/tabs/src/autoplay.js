@@ -149,8 +149,10 @@ export function pauseAutoplay(instance, reason = 'user') {
     instance.playPauseBtn.setAttribute('aria-pressed', 'false');
   }
 
-  // Get current progress for event
+  // Store elapsed time and active tab so we can resume from this point
   const elapsed = performance.now() - state.autoplayStartTime;
+  state.autoplayElapsed = elapsed;
+  state.autoplayPausedOnValue = state.activeValue;
   const progress = Math.min(elapsed / instance.config.autoplayDuration, 1);
 
   emitAutoplayEvent(instance, 'autoplay-pause', {
@@ -159,7 +161,7 @@ export function pauseAutoplay(instance, reason = 'user') {
   });
 }
 
-// Resumes autoplay (resets timer to 0)
+// Resumes autoplay from where it was paused
 export function resumeAutoplay(instance) {
   const { state, container } = instance;
 
@@ -167,7 +169,11 @@ export function resumeAutoplay(instance) {
   if (!canResume(instance)) return;
 
   state.isPaused = false;
-  state.autoplayStartTime = performance.now(); // Reset timer to 0
+  // Resume from stored elapsed time only if still on the same tab, otherwise reset
+  const sameTab = state.autoplayPausedOnValue === state.activeValue;
+  state.autoplayStartTime = sameTab
+    ? performance.now() - (state.autoplayElapsed || 0)
+    : performance.now();
 
   container.classList.remove(CLASSES.AUTOPLAY_PAUSED);
 
