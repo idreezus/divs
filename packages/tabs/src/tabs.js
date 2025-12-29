@@ -15,30 +15,21 @@ import {
   resumeAutoplay,
   cleanupAutoplay,
 } from './autoplay.js';
-import { emit } from './utils.js';
-
-// ============================================================================
-// Utility Functions
-// ============================================================================
-
-let idCounter = 0;
-
-// Generates a unique ID for each tabs instance
-function generateUniqueId() {
-  idCounter += 1;
-  return `tabs-${idCounter}`;
-}
-
-// Normalizes a value string to lowercase, hyphenated format
-function normalizeValue(value) {
-  if (!value) return '';
-  return value.toLowerCase().replace(/\s+/g, '-');
-}
+import {
+  emit,
+  normalizeValue,
+  generateUniqueId,
+  prefersReducedMotion,
+  getUrlParam,
+  setUrlParam,
+} from './utils.js';
 
 // Finds the index of a trigger by its normalized value
 function findTriggerIndex(triggers, targetValue) {
   return triggers.findIndex((trigger) => {
-    const triggerValue = normalizeValue(trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE));
+    const triggerValue = normalizeValue(
+      trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE)
+    );
     return triggerValue === targetValue;
   });
 }
@@ -64,30 +55,6 @@ function parseConfig(container) {
       container.getAttribute(ATTRIBUTES.AUTOPLAY_PAUSE_FOCUS) !== 'false',
   };
 }
-
-// Checks if user prefers reduced motion
-function prefersReducedMotion() {
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-}
-
-// Reads URL parameter for a given group name
-function getUrlParam(groupName) {
-  if (!groupName) return null;
-  const params = new URLSearchParams(window.location.search);
-  return params.get(groupName);
-}
-
-// Updates URL parameter using replaceState
-function setUrlParam(groupName, value) {
-  if (!groupName) return;
-  const url = new URL(window.location.href);
-  url.searchParams.set(groupName, value);
-  window.history.replaceState({}, '', url.toString());
-}
-
-// ============================================================================
-// Element Discovery & Validation
-// ============================================================================
 
 // Finds and validates all elements within the tabs container
 function findElements(instance) {
@@ -199,10 +166,6 @@ function findElements(instance) {
   return true;
 }
 
-// ============================================================================
-// Accessibility Setup
-// ============================================================================
-
 // Sets up ARIA attributes for triggers and panels
 function setupAccessibility(instance) {
   const { triggers, panels, id, config } = instance;
@@ -211,7 +174,9 @@ function setupAccessibility(instance) {
   instance.container.setAttribute('aria-orientation', config.orientation);
 
   triggers.forEach((trigger) => {
-    const value = normalizeValue(trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE));
+    const value = normalizeValue(
+      trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE)
+    );
     const triggerId = trigger.id || `${id}-trigger-${value}`;
     const panelId = `${id}-panel-${value}`;
 
@@ -237,7 +202,9 @@ function updateAriaStates(instance) {
   const { triggers, panels, state } = instance;
 
   triggers.forEach((trigger) => {
-    const value = normalizeValue(trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE));
+    const value = normalizeValue(
+      trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE)
+    );
     const isActive = value === state.activeValue;
 
     trigger.setAttribute('aria-selected', isActive.toString());
@@ -251,10 +218,6 @@ function updateAriaStates(instance) {
     panel.setAttribute('aria-hidden', (!isActive).toString());
   });
 }
-
-// ============================================================================
-// Keyboard Navigation
-// ============================================================================
 
 // Sets up keyboard navigation for triggers
 function setupKeyboardNavigation(instance) {
@@ -356,10 +319,6 @@ function focusTriggerAt(instance, index) {
   }
 }
 
-// ============================================================================
-// Tab Activation
-// ============================================================================
-
 // Determines the initial active value
 function determineInitialValue(instance) {
   const { config, triggerMap, triggers } = instance;
@@ -410,13 +369,16 @@ function activate(instance, value, options = {}) {
 
   // Calculate indices for CSS variables
   const newIndex = findTriggerIndex(triggers, normalized);
-  const previousIndex = previousValue ? findTriggerIndex(triggers, previousValue) : -1;
+  const previousIndex = previousValue
+    ? findTriggerIndex(triggers, previousValue)
+    : -1;
 
   // Set active index CSS variable
   container.style.setProperty(CSS_VARS.ACTIVE_INDEX, newIndex);
 
   // Set direction CSS variable (1 = forward, -1 = backward, 0 = initial)
-  const direction = previousIndex === -1 ? 0 : newIndex > previousIndex ? 1 : -1;
+  const direction =
+    previousIndex === -1 ? 0 : newIndex > previousIndex ? 1 : -1;
   container.style.setProperty(CSS_VARS.DIRECTION, direction);
 
   // Update state
@@ -524,10 +486,6 @@ function updateButtonStates(instance) {
   }
 }
 
-// ============================================================================
-// Event Listeners
-// ============================================================================
-
 // Attaches click handlers to triggers and navigation buttons
 function attachEventListeners(instance) {
   const { triggers, prevBtn, nextBtn, playPauseBtn, state } = instance;
@@ -583,10 +541,6 @@ function attachEventListeners(instance) {
   }
 }
 
-// ============================================================================
-// Cleanup
-// ============================================================================
-
 // Cleans up all event listeners and references
 function cleanup(instance) {
   const { container, prevBtn, nextBtn, playPauseBtn, boundHandlers } = instance;
@@ -617,10 +571,6 @@ function cleanup(instance) {
   // Cleanup autoplay
   cleanupAutoplay(instance);
 }
-
-// ============================================================================
-// Initialization
-// ============================================================================
 
 // Initializes a tabs instance
 function init(instance) {
@@ -676,10 +626,7 @@ function init(instance) {
   return true;
 }
 
-// ============================================================================
-// Tabs Class
-// ============================================================================
-
+// Main Tabs class
 export class Tabs {
   constructor(container) {
     this.id = generateUniqueId();
@@ -733,7 +680,9 @@ export class Tabs {
       nextIndex = Math.min(nextIndex, triggers.length - 1);
     }
 
-    const nextValue = triggers[nextIndex].getAttribute(ATTRIBUTES.TRIGGER_VALUE);
+    const nextValue = triggers[nextIndex].getAttribute(
+      ATTRIBUTES.TRIGGER_VALUE
+    );
     activate(this, nextValue);
     return this;
   }
@@ -750,7 +699,9 @@ export class Tabs {
       prevIndex = Math.max(prevIndex, 0);
     }
 
-    const prevValue = triggers[prevIndex].getAttribute(ATTRIBUTES.TRIGGER_VALUE);
+    const prevValue = triggers[prevIndex].getAttribute(
+      ATTRIBUTES.TRIGGER_VALUE
+    );
     activate(this, prevValue);
     return this;
   }
@@ -859,10 +810,6 @@ export class Tabs {
     return new Tabs(container);
   }
 }
-
-// ============================================================================
-// Global Registry & Auto-initialization
-// ============================================================================
 
 const instances = new Map();
 

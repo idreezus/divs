@@ -88,6 +88,10 @@ var Tabs = (function (exports) {
 
   // Shared utility functions for the tabs library
 
+  // ============================================================================
+  // Event Utilities
+  // ============================================================================
+
   // Emits events via instance callbacks and DOM CustomEvent
   function emit(instance, eventName, data = {}) {
     const { events, container } = instance;
@@ -105,6 +109,56 @@ var Tabs = (function (exports) {
       bubbles: true,
     });
     container.dispatchEvent(customEvent);
+  }
+
+  // ============================================================================
+  // Value Normalization
+  // ============================================================================
+
+  // Normalizes a value string to lowercase, hyphenated format
+  function normalizeValue(value) {
+    if (!value) return '';
+    return value.toLowerCase().replace(/\s+/g, '-');
+  }
+
+  // ============================================================================
+  // ID Generation
+  // ============================================================================
+
+  let idCounter = 0;
+
+  // Generates a unique ID for each tabs instance
+  function generateUniqueId() {
+    idCounter += 1;
+    return `tabs-${idCounter}`;
+  }
+
+  // ============================================================================
+  // Browser Environment Utilities
+  // ============================================================================
+
+  // Checks if user prefers reduced motion
+  function prefersReducedMotion() {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  // ============================================================================
+  // URL Parameter Utilities
+  // ============================================================================
+
+  // Reads URL parameter for a given key
+  function getUrlParam(key) {
+    if (!key) return null;
+    const params = new URLSearchParams(window.location.search);
+    return params.get(key);
+  }
+
+  // Updates URL parameter using replaceState
+  function setUrlParam(key, value) {
+    if (!key) return;
+    const url = new URL(window.location.href);
+    url.searchParams.set(key, value);
+    window.history.replaceState({}, '', url.toString());
   }
 
   // Autoplay behavior for tabs: timer, progress updates, pause/resume
@@ -334,20 +388,6 @@ var Tabs = (function (exports) {
   // Utility Functions
   // ============================================================================
 
-  let idCounter = 0;
-
-  // Generates a unique ID for each tabs instance
-  function generateUniqueId() {
-    idCounter += 1;
-    return `tabs-${idCounter}`;
-  }
-
-  // Normalizes a value string to lowercase, hyphenated format
-  function normalizeValue(value) {
-    if (!value) return '';
-    return value.toLowerCase().replace(/\s+/g, '-');
-  }
-
   // Finds the index of a trigger by its normalized value
   function findTriggerIndex(triggers, targetValue) {
     return triggers.findIndex((trigger) => {
@@ -376,26 +416,6 @@ var Tabs = (function (exports) {
       autoplayPauseFocus:
         container.getAttribute(ATTRIBUTES.AUTOPLAY_PAUSE_FOCUS) !== 'false',
     };
-  }
-
-  // Checks if user prefers reduced motion
-  function prefersReducedMotion() {
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  }
-
-  // Reads URL parameter for a given group name
-  function getUrlParam(groupName) {
-    if (!groupName) return null;
-    const params = new URLSearchParams(window.location.search);
-    return params.get(groupName);
-  }
-
-  // Updates URL parameter using replaceState
-  function setUrlParam(groupName, value) {
-    if (!groupName) return;
-    const url = new URL(window.location.href);
-    url.searchParams.set(groupName, value);
-    window.history.replaceState({}, '', url.toString());
   }
 
   // ============================================================================

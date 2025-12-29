@@ -69,8 +69,14 @@ export function setupAutoplay(instance) {
         resumeAutoplay(instance);
       }
     };
-    container.addEventListener('mouseenter', instance.autoplay.handleMouseEnter);
-    container.addEventListener('mouseleave', instance.autoplay.handleMouseLeave);
+    container.addEventListener(
+      'mouseenter',
+      instance.autoplay.handleMouseEnter
+    );
+    container.addEventListener(
+      'mouseleave',
+      instance.autoplay.handleMouseLeave
+    );
   }
 
   // Focus pause handlers
@@ -122,7 +128,9 @@ export function startAutoplay(instance) {
 
   emit(instance, 'autoplay-start', { value: state.activeValue });
 
-  instance.autoplay.rafId = requestAnimationFrame(() => runAutoplayTick(instance));
+  instance.autoplay.rafId = requestAnimationFrame(() =>
+    runAutoplayTick(instance)
+  );
 }
 
 // Pauses autoplay
@@ -186,7 +194,9 @@ export function resumeAutoplay(instance) {
 
   emit(instance, 'autoplay-start', { value: state.activeValue });
 
-  instance.autoplay.rafId = requestAnimationFrame(() => runAutoplayTick(instance));
+  instance.autoplay.rafId = requestAnimationFrame(() =>
+    runAutoplayTick(instance)
+  );
 }
 
 // Stops autoplay completely
