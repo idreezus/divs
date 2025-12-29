@@ -5,3 +5,5 @@ temp/
 
 .cursor/
 .claude/
+
+packages/tabs/examples.html

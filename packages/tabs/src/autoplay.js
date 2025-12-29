@@ -1,6 +1,32 @@
 // Autoplay behavior for tabs: timer, progress updates, pause/resume
 
 import { CLASSES, CSS_VARS } from './config.js';
+import { emit } from './utils.js';
+
+// Shared RAF tick loop for autoplay progress
+function runAutoplayTick(instance) {
+  const { state, config, triggerMap, autoplay } = instance;
+
+  if (!state.isAutoplaying || state.isPaused) return;
+
+  const elapsed = performance.now() - state.autoplayStartTime;
+  const progress = Math.min(elapsed / config.autoplayDuration, 1);
+
+  // Update --tabs-progress on active trigger(s)
+  const activeTriggers = triggerMap.get(state.activeValue);
+  if (activeTriggers) {
+    activeTriggers.forEach((trigger) => {
+      trigger.style.setProperty(CSS_VARS.PROGRESS, progress.toString());
+    });
+  }
+
+  if (progress >= 1) {
+    instance.next();
+    state.autoplayStartTime = performance.now();
+  }
+
+  autoplay.rafId = requestAnimationFrame(() => runAutoplayTick(instance));
+}
 
 // Sets up autoplay with IntersectionObserver and pause handlers
 export function setupAutoplay(instance) {
@@ -94,33 +120,9 @@ export function startAutoplay(instance) {
     instance.playPauseBtn.setAttribute('aria-pressed', 'true');
   }
 
-  emitAutoplayEvent(instance, 'autoplay-start', { value: state.activeValue });
+  emit(instance, 'autoplay-start', { value: state.activeValue });
 
-  // RAF loop for progress updates
-  function tick() {
-    if (!state.isAutoplaying || state.isPaused) return;
-
-    const elapsed = performance.now() - state.autoplayStartTime;
-    const progress = Math.min(elapsed / config.autoplayDuration, 1);
-
-    // Update --tabs-progress on active trigger(s)
-    const activeTriggers = triggerMap.get(state.activeValue);
-    if (activeTriggers) {
-      activeTriggers.forEach((trigger) => {
-        trigger.style.setProperty(CSS_VARS.PROGRESS, progress.toString());
-      });
-    }
-
-    if (progress >= 1) {
-      // Advance to next tab and restart timer
-      instance.next();
-      state.autoplayStartTime = performance.now();
-    }
-
-    instance.autoplay.rafId = requestAnimationFrame(tick);
-  }
-
-  instance.autoplay.rafId = requestAnimationFrame(tick);
+  instance.autoplay.rafId = requestAnimationFrame(() => runAutoplayTick(instance));
 }
 
 // Pauses autoplay
@@ -155,7 +157,7 @@ export function pauseAutoplay(instance, reason = 'user') {
   state.autoplayPausedOnValue = state.activeValue;
   const progress = Math.min(elapsed / instance.config.autoplayDuration, 1);
 
-  emitAutoplayEvent(instance, 'autoplay-pause', {
+  emit(instance, 'autoplay-pause', {
     value: state.activeValue,
     progress,
   });
@@ -182,31 +184,9 @@ export function resumeAutoplay(instance) {
     instance.playPauseBtn.setAttribute('aria-pressed', 'true');
   }
 
-  emitAutoplayEvent(instance, 'autoplay-start', { value: state.activeValue });
+  emit(instance, 'autoplay-start', { value: state.activeValue });
 
-  // Restart RAF loop
-  function tick() {
-    if (!state.isAutoplaying || state.isPaused) return;
-
-    const elapsed = performance.now() - state.autoplayStartTime;
-    const progress = Math.min(elapsed / instance.config.autoplayDuration, 1);
-
-    const activeTriggers = instance.triggerMap.get(state.activeValue);
-    if (activeTriggers) {
-      activeTriggers.forEach((trigger) => {
-        trigger.style.setProperty(CSS_VARS.PROGRESS, progress.toString());
-      });
-    }
-
-    if (progress >= 1) {
-      instance.next();
-      state.autoplayStartTime = performance.now();
-    }
-
-    instance.autoplay.rafId = requestAnimationFrame(tick);
-  }
-
-  instance.autoplay.rafId = requestAnimationFrame(tick);
+  instance.autoplay.rafId = requestAnimationFrame(() => runAutoplayTick(instance));
 }
 
 // Stops autoplay completely
@@ -258,23 +238,4 @@ export function cleanupAutoplay(instance) {
   }
 
   instance.autoplay = null;
-}
-
-// Helper to emit autoplay events via the instance's event system
-function emitAutoplayEvent(instance, eventName, data) {
-  const { events, container } = instance;
-
-  // Instance event callbacks
-  if (events.has(eventName)) {
-    events.get(eventName).forEach((callback) => {
-      callback.call(instance, { type: eventName, target: instance, ...data });
-    });
-  }
-
-  // DOM CustomEvent
-  const customEvent = new CustomEvent(`tabs:${eventName}`, {
-    detail: { tabs: instance, ...data },
-    bubbles: true,
-  });
-  container.dispatchEvent(customEvent);
 }

@@ -61,6 +61,7 @@ export const CSS_VARS = {
   ACTIVE_INDEX: '--tabs-active-index',
   AUTOPLAY_DURATION: '--tabs-autoplay-duration',
   DIRECTION: '--tabs-direction',
+  TRANSITION_DURATION: '--tabs-transition-duration',
 };
 
 // Default configuration values

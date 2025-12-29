@@ -70,7 +70,11 @@ var Tabs = (function (exports) {
   // CSS custom properties
   const CSS_VARS = {
     PROGRESS: '--tabs-progress',
-  };
+    TAB_COUNT: '--tabs-count',
+    TAB_INDEX: '--tabs-index',
+    ACTIVE_INDEX: '--tabs-active-index',
+    AUTOPLAY_DURATION: '--tabs-autoplay-duration',
+    DIRECTION: '--tabs-direction'};
 
   // Default configuration values
   const DEFAULTS = {
@@ -82,8 +86,54 @@ var Tabs = (function (exports) {
     TRANSITION_DURATION: 200,
   };
 
+  // Shared utility functions for the tabs library
+
+  // Emits events via instance callbacks and DOM CustomEvent
+  function emit(instance, eventName, data = {}) {
+    const { events, container } = instance;
+
+    // Instance event callbacks
+    if (events.has(eventName)) {
+      events.get(eventName).forEach((callback) => {
+        callback.call(instance, { type: eventName, target: instance, ...data });
+      });
+    }
+
+    // DOM CustomEvent for addEventListener compatibility
+    const customEvent = new CustomEvent(`tabs:${eventName}`, {
+      detail: { tabs: instance, ...data },
+      bubbles: true,
+    });
+    container.dispatchEvent(customEvent);
+  }
+
   // Autoplay behavior for tabs: timer, progress updates, pause/resume
 
+
+  // Shared RAF tick loop for autoplay progress
+  function runAutoplayTick(instance) {
+    const { state, config, triggerMap, autoplay } = instance;
+
+    if (!state.isAutoplaying || state.isPaused) return;
+
+    const elapsed = performance.now() - state.autoplayStartTime;
+    const progress = Math.min(elapsed / config.autoplayDuration, 1);
+
+    // Update --tabs-progress on active trigger(s)
+    const activeTriggers = triggerMap.get(state.activeValue);
+    if (activeTriggers) {
+      activeTriggers.forEach((trigger) => {
+        trigger.style.setProperty(CSS_VARS.PROGRESS, progress.toString());
+      });
+    }
+
+    if (progress >= 1) {
+      instance.next();
+      state.autoplayStartTime = performance.now();
+    }
+
+    autoplay.rafId = requestAnimationFrame(() => runAutoplayTick(instance));
+  }
 
   // Sets up autoplay with IntersectionObserver and pause handlers
   function setupAutoplay(instance) {
@@ -177,33 +227,9 @@ var Tabs = (function (exports) {
       instance.playPauseBtn.setAttribute('aria-pressed', 'true');
     }
 
-    emitAutoplayEvent(instance, 'autoplay-start', { value: state.activeValue });
+    emit(instance, 'autoplay-start', { value: state.activeValue });
 
-    // RAF loop for progress updates
-    function tick() {
-      if (!state.isAutoplaying || state.isPaused) return;
-
-      const elapsed = performance.now() - state.autoplayStartTime;
-      const progress = Math.min(elapsed / config.autoplayDuration, 1);
-
-      // Update --tabs-progress on active trigger(s)
-      const activeTriggers = triggerMap.get(state.activeValue);
-      if (activeTriggers) {
-        activeTriggers.forEach((trigger) => {
-          trigger.style.setProperty(CSS_VARS.PROGRESS, progress.toString());
-        });
-      }
-
-      if (progress >= 1) {
-        // Advance to next tab and restart timer
-        instance.next();
-        state.autoplayStartTime = performance.now();
-      }
-
-      instance.autoplay.rafId = requestAnimationFrame(tick);
-    }
-
-    instance.autoplay.rafId = requestAnimationFrame(tick);
+    instance.autoplay.rafId = requestAnimationFrame(() => runAutoplayTick(instance));
   }
 
   // Pauses autoplay
@@ -232,17 +258,19 @@ var Tabs = (function (exports) {
       instance.playPauseBtn.setAttribute('aria-pressed', 'false');
     }
 
-    // Get current progress for event
+    // Store elapsed time and active tab so we can resume from this point
     const elapsed = performance.now() - state.autoplayStartTime;
+    state.autoplayElapsed = elapsed;
+    state.autoplayPausedOnValue = state.activeValue;
     const progress = Math.min(elapsed / instance.config.autoplayDuration, 1);
 
-    emitAutoplayEvent(instance, 'autoplay-pause', {
+    emit(instance, 'autoplay-pause', {
       value: state.activeValue,
       progress,
     });
   }
 
-  // Resumes autoplay (resets timer to 0)
+  // Resumes autoplay from where it was paused
   function resumeAutoplay(instance) {
     const { state, container } = instance;
 
@@ -250,7 +278,11 @@ var Tabs = (function (exports) {
     if (!canResume(instance)) return;
 
     state.isPaused = false;
-    state.autoplayStartTime = performance.now(); // Reset timer to 0
+    // Resume from stored elapsed time only if still on the same tab, otherwise reset
+    const sameTab = state.autoplayPausedOnValue === state.activeValue;
+    state.autoplayStartTime = sameTab
+      ? performance.now() - (state.autoplayElapsed || 0)
+      : performance.now();
 
     container.classList.remove(CLASSES.AUTOPLAY_PAUSED);
 
@@ -259,31 +291,9 @@ var Tabs = (function (exports) {
       instance.playPauseBtn.setAttribute('aria-pressed', 'true');
     }
 
-    emitAutoplayEvent(instance, 'autoplay-start', { value: state.activeValue });
+    emit(instance, 'autoplay-start', { value: state.activeValue });
 
-    // Restart RAF loop
-    function tick() {
-      if (!state.isAutoplaying || state.isPaused) return;
-
-      const elapsed = performance.now() - state.autoplayStartTime;
-      const progress = Math.min(elapsed / instance.config.autoplayDuration, 1);
-
-      const activeTriggers = instance.triggerMap.get(state.activeValue);
-      if (activeTriggers) {
-        activeTriggers.forEach((trigger) => {
-          trigger.style.setProperty(CSS_VARS.PROGRESS, progress.toString());
-        });
-      }
-
-      if (progress >= 1) {
-        instance.next();
-        state.autoplayStartTime = performance.now();
-      }
-
-      instance.autoplay.rafId = requestAnimationFrame(tick);
-    }
-
-    instance.autoplay.rafId = requestAnimationFrame(tick);
+    instance.autoplay.rafId = requestAnimationFrame(() => runAutoplayTick(instance));
   }
 
   // Cleans up autoplay listeners and observer
@@ -317,25 +327,6 @@ var Tabs = (function (exports) {
     instance.autoplay = null;
   }
 
-  // Helper to emit autoplay events via the instance's event system
-  function emitAutoplayEvent(instance, eventName, data) {
-    const { events, container } = instance;
-
-    // Instance event callbacks
-    if (events.has(eventName)) {
-      events.get(eventName).forEach((callback) => {
-        callback.call(instance, { type: eventName, target: instance, ...data });
-      });
-    }
-
-    // DOM CustomEvent
-    const customEvent = new CustomEvent(`tabs:${eventName}`, {
-      detail: { tabs: instance, ...data },
-      bubbles: true,
-    });
-    container.dispatchEvent(customEvent);
-  }
-
   // Core tabs library with initialization, keyboard navigation, accessibility, and entry point
 
 
@@ -355,6 +346,14 @@ var Tabs = (function (exports) {
   function normalizeValue(value) {
     if (!value) return '';
     return value.toLowerCase().replace(/\s+/g, '-');
+  }
+
+  // Finds the index of a trigger by its normalized value
+  function findTriggerIndex(triggers, targetValue) {
+    return triggers.findIndex((trigger) => {
+      const triggerValue = normalizeValue(trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE));
+      return triggerValue === targetValue;
+    });
   }
 
   // Parses configuration from data attributes on the container
@@ -377,25 +376,6 @@ var Tabs = (function (exports) {
       autoplayPauseFocus:
         container.getAttribute(ATTRIBUTES.AUTOPLAY_PAUSE_FOCUS) !== 'false',
     };
-  }
-
-  // Emits events via instance callbacks and DOM CustomEvent
-  function emit(instance, eventName, data = {}) {
-    const { events, container } = instance;
-
-    // Instance event callbacks
-    if (events.has(eventName)) {
-      events.get(eventName).forEach((callback) => {
-        callback.call(instance, { type: eventName, target: instance, ...data });
-      });
-    }
-
-    // DOM CustomEvent for addEventListener compatibility
-    const customEvent = new CustomEvent(`tabs:${eventName}`, {
-      detail: { tabs: instance, ...data },
-      bubbles: true,
-    });
-    container.dispatchEvent(customEvent);
   }
 
   // Checks if user prefers reduced motion
@@ -543,7 +523,7 @@ var Tabs = (function (exports) {
     // Set orientation on container
     instance.container.setAttribute('aria-orientation', config.orientation);
 
-    triggers.forEach((trigger, index) => {
+    triggers.forEach((trigger) => {
       const value = normalizeValue(trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE));
       const triggerId = trigger.id || `${id}-trigger-${value}`;
       const panelId = `${id}-panel-${value}`;
@@ -741,6 +721,17 @@ var Tabs = (function (exports) {
     // Skip if already active
     if (normalized === previousValue) return false;
 
+    // Calculate indices for CSS variables
+    const newIndex = findTriggerIndex(triggers, normalized);
+    const previousIndex = previousValue ? findTriggerIndex(triggers, previousValue) : -1;
+
+    // Set active index CSS variable
+    container.style.setProperty(CSS_VARS.ACTIVE_INDEX, newIndex);
+
+    // Set direction CSS variable (1 = forward, -1 = backward, 0 = initial)
+    const direction = previousIndex === -1 ? 0 : newIndex > previousIndex ? 1 : -1;
+    container.style.setProperty(CSS_VARS.DIRECTION, direction);
+
     // Update state
     state.activeValue = normalized;
 
@@ -833,10 +824,7 @@ var Tabs = (function (exports) {
       return;
     }
 
-    const currentIndex = triggers.findIndex((trigger) => {
-      const value = normalizeValue(trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE));
-      return value === state.activeValue;
-    });
+    const currentIndex = findTriggerIndex(triggers, state.activeValue);
 
     if (prevBtn) {
       prevBtn.classList.toggle(CLASSES.BUTTON_DISABLED, currentIndex === 0);
@@ -941,11 +929,6 @@ var Tabs = (function (exports) {
 
     // Cleanup autoplay
     cleanupAutoplay(instance);
-
-    // Clear all properties
-    Object.keys(instance).forEach((key) => {
-      instance[key] = null;
-    });
   }
 
   // ============================================================================
@@ -960,6 +943,15 @@ var Tabs = (function (exports) {
     if (!findElements(instance)) {
       return false;
     }
+
+    // Set CSS variables
+    container.style.setProperty(CSS_VARS.TAB_COUNT, instance.triggers.length);
+    instance.triggers.forEach((trigger, index) => {
+      trigger.style.setProperty(CSS_VARS.TAB_INDEX, index);
+    });
+    instance.panels.forEach((panel, index) => {
+      panel.style.setProperty(CSS_VARS.TAB_INDEX, index);
+    });
 
     // Setup accessibility
     setupAccessibility(instance);
@@ -983,6 +975,10 @@ var Tabs = (function (exports) {
 
     // Setup autoplay if enabled and reduced motion not preferred
     if (config.autoplay && !prefersReducedMotion()) {
+      container.style.setProperty(
+        CSS_VARS.AUTOPLAY_DURATION,
+        config.autoplayDuration + 'ms'
+      );
       setupAutoplay(instance);
       startAutoplay(instance);
     }
@@ -1008,6 +1004,8 @@ var Tabs = (function (exports) {
         isAutoplaying: false,
         isPaused: false,
         autoplayStartTime: null,
+        autoplayElapsed: 0,
+        autoplayPausedOnValue: null,
       };
 
       this.events = new Map();
@@ -1039,15 +1037,9 @@ var Tabs = (function (exports) {
     // Navigates to the next tab
     next() {
       const { triggers, config, state } = this;
-      const currentIndex = triggers.findIndex((trigger) => {
-        const value = normalizeValue(
-          trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE)
-        );
-        return value === state.activeValue;
-      });
+      const currentIndex = findTriggerIndex(triggers, state.activeValue);
 
       let nextIndex = currentIndex + 1;
-
       if (config.loop) {
         nextIndex = nextIndex % triggers.length;
       } else {
@@ -1062,15 +1054,9 @@ var Tabs = (function (exports) {
     // Navigates to the previous tab
     prev() {
       const { triggers, config, state } = this;
-      const currentIndex = triggers.findIndex((trigger) => {
-        const value = normalizeValue(
-          trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE)
-        );
-        return value === state.activeValue;
-      });
+      const currentIndex = findTriggerIndex(triggers, state.activeValue);
 
       let prevIndex = currentIndex - 1;
-
       if (config.loop) {
         prevIndex = (prevIndex + triggers.length) % triggers.length;
       } else {
@@ -1089,6 +1075,12 @@ var Tabs = (function (exports) {
       if (!this.autoplay) {
         setupAutoplay(this);
       }
+
+      // Set autoplay duration CSS variable
+      this.container.style.setProperty(
+        CSS_VARS.AUTOPLAY_DURATION,
+        this.config.autoplayDuration + 'ms'
+      );
 
       this.autoplay.pausedByUser = false;
       startAutoplay(this);
@@ -1114,6 +1106,8 @@ var Tabs = (function (exports) {
         isAutoplaying: false,
         isPaused: false,
         autoplayStartTime: null,
+        autoplayElapsed: 0,
+        autoplayPausedOnValue: null,
       };
       this.events = events; // Preserve event subscriptions
       this.boundHandlers = null;
@@ -1136,6 +1130,7 @@ var Tabs = (function (exports) {
 
     // Destroys the instance
     destroy() {
+      instances.delete(this.id);
       cleanup(this);
       return null;
     }

@@ -40,6 +40,7 @@ src/
 ├── tabs.js       # Entry point, Tabs class, auto-initialization, global API
 ├── config.js     # Centralized selectors, attributes, classes, defaults
 ├── autoplay.js   # Autoplay timer, RAF progress, pause/resume logic
+├── utils.js      # Shared utilities (event emission)
 └── styles.css    # Required CSS (panel visibility, transitions)
 ```
 

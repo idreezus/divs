@@ -13,9 +13,9 @@ import {
   startAutoplay,
   pauseAutoplay,
   resumeAutoplay,
-  stopAutoplay,
   cleanupAutoplay,
 } from './autoplay.js';
+import { emit } from './utils.js';
 
 // ============================================================================
 // Utility Functions
@@ -33,6 +33,14 @@ function generateUniqueId() {
 function normalizeValue(value) {
   if (!value) return '';
   return value.toLowerCase().replace(/\s+/g, '-');
+}
+
+// Finds the index of a trigger by its normalized value
+function findTriggerIndex(triggers, targetValue) {
+  return triggers.findIndex((trigger) => {
+    const triggerValue = normalizeValue(trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE));
+    return triggerValue === targetValue;
+  });
 }
 
 // Parses configuration from data attributes on the container
@@ -55,25 +63,6 @@ function parseConfig(container) {
     autoplayPauseFocus:
       container.getAttribute(ATTRIBUTES.AUTOPLAY_PAUSE_FOCUS) !== 'false',
   };
-}
-
-// Emits events via instance callbacks and DOM CustomEvent
-function emit(instance, eventName, data = {}) {
-  const { events, container } = instance;
-
-  // Instance event callbacks
-  if (events.has(eventName)) {
-    events.get(eventName).forEach((callback) => {
-      callback.call(instance, { type: eventName, target: instance, ...data });
-    });
-  }
-
-  // DOM CustomEvent for addEventListener compatibility
-  const customEvent = new CustomEvent(`tabs:${eventName}`, {
-    detail: { tabs: instance, ...data },
-    bubbles: true,
-  });
-  container.dispatchEvent(customEvent);
 }
 
 // Checks if user prefers reduced motion
@@ -420,16 +409,8 @@ function activate(instance, value, options = {}) {
   if (normalized === previousValue) return false;
 
   // Calculate indices for CSS variables
-  const newIndex = triggers.findIndex((trigger) => {
-    const value = normalizeValue(trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE));
-    return value === normalized;
-  });
-  const previousIndex = previousValue
-    ? triggers.findIndex((trigger) => {
-        const value = normalizeValue(trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE));
-        return value === previousValue;
-      })
-    : -1;
+  const newIndex = findTriggerIndex(triggers, normalized);
+  const previousIndex = previousValue ? findTriggerIndex(triggers, previousValue) : -1;
 
   // Set active index CSS variable
   container.style.setProperty(CSS_VARS.ACTIVE_INDEX, newIndex);
@@ -530,10 +511,7 @@ function updateButtonStates(instance) {
     return;
   }
 
-  const currentIndex = triggers.findIndex((trigger) => {
-    const value = normalizeValue(trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE));
-    return value === state.activeValue;
-  });
+  const currentIndex = findTriggerIndex(triggers, state.activeValue);
 
   if (prevBtn) {
     prevBtn.classList.toggle(CLASSES.BUTTON_DISABLED, currentIndex === 0);
@@ -638,11 +616,6 @@ function cleanup(instance) {
 
   // Cleanup autoplay
   cleanupAutoplay(instance);
-
-  // Clear all properties
-  Object.keys(instance).forEach((key) => {
-    instance[key] = null;
-  });
 }
 
 // ============================================================================
@@ -718,6 +691,8 @@ export class Tabs {
       isAutoplaying: false,
       isPaused: false,
       autoplayStartTime: null,
+      autoplayElapsed: 0,
+      autoplayPausedOnValue: null,
     };
 
     this.events = new Map();
@@ -749,15 +724,9 @@ export class Tabs {
   // Navigates to the next tab
   next() {
     const { triggers, config, state } = this;
-    const currentIndex = triggers.findIndex((trigger) => {
-      const value = normalizeValue(
-        trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE)
-      );
-      return value === state.activeValue;
-    });
+    const currentIndex = findTriggerIndex(triggers, state.activeValue);
 
     let nextIndex = currentIndex + 1;
-
     if (config.loop) {
       nextIndex = nextIndex % triggers.length;
     } else {
@@ -772,15 +741,9 @@ export class Tabs {
   // Navigates to the previous tab
   prev() {
     const { triggers, config, state } = this;
-    const currentIndex = triggers.findIndex((trigger) => {
-      const value = normalizeValue(
-        trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE)
-      );
-      return value === state.activeValue;
-    });
+    const currentIndex = findTriggerIndex(triggers, state.activeValue);
 
     let prevIndex = currentIndex - 1;
-
     if (config.loop) {
       prevIndex = (prevIndex + triggers.length) % triggers.length;
     } else {
@@ -830,6 +793,8 @@ export class Tabs {
       isAutoplaying: false,
       isPaused: false,
       autoplayStartTime: null,
+      autoplayElapsed: 0,
+      autoplayPausedOnValue: null,
     };
     this.events = events; // Preserve event subscriptions
     this.boundHandlers = null;
@@ -852,6 +817,7 @@ export class Tabs {
 
   // Destroys the instance
   destroy() {
+    instances.delete(this.id);
     cleanup(this);
     return null;
   }
