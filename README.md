@@ -24,6 +24,12 @@ A lightweight, zero-dependency theme engine that combines a flicker‑free head 
 
 **[Documentation](https://divs.idreezus.com/components/theme-toggle)**
 
+### Tabs
+
+An accessible, keyboard-navigable tabs component with autoplay support. Uses value-based linking between triggers and panels (not array indices), enabling flexible layouts where triggers and panels can live anywhere in the DOM. Features full ARIA compliance, URL deep linking, CSS custom properties for animations, IntersectionObserver-powered autoplay with pause-on-hover/focus, support for multiple triggers per panel, and nested tabs without conflicts.
+
+**[Documentation](https://divs.idreezus.com/components/tabs)**
+
 ## License
 
 AGPL-3.0

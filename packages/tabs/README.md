@@ -1,8 +1,8 @@
 # Tabs
 
-An accessible, keyboard-navigable tabs component with autoplay support.
+An accessible, keyboard-navigable tabs component that just works.
 
-## Features
+<Features>
 
 - Full keyboard navigation with arrow keys, Home, and End
 - ARIA-compliant with proper roles, states, and focus management
@@ -11,7 +11,10 @@ An accessible, keyboard-navigable tabs component with autoplay support.
 - Supports multiple triggers per panel (e.g., sidebar + content triggers)
 - Works with nested tabs without conflicts
 - Optional prev/next navigation buttons
+- CSS custom properties for powerful styling hooks
 - Native DOM events and instance API
+
+</Features>
 
 ## Setup
 
@@ -53,39 +56,54 @@ Snag one of the variants below, or continue reading the documentation to learn m
 
 ## How It Works
 
-Tabs are linked by matching `data-tabs-trigger-value` and `data-tabs-panel-value` attributes. Unlike traditional tab implementations that rely on array indices, this value-based linking means:
+This library takes a different approach from traditional tab implementations. Instead of relying on array indices or DOM order, tabs are linked by matching `data-tabs-trigger-value` and `data-tabs-panel-value` attributes.
 
-- Triggers and panels can be anywhere in the DOM (not just siblings)
+This value-based linking gives you superpowers:
+
+- Triggers and panels can live anywhere in the DOM (not just as siblings)
 - Multiple triggers can control the same panel
-- Order doesn't matter - matching is by value, not position
+- Order doesn't matter – matching is by value, not position
+- Deep nesting works without special configuration
+
+In the background, the library handles all the accessibility requirements (ARIA roles, states, keyboard navigation), sets up IntersectionObserver for intelligent autoplay pausing, and exposes CSS custom properties for animations that stay perfectly in sync.
 
 ### Structure
 
 Three elements are required:
 
-- `[data-tabs="container"]` - the outermost container, used for scoping
-- `[data-tabs-trigger-value="..."]` - the tab trigger buttons
-- `[data-tabs-panel-value="..."]` - the content panels
+- `[data-tabs="container"]` – the outermost container, used for scoping
+- `[data-tabs-trigger-value="..."]` – the tab trigger buttons
+- `[data-tabs-panel-value="..."]` – the content panels
 
 ```html
 <div data-tabs="container">
   <div role="tablist">
-    <button data-tabs-trigger-value="one">Tab 1</button>
-    <button data-tabs-trigger-value="two">Tab 2</button>
-    <button data-tabs-trigger-value="three">Tab 3</button>
+    <button data-tabs-trigger-value="overview">Overview</button>
+    <button data-tabs-trigger-value="features">Features</button>
+    <button data-tabs-trigger-value="pricing">Pricing</button>
   </div>
   <div>
-    <div data-tabs-panel-value="one">Content 1</div>
-    <div data-tabs-panel-value="two">Content 2</div>
-    <div data-tabs-panel-value="three">Content 3</div>
+    <div data-tabs-panel-value="overview">Overview content here</div>
+    <div data-tabs-panel-value="features">Features content here</div>
+    <div data-tabs-panel-value="pricing">Pricing content here</div>
   </div>
 </div>
 ```
 
 > [!IMPORTANT]
-> The trigger and panel values are normalized to lowercase and hyphenated. So `"Tab One"`, `"tab-one"`, and `"TAB ONE"` all become `"tab-one"`.
+> Trigger and panel values are normalized to lowercase and hyphenated. So `"Tab One"`, `"tab-one"`, and `"TAB ONE"` all become `"tab-one"` internally.
 
-## Data Attributes
+## Webflow CMS
+
+The value-based approach works great with Webflow's Collection List structure:
+
+1. `[data-tabs="container"]` – goes on an ancestor of the `Collection List Wrapper`, or on the wrapper itself if you don't need navigation buttons inside
+2. `[data-tabs-trigger-value]` – goes on trigger elements (pull the value from a CMS field)
+3. `[data-tabs-panel-value]` – goes on the `Collection List Item` (use the same CMS field)
+
+Since triggers and panels are matched by value rather than position, you can have your tab triggers in one Collection List and your panels in another – as long as the values match, they'll connect.
+
+## Customization
 
 ### Container Configuration
 
@@ -125,6 +143,30 @@ Optional controls that work automatically when placed inside the container:
 | `data-tabs="next"`       | Next tab button        |
 | `data-tabs="play-pause"` | Toggle autoplay button |
 
+```html
+<div data-tabs="container" data-tabs-autoplay="true">
+  <!-- Triggers and panels here -->
+  <div>
+    <button data-tabs="prev">Previous</button>
+    <button data-tabs="next">Next</button>
+    <button data-tabs="play-pause">Pause</button>
+  </div>
+</div>
+```
+
+### Keyboard Navigation
+
+When enabled (default), arrow keys navigate between tabs based on `data-tabs-orientation`:
+
+- **Horizontal:** `Arrow Left` / `Arrow Right`
+- **Vertical:** `Arrow Up` / `Arrow Down`
+
+Additional keys:
+
+- `Home` – jump to first tab
+- `End` – jump to last tab
+- `Enter` / `Space` – activate focused tab (when `activate-on-focus` is false)
+
 ## State Classes
 
 The library applies state classes that you can style however you want.
@@ -141,13 +183,36 @@ The library applies state classes that you can style however you want.
 | `.tabs-autoplay-paused` | Container when autoplay is paused          |
 | `.tabs-reduced-motion`  | Container when reduced motion is preferred |
 
+Here's an example styling the active trigger:
+
+```css
+/* Base trigger styles */
+.tabs_trigger {
+  background: transparent;
+  border-bottom: 2px solid transparent;
+  transition: border-color 200ms ease;
+}
+
+/* Active trigger */
+.tabs_trigger.tabs-active {
+  border-bottom-color: var(--primary);
+}
+
+/* Disabled navigation button */
+[data-tabs="prev"].tabs-button-disabled,
+[data-tabs="next"].tabs-button-disabled {
+  opacity: 0.3;
+  pointer-events: none;
+}
+```
+
 ### CSS Custom Properties
 
 | Property                   | Applied to        | Description                                                         |
 | -------------------------- | ----------------- | ------------------------------------------------------------------- |
 | `--tabs-progress`          | Active trigger    | Autoplay progress (0-1)                                             |
 | `--tabs-count`             | Container         | Total number of tabs                                                |
-| `--tabs-index`             | Triggers & panels | Zero-based index of each element                                    |
+| `--tabs-index`             | Triggers &amp; panels | Zero-based index of each element                                    |
 | `--tabs-active-index`      | Container         | Index of currently active tab                                       |
 | `--tabs-direction`         | Container         | Navigation direction: `1` (forward), `-1` (backward), `0` (initial) |
 | `--tabs-autoplay-duration` | Container         | Autoplay duration with unit (e.g., `5000ms`)                        |
@@ -155,24 +220,34 @@ The library applies state classes that you can style however you want.
 These enable powerful CSS-only effects:
 
 ```css
-/* Staggered entrance animations */
-.tabs-panel > * {
-  animation-delay: calc(var(--tabs-index) * 50ms);
-}
-
-/* Sliding indicator based on active tab */
-.indicator {
+/* Sliding indicator that follows the active tab */
+.tabs_indicator {
   transform: translateX(calc(var(--tabs-active-index) * 100%));
+  transition: transform 200ms ease;
 }
 
-/* Directional slide transitions */
+/* Staggered entrance animations for panel content */
+.tabs-panel-entering > * {
+  animation: fadeUp 300ms ease backwards;
+  animation-delay: calc(var(--tabs-index, 0) * 50ms);
+}
+
+/* Directional slide based on navigation direction */
 .tabs-panel-entering {
-  animation: var(--tabs-direction, 1) > 0 ? slideFromRight : slideFromLeft;
+  --direction: var(--tabs-direction, 1);
+  transform: translateX(calc(var(--direction) * 20px));
+  animation: slideIn 200ms ease forwards;
 }
 
-/* Progress bar synced to autoplay */
-.progress-bar {
-  animation: progress var(--tabs-autoplay-duration) linear;
+/* Progress bar synced to autoplay timer */
+.tabs_trigger::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: currentColor;
+  width: calc(var(--tabs-progress, 0) * 100%);
 }
 ```
 
@@ -189,7 +264,7 @@ const tabs = window.Tabs.init('[data-tabs="container"]');
 ### Instance Methods
 
 ```javascript
-tabs.goTo('tab-two'); // Go to specific tab by value
+tabs.goTo("pricing"); // Go to specific tab by value
 tabs.next(); // Go to next tab
 tabs.prev(); // Go to previous tab
 tabs.play(); // Start autoplay
@@ -199,36 +274,36 @@ tabs.destroy(); // Clean up and remove listeners
 tabs.getActiveValue(); // Returns current active value
 ```
 
-All methods are chainable (except getActiveValue and destroy):
+All methods are chainable (except `getActiveValue` and `destroy`):
 
 ```javascript
-tabs.goTo('overview').play();
+tabs.goTo("overview").play();
 ```
 
 ### Events
 
 ```javascript
-tabs.on('change', (e) => {
+tabs.on("change", (e) => {
   console.log(`Active tab: ${e.value}`);
   console.log(`Previous tab: ${e.previousValue}`);
 });
 
-tabs.on('autoplay-start', (e) => {
-  console.log('Autoplay started');
+tabs.on("autoplay-start", (e) => {
+  console.log("Autoplay started");
 });
 
-tabs.on('autoplay-pause', (e) => {
+tabs.on("autoplay-pause", (e) => {
   console.log(`Autoplay paused at ${e.progress * 100}%`);
 });
 
 // Remove listener
-tabs.off('change', handler);
+tabs.off("change", handler);
 ```
 
 Or use native DOM events:
 
 ```javascript
-container.addEventListener('tabs:change', (e) => {
+container.addEventListener("tabs:change", (e) => {
   console.log(e.detail); // { tabs, value, previousValue }
 });
 ```
@@ -245,17 +320,28 @@ Available events:
 
 ```javascript
 // Get instance by selector or element
-const tabs = window.Tabs.get('.my-tabs');
+const tabs = window.Tabs.get(".my-tabs");
 
 // Get all instances
 const allTabs = window.Tabs.getAll();
 
 // Destroy instance
-window.Tabs.destroy('.my-tabs');
+window.Tabs.destroy(".my-tabs");
 
 // Destroy all instances
 window.Tabs.destroy();
 ```
+
+### Dynamic Content
+
+When adding/removing tabs, call `refresh()`:
+
+```javascript
+// After modifying the DOM
+tabs.refresh();
+```
+
+The refresh method preserves event subscriptions and attempts to maintain the current active tab if it still exists.
 
 ## URL Deep Linking
 
@@ -267,7 +353,9 @@ Enable URL syncing with the `data-tabs-group-name` attribute:
 </div>
 ```
 
-Now `?section=pricing` in the URL will activate the "pricing" tab on page load, and clicking tabs will update the URL.
+Now `?section=pricing` in the URL will activate the "pricing" tab on page load, and clicking tabs will update the URL without a page reload.
+
+Priority order for initial tab: **URL parameter** &gt; **`data-tabs-default`** &gt; **first trigger**
 
 ## FAQ
 
@@ -280,7 +368,7 @@ Use the `data-tabs-default` attribute:
 <div data-tabs="container" data-tabs-default="pricing"></div>
 ```
 
-Priority order: URL parameter > `data-tabs-default` > first trigger.
+Priority order: URL parameter &gt; `data-tabs-default` &gt; first trigger.
 </Accordion>
 
 <Accordion title="Can I have multiple triggers for the same panel?">
@@ -288,19 +376,19 @@ Yes! Just use the same value for multiple triggers:
 
 ```html
 <button data-tabs-trigger-value="overview">Overview (sidebar)</button>
-<!-- ... -->
+<!-- ... elsewhere in the container ... -->
 <button data-tabs-trigger-value="overview">Overview (top nav)</button>
 ```
 
 Both will activate the same panel and stay in sync.
 </Accordion>
 
-<Accordion title="How do I animate the progress indicator?">
-Use the `--tabs-progress` CSS custom property:
+<Accordion title="How do I animate the autoplay progress indicator?">
+Use the `--tabs-progress` CSS custom property, which updates from 0 to 1 during autoplay:
 
 ```css
-.tabs-trigger::after {
-  content: '';
+.tabs_trigger::after {
+  content: "";
   position: absolute;
   bottom: 0;
   left: 0;
@@ -313,16 +401,127 @@ Use the `--tabs-progress` CSS custom property:
 </Accordion>
 
 <Accordion title="Does it work with nested tabs?">
-Yes! Each container is scoped independently. Triggers and panels are matched only within their own container.
+Yes! Each container is scoped independently. Triggers and panels are matched only within their own container, so nested tabs work without any special configuration.
 </Accordion>
 
 <Accordion title="What about accessibility?">
 The library automatically sets:
+
 - `role="tab"` on triggers
 - `role="tabpanel"` on panels
 - `aria-selected`, `aria-controls`, `aria-labelledby`
 - Proper `tabindex` management
 - `aria-orientation` on the container
+
+Keyboard navigation follows WAI-ARIA best practices.
+</Accordion>
+
+<Accordion title="Why does autoplay stop when I scroll away?">
+The library uses IntersectionObserver to pause autoplay when the tabs are less than 50% visible in the viewport. This improves performance and prevents tabs from cycling when users aren't looking at them. Autoplay resumes automatically when the tabs become visible again (unless the user manually paused it).
+</Accordion>
+
+<Accordion title="What if the user prefers reduced motion?">
+Autoplay is automatically disabled when `prefers-reduced-motion: reduce` is set. The container also receives the `.tabs-reduced-motion` class so you can adjust your own animations accordingly.
+</Accordion>
+
+<Accordion title="Should I use buttons or links for triggers?">
+Use `<button>` elements for triggers. The library will warn in the console if you use `<a>` tags, since buttons are more semantically appropriate for in-page tab switching. If your tabs navigate to different pages, they're not really tabs – they're navigation links.
+</Accordion>
+
+<Accordion title="How do I create a sliding underline indicator?">
+Use the `--tabs-active-index` CSS variable to position an indicator element:
+
+```css
+.tabs_indicator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  width: calc(100% / var(--tabs-count));
+  background: var(--primary);
+  transform: translateX(calc(var(--tabs-active-index) * 100%));
+  transition: transform 200ms ease;
+}
+```
+
+The indicator will automatically slide to follow the active tab.
+</Accordion>
+
+<Accordion title="Can I style panels differently based on direction?">
+Yes! Use the `--tabs-direction` CSS variable. It's `1` when navigating forward, `-1` when going backward, and `0` on initial load:
+
+```css
+.tabs-panel-entering {
+  animation: slideIn 200ms ease;
+  --slide-from: calc(var(--tabs-direction, 1) * 30px);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(var(--slide-from));
+  }
+}
+```
+
+</Accordion>
+
+<Accordion title="How do I make autoplay resume after user interaction?">
+By default, clicking a tab or using keyboard navigation permanently pauses autoplay until the user clicks a play button. If you want autoplay to resume after a delay, you can use the events API:
+
+```javascript
+const tabs = window.Tabs.get(".my-tabs");
+
+tabs.on("change", () => {
+  // Resume autoplay after 10 seconds of inactivity
+  clearTimeout(window.autoplayTimeout);
+  window.autoplayTimeout = setTimeout(() => {
+    tabs.play();
+  }, 10000);
+});
+```
+
+</Accordion>
+
+<Accordion title="Why aren't my panels showing/hiding?">
+Make sure you've included the required CSS file. The base styles handle panel visibility:
+
+```css
+[data-tabs-panel-value] {
+  display: none;
+}
+[data-tabs-panel-value].tabs-active {
+  display: block;
+}
+```
+
+If you're using custom display values (like `flex` or `grid`), override the active state accordingly.
+</Accordion>
+
+<Accordion title="Can I have tabs without panels (trigger-only)?">
+No – the library validates that every trigger has a matching panel and vice versa. If you need trigger-only behavior (like a button group), you're better off with a simpler custom solution. Tabs are specifically for showing/hiding content panels.
+</Accordion>
+
+<Accordion title="How do I debug initialization issues?">
+The library logs helpful warnings to the console:
+
+- Missing triggers or panels
+- Empty or mismatched values
+- `<a>` tags used as triggers (should be `<button>`)
+- URL parameters that don't match any tab
+
+Each tabs instance also gets a `data-tabs-id` attribute for easier identification in DevTools.
+</Accordion>
+
+<Accordion title="Does autoplay work on mobile?">
+Yes, but with smart pausing. Autoplay pauses when:
+
+- The tabs scroll out of view (IntersectionObserver)
+- The user hovers over the container (if `pause-hover` is enabled)
+- The user focuses any element inside (if `pause-focus` is enabled)
+- The user manually clicks a tab or uses keyboard navigation
+
+On touch devices, hover pausing doesn't apply, but visibility and focus pausing still work.
 </Accordion>
 
 </Accordions>
