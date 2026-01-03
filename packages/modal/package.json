@@ -1,0 +1,22 @@
+{
+  "name": "modal",
+  "version": "1.0.0",
+  "description": "A lightweight modal library built on native HTML dialog elements.",
+  "main": "modal.js",
+  "type": "module",
+  "scripts": {
+    "build": "rollup -c",
+    "build:watch": "rollup -c --watch",
+    "release": "BUILD_MODE=release rollup -c"
+  },
+  "keywords": [
+    "modal",
+    "dialog",
+    "webflow",
+    "vanilla-js",
+    "accessible",
+    "a11y"
+  ],
+  "author": "Idrees Isse (https://github.com/idreezus)",
+  "license": "AGPL-3.0"
+}

@@ -9,14 +9,17 @@
     "build:marquee": "pnpm --filter marquee build",
     "build:carousel": "pnpm --filter carousel build",
     "build:tabs": "pnpm --filter tabs build",
+    "build:modal": "pnpm --filter modal build",
     "dev:marquee": "pnpm --filter marquee build:watch",
     "dev:carousel": "pnpm --filter carousel build:watch",
     "dev:tabs": "pnpm --filter tabs build:watch",
+    "dev:modal": "pnpm --filter modal build:watch",
     "release": "pnpm -r release",
     "release:marquee": "pnpm --filter marquee release",
     "release:carousel": "pnpm --filter carousel release",
     "release:theme-toggle": "pnpm --filter theme-toggle release",
-    "release:tabs": "pnpm --filter tabs release"
+    "release:tabs": "pnpm --filter tabs release",
+    "release:modal": "pnpm --filter modal release"
   },
   "keywords": [
     "components",
