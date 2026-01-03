@@ -6,6 +6,7 @@ import {
   parseConfig,
   emit,
   calculateDimensions,
+  updateCSSProperties,
 } from './utils.js';
 import {
   detectActiveItem,
@@ -46,12 +47,8 @@ function findElements(instance) {
   const prevBtn = container.querySelector(SELECTORS.PREV_BTN);
   const nextBtn = container.querySelector(SELECTORS.NEXT_BTN);
 
-  // Find optional pagination container and dots
-  const pagination = container.querySelector(SELECTORS.PAGINATION);
-  let dots = [];
-  if (pagination) {
-    dots = [...pagination.querySelectorAll(SELECTORS.DOT)];
-  }
+  // Find optional pagination dots (can be anywhere in container)
+  const dots = [...container.querySelectorAll(SELECTORS.DOT)];
 
   // Add data-carousel-id for easier debugging in devtools
   container.setAttribute('data-carousel-id', id);
@@ -62,7 +59,6 @@ function findElements(instance) {
     items,
     prevBtn,
     nextBtn,
-    pagination,
     dots,
   });
 
@@ -145,13 +141,16 @@ function init(instance) {
   // Calculate initial dimensions
   calculateDimensions(instance);
 
+  // Set initial CSS custom properties before first paint
+  updateCSSProperties(instance);
+
   // Attach event listeners
   attachEventListeners(instance);
 
   // Set up responsive behavior
   setupResizeObserver(instance);
 
-  // Set up pagination if container exists
+  // Set up pagination if dots exist
   setupPagination(instance);
 
   // Set up keyboard navigation if enabled

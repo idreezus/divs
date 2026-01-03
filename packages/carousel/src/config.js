@@ -4,8 +4,9 @@ export const SELECTORS = {
   ITEM: '[data-carousel="item"]',
   PREV_BTN: '[data-carousel="prev"]',
   NEXT_BTN: '[data-carousel="next"]',
-  PAGINATION: '[data-carousel="pagination"]',
-  DOT: '[data-carousel="dot"]',
+  DOT: '[data-carousel-dot]',
+  PAGINATION_CURRENT: '[data-carousel-pagination-current]',
+  PAGINATION_TOTAL: '[data-carousel-pagination-total]',
 };
 
 // CSS classes applied to elements
@@ -16,8 +17,7 @@ export const CLASSES = {
   VISIBLE: 'carousel-item-visible', // Applied to items currently in viewport (reserved for future use)
   ANIMATING: 'carousel-animating', // Applied to track during programmatic scroll
   SNAP_DISABLED: 'carousel-snap-disabled', // Applied to track to temporarily disable scroll-snap during button navigation
-  PAGINATION_ACTIVE: 'carousel-pagination-active', // Applied to the current active pagination dot
-  PAGINATION_AUTO_DOT: 'carousel-auto-pagination-dot', // Applied to the automatically generated pagination dots
+  DOT_ACTIVE: 'carousel-dot-active', // Applied to the current active pagination dot
   LIVE_REGION: 'carousel-sr-only', // Applied to the live region for screen readers
 };
 
@@ -42,10 +42,18 @@ export const TOLERANCE = {
   ACTIVE_DETECTION: 2,
 };
 
+// CSS custom property names
+export const CSS_VARS = {
+  INDEX: '--carousel-index',
+  TOTAL: '--carousel-total',
+  PROGRESS: '--carousel-progress',
+};
+
 export const CONFIG = {
   SELECTORS,
   CLASSES,
   DEFAULTS,
   TIMING,
   TOLERANCE,
+  CSS_VARS,
 };

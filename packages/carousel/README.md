@@ -1,46 +1,128 @@
-# Carousel
-
-A smooth scrolling slider that leverages native CSS for easy setup and styling.
+<Variant title="Gallery / Portrait" id="f7c75997-4127-4d96-9d2c-97f4da766ac7" />
 
 ## Features
 
-- Works with any item sizes, even if different widths
-- Navigation buttons work just by placing them in the container
-- Optional keyboard navigation with a single data attribute
-- Automatic recalculations for sizes & spacing that change on breakpoints
+<Features>
+
+- Flexible item sizing with automatic recalculations across breakpoints
+- Simple setup: navigation buttons and keyboard controls work with minimal markup
 - Allows for multiple carousels per page without initialization conflicts
 - Native CSS gives performant, GPU-accelerated scrolling
 - Javascript API and events available for complex builds
 
+</Features>
+
 ## Setup
 
 <Steps>
-<Step number="1" title="Copy and paste the script">
-Paste this script into your Page Settings "Before `</body>` tag".
+<Step number="1" title="Load the Script">
+Copy & paste this script in your Page Settings **Before `</body>` tag**
 
 ```html
 <!-- Divs Carousel Library -->
-<script src="https://cdn.jsdelivr.net/gh/idreezus/divs@carousel-v1.0.0/dist/carousel/v1.0.0/carousel.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/idreezus/divs@v1.0.0/dist/carousel/v1.0.0/carousel.min.js"></script>
 ```
 
 </Step>
 
-<Step number="2" title="Copy and paste the styles">
-Put the required styling on your page. Either an Embed element that's placed anywhere on your page, or your Page Settings "Inside `<head>` tag".
+<Step number="2" title="Add the Styles">
+Copy & paste this in an embed element or your Page Settings **Inside `<head>` tag**
+
+```html
+<style>
+  /* Things you could change */
+  :root {
+    --site-max-width: 80rem; /* your site's container width here */
+    --site-padding: 2.5rem; /* your site's padding here */
+  }
+
+  @media (max-width: 767px) {
+    :root {
+      --site-padding: 1.25rem; /* your site's padding on mobile (landscape) and below */
+    }
+  }
+
+  /*
+*	Things for nerds
+*/
+
+  /* Variables used in the `.carousel_track` `.carousel_track.is-breakout` classes */
+  :root {
+    --carousel-scroll-padding: calc(
+      (100% - min(var(--site-max-width), 100% - var(--site-padding) * 2)) / 2
+    );
+    --carousel-scroll-padding-breakout: calc(
+      (100vw - min(var(--site-max-width), 100vw - var(--site-padding) * 2)) / 2
+    );
+  }
+
+  @media (max-width: 767px) {
+    :root {
+      --carousel-scroll-padding: calc(
+        (100% - min(var(--site-max-width), 100% - var(--site-padding) * 2)) / 2
+      );
+      --carousel-scroll-padding-breakout: calc(
+        (100vw - min(var(--site-max-width), 100vw - var(--site-padding) * 2)) / 2
+      );
+    }
+  }
+
+  /* Hide scrollbar in WebKit browsers */
+  [data-carousel='track']::-webkit-scrollbar {
+    display: none;
+  }
+
+  [data-carousel='track'].carousel-snap-disabled {
+    scroll-snap-type: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-carousel='track'] {
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Default alignment when no attributes set */
+  [data-carousel='container']:not([data-carousel-align])
+    [data-carousel='item'] {
+    scroll-snap-align: start;
+  }
+
+  [data-carousel-align='start'] [data-carousel='item'] {
+    scroll-snap-align: start;
+  }
+
+  [data-carousel-align='center'] [data-carousel='item'] {
+    scroll-snap-align: center;
+  }
+
+  [data-carousel-align='end'] [data-carousel='item'] {
+    scroll-snap-align: end;
+  }
+
+  /* Screen reader only utility for visually hidden live region */
+  .carousel-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>
+```
+
 </Step>
 
-<Step number="3" title="That's all folks">
-Snag one of the variants below, or continue reading the documentation if you want learn more.
+<Step number="3" title="That's all folks!">
+Grab a variant below, or continue reading the documentation if you want to learn more (pls do it's hard to write documentation).
 </Step>
 </Steps>
 
-## Variants
-
-### Content Cards
-
-### Galleries
-
-### Testimonials
+---
 
 ## How It Works
 
@@ -71,7 +153,7 @@ The purpose of the `[data-carousel="container"]` element is three-fold:
 >
 > The only restraints: there can only be one carousel within a container, and all the `[data-carousel="item"]` elements must be **direct children** of the track.
 
-## Webflow CMS
+### Webflow CMS
 
 To match up with the Webflow Collection List structure:
 
@@ -92,6 +174,92 @@ To match up with the Webflow Collection List structure:
   </div>
 </div>
 ```
+
+<SpecialHeading tag="h2" className="animate-pulse text-center">
+  ## Variants
+</SpecialHeading>
+
+<SpecialHeading
+tag="h3"
+className="-md:mt-6 -lg:mt-8 -mt-4 mb-4 text-center text-muted-foreground md:mb-6"
+
+>
+
+### Content Cards
+
+</SpecialHeading>
+
+<GridItem size="lg" className="flex flex-col gap-16 md:gap-24">
+
+<Variant
+  title="Content / Medium (with Details)"
+  id="69649380-c16c-42bd-a568-7a04b535f1ae"
+/>
+
+<Variant
+  title="Content / Small (with Details)"
+  id="840380a9-daae-46da-a593-fbae7c2671e7"
+/>
+
+<Variant
+  title="Content / Large (with Details)"
+  id="0802651b-d7f2-495f-a6af-311ae8811695"
+/>
+
+<Variant title="Content / Small" id="64029c09-dc65-414e-ac65-bd2caa5a3e04" />
+
+<Variant title="Content / Large" id="6b687e14-792d-41d4-a6ee-7c919b641b6d" />
+
+<Variant title="Content / Medium" id="5d53003d-4336-4286-b063-a162fa623cb6" />
+
+</GridItem>
+
+<SpecialHeading tag="h3" className="py-4 text-center md:py-6">
+  ### Feature Cards
+</SpecialHeading>
+
+<GridItem size="lg" className="flex flex-col gap-8 md:gap-16 lg:gap-24">
+
+<Variant title="Features / 4 by 5" id="bd91708d-852e-4c18-b998-83f2fe543efe" />
+
+<Variant
+  title="Features / Landscape"
+  id="6759047b-346d-4bf8-971c-681f9b3e9314"
+/>
+
+</GridItem>
+
+<SpecialHeading tag="h3" className="py-4 text-center md:py-6">
+  ### Galleries
+</SpecialHeading>
+
+<GridItem size="lg" className="flex flex-col gap-8 md:gap-16 lg:gap-24">
+
+<Variant title="Gallery / Portrait" id="f7c75997-4127-4d96-9d2c-97f4da766ac7" />
+
+<Variant
+  title="Gallery / Widescreen"
+  id="c83aea6b-7875-4c1e-847b-ff86e2fe5cf6"
+/>
+
+<Variant title="Gallery / Square" id="e31a3e5f-8be6-4a2b-9ebd-01410d3522d2" />
+
+</GridItem>
+
+<SpecialHeading tag="h3" className="py-4 text-center md:py-6">
+  ### Testimonials
+</SpecialHeading>
+
+<GridItem size="lg" className="flex flex-col gap-8 md:gap-16 lg:gap-24">
+
+<Variant
+  title="Testimonial / Quote"
+  id="93078ecd-ab42-4a5f-91d2-9c7c51ce5623"
+/>
+
+<Variant title="Testimonial / Card" id="7e961eb6-1266-43e8-8e2b-cd783390de9a" />
+
+</GridItem>
 
 ## Customization
 
@@ -116,8 +284,43 @@ Optional navigation controls that work automatically when placed inside the cont
 | `data-carousel="prev"` | Previous button |
 | `data-carousel="next"` | Next button     |
 
-> [!NOTE]
-> Pagination is coming very soon. Just doing some bug testing.
+### Pagination
+
+Add pagination dots anywhere inside the carousel container. The library finds all `[data-carousel-dot]` elements and clones the first one to match the total item count.
+
+```html
+<div data-carousel="container">
+  <div data-carousel="track">
+    <div data-carousel="item">...</div>
+    <div data-carousel="item">...</div>
+    <div data-carousel="item">...</div>
+  </div>
+  <div class="my-pagination-styles">
+    <button data-carousel-dot></button>
+  </div>
+</div>
+```
+
+| Attribute                          | Description                                           |
+| ---------------------------------- | ----------------------------------------------------- |
+| `data-carousel-dot`                | Individual dot element (first one is used as template)|
+| `data-carousel-pagination-current` | Element that displays current slide number (1-based)  |
+| `data-carousel-pagination-total`   | Element that displays total slide count               |
+
+For custom pagination displays like "2 of 5":
+
+```html
+<div class="my-pagination-styles">
+  <button data-carousel-dot></button>
+</div>
+<div>
+  <span data-carousel-pagination-current></span>
+  of
+  <span data-carousel-pagination-total></span>
+</div>
+```
+
+The library automatically adds `aria-label="Go to slide X of Y"` and `aria-current="true"` on the active dot for accessibility.
 
 ### Keyboard Navigation
 
@@ -137,6 +340,27 @@ Use CSS `gap` on the `[data-carousel="track"]` to control spacing.
 
 The library also works with CSS [`scroll-padding`](https://developer.mozilla.org/en-US/docs/Web/CSS/scroll-padding) (container insets) and [`scroll-margin`](https://developer.mozilla.org/en-US/docs/Web/CSS/scroll-margin) (per-item offsets) for controlling snap positioning. For the variants on this page, all of them have `scroll-padding` on the track element.
 
+### CSS Custom Properties
+
+The library exposes state as CSS custom properties on the container element. Use these for dynamic styling without JavaScript.
+
+| Property              | Values    | Description                              |
+| --------------------- | --------- | ---------------------------------------- |
+| `--carousel-index`    | `1, 2, 3…`| Current slide number (1-based)           |
+| `--carousel-total`    | `1, 2, 3…`| Total number of slides                   |
+| `--carousel-progress` | `0` – `1` | Scroll progress through the carousel     |
+
+Example: a progress bar that fills as you scroll through the carousel.
+
+```css
+.carousel-progress-bar {
+  width: calc(var(--carousel-progress) * 100%);
+  height: 2px;
+  background: currentColor;
+  transition: width 150ms ease-out;
+}
+```
+
 ## State Classes
 
 The library applies state classes that you can style however you want.
@@ -148,7 +372,7 @@ The library applies state classes that you can style however you want.
 | `.carousel-scrolling`         | The track while a user or programmatic scrolling is active            |
 | `.carousel-snap-disabled`     | The track to temporarily disable scroll-snap during button navigation |
 | `.carousel-animating`         | The track during programmatic scroll animations                       |
-| `.carousel-pagination-active` | The active pagination dot                                             |
+| `.carousel-dot-active`        | The active pagination dot                                             |
 
 Here's an example from the prev/next buttons on all the variants on this page:
 
@@ -285,15 +509,9 @@ const newCarousel = new Carousel(container);
 
 <Accordions>
 
-<Accordion title="Why do you call it 'Carousel' instead of 'Slider'?">
-Great question. I called it Slider my whole life (I still do), but I learned it's not the right semantics. The browser world (like Chrome and Mozilla devs) call it "Carousel" since "Slider" is reserved for things like an [input range slider.](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/range) And I might want to make an input range slider component in the future. So I had to lock in and leave the `/slider` URL free.
-</Accordion>
+<Accordion title="Does it work vertically?">Not yet. Wink.</Accordion>
 
-<Accordion title="Does it work vertically?">
-Not yet. Wink.
-</Accordion>
-
-<Accordion title="How do I style my navigation buttons at the boundaries?">
+<Accordion title="How do I style my navigation buttons at the edges?">
 The library automatically adds the `.carousel-button-disabled` class when at the start or end. Style that class however you like.
 
 ```css
@@ -306,7 +524,9 @@ button[data-carousel].carousel-button-disabled {
 </Accordion>
 
 <Accordion title="Can I customize the animation duration?">
-The library uses native `scroll-behavior: smooth`, so animation timing is controlled by the browser. For custom timing, you'd need to implement custom scrolling instead of using the native behavior.
+  The library uses native `scroll-behavior: smooth`, so animation timing is
+  controlled by the browser. For custom timing, you'd need to implement custom
+  scrolling instead of using the native behavior.
 </Accordion>
 
 <Accordion title="What if my carousel is initially hidden?">
@@ -319,8 +539,20 @@ carousel.refresh();
 
 </Accordion>
 
-<Accordion title="How do I debug issues?">
-Check the console for warnings. The library logs clear messages for the most common situations (like missing elements). Each carousel also has a `data-carousel-id` attribute for easier debugging in DevTools. If you still have questions, feel free to reach out to me.
+<Accordion title="Why are my buttons not working?">
+  Check the console for warnings. The library logs clear messages for the most
+  common situations (like missing elements). Each carousel also has a
+  `data-carousel-id` attribute for easier debugging in DevTools. If you still
+  have questions, feel free to reach out to me.
+</Accordion>
+
+<Accordion title="Why do you call it 'Carousel' instead of 'Slider'?">
+  Great question. I called it Slider my whole life (I still do), but I learned
+  it's not the right semantics. The browser world (like Chrome and Mozilla devs)
+  call it "Carousel" since "Slider" is reserved for things like an [input range
+  slider.](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/range)
+  And I might want to make an input range slider component in the future. So I
+  had to lock in and leave the `/slider` URL free.
 </Accordion>
 
 </Accordions>

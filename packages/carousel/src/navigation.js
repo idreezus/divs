@@ -7,6 +7,7 @@ import {
   calculateTotalSlides,
   emit,
   calculateDimensions,
+  updateCSSProperties,
 } from './utils.js';
 import { updateActiveClasses } from './keyboard.js';
 
@@ -204,12 +205,13 @@ export function setupResizeObserver(instance) {
   instance.resizeObserver = resizeObserver;
 }
 
-// Sets up pagination dots if pagination container exists
+// Sets up pagination dots if any exist in the container
 export function setupPagination(instance) {
-  const { pagination, items, id } = instance;
+  const { dots: existingDots, container, items, id } = instance;
+  const { CLASSES } = CONFIG;
 
-  // Skip if no pagination container exists
-  if (!pagination) return;
+  // Skip if no dots exist
+  if (!existingDots || existingDots.length === 0) return;
 
   // Remove previously bound handlers before rebuilding dots
   if (instance.boundDotHandlers) {
@@ -218,17 +220,12 @@ export function setupPagination(instance) {
     });
   }
 
-  const totalSlides = calculateTotalSlides(items);
-  const existingDots = instance.dots ? [...instance.dots] : [];
-  if (existingDots.length === 0) {
-    console.warn(
-      `Carousel ${id}: At least one pagination dot is required inside the pagination container.`
-    );
-    return;
-  }
-  const syncedDots = [];
+  // Initialize handler storage
+  instance.boundDotHandlers = [];
 
-  // Converts any provided dot into a semantic button so accessibility is consistent
+  const totalSlides = calculateTotalSlides(items);
+
+  // Converts any provided dot into a semantic button for accessibility
   const normalizeDotElement = (dot) => {
     if (dot.tagName && dot.tagName.toLowerCase() === 'button') {
       return dot;
@@ -248,48 +245,54 @@ export function setupPagination(instance) {
     return button;
   };
 
-  // Applies required attributes and binds events
-  const prepareDot = (dot, index) => {
-    const { CLASSES } = CONFIG;
+  // Use first dot as template
+  const templateDot = normalizeDotElement(existingDots[0]);
+  const allDots = [templateDot];
 
-    dot.setAttribute('data-carousel', 'dot');
+  // Normalize remaining existing dots
+  for (let i = 1; i < existingDots.length; i++) {
+    allDots.push(normalizeDotElement(existingDots[i]));
+  }
+
+  // Get parent from first dot for appending clones
+  const dotsParent = templateDot.parentElement;
+
+  // Clone template to match total slides
+  while (allDots.length < totalSlides) {
+    const duplicate = templateDot.cloneNode(true);
+    dotsParent.appendChild(duplicate);
+    allDots.push(duplicate);
+  }
+
+  // Remove excess dots
+  while (allDots.length > totalSlides) {
+    const removed = allDots.pop();
+    removed.remove();
+  }
+
+  // Prepare each dot with attributes, aria-label, and click handler
+  const preparedDots = [];
+  allDots.forEach((dot, index) => {
     dot.setAttribute('type', 'button');
 
     // Remove any pre-existing active class so scripted state controls visuals
-    dot.classList.remove(CLASSES.PAGINATION_ACTIVE);
+    dot.classList.remove(CLASSES.DOT_ACTIVE);
 
+    // Add accessible label
+    dot.setAttribute(
+      'aria-label',
+      `Go to slide ${index + 1} of ${totalSlides}`
+    );
+
+    // Bind click handler
     const handler = () => instance.goTo(index);
     dot.addEventListener('click', handler);
     instance.boundDotHandlers.push({ dot, handler });
-    syncedDots.push(dot);
-  };
-
-  // Initialize handler storage
-  instance.boundDotHandlers = [];
-
-  const normalizedDots = existingDots.map((dot) => normalizeDotElement(dot));
-  const templateCount = normalizedDots.length;
-
-  while (normalizedDots.length < totalSlides) {
-    const templateDot = normalizedDots[normalizedDots.length % templateCount];
-    const duplicate = templateDot.cloneNode(true);
-    pagination.appendChild(duplicate);
-    normalizedDots.push(duplicate);
-  }
-
-  if (normalizedDots.length > totalSlides) {
-    const removedDots = normalizedDots.splice(totalSlides);
-    removedDots.forEach((dot) => {
-      dot.remove();
-    });
-  }
-
-  normalizedDots.forEach((dot, index) => {
-    prepareDot(dot, index);
+    preparedDots.push(dot);
   });
 
   // Update dots reference on instance
-  instance.dots = syncedDots;
+  instance.dots = preparedDots;
 
   // Set initial active state
   updatePagination(instance);
@@ -297,18 +300,34 @@ export function setupPagination(instance) {
 
 // Updates pagination dots to reflect current active item
 export function updatePagination(instance) {
-  const { dots, state } = instance;
-  const { CLASSES } = CONFIG;
+  const { dots, container, items, state } = instance;
+  const { CLASSES, SELECTORS } = CONFIG;
   const { currentIndex } = state;
 
-  // Skip if no dots exist
-  if (!dots || dots.length === 0) return;
+  // Update each dot's active state and aria-current
+  if (dots && dots.length > 0) {
+    dots.forEach((dot, index) => {
+      const isActive = index === currentIndex;
+      dot.classList.toggle(CLASSES.DOT_ACTIVE, isActive);
 
-  // Update each dot's active state
-  dots.forEach((dot, index) => {
-    const isActive = index === currentIndex;
-    dot.classList.toggle(CLASSES.PAGINATION_ACTIVE, isActive);
-  });
+      if (isActive) {
+        dot.setAttribute('aria-current', 'true');
+      } else {
+        dot.removeAttribute('aria-current');
+      }
+    });
+  }
+
+  // Inject text content for pagination display elements (silent skip if not found)
+  const currentEl = container.querySelector(SELECTORS.PAGINATION_CURRENT);
+  if (currentEl) {
+    currentEl.textContent = currentIndex + 1;
+  }
+
+  const totalEl = container.querySelector(SELECTORS.PAGINATION_TOTAL);
+  if (totalEl) {
+    totalEl.textContent = items.length;
+  }
 }
 
 // Batches DOM updates using requestAnimationFrame for better performance
@@ -323,6 +342,7 @@ export function updateUI(instance) {
     updateActiveClasses(instance);
     updateButtonStates(instance);
     updatePagination(instance);
+    updateCSSProperties(instance);
     instance.rafPending = false;
   });
 }

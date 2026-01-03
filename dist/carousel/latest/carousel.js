@@ -1,11 +1,11 @@
 /*!
- * Carousel v1.0.0
+ * Carousel v1.1.0
  * A smooth scrolling slider that leverages native CSS for easy setup and styling.
  * 
  * A part of Divs by Idreezus, a component library
  * divs.idreezus.com
  * 
- * (c) 2025 Idrees Isse (https://github.com/idreezus)
+ * (c) 2026 Idrees Isse (https://github.com/idreezus)
  * Released under AGPL-3.0
  */
 
@@ -18,8 +18,9 @@
     ITEM: '[data-carousel="item"]',
     PREV_BTN: '[data-carousel="prev"]',
     NEXT_BTN: '[data-carousel="next"]',
-    PAGINATION: '[data-carousel="pagination"]',
-    DOT: '[data-carousel="dot"]',
+    DOT: '[data-carousel-dot]',
+    PAGINATION_CURRENT: '[data-carousel-pagination-current]',
+    PAGINATION_TOTAL: '[data-carousel-pagination-total]',
   };
 
   // CSS classes applied to elements
@@ -29,11 +30,10 @@
     ACTIVE: 'carousel-item-active', // Applied to the current active item
     ANIMATING: 'carousel-animating', // Applied to track during programmatic scroll
     SNAP_DISABLED: 'carousel-snap-disabled', // Applied to track to temporarily disable scroll-snap during button navigation
-    PAGINATION_ACTIVE: 'carousel-pagination-active'};
+    DOT_ACTIVE: 'carousel-dot-active'};
 
   const DEFAULTS = {
-    ALIGN: 'start',
-    SCROLL_BY: 'item'};
+    ALIGN: 'start'};
 
   // Timing constants in milliseconds
   const TIMING = {
@@ -47,12 +47,18 @@
   const TOLERANCE = {
     EDGE_DETECTION: 1};
 
+  // CSS custom property names
+  const CSS_VARS = {
+    INDEX: '--carousel-index',
+    TOTAL: '--carousel-total',
+    PROGRESS: '--carousel-progress',
+  };
+
   const CONFIG = {
     SELECTORS,
     CLASSES,
     TIMING,
-    TOLERANCE,
-  };
+    TOLERANCE};
 
   // Pure utility functions for the carousel library
 
@@ -70,14 +76,11 @@
   function parseConfig(container) {
     const align = container.getAttribute('data-carousel-align') || DEFAULTS.ALIGN;
     const keyboard = container.getAttribute('data-carousel-keyboard') === 'true';
-    const scrollBy =
-      container.getAttribute('data-carousel-scroll-by') || DEFAULTS.SCROLL_BY;
     const loop = container.getAttribute('data-carousel-loop') === 'true';
 
     return {
       align,
       keyboard,
-      scrollBy,
       loop,
     };
   }
@@ -282,6 +285,25 @@
 
     // Store snap alignment on instance for reference
     instance.snapAlign = config.align;
+  }
+
+  // Updates CSS custom properties on the carousel container
+  function updateCSSProperties(instance) {
+    const { container, track, items, state } = instance;
+    const { currentIndex, scrollWidth, containerWidth } = state;
+
+    // Set one-based index for display friendliness
+    container.style.setProperty(CSS_VARS.INDEX, currentIndex + 1);
+
+    // Set total item count
+    container.style.setProperty(CSS_VARS.TOTAL, items.length);
+
+    // Calculate progress (0-1) based on scroll position
+    const maxScroll = scrollWidth - containerWidth;
+    const scrollLeft = track.scrollLeft;
+    const progress =
+      maxScroll > 0 ? Math.min(1, Math.max(0, scrollLeft / maxScroll)) : 0;
+    container.style.setProperty(CSS_VARS.PROGRESS, progress);
   }
 
   // Keyboard navigation support
@@ -542,12 +564,13 @@
     instance.resizeObserver = resizeObserver;
   }
 
-  // Sets up pagination dots if pagination container exists
+  // Sets up pagination dots if any exist in the container
   function setupPagination(instance) {
-    const { pagination, items, id } = instance;
+    const { dots: existingDots, container, items, id } = instance;
+    const { CLASSES } = CONFIG;
 
-    // Skip if no pagination container exists
-    if (!pagination) return;
+    // Skip if no dots exist
+    if (!existingDots || existingDots.length === 0) return;
 
     // Remove previously bound handlers before rebuilding dots
     if (instance.boundDotHandlers) {
@@ -556,17 +579,12 @@
       });
     }
 
-    const totalSlides = calculateTotalSlides(items);
-    const existingDots = instance.dots ? [...instance.dots] : [];
-    if (existingDots.length === 0) {
-      console.warn(
-        `Carousel ${id}: At least one pagination dot is required inside the pagination container.`
-      );
-      return;
-    }
-    const syncedDots = [];
+    // Initialize handler storage
+    instance.boundDotHandlers = [];
 
-    // Converts any provided dot into a semantic button so accessibility is consistent
+    const totalSlides = calculateTotalSlides(items);
+
+    // Converts any provided dot into a semantic button for accessibility
     const normalizeDotElement = (dot) => {
       if (dot.tagName && dot.tagName.toLowerCase() === 'button') {
         return dot;
@@ -586,48 +604,54 @@
       return button;
     };
 
-    // Applies required attributes and binds events
-    const prepareDot = (dot, index) => {
-      const { CLASSES } = CONFIG;
+    // Use first dot as template
+    const templateDot = normalizeDotElement(existingDots[0]);
+    const allDots = [templateDot];
 
-      dot.setAttribute('data-carousel', 'dot');
+    // Normalize remaining existing dots
+    for (let i = 1; i < existingDots.length; i++) {
+      allDots.push(normalizeDotElement(existingDots[i]));
+    }
+
+    // Get parent from first dot for appending clones
+    const dotsParent = templateDot.parentElement;
+
+    // Clone template to match total slides
+    while (allDots.length < totalSlides) {
+      const duplicate = templateDot.cloneNode(true);
+      dotsParent.appendChild(duplicate);
+      allDots.push(duplicate);
+    }
+
+    // Remove excess dots
+    while (allDots.length > totalSlides) {
+      const removed = allDots.pop();
+      removed.remove();
+    }
+
+    // Prepare each dot with attributes, aria-label, and click handler
+    const preparedDots = [];
+    allDots.forEach((dot, index) => {
       dot.setAttribute('type', 'button');
 
       // Remove any pre-existing active class so scripted state controls visuals
-      dot.classList.remove(CLASSES.PAGINATION_ACTIVE);
+      dot.classList.remove(CLASSES.DOT_ACTIVE);
 
+      // Add accessible label
+      dot.setAttribute(
+        'aria-label',
+        `Go to slide ${index + 1} of ${totalSlides}`
+      );
+
+      // Bind click handler
       const handler = () => instance.goTo(index);
       dot.addEventListener('click', handler);
       instance.boundDotHandlers.push({ dot, handler });
-      syncedDots.push(dot);
-    };
-
-    // Initialize handler storage
-    instance.boundDotHandlers = [];
-
-    const normalizedDots = existingDots.map((dot) => normalizeDotElement(dot));
-    const templateCount = normalizedDots.length;
-
-    while (normalizedDots.length < totalSlides) {
-      const templateDot = normalizedDots[normalizedDots.length % templateCount];
-      const duplicate = templateDot.cloneNode(true);
-      pagination.appendChild(duplicate);
-      normalizedDots.push(duplicate);
-    }
-
-    if (normalizedDots.length > totalSlides) {
-      const removedDots = normalizedDots.splice(totalSlides);
-      removedDots.forEach((dot) => {
-        dot.remove();
-      });
-    }
-
-    normalizedDots.forEach((dot, index) => {
-      prepareDot(dot, index);
+      preparedDots.push(dot);
     });
 
     // Update dots reference on instance
-    instance.dots = syncedDots;
+    instance.dots = preparedDots;
 
     // Set initial active state
     updatePagination(instance);
@@ -635,18 +659,34 @@
 
   // Updates pagination dots to reflect current active item
   function updatePagination(instance) {
-    const { dots, state } = instance;
-    const { CLASSES } = CONFIG;
+    const { dots, container, items, state } = instance;
+    const { CLASSES, SELECTORS } = CONFIG;
     const { currentIndex } = state;
 
-    // Skip if no dots exist
-    if (!dots || dots.length === 0) return;
+    // Update each dot's active state and aria-current
+    if (dots && dots.length > 0) {
+      dots.forEach((dot, index) => {
+        const isActive = index === currentIndex;
+        dot.classList.toggle(CLASSES.DOT_ACTIVE, isActive);
 
-    // Update each dot's active state
-    dots.forEach((dot, index) => {
-      const isActive = index === currentIndex;
-      dot.classList.toggle(CLASSES.PAGINATION_ACTIVE, isActive);
-    });
+        if (isActive) {
+          dot.setAttribute('aria-current', 'true');
+        } else {
+          dot.removeAttribute('aria-current');
+        }
+      });
+    }
+
+    // Inject text content for pagination display elements (silent skip if not found)
+    const currentEl = container.querySelector(SELECTORS.PAGINATION_CURRENT);
+    if (currentEl) {
+      currentEl.textContent = currentIndex + 1;
+    }
+
+    const totalEl = container.querySelector(SELECTORS.PAGINATION_TOTAL);
+    if (totalEl) {
+      totalEl.textContent = items.length;
+    }
   }
 
   // Batches DOM updates using requestAnimationFrame for better performance
@@ -661,6 +701,7 @@
       updateActiveClasses(instance);
       updateButtonStates(instance);
       updatePagination(instance);
+      updateCSSProperties(instance);
       instance.rafPending = false;
     });
   }
@@ -695,12 +736,8 @@
     const prevBtn = container.querySelector(SELECTORS.PREV_BTN);
     const nextBtn = container.querySelector(SELECTORS.NEXT_BTN);
 
-    // Find optional pagination container and dots
-    const pagination = container.querySelector(SELECTORS.PAGINATION);
-    let dots = [];
-    if (pagination) {
-      dots = [...pagination.querySelectorAll(SELECTORS.DOT)];
-    }
+    // Find optional pagination dots (can be anywhere in container)
+    const dots = [...container.querySelectorAll(SELECTORS.DOT)];
 
     // Add data-carousel-id for easier debugging in devtools
     container.setAttribute('data-carousel-id', id);
@@ -711,7 +748,6 @@
       items,
       prevBtn,
       nextBtn,
-      pagination,
       dots,
     });
 
@@ -793,6 +829,9 @@
 
     // Calculate initial dimensions
     calculateDimensions(instance);
+
+    // Set initial CSS custom properties before first paint
+    updateCSSProperties(instance);
 
     // Attach event listeners
     attachEventListeners(instance);

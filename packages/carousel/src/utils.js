@@ -1,6 +1,6 @@
 // Pure utility functions for the carousel library
 
-import { DEFAULTS } from './config.js';
+import { DEFAULTS, CSS_VARS } from './config.js';
 
 // Counter for generating unique carousel IDs
 let idCounter = 0;
@@ -15,14 +15,11 @@ export function generateUniqueId() {
 export function parseConfig(container) {
   const align = container.getAttribute('data-carousel-align') || DEFAULTS.ALIGN;
   const keyboard = container.getAttribute('data-carousel-keyboard') === 'true';
-  const scrollBy =
-    container.getAttribute('data-carousel-scroll-by') || DEFAULTS.SCROLL_BY;
   const loop = container.getAttribute('data-carousel-loop') === 'true';
 
   return {
     align,
     keyboard,
-    scrollBy,
     loop,
   };
 }
@@ -230,4 +227,23 @@ export function calculateDimensions(instance) {
 
   // Store snap alignment on instance for reference
   instance.snapAlign = config.align;
+}
+
+// Updates CSS custom properties on the carousel container
+export function updateCSSProperties(instance) {
+  const { container, track, items, state } = instance;
+  const { currentIndex, scrollWidth, containerWidth } = state;
+
+  // Set one-based index for display friendliness
+  container.style.setProperty(CSS_VARS.INDEX, currentIndex + 1);
+
+  // Set total item count
+  container.style.setProperty(CSS_VARS.TOTAL, items.length);
+
+  // Calculate progress (0-1) based on scroll position
+  const maxScroll = scrollWidth - containerWidth;
+  const scrollLeft = track.scrollLeft;
+  const progress =
+    maxScroll > 0 ? Math.min(1, Math.max(0, scrollLeft / maxScroll)) : 0;
+  container.style.setProperty(CSS_VARS.PROGRESS, progress);
 }
