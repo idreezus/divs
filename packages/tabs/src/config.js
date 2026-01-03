@@ -1,89 +1,89 @@
 // Configuration constants for the tabs library
 
 // Selectors for querying DOM elements
-export const SELECTORS = {
-  CONTAINER: '[data-tabs="container"]',
-  TRIGGER: '[data-tabs-trigger-value]',
-  PANEL: '[data-tabs-panel-value]',
-  PREV_BTN: '[data-tabs="prev"]',
-  NEXT_BTN: '[data-tabs="next"]',
-  PLAY_PAUSE_BTN: '[data-tabs="play-pause"]',
+export const selectors = {
+  container: '[data-tabs="container"]',
+  trigger: '[data-tabs-trigger-value]',
+  panel: '[data-tabs-panel-value]',
+  prevBtn: '[data-tabs="prev"]',
+  nextBtn: '[data-tabs="next"]',
+  playPauseBtn: '[data-tabs="play-pause"]',
 };
 
 // Attribute names for configuration
-export const ATTRIBUTES = {
+export const attributes = {
   // Container configuration
-  GROUP_NAME: 'data-tabs-group-name',
-  DEFAULT: 'data-tabs-default',
-  ORIENTATION: 'data-tabs-orientation',
-  ACTIVATE_ON_FOCUS: 'data-tabs-activate-on-focus',
-  LOOP: 'data-tabs-loop',
-  KEYBOARD: 'data-tabs-keyboard',
+  groupName: 'data-tabs-group-name',
+  default: 'data-tabs-default',
+  orientation: 'data-tabs-orientation',
+  activateOnFocus: 'data-tabs-activate-on-focus',
+  loop: 'data-tabs-loop',
+  keyboard: 'data-tabs-keyboard',
 
   // Content linking
-  TRIGGER_VALUE: 'data-tabs-trigger-value',
-  PANEL_VALUE: 'data-tabs-panel-value',
+  triggerValue: 'data-tabs-trigger-value',
+  panelValue: 'data-tabs-panel-value',
 
   // Autoplay configuration
-  AUTOPLAY: 'data-tabs-autoplay',
-  AUTOPLAY_DURATION: 'data-tabs-autoplay-duration',
-  AUTOPLAY_PAUSE_HOVER: 'data-tabs-autoplay-pause-hover',
-  AUTOPLAY_PAUSE_FOCUS: 'data-tabs-autoplay-pause-focus',
+  autoplay: 'data-tabs-autoplay',
+  autoplayDuration: 'data-tabs-autoplay-duration',
+  autoplayPauseHover: 'data-tabs-autoplay-pause-hover',
+  autoplayPauseFocus: 'data-tabs-autoplay-pause-focus',
 };
 
 // CSS classes applied to elements
-export const CLASSES = {
+export const classes = {
   // State classes
-  ACTIVE: 'tabs-active',
-  INACTIVE: 'tabs-inactive',
-  TRANSITIONING: 'tabs-transitioning',
+  active: 'tabs-active',
+  inactive: 'tabs-inactive',
+  transitioning: 'tabs-transitioning',
 
   // Panel transition classes
-  PANEL_ENTERING: 'tabs-panel-entering',
-  PANEL_LEAVING: 'tabs-panel-leaving',
+  panelEntering: 'tabs-panel-entering',
+  panelLeaving: 'tabs-panel-leaving',
 
   // Button state classes
-  BUTTON_DISABLED: 'tabs-button-disabled',
+  buttonDisabled: 'tabs-button-disabled',
 
   // Autoplay state classes
-  AUTOPLAY_ACTIVE: 'tabs-autoplay-active',
-  AUTOPLAY_PAUSED: 'tabs-autoplay-paused',
+  autoplayActive: 'tabs-autoplay-active',
+  autoplayPaused: 'tabs-autoplay-paused',
 
   // Accessibility
-  REDUCED_MOTION: 'tabs-reduced-motion',
+  reducedMotion: 'tabs-reduced-motion',
 };
 
 // CSS custom properties
-export const CSS_VARS = {
-  PROGRESS: '--tabs-progress',
-  TAB_COUNT: '--tabs-count',
-  TAB_INDEX: '--tabs-index',
-  ACTIVE_INDEX: '--tabs-active-index',
-  AUTOPLAY_DURATION: '--tabs-autoplay-duration',
-  DIRECTION: '--tabs-direction',
-  TRANSITION_DURATION: '--tabs-transition-duration',
+export const cssVars = {
+  progress: '--tabs-progress',
+  tabCount: '--tabs-count',
+  tabIndex: '--tabs-index',
+  activeIndex: '--tabs-active-index',
+  autoplayDuration: '--tabs-autoplay-duration',
+  direction: '--tabs-direction',
+  transitionDuration: '--tabs-transition-duration',
 };
 
 // Default configuration values
-export const DEFAULTS = {
-  ORIENTATION: 'horizontal',
-  ACTIVATE_ON_FOCUS: true,
-  LOOP: false,
-  KEYBOARD: true,
-  AUTOPLAY: false,
-  AUTOPLAY_DURATION: 5000,
-  AUTOPLAY_PAUSE_HOVER: true,
-  AUTOPLAY_PAUSE_FOCUS: true,
+export const defaults = {
+  orientation: 'horizontal',
+  activateOnFocus: true,
+  loop: false,
+  keyboard: true,
+  autoplay: false,
+  autoplayDuration: 5000,
+  autoplayPauseHover: true,
+  autoplayPauseFocus: true,
 };
 
 // Timing constants in milliseconds
-export const TIMING = {
-  TRANSITION_DURATION: 200,
+export const timing = {
+  transitionDuration: 200,
 };
 
 // Event names for CustomEvents
-export const EVENTS = {
-  CHANGE: 'change',
-  AUTOPLAY_START: 'autoplay-start',
-  AUTOPLAY_PAUSE: 'autoplay-pause',
+export const events = {
+  change: 'change',
+  autoplayStart: 'autoplay-start',
+  autoplayPause: 'autoplay-pause',
 };

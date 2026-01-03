@@ -1,6 +1,6 @@
 // Autoplay behavior for tabs: timer, progress updates, pause/resume
 
-import { CLASSES, CSS_VARS, EVENTS } from './config.js';
+import { classes, cssVars, events } from './config.js';
 import { emit } from './utils.js';
 
 // Shared RAF tick loop for autoplay progress
@@ -16,7 +16,7 @@ function runAutoplayTick(instance) {
   const activeTriggers = triggerMap.get(state.activeValue);
   if (activeTriggers) {
     activeTriggers.forEach((trigger) => {
-      trigger.style.setProperty(CSS_VARS.PROGRESS, progress.toString());
+      trigger.style.setProperty(cssVars.progress, progress.toString());
     });
   }
 
@@ -118,15 +118,15 @@ export function startAutoplay(instance) {
   state.isPaused = false;
   state.autoplayStartTime = performance.now();
 
-  container.classList.add(CLASSES.AUTOPLAY_ACTIVE);
-  container.classList.remove(CLASSES.AUTOPLAY_PAUSED);
+  container.classList.add(classes.autoplayActive);
+  container.classList.remove(classes.autoplayPaused);
 
   // Update play/pause button
   if (instance.playPauseBtn) {
     instance.playPauseBtn.setAttribute('aria-pressed', 'true');
   }
 
-  emit(instance, EVENTS.AUTOPLAY_START, { value: state.activeValue });
+  emit(instance, events.autoplayStart, { value: state.activeValue });
 
   instance.autoplay.rafId = requestAnimationFrame(() =>
     runAutoplayTick(instance)
@@ -152,7 +152,7 @@ export function pauseAutoplay(instance, reason = 'user') {
     instance.autoplay.rafId = null;
   }
 
-  container.classList.add(CLASSES.AUTOPLAY_PAUSED);
+  container.classList.add(classes.autoplayPaused);
 
   // Update play/pause button
   if (instance.playPauseBtn) {
@@ -165,7 +165,7 @@ export function pauseAutoplay(instance, reason = 'user') {
   state.autoplayPausedOnValue = state.activeValue;
   const progress = Math.min(elapsed / instance.config.autoplayDuration, 1);
 
-  emit(instance, EVENTS.AUTOPLAY_PAUSE, {
+  emit(instance, events.autoplayPause, {
     value: state.activeValue,
     progress,
   });
@@ -185,14 +185,14 @@ export function resumeAutoplay(instance) {
     ? performance.now() - (state.autoplayElapsed || 0)
     : performance.now();
 
-  container.classList.remove(CLASSES.AUTOPLAY_PAUSED);
+  container.classList.remove(classes.autoplayPaused);
 
   // Update play/pause button
   if (instance.playPauseBtn) {
     instance.playPauseBtn.setAttribute('aria-pressed', 'true');
   }
 
-  emit(instance, EVENTS.AUTOPLAY_START, { value: state.activeValue });
+  emit(instance, events.autoplayStart, { value: state.activeValue });
 
   instance.autoplay.rafId = requestAnimationFrame(() =>
     runAutoplayTick(instance)
@@ -211,11 +211,11 @@ export function stopAutoplay(instance) {
     instance.autoplay.rafId = null;
   }
 
-  container.classList.remove(CLASSES.AUTOPLAY_ACTIVE, CLASSES.AUTOPLAY_PAUSED);
+  container.classList.remove(classes.autoplayActive, classes.autoplayPaused);
 
   // Reset progress on all triggers
   instance.triggers.forEach((trigger) => {
-    trigger.style.setProperty(CSS_VARS.PROGRESS, '0');
+    trigger.style.setProperty(cssVars.progress, '0');
   });
 }
 

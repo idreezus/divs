@@ -1,13 +1,13 @@
 // Core tabs library with initialization, keyboard navigation, accessibility, and entry point
 
 import {
-  SELECTORS,
-  ATTRIBUTES,
-  CLASSES,
-  CSS_VARS,
-  DEFAULTS,
-  TIMING,
-  EVENTS,
+  selectors,
+  attributes,
+  classes,
+  cssVars,
+  defaults,
+  timing,
+  events,
 } from './config.js';
 import {
   setupAutoplay,
@@ -29,7 +29,7 @@ import {
 function findTriggerIndex(triggers, targetValue) {
   return triggers.findIndex((trigger) => {
     const triggerValue = normalizeValue(
-      trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE)
+      trigger.getAttribute(attributes.triggerValue)
     );
     return triggerValue === targetValue;
   });
@@ -38,22 +38,22 @@ function findTriggerIndex(triggers, targetValue) {
 // Parses configuration from data attributes on the container
 function parseConfig(container) {
   return {
-    groupName: container.getAttribute(ATTRIBUTES.GROUP_NAME) || null,
-    defaultValue: container.getAttribute(ATTRIBUTES.DEFAULT) || null,
+    groupName: container.getAttribute(attributes.groupName) || null,
+    defaultValue: container.getAttribute(attributes.default) || null,
     orientation:
-      container.getAttribute(ATTRIBUTES.ORIENTATION) || DEFAULTS.ORIENTATION,
+      container.getAttribute(attributes.orientation) || defaults.orientation,
     activateOnFocus:
-      container.getAttribute(ATTRIBUTES.ACTIVATE_ON_FOCUS) !== 'false',
-    loop: container.getAttribute(ATTRIBUTES.LOOP) === 'true',
-    keyboard: container.getAttribute(ATTRIBUTES.KEYBOARD) !== 'false',
-    autoplay: container.getAttribute(ATTRIBUTES.AUTOPLAY) === 'true',
+      container.getAttribute(attributes.activateOnFocus) !== 'false',
+    loop: container.getAttribute(attributes.loop) === 'true',
+    keyboard: container.getAttribute(attributes.keyboard) !== 'false',
+    autoplay: container.getAttribute(attributes.autoplay) === 'true',
     autoplayDuration:
-      parseInt(container.getAttribute(ATTRIBUTES.AUTOPLAY_DURATION), 10) ||
-      DEFAULTS.AUTOPLAY_DURATION,
+      parseInt(container.getAttribute(attributes.autoplayDuration), 10) ||
+      defaults.autoplayDuration,
     autoplayPauseHover:
-      container.getAttribute(ATTRIBUTES.AUTOPLAY_PAUSE_HOVER) !== 'false',
+      container.getAttribute(attributes.autoplayPauseHover) !== 'false',
     autoplayPauseFocus:
-      container.getAttribute(ATTRIBUTES.AUTOPLAY_PAUSE_FOCUS) !== 'false',
+      container.getAttribute(attributes.autoplayPauseFocus) !== 'false',
   };
 }
 
@@ -64,13 +64,13 @@ function findElements(instance) {
   // Scope to this container to support nested tabs
   const scopedQuery = (selector) => {
     return [...container.querySelectorAll(selector)].filter((el) => {
-      return el.closest(SELECTORS.CONTAINER) === container;
+      return el.closest(selectors.container) === container;
     });
   };
 
   // Find triggers and panels
-  const triggers = scopedQuery(SELECTORS.TRIGGER);
-  const panels = scopedQuery(SELECTORS.PANEL);
+  const triggers = scopedQuery(selectors.trigger);
+  const panels = scopedQuery(selectors.panel);
 
   if (triggers.length === 0) {
     console.error(
@@ -92,7 +92,7 @@ function findElements(instance) {
   let hasErrors = false;
 
   triggers.forEach((trigger) => {
-    const rawValue = trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE);
+    const rawValue = trigger.getAttribute(attributes.triggerValue);
     const value = normalizeValue(rawValue);
 
     if (!value) {
@@ -115,7 +115,7 @@ function findElements(instance) {
   });
 
   panels.forEach((panel) => {
-    const rawValue = panel.getAttribute(ATTRIBUTES.PANEL_VALUE);
+    const rawValue = panel.getAttribute(attributes.panelValue);
     const value = normalizeValue(rawValue);
 
     if (!value) {
@@ -149,9 +149,9 @@ function findElements(instance) {
   if (hasErrors) return false;
 
   // Find optional navigation buttons (scoped)
-  const prevBtn = container.querySelector(SELECTORS.PREV_BTN);
-  const nextBtn = container.querySelector(SELECTORS.NEXT_BTN);
-  const playPauseBtn = container.querySelector(SELECTORS.PLAY_PAUSE_BTN);
+  const prevBtn = container.querySelector(selectors.prevBtn);
+  const nextBtn = container.querySelector(selectors.nextBtn);
+  const playPauseBtn = container.querySelector(selectors.playPauseBtn);
 
   // Store references
   Object.assign(instance, {
@@ -176,7 +176,7 @@ function setupAccessibility(instance) {
 
   triggers.forEach((trigger) => {
     const value = normalizeValue(
-      trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE)
+      trigger.getAttribute(attributes.triggerValue)
     );
     const triggerId = trigger.id || `${id}-trigger-${value}`;
     const panelId = `${id}-panel-${value}`;
@@ -187,7 +187,7 @@ function setupAccessibility(instance) {
   });
 
   panels.forEach((panel) => {
-    const value = normalizeValue(panel.getAttribute(ATTRIBUTES.PANEL_VALUE));
+    const value = normalizeValue(panel.getAttribute(attributes.panelValue));
     const panelId = panel.id || `${id}-panel-${value}`;
     const triggerId = `${id}-trigger-${value}`;
 
@@ -204,7 +204,7 @@ function updateAriaStates(instance) {
 
   triggers.forEach((trigger) => {
     const value = normalizeValue(
-      trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE)
+      trigger.getAttribute(attributes.triggerValue)
     );
     const isActive = value === state.activeValue;
 
@@ -213,7 +213,7 @@ function updateAriaStates(instance) {
   });
 
   panels.forEach((panel) => {
-    const value = normalizeValue(panel.getAttribute(ATTRIBUTES.PANEL_VALUE));
+    const value = normalizeValue(panel.getAttribute(attributes.panelValue));
     const isActive = value === state.activeValue;
 
     panel.setAttribute('aria-hidden', (!isActive).toString());
@@ -229,7 +229,7 @@ function setupKeyboardNavigation(instance) {
     const focusedTrigger = document.activeElement;
     if (
       !instance.triggers.includes(focusedTrigger) ||
-      focusedTrigger.closest(SELECTORS.CONTAINER) !== container
+      focusedTrigger.closest(selectors.container) !== container
     ) {
       return;
     }
@@ -264,7 +264,7 @@ function setupKeyboardNavigation(instance) {
         // Only needed if activate-on-focus is false
         if (!config.activateOnFocus) {
           e.preventDefault();
-          const value = focusedTrigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE);
+          const value = focusedTrigger.getAttribute(attributes.triggerValue);
           activate(instance, value);
         }
         break;
@@ -299,7 +299,7 @@ function moveFocus(instance, direction) {
 
   // Activate if activate-on-focus is true
   if (config.activateOnFocus) {
-    const value = triggers[nextIndex].getAttribute(ATTRIBUTES.TRIGGER_VALUE);
+    const value = triggers[nextIndex].getAttribute(attributes.triggerValue);
     activate(instance, value);
   }
 }
@@ -315,7 +315,7 @@ function focusTriggerAt(instance, index) {
   }
 
   if (config.activateOnFocus) {
-    const value = triggers[index].getAttribute(ATTRIBUTES.TRIGGER_VALUE);
+    const value = triggers[index].getAttribute(attributes.triggerValue);
     activate(instance, value);
   }
 }
@@ -347,7 +347,7 @@ function determineInitialValue(instance) {
   }
 
   // Priority 3: First trigger
-  const firstValue = triggers[0].getAttribute(ATTRIBUTES.TRIGGER_VALUE);
+  const firstValue = triggers[0].getAttribute(attributes.triggerValue);
   return normalizeValue(firstValue);
 }
 
@@ -375,12 +375,12 @@ function activate(instance, value, options = {}) {
     : -1;
 
   // Set active index CSS variable
-  container.style.setProperty(CSS_VARS.ACTIVE_INDEX, newIndex);
+  container.style.setProperty(cssVars.activeIndex, newIndex);
 
   // Set direction CSS variable (1 = forward, -1 = backward, 0 = initial)
   const direction =
     previousIndex === -1 ? 0 : newIndex > previousIndex ? 1 : -1;
-  container.style.setProperty(CSS_VARS.DIRECTION, direction);
+  container.style.setProperty(cssVars.direction, direction);
 
   // Update state
   state.activeValue = normalized;
@@ -396,54 +396,54 @@ function activate(instance, value, options = {}) {
   }
 
   // Add transitioning class
-  container.classList.add(CLASSES.TRANSITIONING);
+  container.classList.add(classes.transitioning);
 
   // Update trigger states
   triggers.forEach((trigger) => {
     const triggerValue = normalizeValue(
-      trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE)
+      trigger.getAttribute(attributes.triggerValue)
     );
     const isActive = triggerValue === normalized;
 
-    trigger.classList.toggle(CLASSES.ACTIVE, isActive);
-    trigger.classList.toggle(CLASSES.INACTIVE, !isActive);
+    trigger.classList.toggle(classes.active, isActive);
+    trigger.classList.toggle(classes.inactive, !isActive);
 
     // Reset progress on inactive triggers
     if (!isActive) {
-      trigger.style.setProperty(CSS_VARS.PROGRESS, '0');
+      trigger.style.setProperty(cssVars.progress, '0');
     }
   });
 
   // Update panel states
   panels.forEach((panel) => {
     const panelValue = normalizeValue(
-      panel.getAttribute(ATTRIBUTES.PANEL_VALUE)
+      panel.getAttribute(attributes.panelValue)
     );
     const isActive = panelValue === normalized;
     const wasActive = panelValue === previousValue;
 
     // Remove previous transition classes
-    panel.classList.remove(CLASSES.PANEL_ENTERING, CLASSES.PANEL_LEAVING);
+    panel.classList.remove(classes.panelEntering, classes.panelLeaving);
 
     if (isActive) {
-      panel.classList.add(CLASSES.ACTIVE, CLASSES.PANEL_ENTERING);
-      panel.classList.remove(CLASSES.INACTIVE);
+      panel.classList.add(classes.active, classes.panelEntering);
+      panel.classList.remove(classes.inactive);
     } else if (wasActive) {
-      panel.classList.add(CLASSES.INACTIVE, CLASSES.PANEL_LEAVING);
-      panel.classList.remove(CLASSES.ACTIVE);
+      panel.classList.add(classes.inactive, classes.panelLeaving);
+      panel.classList.remove(classes.active);
     } else {
-      panel.classList.add(CLASSES.INACTIVE);
-      panel.classList.remove(CLASSES.ACTIVE);
+      panel.classList.add(classes.inactive);
+      panel.classList.remove(classes.active);
     }
   });
 
   // Remove transition classes after animation
   setTimeout(() => {
-    container.classList.remove(CLASSES.TRANSITIONING);
+    container.classList.remove(classes.transitioning);
     panels.forEach((panel) => {
-      panel.classList.remove(CLASSES.PANEL_ENTERING, CLASSES.PANEL_LEAVING);
+      panel.classList.remove(classes.panelEntering, classes.panelLeaving);
     });
-  }, TIMING.TRANSITION_DURATION);
+  }, timing.transitionDuration);
 
   // Update ARIA states
   updateAriaStates(instance);
@@ -453,7 +453,7 @@ function activate(instance, value, options = {}) {
 
   // Emit change event
   if (!silent) {
-    emit(instance, EVENTS.CHANGE, {
+    emit(instance, events.change, {
       value: normalized,
       previousValue,
     });
@@ -469,19 +469,19 @@ function updateButtonStates(instance) {
   if (!prevBtn && !nextBtn) return;
   if (config.loop) {
     // Never disabled when looping
-    prevBtn?.classList.remove(CLASSES.BUTTON_DISABLED);
-    nextBtn?.classList.remove(CLASSES.BUTTON_DISABLED);
+    prevBtn?.classList.remove(classes.buttonDisabled);
+    nextBtn?.classList.remove(classes.buttonDisabled);
     return;
   }
 
   const currentIndex = findTriggerIndex(triggers, state.activeValue);
 
   if (prevBtn) {
-    prevBtn.classList.toggle(CLASSES.BUTTON_DISABLED, currentIndex === 0);
+    prevBtn.classList.toggle(classes.buttonDisabled, currentIndex === 0);
   }
   if (nextBtn) {
     nextBtn.classList.toggle(
-      CLASSES.BUTTON_DISABLED,
+      classes.buttonDisabled,
       currentIndex === triggers.length - 1
     );
   }
@@ -503,7 +503,7 @@ function attachEventListeners(instance) {
   triggers.forEach((trigger) => {
     const handler = (e) => {
       e.preventDefault();
-      const value = trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE);
+      const value = trigger.getAttribute(attributes.triggerValue);
 
       // Pause autoplay on user interaction
       if (state.isAutoplaying) {
@@ -583,15 +583,15 @@ function resetDOM(instance) {
   container.removeAttribute('data-tabs-id');
   container.removeAttribute('aria-orientation');
   container.classList.remove(
-    CLASSES.TRANSITIONING,
-    CLASSES.AUTOPLAY_ACTIVE,
-    CLASSES.AUTOPLAY_PAUSED,
-    CLASSES.REDUCED_MOTION
+    classes.transitioning,
+    classes.autoplayActive,
+    classes.autoplayPaused,
+    classes.reducedMotion
   );
-  container.style.removeProperty(CSS_VARS.TAB_COUNT);
-  container.style.removeProperty(CSS_VARS.ACTIVE_INDEX);
-  container.style.removeProperty(CSS_VARS.DIRECTION);
-  container.style.removeProperty(CSS_VARS.AUTOPLAY_DURATION);
+  container.style.removeProperty(cssVars.tabCount);
+  container.style.removeProperty(cssVars.activeIndex);
+  container.style.removeProperty(cssVars.direction);
+  container.style.removeProperty(cssVars.autoplayDuration);
 
   // Triggers: remove ARIA, classes, CSS vars, generated IDs
   triggers.forEach((trigger) => {
@@ -605,9 +605,9 @@ function resetDOM(instance) {
       trigger.id = '';
     }
 
-    trigger.classList.remove(CLASSES.ACTIVE, CLASSES.INACTIVE);
-    trigger.style.removeProperty(CSS_VARS.TAB_INDEX);
-    trigger.style.removeProperty(CSS_VARS.PROGRESS);
+    trigger.classList.remove(classes.active, classes.inactive);
+    trigger.style.removeProperty(cssVars.tabIndex);
+    trigger.style.removeProperty(cssVars.progress);
   });
 
   // Panels: remove ARIA, classes, CSS vars, generated IDs
@@ -623,20 +623,20 @@ function resetDOM(instance) {
     }
 
     panel.classList.remove(
-      CLASSES.ACTIVE,
-      CLASSES.INACTIVE,
-      CLASSES.PANEL_ENTERING,
-      CLASSES.PANEL_LEAVING
+      classes.active,
+      classes.inactive,
+      classes.panelEntering,
+      classes.panelLeaving
     );
-    panel.style.removeProperty(CSS_VARS.TAB_INDEX);
+    panel.style.removeProperty(cssVars.tabIndex);
   });
 
   // Navigation buttons: remove disabled class
   if (prevBtn) {
-    prevBtn.classList.remove(CLASSES.BUTTON_DISABLED);
+    prevBtn.classList.remove(classes.buttonDisabled);
   }
   if (nextBtn) {
-    nextBtn.classList.remove(CLASSES.BUTTON_DISABLED);
+    nextBtn.classList.remove(classes.buttonDisabled);
   }
 
   // Play/pause button: remove aria-pressed
@@ -658,12 +658,12 @@ function init(instance) {
   }
 
   // Set CSS variables
-  container.style.setProperty(CSS_VARS.TAB_COUNT, instance.triggers.length);
+  container.style.setProperty(cssVars.tabCount, instance.triggers.length);
   instance.triggers.forEach((trigger, index) => {
-    trigger.style.setProperty(CSS_VARS.TAB_INDEX, index);
+    trigger.style.setProperty(cssVars.tabIndex, index);
   });
   instance.panels.forEach((panel, index) => {
-    panel.style.setProperty(CSS_VARS.TAB_INDEX, index);
+    panel.style.setProperty(cssVars.tabIndex, index);
   });
 
   // Setup accessibility
@@ -683,13 +683,13 @@ function init(instance) {
 
   // Check for reduced motion
   if (prefersReducedMotion()) {
-    container.classList.add(CLASSES.REDUCED_MOTION);
+    container.classList.add(classes.reducedMotion);
   }
 
   // Setup autoplay if enabled and reduced motion not preferred
   if (config.autoplay && !prefersReducedMotion()) {
     container.style.setProperty(
-      CSS_VARS.AUTOPLAY_DURATION,
+      cssVars.autoplayDuration,
       config.autoplayDuration + 'ms'
     );
     setupAutoplay(instance);
@@ -757,7 +757,7 @@ export class Tabs {
     }
 
     const nextValue = triggers[nextIndex].getAttribute(
-      ATTRIBUTES.TRIGGER_VALUE
+      attributes.triggerValue
     );
     activate(this, nextValue);
     return this;
@@ -776,7 +776,7 @@ export class Tabs {
     }
 
     const prevValue = triggers[prevIndex].getAttribute(
-      ATTRIBUTES.TRIGGER_VALUE
+      attributes.triggerValue
     );
     activate(this, prevValue);
     return this;
@@ -792,7 +792,7 @@ export class Tabs {
 
     // Set autoplay duration CSS variable
     this.container.style.setProperty(
-      CSS_VARS.AUTOPLAY_DURATION,
+      cssVars.autoplayDuration,
       this.config.autoplayDuration + 'ms'
     );
 
@@ -867,7 +867,7 @@ const instances = new Map();
 
 // Auto-initializes all tabs containers
 function autoInit() {
-  const containers = document.querySelectorAll(SELECTORS.CONTAINER);
+  const containers = document.querySelectorAll(selectors.container);
 
   containers.forEach((container) => {
     try {
