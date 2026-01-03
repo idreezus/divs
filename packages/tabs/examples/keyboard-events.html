@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Keyboard & Events - Tabs Examples</title>
+    <script type="module" src="../src/tabs.js"></script>
+    <link rel="stylesheet" href="../src/styles.css" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <nav class="examples-nav">
+      <a href="index.html" class="nav-logo">Tabs Examples</a>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="basic.html">Basic</a>
+        <a href="navigation.html">Navigation</a>
+        <a href="keyboard-events.html" class="active">Keyboard</a>
+        <a href="styling.html">Styling</a>
+        <a href="animations.html">Animations</a>
+        <a href="edge-cases.html">Edge Cases</a>
+        <a href="api.html">API</a>
+        <a href="advanced.html">Advanced</a>
+      </div>
+    </nav>
+
+    <div class="container">
+      <header>
+        <h1>Keyboard & Events</h1>
+        <p class="header-subtitle">
+          Full keyboard navigation support and DOM event system demonstration
+        </p>
+      </header>
+
+      <section class="test-category">
+        <div class="test-case" data-test-id="6">
+          <div class="test-header">
+            <span class="test-number">06</span>
+            <h3>Keyboard Navigation</h3>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Full keyboard support with Arrow keys, Home, End. Tab activates on
+              focus by default.
+            </p>
+            <div class="tabs-demo">
+              <div
+                data-tabs="container"
+                class="sliding-pill"
+                data-tabs-keyboard="true"
+                id="test6-tabs"
+              >
+                <div class="tabs-trigger-list" role="tablist">
+                  <button class="tabs-trigger" data-tabs-trigger-value="tab-a">
+                    Tab A
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="tab-b">
+                    Tab B
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="tab-c">
+                    Tab C
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="tab-d">
+                    Tab D
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="tab-e">
+                    Tab E
+                  </button>
+                </div>
+                <div class="tabs-panels">
+                  <div class="tabs-panel" data-tabs-panel-value="tab-a">
+                    <strong>Tab A Content</strong> - Press Arrow Right to go to
+                    Tab B, or End to jump to Tab E.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="tab-b">
+                    <strong>Tab B Content</strong> - Press Arrow Left to go back
+                    to Tab A.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="tab-c">
+                    <strong>Tab C Content</strong> - You're in the middle. Use
+                    Home to jump to the start.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="tab-d">
+                    <strong>Tab D Content</strong> - Almost at the end. One more
+                    to go!
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="tab-e">
+                    <strong>Tab E Content</strong> - This is the last tab. Press
+                    Home to return to the beginning.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="code-block">
+              Keyboard shortcuts: Arrow Left/Right (navigate), Home (first tab),
+              End (last tab)
+            </div>
+          </div>
+        </div>
+
+        <div class="test-case" data-test-id="7">
+          <div class="test-header">
+            <span class="test-number">07</span>
+            <h3>Event System</h3>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Demonstrates the tabs event system. Events are logged below as you
+              interact with the tabs.
+            </p>
+            <div class="tabs-demo">
+              <div data-tabs="container" id="test7-tabs" class="sliding-pill">
+                <div class="tabs-trigger-list" role="tablist">
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="event-1"
+                  >
+                    Event 1
+                  </button>
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="event-2"
+                  >
+                    Event 2
+                  </button>
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="event-3"
+                  >
+                    Event 3
+                  </button>
+                </div>
+                <div class="tabs-panels">
+                  <div class="tabs-panel" data-tabs-panel-value="event-1">
+                    Click on different tabs to see change events logged below.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="event-2">
+                    Each tab change fires a "change" event with value and
+                    previousValue.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="event-3">
+                    Events can be subscribed to via instance.on() or DOM
+                    addEventListener.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="event-log" id="test7-log">Waiting for events...</div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script type="module">
+      import { waitForTabs } from './shared.js';
+
+      waitForTabs(() => {
+        const tabs = window.Tabs.get('#test7-tabs');
+        const log = document.getElementById('test7-log');
+
+        if (tabs && log) {
+          const events = [];
+
+          tabs.on('change', (e) => {
+            events.unshift(`change: "${e.previousValue}" -> "${e.value}"`);
+            log.textContent = events.slice(0, 10).join('\n');
+          });
+
+          tabs.container.addEventListener('tabs:change', (e) => {
+            console.log('DOM event:', e.detail);
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

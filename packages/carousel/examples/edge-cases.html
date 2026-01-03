@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edge Cases - Carousel Examples</title>
+    <script type="module" src="../src/carousel.js"></script>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <nav class="examples-nav">
+      <a href="index.html" class="nav-logo">Carousel Examples</a>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="basic.html">Basic</a>
+        <a href="navigation.html">Navigation</a>
+        <a href="instances.html">Instances</a>
+        <a href="responsive.html">Responsive</a>
+        <a href="keyboard.html">Keyboard</a>
+        <a href="accessibility.html">Accessibility</a>
+        <a href="edge-cases.html" class="active">Edge Cases</a>
+        <a href="api.html">API</a>
+        <a href="pagination.html">Pagination</a>
+      </div>
+    </nav>
+
+    <div class="container">
+      <header>
+        <h1>Edge Cases</h1>
+        <p class="header-subtitle">
+          Extreme varying widths, stress tests, gap handling, and CSS behavior
+          classes
+        </p>
+      </header>
+
+      <section class="test-category">
+        <div class="test-case" data-test-id="16">
+          <div class="test-header">
+            <span class="test-number">16</span>
+            <h3>Extreme Varying Widths</h3>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Demonstrates carousel with items of dramatically different widths
+              - from very narrow to extremely wide.
+            </p>
+            <div class="carousel-demo">
+              <div
+                data-carousel="container"
+                data-carousel-align="start"
+                id="test16-carousel"
+              >
+                <div data-carousel="track">
+                  <div data-carousel="item" style="width: 150px">Narrow</div>
+                  <div data-carousel="item" style="width: 500px">
+                    Very Wide Item
+                  </div>
+                  <div data-carousel="item" style="width: 180px">Small</div>
+                  <div data-carousel="item" style="width: 600px">
+                    Extremely Wide Content
+                  </div>
+                  <div data-carousel="item" style="width: 200px">Compact</div>
+                  <div data-carousel="item" style="width: 450px">
+                    Large Item
+                  </div>
+                  <div data-carousel="item" style="width: 160px">Tiny</div>
+                  <div data-carousel="item" style="width: 550px">
+                    Super Wide
+                  </div>
+                </div>
+                <div class="carousel-nav">
+                  <button data-carousel="prev">Previous</button>
+                  <button data-carousel="next">Next</button>
+                </div>
+                <div data-carousel="pagination"></div>
+              </div>
+            </div>
+            <div class="code-block">
+              Items range from 150px to 600px width. The carousel correctly
+              calculates scroll positions for each item.
+            </div>
+          </div>
+        </div>
+
+        <div class="test-case" data-test-id="18">
+          <div class="test-header">
+            <span class="test-number">18</span>
+            <h3>Many Items (Stress Test)</h3>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Carousel with many items to test performance and pagination
+              generation with large datasets.
+            </p>
+            <div class="carousel-demo">
+              <div
+                data-carousel="container"
+                data-carousel-align="start"
+                id="test18-carousel"
+              >
+                <div data-carousel="track">
+                  <div data-carousel="item">Item 1</div>
+                  <div data-carousel="item">Item 2</div>
+                  <div data-carousel="item">Item 3</div>
+                  <div data-carousel="item">Item 4</div>
+                  <div data-carousel="item">Item 5</div>
+                  <div data-carousel="item">Item 6</div>
+                  <div data-carousel="item">Item 7</div>
+                  <div data-carousel="item">Item 8</div>
+                  <div data-carousel="item">Item 9</div>
+                  <div data-carousel="item">Item 10</div>
+                  <div data-carousel="item">Item 11</div>
+                  <div data-carousel="item">Item 12</div>
+                  <div data-carousel="item">Item 13</div>
+                  <div data-carousel="item">Item 14</div>
+                  <div data-carousel="item">Item 15</div>
+                </div>
+                <div class="carousel-nav">
+                  <button data-carousel="prev">Previous</button>
+                  <button data-carousel="next">Next</button>
+                </div>
+                <div data-carousel="pagination"></div>
+              </div>
+            </div>
+            <div class="code-block">
+              15 items with auto-generated pagination dots. Tests performance
+              with larger datasets.
+            </div>
+          </div>
+        </div>
+
+        <div class="test-case" data-test-id="19">
+          <div class="test-header">
+            <span class="test-number">19</span>
+            <h3>Gap Handling</h3>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Demonstrates proper gap calculation between items. The carousel
+              automatically measures CSS gap for accurate scroll positioning.
+            </p>
+            <div class="carousel-demo">
+              <div
+                data-carousel="container"
+                data-carousel-align="start"
+                id="test19-carousel"
+                style="--gap: 30px"
+              >
+                <div data-carousel="track" style="gap: 30px">
+                  <div data-carousel="item">Gap 1</div>
+                  <div data-carousel="item">Gap 2</div>
+                  <div data-carousel="item">Gap 3</div>
+                  <div data-carousel="item">Gap 4</div>
+                  <div data-carousel="item">Gap 5</div>
+                  <div data-carousel="item">Gap 6</div>
+                  <div data-carousel="item">Gap 7</div>
+                  <div data-carousel="item">Gap 8</div>
+                </div>
+                <div class="carousel-nav">
+                  <button data-carousel="prev">Previous</button>
+                  <button data-carousel="next">Next</button>
+                </div>
+              </div>
+            </div>
+            <div class="code-block">
+              This carousel uses a 30px gap between items. The library
+              automatically measures and accounts for gaps in scroll
+              calculations.
+            </div>
+          </div>
+        </div>
+
+        <div class="test-case" data-test-id="21">
+          <div class="test-header">
+            <span class="test-number">21</span>
+            <h3>Scroll Behavior Classes</h3>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Demonstrates functional CSS classes applied by the library:
+              carousel-scrolling, carousel-animating, carousel-active.
+            </p>
+            <div class="carousel-demo">
+              <div
+                data-carousel="container"
+                data-carousel-align="start"
+                id="test21-carousel"
+              >
+                <div data-carousel="track">
+                  <div data-carousel="item">Class 1</div>
+                  <div data-carousel="item">Class 2</div>
+                  <div data-carousel="item">Class 3</div>
+                  <div data-carousel="item">Class 4</div>
+                  <div data-carousel="item">Class 5</div>
+                  <div data-carousel="item">Class 6</div>
+                  <div data-carousel="item">Class 7</div>
+                  <div data-carousel="item">Class 8</div>
+                </div>
+                <div class="carousel-nav">
+                  <button data-carousel="prev">Previous</button>
+                  <button data-carousel="next">Next</button>
+                </div>
+              </div>
+            </div>
+            <div class="code-block">
+              Watch for classes in DevTools: • .carousel-active on active item •
+              .carousel-scrolling on track during scroll • .carousel-animating
+              on track during programmatic navigation • .carousel-disabled on
+              buttons at edges
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>

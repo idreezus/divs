@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Animations - Tabs Examples</title>
+    <script type="module" src="../src/tabs.js"></script>
+    <link rel="stylesheet" href="../src/styles.css" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <nav class="examples-nav">
+      <a href="index.html" class="nav-logo">Tabs Examples</a>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="basic.html">Basic</a>
+        <a href="navigation.html">Navigation</a>
+        <a href="keyboard-events.html">Keyboard</a>
+        <a href="styling.html">Styling</a>
+        <a href="animations.html" class="active">Animations</a>
+        <a href="edge-cases.html">Edge Cases</a>
+        <a href="api.html">API</a>
+        <a href="advanced.html">Advanced</a>
+      </div>
+    </nav>
+
+    <div class="container">
+      <header>
+        <h1>Animations</h1>
+        <p class="header-subtitle">
+          Fade, slide, scale, sliding indicators, direction-aware, and staggered
+          animations
+        </p>
+      </header>
+
+      <section class="test-category">
+        <div class="test-case" data-test-id="11">
+          <div class="test-header">
+            <span class="test-number">11</span>
+            <h3>Fade Panel Animation</h3>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Simple fade animation for panel transitions. Clean and subtle
+              effect using opacity.
+            </p>
+            <div class="tabs-demo">
+              <div
+                data-tabs="container"
+                id="test11-tabs"
+                class="fade-tabs sliding-pill"
+              >
+                <div class="tabs-trigger-list" role="tablist">
+                  <button class="tabs-trigger" data-tabs-trigger-value="fade-1">
+                    Overview
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="fade-2">
+                    Details
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="fade-3">
+                    Reviews
+                  </button>
+                </div>
+                <div class="tabs-panels">
+                  <div class="tabs-panel" data-tabs-panel-value="fade-1">
+                    <strong>Fade Animation</strong> - Content fades in smoothly
+                    with a 300ms ease-out transition. Minimal and elegant.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="fade-2">
+                    <strong>Details Panel</strong> - The fade effect is subtle
+                    and works well for content-heavy interfaces.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="fade-3">
+                    <strong>Reviews Panel</strong> - Great for dashboards and
+                    documentation sites.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="code-block">
+              .fade-tabs .tabs-panel-entering { animation: tabs-fade-in 0.3s
+              ease-out; }
+            </div>
+          </div>
+        </div>
+
+        <div class="test-case" data-test-id="12">
+          <div class="test-header">
+            <span class="test-number">12</span>
+            <h3>Slide Panel Animation</h3>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Horizontal slide animation with panels entering from the right and
+              exiting to the left.
+            </p>
+            <div class="tabs-demo">
+              <div
+                data-tabs="container"
+                id="test12-tabs"
+                class="slide-tabs sliding-pill"
+              >
+                <div class="tabs-trigger-list" role="tablist">
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="slide-1"
+                  >
+                    Step 1
+                  </button>
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="slide-2"
+                  >
+                    Step 2
+                  </button>
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="slide-3"
+                  >
+                    Step 3
+                  </button>
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="slide-4"
+                  >
+                    Step 4
+                  </button>
+                </div>
+                <div class="tabs-panels">
+                  <div class="tabs-panel" data-tabs-panel-value="slide-1">
+                    <strong>Slide Animation</strong> - Content slides in from
+                    the right with a smooth cubic-bezier easing curve.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="slide-2">
+                    <strong>Step 2</strong> - Great for wizard flows and
+                    multi-step forms where progression is implied.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="slide-3">
+                    <strong>Step 3</strong> - The exiting panel slides out to
+                    the left while the new one enters.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="slide-4">
+                    <strong>Step 4</strong> - Uses hardware-accelerated
+                    transforms for smooth 60fps animation.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="code-block">
+              translateX(24px) -> translateX(0) on enter, translateX(0) ->
+              translateX(-24px) on exit
+            </div>
+          </div>
+        </div>
+
+        <div class="test-case" data-test-id="13">
+          <div class="test-header">
+            <span class="test-number">13</span>
+            <h3>Scale Panel Animation</h3>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Scale animation with spring easing. Content scales up slightly
+              with an overshoot effect.
+            </p>
+            <div class="tabs-demo">
+              <div
+                data-tabs="container"
+                id="test13-tabs"
+                class="scale-tabs sliding-pill"
+              >
+                <div class="tabs-trigger-list" role="tablist">
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="scale-1"
+                  >
+                    Product
+                  </button>
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="scale-2"
+                  >
+                    Features
+                  </button>
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="scale-3"
+                  >
+                    Pricing
+                  </button>
+                </div>
+                <div class="tabs-panels">
+                  <div class="tabs-panel" data-tabs-panel-value="scale-1">
+                    <strong>Scale Animation</strong> - Subtle scale effect with
+                    spring easing for a playful, modern feel.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="scale-2">
+                    <strong>Features</strong> - The overshoot easing
+                    (cubic-bezier 0.34, 1.56, 0.64, 1) adds personality.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="scale-3">
+                    <strong>Pricing</strong> - Works well for product pages and
+                    marketing sites.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="code-block">
+              scale(0.96) -> scale(1) with spring easing cubic-bezier(0.34,
+              1.56, 0.64, 1)
+            </div>
+          </div>
+        </div>
+
+        <div class="test-case" data-test-id="14">
+          <div class="test-header">
+            <span class="test-number">14</span>
+            <h3>Sliding Underline Indicator</h3>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              CSS-only sliding underline that animates between tabs. Uses CSS
+              custom properties set by JavaScript.
+            </p>
+            <div class="tabs-demo">
+              <div class="multi-tabs">
+                <h4>3 Tabs</h4>
+                <div
+                  data-tabs="container"
+                  id="test14a-tabs"
+                  class="sliding-underline"
+                >
+                  <div class="tabs-trigger-list" role="tablist">
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="under-1"
+                    >
+                      Dashboard
+                    </button>
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="under-2"
+                    >
+                      Analytics
+                    </button>
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="under-3"
+                    >
+                      Settings
+                    </button>
+                  </div>
+                  <div class="tabs-panels">
+                    <div class="tabs-panel" data-tabs-panel-value="under-1">
+                      The underline smoothly slides to follow the active tab.
+                    </div>
+                    <div class="tabs-panel" data-tabs-panel-value="under-2">
+                      Pure CSS animation using CSS custom properties.
+                    </div>
+                    <div class="tabs-panel" data-tabs-panel-value="under-3">
+                      Set --tabs-count to match your number of tabs.
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="multi-tabs">
+                <h4>5 Tabs</h4>
+                <div
+                  data-tabs="container"
+                  id="test14b-tabs"
+                  class="sliding-underline"
+                >
+                  <div class="tabs-trigger-list" role="tablist">
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="five-1"
+                    >
+                      Home
+                    </button>
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="five-2"
+                    >
+                      Products
+                    </button>
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="five-3"
+                    >
+                      Services
+                    </button>
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="five-4"
+                    >
+                      About
+                    </button>
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="five-5"
+                    >
+                      Contact
+                    </button>
+                  </div>
+                  <div class="tabs-panels">
+                    <div class="tabs-panel" data-tabs-panel-value="five-1">
+                      Works with any number of tabs by setting --tabs-count.
+                    </div>
+                    <div class="tabs-panel" data-tabs-panel-value="five-2">
+                      Products panel content.
+                    </div>
+                    <div class="tabs-panel" data-tabs-panel-value="five-3">
+                      Services panel content.
+                    </div>
+                    <div class="tabs-panel" data-tabs-panel-value="five-4">
+                      About panel content.
+                    </div>
+                    <div class="tabs-panel" data-tabs-panel-value="five-5">
+                      Contact panel content.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="code-block">
+              --tabs-count auto-set by JS | Uses --tabs-active-index for
+              position
+            </div>
+          </div>
+        </div>
+
+        <div class="test-case" data-test-id="15">
+          <div class="test-header">
+            <span class="test-number">15</span>
+            <h3>Sliding Pill Indicator</h3>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              CSS-only sliding pill background. The white pill smoothly
+              transitions between active tabs.
+            </p>
+            <div class="tabs-demo">
+              <div class="multi-tabs">
+                <h4>3 Tabs</h4>
+                <div
+                  data-tabs="container"
+                  id="test15a-tabs"
+                  class="sliding-pill"
+                >
+                  <div class="tabs-trigger-list" role="tablist">
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="pill-1"
+                    >
+                      All
+                    </button>
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="pill-2"
+                    >
+                      Active
+                    </button>
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="pill-3"
+                    >
+                      Archived
+                    </button>
+                  </div>
+                  <div class="tabs-panels">
+                    <div class="tabs-panel" data-tabs-panel-value="pill-1">
+                      The pill background slides smoothly between tabs.
+                    </div>
+                    <div class="tabs-panel" data-tabs-panel-value="pill-2">
+                      Popular style seen in iOS and many modern UIs.
+                    </div>
+                    <div class="tabs-panel" data-tabs-panel-value="pill-3">
+                      Uses ::before pseudo-element for the sliding background.
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="multi-tabs">
+                <h4>4 Tabs</h4>
+                <div
+                  data-tabs="container"
+                  id="test15b-tabs"
+                  class="sliding-pill"
+                >
+                  <div class="tabs-trigger-list" role="tablist">
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="four-1"
+                    >
+                      Daily
+                    </button>
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="four-2"
+                    >
+                      Weekly
+                    </button>
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="four-3"
+                    >
+                      Monthly
+                    </button>
+                    <button
+                      class="tabs-trigger"
+                      data-tabs-trigger-value="four-4"
+                    >
+                      Yearly
+                    </button>
+                  </div>
+                  <div class="tabs-panels">
+                    <div class="tabs-panel" data-tabs-panel-value="four-1">
+                      Daily view - showing today's data.
+                    </div>
+                    <div class="tabs-panel" data-tabs-panel-value="four-2">
+                      Weekly view - last 7 days of activity.
+                    </div>
+                    <div class="tabs-panel" data-tabs-panel-value="four-3">
+                      Monthly view - this month's summary.
+                    </div>
+                    <div class="tabs-panel" data-tabs-panel-value="four-4">
+                      Yearly view - annual overview.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="code-block">
+              ::before pseudo-element with box-shadow and translateX animation
+            </div>
+          </div>
+        </div>
+
+        <div class="test-case" data-test-id="16">
+          <div class="test-header">
+            <span class="test-number">16</span>
+            <h3>Gradient Underline Indicator</h3>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Colorful gradient underline that slides between tabs. Combines
+              sliding animation with a purple-blue gradient.
+            </p>
+            <div class="tabs-demo">
+              <div data-tabs="container" id="test16-tabs" class="sliding-pill">
+                <div class="tabs-trigger-list" role="tablist">
+                  <button class="tabs-trigger" data-tabs-trigger-value="grad-1">
+                    Explore
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="grad-2">
+                    Create
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="grad-3">
+                    Connect
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="grad-4">
+                    Grow
+                  </button>
+                </div>
+                <div class="tabs-panels">
+                  <div class="tabs-panel" data-tabs-panel-value="grad-1">
+                    <strong>Gradient Indicator</strong> - The underline has a
+                    beautiful purple-to-blue gradient.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="grad-2">
+                    <strong>Create</strong> - Great for creative and modern
+                    interfaces.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="grad-3">
+                    <strong>Connect</strong> - The active tab text also changes
+                    to match the gradient color.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="grad-4">
+                    <strong>Grow</strong> - Combines visual polish with smooth
+                    animation.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="code-block">
+              background: linear-gradient(90deg, #667eea 0%, #764ba2 100%)
+            </div>
+          </div>
+        </div>
+
+        <div class="test-case" data-test-id="17">
+          <div class="test-header">
+            <span class="test-number">17</span>
+            <h3>Direction-Aware Slide Animation</h3>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Panels slide in from the correct direction based on navigation.
+              Uses --tabs-direction variable (1=forward, -1=backward).
+            </p>
+            <div class="tabs-demo">
+              <div
+                data-tabs="container"
+                id="test17-tabs"
+                class="direction-slide sliding-pill"
+              >
+                <div class="tabs-trigger-list" role="tablist">
+                  <button class="tabs-trigger" data-tabs-trigger-value="dir-1">
+                    First
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="dir-2">
+                    Second
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="dir-3">
+                    Third
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="dir-4">
+                    Fourth
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="dir-5">
+                    Fifth
+                  </button>
+                </div>
+                <div class="tabs-panels">
+                  <div class="tabs-panel" data-tabs-panel-value="dir-1">
+                    <strong>First Panel</strong> - Click tabs to the right to
+                    see content slide in from the right. Click tabs to the left
+                    to see content slide in from the left.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="dir-2">
+                    <strong>Second Panel</strong> - The --tabs-direction
+                    variable is set to 1 (forward) or -1 (backward) based on
+                    navigation.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="dir-3">
+                    <strong>Third Panel</strong> - This creates a natural
+                    carousel-like feel where content flows in the expected
+                    direction.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="dir-4">
+                    <strong>Fourth Panel</strong> - The CSS uses
+                    calc(var(--tabs-direction) * 30px) to determine slide
+                    direction.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="dir-5">
+                    <strong>Fifth Panel</strong> - Try navigating back to the
+                    first tab to see the reverse animation.
+                  </div>
+                </div>
+              </div>
+              <div class="direction-indicator" id="test17-direction">
+                <span>Direction:</span>
+                <span class="arrow" id="test17-arrow">-></span>
+                <span id="test17-dir-value">0 (initial)</span>
+              </div>
+            </div>
+            <div class="code-block">
+              transform: translateX(calc(var(--tabs-direction, 1) * 30px))
+            </div>
+          </div>
+        </div>
+
+        <div class="test-case" data-test-id="18">
+          <div class="test-header">
+            <span class="test-number">18</span>
+            <h3>Staggered Animation with --tabs-index</h3>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Each trigger animates in with a staggered delay based on its
+              --tabs-index. Panels have index-based color accents.
+            </p>
+            <div class="tabs-demo">
+              <div
+                data-tabs="container"
+                id="test18-tabs"
+                class="staggered-triggers sliding-pill"
+              >
+                <div class="tabs-trigger-list" role="tablist">
+                  <button class="tabs-trigger" data-tabs-trigger-value="stag-1">
+                    Index 0
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="stag-2">
+                    Index 1
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="stag-3">
+                    Index 2
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="stag-4">
+                    Index 3
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="stag-5">
+                    Index 4
+                  </button>
+                </div>
+                <div class="tabs-panels">
+                  <div class="tabs-panel" data-tabs-panel-value="stag-1">
+                    <strong>Panel 0</strong> - Each trigger's animation-delay
+                    uses calc(var(--tabs-index) * 80ms) for staggered entrance.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="stag-2">
+                    <strong>Panel 1</strong> - The panel's left border color is
+                    calculated from the tab index using HSL.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="stag-3">
+                    <strong>Panel 2</strong> - Hover over triggers to see
+                    index-based background color variations.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="stag-4">
+                    <strong>Panel 3</strong> - The --tabs-index variable is set
+                    on both triggers and panels.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="stag-5">
+                    <strong>Panel 4</strong> - Refresh the page to see the
+                    staggered animation again.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="code-block">
+              animation-delay: calc(var(--tabs-index, 0) * 80ms) | border-color:
+              hsl(calc(220 + var(--tabs-index) * 20), 70%, 60%)
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script type="module">
+      import { waitForTabs } from './shared.js';
+
+      waitForTabs(() => {
+        const tabs = window.Tabs.get('#test17-tabs');
+        const arrowEl = document.getElementById('test17-arrow');
+        const dirValueEl = document.getElementById('test17-dir-value');
+        const container = document.getElementById('test17-tabs');
+
+        if (tabs && container && arrowEl && dirValueEl) {
+          tabs.on('change', () => {
+            const style = getComputedStyle(container);
+            const direction = style.getPropertyValue('--tabs-direction');
+            const dirNum = parseFloat(direction) || 0;
+
+            arrowEl.textContent = dirNum > 0 ? '->' : dirNum < 0 ? '<-' : '->';
+            dirValueEl.textContent = `${dirNum} (${
+              dirNum > 0 ? 'forward' : dirNum < 0 ? 'backward' : 'initial'
+            })`;
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pagination Features - Carousel Examples</title>
+    <script type="module" src="../src/carousel.js"></script>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <nav class="examples-nav">
+      <a href="index.html" class="nav-logo">Carousel Examples</a>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="basic.html">Basic</a>
+        <a href="navigation.html">Navigation</a>
+        <a href="instances.html">Instances</a>
+        <a href="responsive.html">Responsive</a>
+        <a href="keyboard.html">Keyboard</a>
+        <a href="accessibility.html">Accessibility</a>
+        <a href="edge-cases.html">Edge Cases</a>
+        <a href="api.html">API</a>
+        <a href="pagination.html" class="active">Pagination</a>
+      </div>
+    </nav>
+
+    <div class="container">
+      <header>
+        <h1>Pagination Features</h1>
+        <p class="header-subtitle">
+          Dot template cloning, current/total display, and CSS custom properties
+        </p>
+      </header>
+
+      <section class="test-category">
+        <div class="test-case" data-test-id="22">
+          <div class="test-header">
+            <span class="test-number">22</span>
+            <h3>Dot Template Cloning</h3>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              The first dot element serves as a template. The library clones it
+              to match the number of slides. Style one dot, get them all styled.
+            </p>
+            <div class="carousel-demo">
+              <div
+                data-carousel="container"
+                data-carousel-align="start"
+                class="custom-dots-demo"
+                id="test22-carousel"
+              >
+                <div data-carousel="track">
+                  <div data-carousel="item">Slide 1</div>
+                  <div data-carousel="item">Slide 2</div>
+                  <div data-carousel="item">Slide 3</div>
+                  <div data-carousel="item">Slide 4</div>
+                  <div data-carousel="item">Slide 5</div>
+                  <div data-carousel="item">Slide 6</div>
+                  <div data-carousel="item">Slide 7</div>
+                </div>
+                <div class="carousel-nav">
+                  <button data-carousel="prev">Previous</button>
+                  <button data-carousel="next">Next</button>
+                </div>
+                <!-- Only one dot needed - library clones it for all 7 slides -->
+                <div
+                  data-carousel="pagination"
+                  style="
+                    display: flex;
+                    gap: 8px;
+                    justify-content: center;
+                    margin-top: 20px;
+                  "
+                >
+                  <button data-carousel-dot></button>
+                </div>
+              </div>
+            </div>
+            <div class="code-block">
+              &lt;!-- HTML: Only define one dot - it becomes the template --&gt;
+              &lt;div data-carousel="pagination"&gt; &lt;button
+              data-carousel-dot&gt;&lt;/button&gt; &lt;/div&gt; /* CSS: Style
+              the template, clones inherit all styles */ [data-carousel-dot] {
+              width: 40px; height: 6px; background: #d4d4d4; }
+              [data-carousel-dot].carousel-dot-active { background: #667eea;
+              width: 60px; }
+            </div>
+          </div>
+        </div>
+
+        <div class="test-case" data-test-id="23">
+          <div class="test-header">
+            <span class="test-number">23</span>
+            <h3>Current/Total Text Display</h3>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Display "1 of 8" style pagination using
+              data-carousel-pagination-current and
+              data-carousel-pagination-total. Text is auto-injected and updated.
+            </p>
+            <div class="carousel-demo">
+              <div
+                data-carousel="container"
+                data-carousel-align="start"
+                id="test23-carousel"
+              >
+                <div data-carousel="track">
+                  <div data-carousel="item">Content 1</div>
+                  <div data-carousel="item">Content 2</div>
+                  <div data-carousel="item">Content 3</div>
+                  <div data-carousel="item">Content 4</div>
+                  <div data-carousel="item">Content 5</div>
+                  <div data-carousel="item">Content 6</div>
+                  <div data-carousel="item">Content 7</div>
+                  <div data-carousel="item">Content 8</div>
+                </div>
+                <div class="carousel-nav">
+                  <button data-carousel="prev">Previous</button>
+                  <button data-carousel="next">Next</button>
+                </div>
+                <!-- Current/Total display - text auto-injected by library -->
+                <div class="pagination-counter">
+                  <span data-carousel-pagination-current></span>
+                  <span class="separator">/</span>
+                  <span data-carousel-pagination-total></span>
+                </div>
+              </div>
+            </div>
+            <div class="code-block">
+              &lt;!-- Text is automatically injected into these elements --&gt;
+              &lt;div class="pagination-counter"&gt; &lt;span
+              data-carousel-pagination-current&gt;&lt;/span&gt; &lt;span
+              class="separator"&gt;/&lt;/span&gt; &lt;span
+              data-carousel-pagination-total&gt;&lt;/span&gt; &lt;/div&gt; /*
+              Result: "1 / 8" - updates as you navigate */
+            </div>
+          </div>
+        </div>
+
+        <div class="test-case" data-test-id="24">
+          <div class="test-header">
+            <span class="test-number">24</span>
+            <h3>CSS Custom Properties</h3>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Use --carousel-index, --carousel-total, and --carousel-progress
+              for pure CSS-driven UI. No JavaScript needed for progress bars,
+              counters, or dynamic styling.
+            </p>
+            <div class="carousel-demo">
+              <div
+                data-carousel="container"
+                data-carousel-align="start"
+                class="css-vars-demo"
+                id="test24-carousel"
+              >
+                <div data-carousel="track">
+                  <div data-carousel="item">Slide 1</div>
+                  <div data-carousel="item">Slide 2</div>
+                  <div data-carousel="item">Slide 3</div>
+                  <div data-carousel="item">Slide 4</div>
+                  <div data-carousel="item">Slide 5</div>
+                  <div data-carousel="item">Slide 6</div>
+                </div>
+                <div class="carousel-nav">
+                  <button data-carousel="prev">Previous</button>
+                  <button data-carousel="next">Next</button>
+                </div>
+                <!-- Progress bar driven by CSS variable -->
+                <div class="progress-bar-container">
+                  <div class="progress-bar"></div>
+                </div>
+                <!-- Counter display using CSS counters + custom properties -->
+                <div class="slide-indicator">
+                  <span class="current"></span>
+                  <span>of</span>
+                  <span class="total"></span>
+                </div>
+              </div>
+            </div>
+            <div class="code-block">
+              /* Progress bar using --carousel-progress (0 to 1) */
+              .progress-bar { width: calc(var(--carousel-progress, 0) * 100%); }
+              /* CSS counter using --carousel-index */ .current::before {
+              counter-reset: num var(--carousel-index, 1); content:
+              counter(num); } /* Dynamic colors using --carousel-index */
+              [data-carousel='item'] { background: hsl(calc(240 +
+              var(--carousel-index) * 15), 70%, 95%); }
+            </div>
+            <dl class="info-panel" id="test24-info">
+              <div class="info-item">
+                <dt>--carousel-index</dt>
+                <dd id="test24-index">—</dd>
+              </div>
+              <div class="info-item">
+                <dt>--carousel-total</dt>
+                <dd id="test24-total">—</dd>
+              </div>
+              <div class="info-item">
+                <dt>--carousel-progress</dt>
+                <dd id="test24-progress">—</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script type="module">
+      import { waitForCarousels } from './shared.js';
+
+      waitForCarousels(() => {
+        const container = document.getElementById('test24-carousel');
+        const carousel = window.Carousel.get('#test24-carousel');
+
+        if (carousel) {
+          const indexEl = document.getElementById('test24-index');
+          const totalEl = document.getElementById('test24-total');
+          const progressEl = document.getElementById('test24-progress');
+
+          function updateCSSVarsDisplay() {
+            const styles = getComputedStyle(container);
+            const index = styles.getPropertyValue('--carousel-index').trim();
+            const total = styles.getPropertyValue('--carousel-total').trim();
+            const progress = styles.getPropertyValue('--carousel-progress').trim();
+
+            indexEl.textContent = index || '—';
+            totalEl.textContent = total || '—';
+            progressEl.textContent = progress
+              ? parseFloat(progress).toFixed(3)
+              : '—';
+          }
+
+          // Update on change
+          carousel.on('change', updateCSSVarsDisplay);
+
+          // Also update on scroll for progress
+          const track = container.querySelector('[data-carousel="track"]');
+          if (track) {
+            track.addEventListener('scroll', () => {
+              requestAnimationFrame(updateCSSVarsDisplay);
+            });
+          }
+
+          // Initial update
+          updateCSSVarsDisplay();
+        }
+      });
+    </script>
+  </body>
+</html>

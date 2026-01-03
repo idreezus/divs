@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Basic Functionality - Tabs Examples</title>
+    <script type="module" src="../src/tabs.js"></script>
+    <link rel="stylesheet" href="../src/styles.css" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <nav class="examples-nav">
+      <a href="index.html" class="nav-logo">Tabs Examples</a>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="basic.html" class="active">Basic</a>
+        <a href="navigation.html">Navigation</a>
+        <a href="keyboard-events.html">Keyboard</a>
+        <a href="styling.html">Styling</a>
+        <a href="animations.html">Animations</a>
+        <a href="edge-cases.html">Edge Cases</a>
+        <a href="api.html">API</a>
+        <a href="advanced.html">Advanced</a>
+      </div>
+    </nav>
+
+    <div class="container">
+      <header>
+        <h1>Basic Functionality</h1>
+        <p class="header-subtitle">
+          Simple horizontal tabs, vertical orientation, and default tab
+          selection
+        </p>
+      </header>
+
+      <section class="test-category">
+        <div class="test-case" data-test-id="1">
+          <div class="test-header">
+            <span class="test-number">01</span>
+            <h3>Basic Horizontal Tabs</h3>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Simple horizontal tabs with default configuration. Click triggers
+              to switch between panels.
+            </p>
+            <div class="tabs-demo">
+              <div data-tabs="container" id="test1-tabs" class="sliding-pill">
+                <div class="tabs-trigger-list" role="tablist">
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="overview"
+                  >
+                    Overview
+                  </button>
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="features"
+                  >
+                    Features
+                  </button>
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="pricing"
+                  >
+                    Pricing
+                  </button>
+                </div>
+                <div class="tabs-panels">
+                  <div class="tabs-panel" data-tabs-panel-value="overview">
+                    <strong>Overview</strong> - This is the overview panel
+                    content. It provides a high-level summary of the product or
+                    service being described.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="features">
+                    <strong>Features</strong> - Explore all the amazing features
+                    including automatic initialization, keyboard navigation,
+                    ARIA support, and URL synchronization.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="pricing">
+                    <strong>Pricing</strong> - Our flexible pricing plans are
+                    designed to fit teams of all sizes. Start free and scale as
+                    you grow.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="test-case" data-test-id="2">
+          <div class="test-header">
+            <span class="test-number">02</span>
+            <h3>Vertical Orientation</h3>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Tabs with vertical orientation. Arrow Up/Down keys navigate
+              instead of Left/Right.
+            </p>
+            <div class="tabs-demo">
+              <div
+                data-tabs="container"
+                data-tabs-orientation="vertical"
+                id="test2-tabs"
+                class="vertical-tabs sliding-pill"
+              >
+                <div class="tabs-trigger-list" role="tablist">
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="account"
+                  >
+                    Account
+                  </button>
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="security"
+                  >
+                    Security
+                  </button>
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="notifications"
+                  >
+                    Notifications
+                  </button>
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="billing"
+                  >
+                    Billing
+                  </button>
+                </div>
+                <div class="tabs-panels">
+                  <div class="tabs-panel" data-tabs-panel-value="account">
+                    <strong>Account Settings</strong> - Manage your profile
+                    information, update your email address, and customize your
+                    display name.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="security">
+                    <strong>Security Settings</strong> - Configure two-factor
+                    authentication, manage active sessions, and update your
+                    password.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="notifications">
+                    <strong>Notification Preferences</strong> - Control which
+                    emails you receive and how you're notified about important
+                    updates.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="billing">
+                    <strong>Billing Information</strong> - View invoices, update
+                    payment methods, and manage your subscription plan.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="code-block">
+              Use Arrow Up/Down to navigate. Arrow Left/Right are ignored in
+              vertical mode.
+            </div>
+          </div>
+        </div>
+
+        <div class="test-case" data-test-id="3">
+          <div class="test-header">
+            <span class="test-number">03</span>
+            <h3>Default Tab Selection</h3>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Tabs with a specific default tab set via data-tabs-default. The
+              "Advanced" tab should be active on load.
+            </p>
+            <div class="tabs-demo">
+              <div
+                data-tabs="container"
+                class="sliding-pill"
+                data-tabs-default="advanced"
+                id="test3-tabs"
+              >
+                <div class="tabs-trigger-list" role="tablist">
+                  <button class="tabs-trigger" data-tabs-trigger-value="basic">
+                    Basic
+                  </button>
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="advanced"
+                  >
+                    Advanced
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="expert">
+                    Expert
+                  </button>
+                </div>
+                <div class="tabs-panels">
+                  <div class="tabs-panel" data-tabs-panel-value="basic">
+                    <strong>Basic Mode</strong> - Simple configuration with
+                    sensible defaults. Perfect for getting started quickly.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="advanced">
+                    <strong>Advanced Mode</strong> - This tab is selected by
+                    default using data-tabs-default="advanced". More options for
+                    power users.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="expert">
+                    <strong>Expert Mode</strong> - Full control over every
+                    setting. Recommended for experienced users only.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>

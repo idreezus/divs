@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Navigation Features - Carousel Examples</title>
+    <script type="module" src="../src/carousel.js"></script>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <nav class="examples-nav">
+      <a href="index.html" class="nav-logo">Carousel Examples</a>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="basic.html">Basic</a>
+        <a href="navigation.html" class="active">Navigation</a>
+        <a href="instances.html">Instances</a>
+        <a href="responsive.html">Responsive</a>
+        <a href="keyboard.html">Keyboard</a>
+        <a href="accessibility.html">Accessibility</a>
+        <a href="edge-cases.html">Edge Cases</a>
+        <a href="api.html">API</a>
+        <a href="pagination.html">Pagination</a>
+      </div>
+    </nav>
+
+    <div class="container">
+      <header>
+        <h1>Navigation Features</h1>
+        <p class="header-subtitle">
+          Auto-generated pagination dots, manual dots, and button disabled
+          states
+        </p>
+      </header>
+
+      <section class="test-category">
+        <div class="test-case" data-test-id="4">
+          <div class="test-header">
+            <span class="test-number">04</span>
+            <h3>Auto-Generated Pagination Dots</h3>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Pagination dots are automatically generated when an empty
+              pagination container is provided.
+            </p>
+            <div class="carousel-demo">
+              <div
+                data-carousel="container"
+                data-carousel-align="start"
+                id="test4-carousel"
+              >
+                <div data-carousel="track">
+                  <div data-carousel="item">Dot 1</div>
+                  <div data-carousel="item">Dot 2</div>
+                  <div data-carousel="item">Dot 3</div>
+                  <div data-carousel="item">Dot 4</div>
+                  <div data-carousel="item">Dot 5</div>
+                  <div data-carousel="item">Dot 6</div>
+                  <div data-carousel="item">Dot 7</div>
+                  <div data-carousel="item">Dot 8</div>
+                  <div data-carousel="item">Dot 9</div>
+                </div>
+                <div class="carousel-nav">
+                  <button data-carousel="prev">Previous</button>
+                  <button data-carousel="next">Next</button>
+                </div>
+                <div data-carousel="pagination"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="test-case" data-test-id="5">
+          <div class="test-header">
+            <span class="test-number">05</span>
+            <h3>Manual Pagination Dots</h3>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Pre-existing pagination dots in HTML are automatically enhanced
+              with click handlers and ARIA attributes.
+            </p>
+            <div class="carousel-demo">
+              <div
+                data-carousel="container"
+                data-carousel-align="start"
+                id="test5-carousel"
+              >
+                <div data-carousel="track">
+                  <div data-carousel="item">Manual 1</div>
+                  <div data-carousel="item">Manual 2</div>
+                  <div data-carousel="item">Manual 3</div>
+                  <div data-carousel="item">Manual 4</div>
+                  <div data-carousel="item">Manual 5</div>
+                  <div data-carousel="item">Manual 6</div>
+                  <div data-carousel="item">Manual 7</div>
+                </div>
+                <div class="carousel-nav">
+                  <button data-carousel="prev">Previous</button>
+                  <button data-carousel="next">Next</button>
+                </div>
+                <div data-carousel="pagination">
+                  <button data-carousel="dot"></button>
+                  <button data-carousel="dot"></button>
+                  <button data-carousel="dot"></button>
+                  <button data-carousel="dot"></button>
+                  <button data-carousel="dot"></button>
+                  <button data-carousel="dot"></button>
+                  <button data-carousel="dot"></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="test-case" data-test-id="6">
+          <div class="test-header">
+            <span class="test-number">06</span>
+            <h3>Button Disabled States</h3>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Navigation buttons are automatically disabled at the start and end
+              of the carousel.
+            </p>
+            <div class="carousel-demo">
+              <div
+                data-carousel="container"
+                data-carousel-align="start"
+                id="test6-carousel"
+              >
+                <div data-carousel="track">
+                  <div data-carousel="item">Edge 1</div>
+                  <div data-carousel="item">Edge 2</div>
+                  <div data-carousel="item">Edge 3</div>
+                  <div data-carousel="item">Edge 4</div>
+                  <div data-carousel="item">Edge 5</div>
+                  <div data-carousel="item">Edge 6</div>
+                  <div data-carousel="item">Edge 7</div>
+                  <div data-carousel="item">Edge 8</div>
+                </div>
+                <div class="carousel-nav">
+                  <button data-carousel="prev">Previous</button>
+                  <button data-carousel="next">Next</button>
+                </div>
+              </div>
+            </div>
+            <div class="code-block">
+              Try navigating to the first and last slides to see buttons disable
+              automatically.
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>

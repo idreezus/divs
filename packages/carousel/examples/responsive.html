@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Responsive Behavior - Carousel Examples</title>
+    <script type="module" src="../src/carousel.js"></script>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <nav class="examples-nav">
+      <a href="index.html" class="nav-logo">Carousel Examples</a>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="basic.html">Basic</a>
+        <a href="navigation.html">Navigation</a>
+        <a href="instances.html">Instances</a>
+        <a href="responsive.html" class="active">Responsive</a>
+        <a href="keyboard.html">Keyboard</a>
+        <a href="accessibility.html">Accessibility</a>
+        <a href="edge-cases.html">Edge Cases</a>
+        <a href="api.html">API</a>
+        <a href="pagination.html">Pagination</a>
+      </div>
+    </nav>
+
+    <div class="container">
+      <header>
+        <h1>Responsive Behavior</h1>
+        <p class="header-subtitle">
+          Responsive item widths and live ResizeObserver dimension tracking
+        </p>
+      </header>
+
+      <section class="test-category">
+        <div class="test-case" data-test-id="9">
+          <div class="test-header">
+            <span class="test-number">09</span>
+            <h3>Responsive Item Widths</h3>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Item dimensions change at different breakpoints. The carousel
+              automatically recalculates using ResizeObserver.
+            </p>
+            <div class="carousel-demo">
+              <div
+                data-carousel="container"
+                data-carousel-align="start"
+                class="responsive"
+                id="test9-carousel"
+              >
+                <div data-carousel="track">
+                  <div data-carousel="item">350px → 280px → 220px</div>
+                  <div data-carousel="item">Responsive 2</div>
+                  <div data-carousel="item">Responsive 3</div>
+                  <div data-carousel="item">Responsive 4</div>
+                  <div data-carousel="item">Responsive 5</div>
+                  <div data-carousel="item">Responsive 6</div>
+                  <div data-carousel="item">Responsive 7</div>
+                  <div data-carousel="item">Responsive 8</div>
+                  <div data-carousel="item">Responsive 9</div>
+                </div>
+                <div class="carousel-nav">
+                  <button data-carousel="prev">Previous</button>
+                  <button data-carousel="next">Next</button>
+                </div>
+              </div>
+            </div>
+            <div class="code-block">
+              Resize your browser window to see items adapt: 350px (large) →
+              280px (medium) → 220px (small)
+            </div>
+          </div>
+        </div>
+
+        <div class="test-case" data-test-id="10">
+          <div class="test-header">
+            <span class="test-number">10</span>
+            <h3>ResizeObserver Live Dimensions</h3>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Live dimension tracking shows how ResizeObserver automatically
+              updates carousel calculations.
+            </p>
+            <div class="carousel-demo">
+              <div
+                data-carousel="container"
+                data-carousel-align="start"
+                id="test10-carousel"
+              >
+                <div data-carousel="track">
+                  <div data-carousel="item">Resize 1</div>
+                  <div data-carousel="item">Resize 2</div>
+                  <div data-carousel="item">Resize 3</div>
+                  <div data-carousel="item">Resize 4</div>
+                  <div data-carousel="item">Resize 5</div>
+                  <div data-carousel="item">Resize 6</div>
+                  <div data-carousel="item">Resize 7</div>
+                  <div data-carousel="item">Resize 8</div>
+                </div>
+                <div class="carousel-nav">
+                  <button data-carousel="prev">Previous</button>
+                  <button data-carousel="next">Next</button>
+                </div>
+              </div>
+            </div>
+            <dl class="info-panel" id="test10-info">
+              <div class="info-item">
+                <dt>Window Width</dt>
+                <dd id="test10-window">—</dd>
+              </div>
+              <div class="info-item">
+                <dt>Container Width</dt>
+                <dd id="test10-container">—</dd>
+              </div>
+              <div class="info-item">
+                <dt>Item Width</dt>
+                <dd id="test10-item">—</dd>
+              </div>
+              <div class="info-item">
+                <dt>Active Slide</dt>
+                <dd id="test10-active">—</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script type="module">
+      import { waitForCarousels } from './shared.js';
+
+      waitForCarousels(() => {
+        const carousel = window.Carousel.get('#test10-carousel');
+
+        if (carousel) {
+          function updateDimensions() {
+            document.getElementById('test10-window').textContent =
+              `${window.innerWidth}px`;
+            document.getElementById('test10-container').textContent =
+              `${carousel.state.containerWidth}px`;
+            const firstItem = carousel.items[0];
+            if (firstItem) {
+              document.getElementById('test10-item').textContent =
+                `${Math.round(firstItem.offsetWidth)}px`;
+            }
+            document.getElementById('test10-active').textContent =
+              `${carousel.state.currentIndex + 1} of ${carousel.items.length}`;
+          }
+
+          carousel.on('change', updateDimensions);
+          window.addEventListener('resize', () => {
+            setTimeout(updateDimensions, 200);
+          });
+          updateDimensions();
+        }
+      });
+    </script>
+  </body>
+</html>

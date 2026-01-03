@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edge Cases - Tabs Examples</title>
+    <script type="module" src="../src/tabs.js"></script>
+    <link rel="stylesheet" href="../src/styles.css" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <nav class="examples-nav">
+      <a href="index.html" class="nav-logo">Tabs Examples</a>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="basic.html">Basic</a>
+        <a href="navigation.html">Navigation</a>
+        <a href="keyboard-events.html">Keyboard</a>
+        <a href="styling.html">Styling</a>
+        <a href="animations.html">Animations</a>
+        <a href="edge-cases.html" class="active">Edge Cases</a>
+        <a href="api.html">API</a>
+        <a href="advanced.html">Advanced</a>
+      </div>
+    </nav>
+
+    <div class="container">
+      <header>
+        <h1>Edge Cases</h1>
+        <p class="header-subtitle">
+          Nested tabs, multiple triggers for same panel, and manual activation
+          mode
+        </p>
+      </header>
+
+      <section class="test-category">
+        <div class="test-case" data-test-id="9">
+          <div class="test-header">
+            <span class="test-number">09</span>
+            <h3>Nested Tabs</h3>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Tabs nested inside other tabs. Each instance operates
+              independently with proper scoping.
+            </p>
+            <div class="tabs-demo">
+              <div
+                data-tabs="container"
+                id="test9-outer"
+                class="nested-outer sliding-pill"
+              >
+                <div class="tabs-trigger-list" role="tablist">
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="frontend"
+                  >
+                    Frontend
+                  </button>
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="backend"
+                  >
+                    Backend
+                  </button>
+                </div>
+                <div class="tabs-panels">
+                  <div class="tabs-panel" data-tabs-panel-value="frontend">
+                    <strong>Frontend Technologies</strong>
+                    <div
+                      data-tabs="container"
+                      id="test9-inner-fe"
+                      class="nested-inner sliding-pill"
+                    >
+                      <div class="tabs-trigger-list" role="tablist">
+                        <button
+                          class="tabs-trigger"
+                          data-tabs-trigger-value="react"
+                        >
+                          React
+                        </button>
+                        <button
+                          class="tabs-trigger"
+                          data-tabs-trigger-value="vue"
+                        >
+                          Vue
+                        </button>
+                        <button
+                          class="tabs-trigger"
+                          data-tabs-trigger-value="svelte"
+                        >
+                          Svelte
+                        </button>
+                      </div>
+                      <div class="tabs-panels">
+                        <div class="tabs-panel" data-tabs-panel-value="react">
+                          React - A JavaScript library for building user
+                          interfaces.
+                        </div>
+                        <div class="tabs-panel" data-tabs-panel-value="vue">
+                          Vue - The progressive JavaScript framework.
+                        </div>
+                        <div class="tabs-panel" data-tabs-panel-value="svelte">
+                          Svelte - Cybernetically enhanced web apps.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="backend">
+                    <strong>Backend Technologies</strong>
+                    <div
+                      data-tabs="container"
+                      id="test9-inner-be"
+                      class="nested-inner"
+                    >
+                      <div class="tabs-trigger-list" role="tablist">
+                        <button
+                          class="tabs-trigger"
+                          data-tabs-trigger-value="node"
+                        >
+                          Node.js
+                        </button>
+                        <button
+                          class="tabs-trigger"
+                          data-tabs-trigger-value="python"
+                        >
+                          Python
+                        </button>
+                        <button
+                          class="tabs-trigger"
+                          data-tabs-trigger-value="go"
+                        >
+                          Go
+                        </button>
+                      </div>
+                      <div class="tabs-panels">
+                        <div class="tabs-panel" data-tabs-panel-value="node">
+                          Node.js - JavaScript runtime built on V8.
+                        </div>
+                        <div class="tabs-panel" data-tabs-panel-value="python">
+                          Python - A language that lets you work quickly.
+                        </div>
+                        <div class="tabs-panel" data-tabs-panel-value="go">
+                          Go - Build simple, secure, scalable systems.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="code-block">
+              Outer tabs: Frontend/Backend. Each contains nested inner tabs.
+              Keyboard navigation is scoped to each instance.
+            </div>
+          </div>
+        </div>
+
+        <div class="test-case" data-test-id="10">
+          <div class="test-header">
+            <span class="test-number">10</span>
+            <h3>Multiple Triggers (Same Value)</h3>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Multiple trigger buttons controlling the same panel. All triggers
+              with matching values sync their active state.
+            </p>
+            <div class="tabs-demo">
+              <div data-tabs="container" id="test10-tabs" class="sliding-pill">
+                <!-- Top triggers -->
+                <div class="synced-triggers">
+                  <button class="tabs-trigger" data-tabs-trigger-value="info">
+                    Info
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="specs">
+                    Specs
+                  </button>
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="reviews"
+                  >
+                    Reviews
+                  </button>
+                </div>
+                <div class="tabs-panels">
+                  <div class="tabs-panel" data-tabs-panel-value="info">
+                    <strong>Product Information</strong> - Detailed description
+                    of the product including materials, dimensions, and care
+                    instructions.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="specs">
+                    <strong>Technical Specifications</strong> - Weight: 1.2kg,
+                    Dimensions: 30x20x10cm, Material: Aluminum alloy.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="reviews">
+                    <strong>Customer Reviews</strong> - Average rating: 4.8/5
+                    stars based on 1,247 reviews.
+                  </div>
+                </div>
+                <!-- Bottom triggers (duplicate) -->
+                <div class="bottom-triggers">
+                  <button class="tabs-trigger" data-tabs-trigger-value="info">
+                    Info
+                  </button>
+                  <button class="tabs-trigger" data-tabs-trigger-value="specs">
+                    Specs
+                  </button>
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="reviews"
+                  >
+                    Reviews
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="code-block">
+              Two sets of triggers (top and bottom) control the same panels.
+              Clicking either set activates all matching triggers.
+            </div>
+          </div>
+        </div>
+
+        <div class="test-case" data-test-id="19">
+          <div class="test-header">
+            <span class="test-number">19</span>
+            <h3>Manual Activation (activate-on-focus="false")</h3>
+          </div>
+          <div class="test-content">
+            <p class="test-description">
+              Tab requires Enter or Space to activate. Arrow keys only move
+              focus without changing the active panel.
+            </p>
+            <div class="tabs-demo">
+              <div
+                data-tabs="container"
+                data-tabs-activate-on-focus="false"
+                id="test19-tabs"
+                class="manual-tabs sliding-pill"
+              >
+                <div class="tabs-trigger-list" role="tablist">
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="manual-1"
+                  >
+                    Tab 1
+                  </button>
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="manual-2"
+                  >
+                    Tab 2
+                  </button>
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="manual-3"
+                  >
+                    Tab 3
+                  </button>
+                  <button
+                    class="tabs-trigger"
+                    data-tabs-trigger-value="manual-4"
+                  >
+                    Tab 4
+                  </button>
+                </div>
+                <div class="tabs-panels">
+                  <div class="tabs-panel" data-tabs-panel-value="manual-1">
+                    <strong>Tab 1</strong> - Focus moves with arrow keys, but
+                    panel doesn't change until you press Enter or Space.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="manual-2">
+                    <strong>Tab 2</strong> - This is useful when tab content is
+                    expensive to render or fetch.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="manual-3">
+                    <strong>Tab 3</strong> - The dashed border indicates focus
+                    without activation.
+                  </div>
+                  <div class="tabs-panel" data-tabs-panel-value="manual-4">
+                    <strong>Tab 4</strong> - Press Enter or Space to activate
+                    this tab.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="code-block">
+              data-tabs-activate-on-focus="false" - Arrow keys move focus only.
+              Press Enter or Space to activate.
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>
