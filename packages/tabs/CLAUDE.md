@@ -60,6 +60,7 @@ src/
 - `CSS_VARS` - CSS custom property names
 - `DEFAULTS` - Default configuration values
 - `TIMING` - Animation timing constants
+- `EVENTS` - CustomEvent names (change, autoplay-start, autoplay-pause)
 
 **Autoplay System (src/autoplay.js)**
 
@@ -85,9 +86,9 @@ src/
 
 **Event System**
 
-- Dual system: instance callbacks (`tabs.on()`) and DOM CustomEvents (`tabs:change`)
+- DOM CustomEvents only (`tabs:change`, `tabs:autoplay-start`, `tabs:autoplay-pause`)
 - Events bubble from container element
-- Autoplay events: `autoplay-start`, `autoplay-pause`
+- Listen via `container.addEventListener('tabs:change', handler)`
 
 **Accessibility Setup**
 
@@ -151,10 +152,11 @@ instance.prev(); // Previous tab
 instance.play(); // Start autoplay
 instance.pause(); // Pause autoplay
 instance.refresh(); // Re-initialize after DOM changes
-instance.destroy(); // Clean up
+instance.destroy(); // Clean up and reset DOM
 instance.getActiveValue(); // Returns current active value
-instance.on(event, callback); // Subscribe to events
-instance.off(event, callback); // Unsubscribe from events
+
+// Instance reference on element
+container._tabs; // Direct access to instance
 ```
 
 ## Development Notes

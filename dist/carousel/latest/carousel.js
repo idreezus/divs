@@ -839,7 +839,7 @@
     // Set up responsive behavior
     setupResizeObserver(instance);
 
-    // Set up pagination if container exists
+    // Set up pagination if dots exist
     setupPagination(instance);
 
     // Set up keyboard navigation if enabled

@@ -5,7 +5,7 @@
  * A part of Divs by Idreezus, a component library
  * divs.idreezus.com
  *
- * (c) 2025 Idrees Isse (https://github.com/idreezus)
+ * (c) 2026 Idrees Isse (https://github.com/idreezus)
  * Released under AGPL-3.0
  */
 
@@ -86,24 +86,19 @@ var Tabs = (function (exports) {
     TRANSITION_DURATION: 200,
   };
 
+  // Event names for CustomEvents
+  const EVENTS = {
+    CHANGE: 'change',
+    AUTOPLAY_START: 'autoplay-start',
+    AUTOPLAY_PAUSE: 'autoplay-pause',
+  };
+
   // Shared utility functions for the tabs library
 
-  // ============================================================================
-  // Event Utilities
-  // ============================================================================
-
-  // Emits events via instance callbacks and DOM CustomEvent
+  // Emits DOM CustomEvent on the container element
   function emit(instance, eventName, data = {}) {
-    const { events, container } = instance;
+    const { container } = instance;
 
-    // Instance event callbacks
-    if (events.has(eventName)) {
-      events.get(eventName).forEach((callback) => {
-        callback.call(instance, { type: eventName, target: instance, ...data });
-      });
-    }
-
-    // DOM CustomEvent for addEventListener compatibility
     const customEvent = new CustomEvent(`tabs:${eventName}`, {
       detail: { tabs: instance, ...data },
       bubbles: true,
@@ -111,19 +106,11 @@ var Tabs = (function (exports) {
     container.dispatchEvent(customEvent);
   }
 
-  // ============================================================================
-  // Value Normalization
-  // ============================================================================
-
   // Normalizes a value string to lowercase, hyphenated format
   function normalizeValue(value) {
     if (!value) return '';
     return value.toLowerCase().replace(/\s+/g, '-');
   }
-
-  // ============================================================================
-  // ID Generation
-  // ============================================================================
 
   let idCounter = 0;
 
@@ -133,18 +120,10 @@ var Tabs = (function (exports) {
     return `tabs-${idCounter}`;
   }
 
-  // ============================================================================
-  // Browser Environment Utilities
-  // ============================================================================
-
   // Checks if user prefers reduced motion
   function prefersReducedMotion() {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
-
-  // ============================================================================
-  // URL Parameter Utilities
-  // ============================================================================
 
   // Reads URL parameter for a given key
   function getUrlParam(key) {
@@ -230,8 +209,14 @@ var Tabs = (function (exports) {
           resumeAutoplay(instance);
         }
       };
-      container.addEventListener('mouseenter', instance.autoplay.handleMouseEnter);
-      container.addEventListener('mouseleave', instance.autoplay.handleMouseLeave);
+      container.addEventListener(
+        'mouseenter',
+        instance.autoplay.handleMouseEnter
+      );
+      container.addEventListener(
+        'mouseleave',
+        instance.autoplay.handleMouseLeave
+      );
     }
 
     // Focus pause handlers
@@ -281,9 +266,11 @@ var Tabs = (function (exports) {
       instance.playPauseBtn.setAttribute('aria-pressed', 'true');
     }
 
-    emit(instance, 'autoplay-start', { value: state.activeValue });
+    emit(instance, EVENTS.AUTOPLAY_START, { value: state.activeValue });
 
-    instance.autoplay.rafId = requestAnimationFrame(() => runAutoplayTick(instance));
+    instance.autoplay.rafId = requestAnimationFrame(() =>
+      runAutoplayTick(instance)
+    );
   }
 
   // Pauses autoplay
@@ -318,7 +305,7 @@ var Tabs = (function (exports) {
     state.autoplayPausedOnValue = state.activeValue;
     const progress = Math.min(elapsed / instance.config.autoplayDuration, 1);
 
-    emit(instance, 'autoplay-pause', {
+    emit(instance, EVENTS.AUTOPLAY_PAUSE, {
       value: state.activeValue,
       progress,
     });
@@ -345,9 +332,11 @@ var Tabs = (function (exports) {
       instance.playPauseBtn.setAttribute('aria-pressed', 'true');
     }
 
-    emit(instance, 'autoplay-start', { value: state.activeValue });
+    emit(instance, EVENTS.AUTOPLAY_START, { value: state.activeValue });
 
-    instance.autoplay.rafId = requestAnimationFrame(() => runAutoplayTick(instance));
+    instance.autoplay.rafId = requestAnimationFrame(() =>
+      runAutoplayTick(instance)
+    );
   }
 
   // Cleans up autoplay listeners and observer
@@ -384,14 +373,12 @@ var Tabs = (function (exports) {
   // Core tabs library with initialization, keyboard navigation, accessibility, and entry point
 
 
-  // ============================================================================
-  // Utility Functions
-  // ============================================================================
-
   // Finds the index of a trigger by its normalized value
   function findTriggerIndex(triggers, targetValue) {
     return triggers.findIndex((trigger) => {
-      const triggerValue = normalizeValue(trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE));
+      const triggerValue = normalizeValue(
+        trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE)
+      );
       return triggerValue === targetValue;
     });
   }
@@ -417,10 +404,6 @@ var Tabs = (function (exports) {
         container.getAttribute(ATTRIBUTES.AUTOPLAY_PAUSE_FOCUS) !== 'false',
     };
   }
-
-  // ============================================================================
-  // Element Discovery & Validation
-  // ============================================================================
 
   // Finds and validates all elements within the tabs container
   function findElements(instance) {
@@ -532,10 +515,6 @@ var Tabs = (function (exports) {
     return true;
   }
 
-  // ============================================================================
-  // Accessibility Setup
-  // ============================================================================
-
   // Sets up ARIA attributes for triggers and panels
   function setupAccessibility(instance) {
     const { triggers, panels, id, config } = instance;
@@ -544,7 +523,9 @@ var Tabs = (function (exports) {
     instance.container.setAttribute('aria-orientation', config.orientation);
 
     triggers.forEach((trigger) => {
-      const value = normalizeValue(trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE));
+      const value = normalizeValue(
+        trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE)
+      );
       const triggerId = trigger.id || `${id}-trigger-${value}`;
       const panelId = `${id}-panel-${value}`;
 
@@ -570,7 +551,9 @@ var Tabs = (function (exports) {
     const { triggers, panels, state } = instance;
 
     triggers.forEach((trigger) => {
-      const value = normalizeValue(trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE));
+      const value = normalizeValue(
+        trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE)
+      );
       const isActive = value === state.activeValue;
 
       trigger.setAttribute('aria-selected', isActive.toString());
@@ -584,10 +567,6 @@ var Tabs = (function (exports) {
       panel.setAttribute('aria-hidden', (!isActive).toString());
     });
   }
-
-  // ============================================================================
-  // Keyboard Navigation
-  // ============================================================================
 
   // Sets up keyboard navigation for triggers
   function setupKeyboardNavigation(instance) {
@@ -640,7 +619,7 @@ var Tabs = (function (exports) {
       }
     };
 
-    instance.keyboardHandler = handleKeydown;
+    instance.boundHandlers.keyboard = handleKeydown;
     container.addEventListener('keydown', handleKeydown);
   }
 
@@ -688,10 +667,6 @@ var Tabs = (function (exports) {
       activate(instance, value);
     }
   }
-
-  // ============================================================================
-  // Tab Activation
-  // ============================================================================
 
   // Determines the initial active value
   function determineInitialValue(instance) {
@@ -743,13 +718,16 @@ var Tabs = (function (exports) {
 
     // Calculate indices for CSS variables
     const newIndex = findTriggerIndex(triggers, normalized);
-    const previousIndex = previousValue ? findTriggerIndex(triggers, previousValue) : -1;
+    const previousIndex = previousValue
+      ? findTriggerIndex(triggers, previousValue)
+      : -1;
 
     // Set active index CSS variable
     container.style.setProperty(CSS_VARS.ACTIVE_INDEX, newIndex);
 
     // Set direction CSS variable (1 = forward, -1 = backward, 0 = initial)
-    const direction = previousIndex === -1 ? 0 : newIndex > previousIndex ? 1 : -1;
+    const direction =
+      previousIndex === -1 ? 0 : newIndex > previousIndex ? 1 : -1;
     container.style.setProperty(CSS_VARS.DIRECTION, direction);
 
     // Update state
@@ -823,7 +801,7 @@ var Tabs = (function (exports) {
 
     // Emit change event
     if (!silent) {
-      emit(instance, 'change', {
+      emit(instance, EVENTS.CHANGE, {
         value: normalized,
         previousValue,
       });
@@ -857,10 +835,6 @@ var Tabs = (function (exports) {
     }
   }
 
-  // ============================================================================
-  // Event Listeners
-  // ============================================================================
-
   // Attaches click handlers to triggers and navigation buttons
   function attachEventListeners(instance) {
     const { triggers, prevBtn, nextBtn, playPauseBtn, state } = instance;
@@ -870,6 +844,7 @@ var Tabs = (function (exports) {
       prev: null,
       next: null,
       playPause: null,
+      keyboard: null,
     };
 
     // Trigger click handlers
@@ -916,10 +891,6 @@ var Tabs = (function (exports) {
     }
   }
 
-  // ============================================================================
-  // Cleanup
-  // ============================================================================
-
   // Cleans up all event listeners and references
   function cleanup(instance) {
     const { container, prevBtn, nextBtn, playPauseBtn, boundHandlers } = instance;
@@ -943,17 +914,87 @@ var Tabs = (function (exports) {
     }
 
     // Remove keyboard handler
-    if (instance.keyboardHandler) {
-      container.removeEventListener('keydown', instance.keyboardHandler);
+    if (boundHandlers?.keyboard) {
+      container.removeEventListener('keydown', boundHandlers.keyboard);
     }
 
     // Cleanup autoplay
     cleanupAutoplay(instance);
   }
 
-  // ============================================================================
-  // Initialization
-  // ============================================================================
+  // Resets DOM to pre-initialization state
+  function resetDOM(instance) {
+    const { id, container, triggers, panels, prevBtn, nextBtn, playPauseBtn } =
+      instance;
+
+    // Container: remove attributes and classes
+    container.removeAttribute('data-tabs-id');
+    container.removeAttribute('aria-orientation');
+    container.classList.remove(
+      CLASSES.TRANSITIONING,
+      CLASSES.AUTOPLAY_ACTIVE,
+      CLASSES.AUTOPLAY_PAUSED,
+      CLASSES.REDUCED_MOTION
+    );
+    container.style.removeProperty(CSS_VARS.TAB_COUNT);
+    container.style.removeProperty(CSS_VARS.ACTIVE_INDEX);
+    container.style.removeProperty(CSS_VARS.DIRECTION);
+    container.style.removeProperty(CSS_VARS.AUTOPLAY_DURATION);
+
+    // Triggers: remove ARIA, classes, CSS vars, generated IDs
+    triggers.forEach((trigger) => {
+      trigger.removeAttribute('role');
+      trigger.removeAttribute('aria-selected');
+      trigger.removeAttribute('aria-controls');
+      trigger.removeAttribute('tabindex');
+
+      // Only reset ID if we generated it (starts with instance ID prefix)
+      if (trigger.id.startsWith(`${id}-trigger-`)) {
+        trigger.id = '';
+      }
+
+      trigger.classList.remove(CLASSES.ACTIVE, CLASSES.INACTIVE);
+      trigger.style.removeProperty(CSS_VARS.TAB_INDEX);
+      trigger.style.removeProperty(CSS_VARS.PROGRESS);
+    });
+
+    // Panels: remove ARIA, classes, CSS vars, generated IDs
+    panels.forEach((panel) => {
+      panel.removeAttribute('role');
+      panel.removeAttribute('aria-labelledby');
+      panel.removeAttribute('aria-hidden');
+      panel.removeAttribute('tabindex');
+
+      // Only reset ID if we generated it (starts with instance ID prefix)
+      if (panel.id.startsWith(`${id}-panel-`)) {
+        panel.id = '';
+      }
+
+      panel.classList.remove(
+        CLASSES.ACTIVE,
+        CLASSES.INACTIVE,
+        CLASSES.PANEL_ENTERING,
+        CLASSES.PANEL_LEAVING
+      );
+      panel.style.removeProperty(CSS_VARS.TAB_INDEX);
+    });
+
+    // Navigation buttons: remove disabled class
+    if (prevBtn) {
+      prevBtn.classList.remove(CLASSES.BUTTON_DISABLED);
+    }
+    if (nextBtn) {
+      nextBtn.classList.remove(CLASSES.BUTTON_DISABLED);
+    }
+
+    // Play/pause button: remove aria-pressed
+    if (playPauseBtn) {
+      playPauseBtn.removeAttribute('aria-pressed');
+    }
+
+    // Remove instance reference from element
+    delete container._tabs;
+  }
 
   // Initializes a tabs instance
   function init(instance) {
@@ -1009,10 +1050,7 @@ var Tabs = (function (exports) {
     return true;
   }
 
-  // ============================================================================
-  // Tabs Class
-  // ============================================================================
-
+  // Main Tabs class
   class Tabs {
     constructor(container) {
       this.id = generateUniqueId();
@@ -1028,9 +1066,7 @@ var Tabs = (function (exports) {
         autoplayPausedOnValue: null,
       };
 
-      this.events = new Map();
       this.boundHandlers = null;
-      this.keyboardHandler = null;
       this.autoplay = null;
 
       // Element references (populated by findElements)
@@ -1043,7 +1079,9 @@ var Tabs = (function (exports) {
       this.playPauseBtn = null;
 
       const initialized = init(this);
-      if (!initialized) {
+      if (initialized) {
+        this.container._tabs = this;
+      } else {
         console.warn(`Tabs ${this.id}: Initialization failed.`);
       }
     }
@@ -1066,7 +1104,9 @@ var Tabs = (function (exports) {
         nextIndex = Math.min(nextIndex, triggers.length - 1);
       }
 
-      const nextValue = triggers[nextIndex].getAttribute(ATTRIBUTES.TRIGGER_VALUE);
+      const nextValue = triggers[nextIndex].getAttribute(
+        ATTRIBUTES.TRIGGER_VALUE
+      );
       activate(this, nextValue);
       return this;
     }
@@ -1083,7 +1123,9 @@ var Tabs = (function (exports) {
         prevIndex = Math.max(prevIndex, 0);
       }
 
-      const prevValue = triggers[prevIndex].getAttribute(ATTRIBUTES.TRIGGER_VALUE);
+      const prevValue = triggers[prevIndex].getAttribute(
+        ATTRIBUTES.TRIGGER_VALUE
+      );
       activate(this, prevValue);
       return this;
     }
@@ -1116,7 +1158,6 @@ var Tabs = (function (exports) {
     // Re-initializes after DOM changes
     refresh() {
       const currentValue = this.state.activeValue;
-      const events = this.events;
 
       cleanup(this);
 
@@ -1129,9 +1170,7 @@ var Tabs = (function (exports) {
         autoplayElapsed: 0,
         autoplayPausedOnValue: null,
       };
-      this.events = events; // Preserve event subscriptions
       this.boundHandlers = null;
-      this.keyboardHandler = null;
       this.autoplay = null;
       this.triggers = [];
       this.panels = [];
@@ -1148,37 +1187,16 @@ var Tabs = (function (exports) {
       return this;
     }
 
-    // Destroys the instance
+    // Destroys the instance and resets DOM to pre-init state
     destroy() {
       instances.delete(this.id);
       cleanup(this);
-      return null;
+      resetDOM(this);
     }
 
     // Returns the current active value
     getActiveValue() {
       return this.state.activeValue;
-    }
-
-    // Subscribes to an event
-    on(event, callback) {
-      if (!this.events.has(event)) {
-        this.events.set(event, []);
-      }
-      this.events.get(event).push(callback);
-      return this;
-    }
-
-    // Unsubscribes from an event
-    off(event, callback) {
-      if (!this.events.has(event)) return this;
-
-      const callbacks = this.events.get(event);
-      const index = callbacks.indexOf(callback);
-      if (index > -1) {
-        callbacks.splice(index, 1);
-      }
-      return this;
     }
 
     // Static method for manual initialization
@@ -1192,10 +1210,6 @@ var Tabs = (function (exports) {
       return new Tabs(container);
     }
   }
-
-  // ============================================================================
-  // Global Registry & Auto-initialization
-  // ============================================================================
 
   const instances = new Map();
 

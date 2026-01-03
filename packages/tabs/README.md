@@ -274,7 +274,7 @@ tabs.destroy(); // Clean up and remove listeners
 tabs.getActiveValue(); // Returns current active value
 ```
 
-All methods are chainable (except `getActiveValue` and `destroy`):
+All methods are chainable except `getActiveValue` (returns data) and `destroy` (resets DOM to pre-init state):
 
 ```javascript
 tabs.goTo("overview").play();
@@ -282,39 +282,29 @@ tabs.goTo("overview").play();
 
 ### Events
 
-```javascript
-tabs.on("change", (e) => {
-  console.log(`Active tab: ${e.value}`);
-  console.log(`Previous tab: ${e.previousValue}`);
-});
-
-tabs.on("autoplay-start", (e) => {
-  console.log("Autoplay started");
-});
-
-tabs.on("autoplay-pause", (e) => {
-  console.log(`Autoplay paused at ${e.progress * 100}%`);
-});
-
-// Remove listener
-tabs.off("change", handler);
-```
-
-Or use native DOM events:
+Listen for events using native DOM `addEventListener`:
 
 ```javascript
 container.addEventListener("tabs:change", (e) => {
   console.log(e.detail); // { tabs, value, previousValue }
 });
+
+container.addEventListener("tabs:autoplay-start", (e) => {
+  console.log("Autoplay started");
+});
+
+container.addEventListener("tabs:autoplay-pause", (e) => {
+  console.log(`Autoplay paused at ${e.detail.progress * 100}%`);
+});
 ```
 
 Available events:
 
-| Event            | Description              | Event Data                 |
-| ---------------- | ------------------------ | -------------------------- |
-| `change`         | Active tab changed       | `{ value, previousValue }` |
-| `autoplay-start` | Autoplay started/resumed | `{ value }`                |
-| `autoplay-pause` | Autoplay paused          | `{ value, progress }`      |
+| Event                 | Description              | Event Data                 |
+| --------------------- | ------------------------ | -------------------------- |
+| `tabs:change`         | Active tab changed       | `{ value, previousValue }` |
+| `tabs:autoplay-start` | Autoplay started/resumed | `{ value }`                |
+| `tabs:autoplay-pause` | Autoplay paused          | `{ value, progress }`      |
 
 ### Global API
 
@@ -341,7 +331,7 @@ When adding/removing tabs, call `refresh()`:
 tabs.refresh();
 ```
 
-The refresh method preserves event subscriptions and attempts to maintain the current active tab if it still exists.
+The refresh method attempts to maintain the current active tab if it still exists.
 
 ## URL Deep Linking
 
@@ -470,9 +460,10 @@ Yes! Use the `--tabs-direction` CSS variable. It's `1` when navigating forward, 
 By default, clicking a tab or using keyboard navigation permanently pauses autoplay until the user clicks a play button. If you want autoplay to resume after a delay, you can use the events API:
 
 ```javascript
-const tabs = window.Tabs.get(".my-tabs");
+const container = document.querySelector('[data-tabs="container"]');
+const tabs = window.Tabs.get(container);
 
-tabs.on("change", () => {
+container.addEventListener("tabs:change", () => {
   // Resume autoplay after 10 seconds of inactivity
   clearTimeout(window.autoplayTimeout);
   window.autoplayTimeout = setTimeout(() => {

@@ -1,6 +1,6 @@
 // Autoplay behavior for tabs: timer, progress updates, pause/resume
 
-import { CLASSES, CSS_VARS } from './config.js';
+import { CLASSES, CSS_VARS, EVENTS } from './config.js';
 import { emit } from './utils.js';
 
 // Shared RAF tick loop for autoplay progress
@@ -126,7 +126,7 @@ export function startAutoplay(instance) {
     instance.playPauseBtn.setAttribute('aria-pressed', 'true');
   }
 
-  emit(instance, 'autoplay-start', { value: state.activeValue });
+  emit(instance, EVENTS.AUTOPLAY_START, { value: state.activeValue });
 
   instance.autoplay.rafId = requestAnimationFrame(() =>
     runAutoplayTick(instance)
@@ -165,7 +165,7 @@ export function pauseAutoplay(instance, reason = 'user') {
   state.autoplayPausedOnValue = state.activeValue;
   const progress = Math.min(elapsed / instance.config.autoplayDuration, 1);
 
-  emit(instance, 'autoplay-pause', {
+  emit(instance, EVENTS.AUTOPLAY_PAUSE, {
     value: state.activeValue,
     progress,
   });
@@ -192,7 +192,7 @@ export function resumeAutoplay(instance) {
     instance.playPauseBtn.setAttribute('aria-pressed', 'true');
   }
 
-  emit(instance, 'autoplay-start', { value: state.activeValue });
+  emit(instance, EVENTS.AUTOPLAY_START, { value: state.activeValue });
 
   instance.autoplay.rafId = requestAnimationFrame(() =>
     runAutoplayTick(instance)

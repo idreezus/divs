@@ -7,6 +7,7 @@ import {
   CSS_VARS,
   DEFAULTS,
   TIMING,
+  EVENTS,
 } from './config.js';
 import {
   setupAutoplay,
@@ -270,7 +271,7 @@ function setupKeyboardNavigation(instance) {
     }
   };
 
-  instance.keyboardHandler = handleKeydown;
+  instance.boundHandlers.keyboard = handleKeydown;
   container.addEventListener('keydown', handleKeydown);
 }
 
@@ -452,7 +453,7 @@ function activate(instance, value, options = {}) {
 
   // Emit change event
   if (!silent) {
-    emit(instance, 'change', {
+    emit(instance, EVENTS.CHANGE, {
       value: normalized,
       previousValue,
     });
@@ -495,6 +496,7 @@ function attachEventListeners(instance) {
     prev: null,
     next: null,
     playPause: null,
+    keyboard: null,
   };
 
   // Trigger click handlers
@@ -564,12 +566,86 @@ function cleanup(instance) {
   }
 
   // Remove keyboard handler
-  if (instance.keyboardHandler) {
-    container.removeEventListener('keydown', instance.keyboardHandler);
+  if (boundHandlers?.keyboard) {
+    container.removeEventListener('keydown', boundHandlers.keyboard);
   }
 
   // Cleanup autoplay
   cleanupAutoplay(instance);
+}
+
+// Resets DOM to pre-initialization state
+function resetDOM(instance) {
+  const { id, container, triggers, panels, prevBtn, nextBtn, playPauseBtn } =
+    instance;
+
+  // Container: remove attributes and classes
+  container.removeAttribute('data-tabs-id');
+  container.removeAttribute('aria-orientation');
+  container.classList.remove(
+    CLASSES.TRANSITIONING,
+    CLASSES.AUTOPLAY_ACTIVE,
+    CLASSES.AUTOPLAY_PAUSED,
+    CLASSES.REDUCED_MOTION
+  );
+  container.style.removeProperty(CSS_VARS.TAB_COUNT);
+  container.style.removeProperty(CSS_VARS.ACTIVE_INDEX);
+  container.style.removeProperty(CSS_VARS.DIRECTION);
+  container.style.removeProperty(CSS_VARS.AUTOPLAY_DURATION);
+
+  // Triggers: remove ARIA, classes, CSS vars, generated IDs
+  triggers.forEach((trigger) => {
+    trigger.removeAttribute('role');
+    trigger.removeAttribute('aria-selected');
+    trigger.removeAttribute('aria-controls');
+    trigger.removeAttribute('tabindex');
+
+    // Only reset ID if we generated it (starts with instance ID prefix)
+    if (trigger.id.startsWith(`${id}-trigger-`)) {
+      trigger.id = '';
+    }
+
+    trigger.classList.remove(CLASSES.ACTIVE, CLASSES.INACTIVE);
+    trigger.style.removeProperty(CSS_VARS.TAB_INDEX);
+    trigger.style.removeProperty(CSS_VARS.PROGRESS);
+  });
+
+  // Panels: remove ARIA, classes, CSS vars, generated IDs
+  panels.forEach((panel) => {
+    panel.removeAttribute('role');
+    panel.removeAttribute('aria-labelledby');
+    panel.removeAttribute('aria-hidden');
+    panel.removeAttribute('tabindex');
+
+    // Only reset ID if we generated it (starts with instance ID prefix)
+    if (panel.id.startsWith(`${id}-panel-`)) {
+      panel.id = '';
+    }
+
+    panel.classList.remove(
+      CLASSES.ACTIVE,
+      CLASSES.INACTIVE,
+      CLASSES.PANEL_ENTERING,
+      CLASSES.PANEL_LEAVING
+    );
+    panel.style.removeProperty(CSS_VARS.TAB_INDEX);
+  });
+
+  // Navigation buttons: remove disabled class
+  if (prevBtn) {
+    prevBtn.classList.remove(CLASSES.BUTTON_DISABLED);
+  }
+  if (nextBtn) {
+    nextBtn.classList.remove(CLASSES.BUTTON_DISABLED);
+  }
+
+  // Play/pause button: remove aria-pressed
+  if (playPauseBtn) {
+    playPauseBtn.removeAttribute('aria-pressed');
+  }
+
+  // Remove instance reference from element
+  delete container._tabs;
 }
 
 // Initializes a tabs instance
@@ -642,9 +718,7 @@ export class Tabs {
       autoplayPausedOnValue: null,
     };
 
-    this.events = new Map();
     this.boundHandlers = null;
-    this.keyboardHandler = null;
     this.autoplay = null;
 
     // Element references (populated by findElements)
@@ -657,7 +731,9 @@ export class Tabs {
     this.playPauseBtn = null;
 
     const initialized = init(this);
-    if (!initialized) {
+    if (initialized) {
+      this.container._tabs = this;
+    } else {
       console.warn(`Tabs ${this.id}: Initialization failed.`);
     }
   }
@@ -734,7 +810,6 @@ export class Tabs {
   // Re-initializes after DOM changes
   refresh() {
     const currentValue = this.state.activeValue;
-    const events = this.events;
 
     cleanup(this);
 
@@ -747,9 +822,7 @@ export class Tabs {
       autoplayElapsed: 0,
       autoplayPausedOnValue: null,
     };
-    this.events = events; // Preserve event subscriptions
     this.boundHandlers = null;
-    this.keyboardHandler = null;
     this.autoplay = null;
     this.triggers = [];
     this.panels = [];
@@ -766,37 +839,16 @@ export class Tabs {
     return this;
   }
 
-  // Destroys the instance
+  // Destroys the instance and resets DOM to pre-init state
   destroy() {
     instances.delete(this.id);
     cleanup(this);
-    return null;
+    resetDOM(this);
   }
 
   // Returns the current active value
   getActiveValue() {
     return this.state.activeValue;
-  }
-
-  // Subscribes to an event
-  on(event, callback) {
-    if (!this.events.has(event)) {
-      this.events.set(event, []);
-    }
-    this.events.get(event).push(callback);
-    return this;
-  }
-
-  // Unsubscribes from an event
-  off(event, callback) {
-    if (!this.events.has(event)) return this;
-
-    const callbacks = this.events.get(event);
-    const index = callbacks.indexOf(callback);
-    if (index > -1) {
-      callbacks.splice(index, 1);
-    }
-    return this;
   }
 
   // Static method for manual initialization

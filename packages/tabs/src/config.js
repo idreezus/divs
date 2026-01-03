@@ -80,3 +80,10 @@ export const DEFAULTS = {
 export const TIMING = {
   TRANSITION_DURATION: 200,
 };
+
+// Event names for CustomEvents
+export const EVENTS = {
+  CHANGE: 'change',
+  AUTOPLAY_START: 'autoplay-start',
+  AUTOPLAY_PAUSE: 'autoplay-pause',
+};
