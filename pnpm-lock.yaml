@@ -29,6 +29,8 @@ importers:
         specifier: ^3.0.0
         version: 3.13.0
 
+  packages/tabs: {}
+
   packages/theme-toggle: {}
 
 packages:

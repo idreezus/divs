@@ -19,6 +19,7 @@ export const attributes = {
   activateOnFocus: 'data-tabs-activate-on-focus',
   loop: 'data-tabs-loop',
   keyboard: 'data-tabs-keyboard',
+  id: 'data-tabs-id',
 
   // Content linking
   triggerValue: 'data-tabs-trigger-value',
@@ -54,7 +55,7 @@ export const classes = {
 };
 
 // CSS custom properties
-export const cssVars = {
+export const cssProps = {
   progress: '--tabs-progress',
   tabCount: '--tabs-count',
   tabIndex: '--tabs-index',
@@ -74,10 +75,6 @@ export const defaults = {
   autoplayDuration: 5000,
   autoplayPauseHover: true,
   autoplayPauseFocus: true,
-};
-
-// Timing constants in milliseconds
-export const timing = {
   transitionDuration: 200,
 };
 

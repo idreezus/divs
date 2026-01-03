@@ -1,6 +1,6 @@
 // Autoplay behavior for tabs: timer, progress updates, pause/resume
 
-import { classes, cssVars, events } from './config.js';
+import { classes, cssProps, events } from './config.js';
 import { emit } from './utils.js';
 
 // Shared RAF tick loop for autoplay progress
@@ -16,7 +16,7 @@ function runAutoplayTick(instance) {
   const activeTriggers = triggerMap.get(state.activeValue);
   if (activeTriggers) {
     activeTriggers.forEach((trigger) => {
-      trigger.style.setProperty(cssVars.progress, progress.toString());
+      trigger.style.setProperty(cssProps.progress, progress.toString());
     });
   }
 
@@ -112,7 +112,7 @@ function canResume(instance) {
 
 // Starts autoplay timer with RAF progress updates
 export function startAutoplay(instance) {
-  const { container, config, state, triggerMap } = instance;
+  const { container, state } = instance;
 
   state.isAutoplaying = true;
   state.isPaused = false;
@@ -215,7 +215,7 @@ export function stopAutoplay(instance) {
 
   // Reset progress on all triggers
   instance.triggers.forEach((trigger) => {
-    trigger.style.setProperty(cssVars.progress, '0');
+    trigger.style.setProperty(cssProps.progress, '0');
   });
 }
 

@@ -37,7 +37,8 @@ Build output paths:
 
 ```
 src/
-├── tabs.js       # Entry point, Tabs class, auto-initialization, global API
+├── tabs.js       # Entry point, auto-initialization only
+├── core.js       # Tabs class, helper functions, initialization logic
 ├── config.js     # Centralized selectors, attributes, classes, defaults
 ├── autoplay.js   # Autoplay timer, RAF progress, pause/resume logic
 ├── utils.js      # Shared utilities (event emission)
@@ -46,21 +47,27 @@ src/
 
 ### Core Components
 
-**Tabs Class (src/tabs.js)**
+**Entry Point (src/tabs.js)**
+
+- Auto-initialization on DOMContentLoaded
+- Exports Tabs class for module usage
+- No global window.Tabs API
+
+**Tabs Class (src/core.js)**
 
 - Main class managing individual tabs instances
 - Lifecycle: parse config → find elements → setup accessibility → activate initial → attach listeners → setup autoplay
-- Instances stored in a Map for global access
+- Module-private helper functions for internal logic
+- Instance stored on element as `container._tabs`
 
 **Configuration (src/config.js)**
 
-- `SELECTORS` - DOM query selectors
-- `ATTRIBUTES` - Data attribute names
-- `CLASSES` - State class names
-- `CSS_VARS` - CSS custom property names
-- `DEFAULTS` - Default configuration values
-- `TIMING` - Animation timing constants
-- `EVENTS` - CustomEvent names (change, autoplay-start, autoplay-pause)
+- `selectors` - DOM query selectors (bracket-wrapped for querySelectorAll)
+- `attributes` - Data attribute names (for getAttribute/hasAttribute)
+- `classes` - State class names
+- `cssProps` - CSS custom property names
+- `defaults` - Default configuration values (includes transition timing)
+- `events` - CustomEvent names (change, autoplay-start, autoplay-pause)
 
 **Autoplay System (src/autoplay.js)**
 
@@ -139,24 +146,24 @@ All configuration via `data-tabs-*` attributes on container element:
 ## Public API
 
 ```javascript
-// Auto-initializes on DOMContentLoaded
-window.Tabs.init(selector); // Initialize specific container
-window.Tabs.get(selectorOrElement); // Get single instance
-window.Tabs.getAll(); // Get all instances (array)
-window.Tabs.destroy(selector); // Destroy one or all instances
+// Auto-initializes on DOMContentLoaded - no manual init needed
+
+// Instance access via element
+const tabs = container._tabs; // Direct access to instance
 
 // Instance methods (chainable except getActiveValue/destroy)
-instance.goTo(value); // Activate by value
-instance.next(); // Next tab
-instance.prev(); // Previous tab
-instance.play(); // Start autoplay
-instance.pause(); // Pause autoplay
-instance.refresh(); // Re-initialize after DOM changes
-instance.destroy(); // Clean up and reset DOM
-instance.getActiveValue(); // Returns current active value
+tabs.goTo(value); // Activate by value
+tabs.next(); // Next tab
+tabs.prev(); // Previous tab
+tabs.play(); // Start autoplay
+tabs.pause(); // Pause autoplay
+tabs.refresh(); // Re-initialize after DOM changes
+tabs.destroy(); // Clean up and reset DOM
+tabs.getActiveValue(); // Returns current active value
 
-// Instance reference on element
-container._tabs; // Direct access to instance
+// For module users
+import { Tabs } from './tabs.js';
+const tabs = new Tabs(container); // Manual instantiation
 ```
 
 ## Development Notes

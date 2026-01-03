@@ -15,82 +15,80 @@ var Tabs = (function (exports) {
   // Configuration constants for the tabs library
 
   // Selectors for querying DOM elements
-  const SELECTORS = {
-    CONTAINER: '[data-tabs="container"]',
-    TRIGGER: '[data-tabs-trigger-value]',
-    PANEL: '[data-tabs-panel-value]',
-    PREV_BTN: '[data-tabs="prev"]',
-    NEXT_BTN: '[data-tabs="next"]',
-    PLAY_PAUSE_BTN: '[data-tabs="play-pause"]',
+  const selectors = {
+    container: '[data-tabs="container"]',
+    trigger: '[data-tabs-trigger-value]',
+    panel: '[data-tabs-panel-value]',
+    prevBtn: '[data-tabs="prev"]',
+    nextBtn: '[data-tabs="next"]',
+    playPauseBtn: '[data-tabs="play-pause"]',
   };
 
   // Attribute names for configuration
-  const ATTRIBUTES = {
+  const attributes = {
     // Container configuration
-    GROUP_NAME: 'data-tabs-group-name',
-    DEFAULT: 'data-tabs-default',
-    ORIENTATION: 'data-tabs-orientation',
-    ACTIVATE_ON_FOCUS: 'data-tabs-activate-on-focus',
-    LOOP: 'data-tabs-loop',
-    KEYBOARD: 'data-tabs-keyboard',
+    groupName: 'data-tabs-group-name',
+    default: 'data-tabs-default',
+    orientation: 'data-tabs-orientation',
+    activateOnFocus: 'data-tabs-activate-on-focus',
+    loop: 'data-tabs-loop',
+    keyboard: 'data-tabs-keyboard',
+    id: 'data-tabs-id',
 
     // Content linking
-    TRIGGER_VALUE: 'data-tabs-trigger-value',
-    PANEL_VALUE: 'data-tabs-panel-value',
+    triggerValue: 'data-tabs-trigger-value',
+    panelValue: 'data-tabs-panel-value',
 
     // Autoplay configuration
-    AUTOPLAY: 'data-tabs-autoplay',
-    AUTOPLAY_DURATION: 'data-tabs-autoplay-duration',
-    AUTOPLAY_PAUSE_HOVER: 'data-tabs-autoplay-pause-hover',
-    AUTOPLAY_PAUSE_FOCUS: 'data-tabs-autoplay-pause-focus',
+    autoplay: 'data-tabs-autoplay',
+    autoplayDuration: 'data-tabs-autoplay-duration',
+    autoplayPauseHover: 'data-tabs-autoplay-pause-hover',
+    autoplayPauseFocus: 'data-tabs-autoplay-pause-focus',
   };
 
   // CSS classes applied to elements
-  const CLASSES = {
+  const classes = {
     // State classes
-    ACTIVE: 'tabs-active',
-    INACTIVE: 'tabs-inactive',
-    TRANSITIONING: 'tabs-transitioning',
+    active: 'tabs-active',
+    inactive: 'tabs-inactive',
+    transitioning: 'tabs-transitioning',
 
     // Panel transition classes
-    PANEL_ENTERING: 'tabs-panel-entering',
-    PANEL_LEAVING: 'tabs-panel-leaving',
+    panelEntering: 'tabs-panel-entering',
+    panelLeaving: 'tabs-panel-leaving',
 
     // Button state classes
-    BUTTON_DISABLED: 'tabs-button-disabled',
+    buttonDisabled: 'tabs-button-disabled',
 
     // Autoplay state classes
-    AUTOPLAY_ACTIVE: 'tabs-autoplay-active',
-    AUTOPLAY_PAUSED: 'tabs-autoplay-paused',
+    autoplayActive: 'tabs-autoplay-active',
+    autoplayPaused: 'tabs-autoplay-paused',
 
     // Accessibility
-    REDUCED_MOTION: 'tabs-reduced-motion',
+    reducedMotion: 'tabs-reduced-motion',
   };
 
   // CSS custom properties
-  const CSS_VARS = {
-    PROGRESS: '--tabs-progress',
-    TAB_COUNT: '--tabs-count',
-    TAB_INDEX: '--tabs-index',
-    ACTIVE_INDEX: '--tabs-active-index',
-    AUTOPLAY_DURATION: '--tabs-autoplay-duration',
-    DIRECTION: '--tabs-direction'};
+  const cssProps = {
+    progress: '--tabs-progress',
+    tabCount: '--tabs-count',
+    tabIndex: '--tabs-index',
+    activeIndex: '--tabs-active-index',
+    autoplayDuration: '--tabs-autoplay-duration',
+    direction: '--tabs-direction'};
 
   // Default configuration values
-  const DEFAULTS = {
-    ORIENTATION: 'horizontal',
-    AUTOPLAY_DURATION: 5000};
-
-  // Timing constants in milliseconds
-  const TIMING = {
-    TRANSITION_DURATION: 200,
+  const defaults = {
+    orientation: 'horizontal',
+    autoplayDuration: 5000,
+    transitionDuration: 200,
   };
 
   // Event names for CustomEvents
-  const EVENTS = {
-    CHANGE: 'change',
-    AUTOPLAY_START: 'autoplay-start',
-    AUTOPLAY_PAUSE: 'autoplay-pause',
+  const events = {
+    change: 'change',
+    autoplayStart: 'autoplay-start',
+    autoplayPause: 'autoplay-pause',
   };
 
   // Shared utility functions for the tabs library
@@ -156,7 +154,7 @@ var Tabs = (function (exports) {
     const activeTriggers = triggerMap.get(state.activeValue);
     if (activeTriggers) {
       activeTriggers.forEach((trigger) => {
-        trigger.style.setProperty(CSS_VARS.PROGRESS, progress.toString());
+        trigger.style.setProperty(cssProps.progress, progress.toString());
       });
     }
 
@@ -252,21 +250,21 @@ var Tabs = (function (exports) {
 
   // Starts autoplay timer with RAF progress updates
   function startAutoplay(instance) {
-    const { container, config, state, triggerMap } = instance;
+    const { container, state } = instance;
 
     state.isAutoplaying = true;
     state.isPaused = false;
     state.autoplayStartTime = performance.now();
 
-    container.classList.add(CLASSES.AUTOPLAY_ACTIVE);
-    container.classList.remove(CLASSES.AUTOPLAY_PAUSED);
+    container.classList.add(classes.autoplayActive);
+    container.classList.remove(classes.autoplayPaused);
 
     // Update play/pause button
     if (instance.playPauseBtn) {
       instance.playPauseBtn.setAttribute('aria-pressed', 'true');
     }
 
-    emit(instance, EVENTS.AUTOPLAY_START, { value: state.activeValue });
+    emit(instance, events.autoplayStart, { value: state.activeValue });
 
     instance.autoplay.rafId = requestAnimationFrame(() =>
       runAutoplayTick(instance)
@@ -292,7 +290,7 @@ var Tabs = (function (exports) {
       instance.autoplay.rafId = null;
     }
 
-    container.classList.add(CLASSES.AUTOPLAY_PAUSED);
+    container.classList.add(classes.autoplayPaused);
 
     // Update play/pause button
     if (instance.playPauseBtn) {
@@ -305,7 +303,7 @@ var Tabs = (function (exports) {
     state.autoplayPausedOnValue = state.activeValue;
     const progress = Math.min(elapsed / instance.config.autoplayDuration, 1);
 
-    emit(instance, EVENTS.AUTOPLAY_PAUSE, {
+    emit(instance, events.autoplayPause, {
       value: state.activeValue,
       progress,
     });
@@ -325,14 +323,14 @@ var Tabs = (function (exports) {
       ? performance.now() - (state.autoplayElapsed || 0)
       : performance.now();
 
-    container.classList.remove(CLASSES.AUTOPLAY_PAUSED);
+    container.classList.remove(classes.autoplayPaused);
 
     // Update play/pause button
     if (instance.playPauseBtn) {
       instance.playPauseBtn.setAttribute('aria-pressed', 'true');
     }
 
-    emit(instance, EVENTS.AUTOPLAY_START, { value: state.activeValue });
+    emit(instance, events.autoplayStart, { value: state.activeValue });
 
     instance.autoplay.rafId = requestAnimationFrame(() =>
       runAutoplayTick(instance)
@@ -370,14 +368,17 @@ var Tabs = (function (exports) {
     instance.autoplay = null;
   }
 
-  // Core tabs library with initialization, keyboard navigation, accessibility, and entry point
+  // Core tabs library with Tabs class and initialization logic
 
+
+  // Internal registry for instance lookup (used by destroy)
+  const instances = new Map();
 
   // Finds the index of a trigger by its normalized value
   function findTriggerIndex(triggers, targetValue) {
     return triggers.findIndex((trigger) => {
       const triggerValue = normalizeValue(
-        trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE)
+        trigger.getAttribute(attributes.triggerValue)
       );
       return triggerValue === targetValue;
     });
@@ -386,22 +387,22 @@ var Tabs = (function (exports) {
   // Parses configuration from data attributes on the container
   function parseConfig(container) {
     return {
-      groupName: container.getAttribute(ATTRIBUTES.GROUP_NAME) || null,
-      defaultValue: container.getAttribute(ATTRIBUTES.DEFAULT) || null,
+      groupName: container.getAttribute(attributes.groupName) || null,
+      defaultValue: container.getAttribute(attributes.default) || null,
       orientation:
-        container.getAttribute(ATTRIBUTES.ORIENTATION) || DEFAULTS.ORIENTATION,
+        container.getAttribute(attributes.orientation) || defaults.orientation,
       activateOnFocus:
-        container.getAttribute(ATTRIBUTES.ACTIVATE_ON_FOCUS) !== 'false',
-      loop: container.getAttribute(ATTRIBUTES.LOOP) === 'true',
-      keyboard: container.getAttribute(ATTRIBUTES.KEYBOARD) !== 'false',
-      autoplay: container.getAttribute(ATTRIBUTES.AUTOPLAY) === 'true',
+        container.getAttribute(attributes.activateOnFocus) !== 'false',
+      loop: container.getAttribute(attributes.loop) === 'true',
+      keyboard: container.getAttribute(attributes.keyboard) !== 'false',
+      autoplay: container.getAttribute(attributes.autoplay) === 'true',
       autoplayDuration:
-        parseInt(container.getAttribute(ATTRIBUTES.AUTOPLAY_DURATION), 10) ||
-        DEFAULTS.AUTOPLAY_DURATION,
+        parseInt(container.getAttribute(attributes.autoplayDuration), 10) ||
+        defaults.autoplayDuration,
       autoplayPauseHover:
-        container.getAttribute(ATTRIBUTES.AUTOPLAY_PAUSE_HOVER) !== 'false',
+        container.getAttribute(attributes.autoplayPauseHover) !== 'false',
       autoplayPauseFocus:
-        container.getAttribute(ATTRIBUTES.AUTOPLAY_PAUSE_FOCUS) !== 'false',
+        container.getAttribute(attributes.autoplayPauseFocus) !== 'false',
     };
   }
 
@@ -412,13 +413,13 @@ var Tabs = (function (exports) {
     // Scope to this container to support nested tabs
     const scopedQuery = (selector) => {
       return [...container.querySelectorAll(selector)].filter((el) => {
-        return el.closest(SELECTORS.CONTAINER) === container;
+        return el.closest(selectors.container) === container;
       });
     };
 
     // Find triggers and panels
-    const triggers = scopedQuery(SELECTORS.TRIGGER);
-    const panels = scopedQuery(SELECTORS.PANEL);
+    const triggers = scopedQuery(selectors.trigger);
+    const panels = scopedQuery(selectors.panel);
 
     if (triggers.length === 0) {
       console.error(
@@ -440,7 +441,7 @@ var Tabs = (function (exports) {
     let hasErrors = false;
 
     triggers.forEach((trigger) => {
-      const rawValue = trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE);
+      const rawValue = trigger.getAttribute(attributes.triggerValue);
       const value = normalizeValue(rawValue);
 
       if (!value) {
@@ -463,7 +464,7 @@ var Tabs = (function (exports) {
     });
 
     panels.forEach((panel) => {
-      const rawValue = panel.getAttribute(ATTRIBUTES.PANEL_VALUE);
+      const rawValue = panel.getAttribute(attributes.panelValue);
       const value = normalizeValue(rawValue);
 
       if (!value) {
@@ -497,9 +498,9 @@ var Tabs = (function (exports) {
     if (hasErrors) return false;
 
     // Find optional navigation buttons (scoped)
-    const prevBtn = container.querySelector(SELECTORS.PREV_BTN);
-    const nextBtn = container.querySelector(SELECTORS.NEXT_BTN);
-    const playPauseBtn = container.querySelector(SELECTORS.PLAY_PAUSE_BTN);
+    const prevBtn = container.querySelector(selectors.prevBtn);
+    const nextBtn = container.querySelector(selectors.nextBtn);
+    const playPauseBtn = container.querySelector(selectors.playPauseBtn);
 
     // Store references
     Object.assign(instance, {
@@ -524,7 +525,7 @@ var Tabs = (function (exports) {
 
     triggers.forEach((trigger) => {
       const value = normalizeValue(
-        trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE)
+        trigger.getAttribute(attributes.triggerValue)
       );
       const triggerId = trigger.id || `${id}-trigger-${value}`;
       const panelId = `${id}-panel-${value}`;
@@ -535,7 +536,7 @@ var Tabs = (function (exports) {
     });
 
     panels.forEach((panel) => {
-      const value = normalizeValue(panel.getAttribute(ATTRIBUTES.PANEL_VALUE));
+      const value = normalizeValue(panel.getAttribute(attributes.panelValue));
       const panelId = panel.id || `${id}-panel-${value}`;
       const triggerId = `${id}-trigger-${value}`;
 
@@ -552,7 +553,7 @@ var Tabs = (function (exports) {
 
     triggers.forEach((trigger) => {
       const value = normalizeValue(
-        trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE)
+        trigger.getAttribute(attributes.triggerValue)
       );
       const isActive = value === state.activeValue;
 
@@ -561,7 +562,7 @@ var Tabs = (function (exports) {
     });
 
     panels.forEach((panel) => {
-      const value = normalizeValue(panel.getAttribute(ATTRIBUTES.PANEL_VALUE));
+      const value = normalizeValue(panel.getAttribute(attributes.panelValue));
       const isActive = value === state.activeValue;
 
       panel.setAttribute('aria-hidden', (!isActive).toString());
@@ -577,7 +578,7 @@ var Tabs = (function (exports) {
       const focusedTrigger = document.activeElement;
       if (
         !instance.triggers.includes(focusedTrigger) ||
-        focusedTrigger.closest(SELECTORS.CONTAINER) !== container
+        focusedTrigger.closest(selectors.container) !== container
       ) {
         return;
       }
@@ -612,7 +613,7 @@ var Tabs = (function (exports) {
           // Only needed if activate-on-focus is false
           if (!config.activateOnFocus) {
             e.preventDefault();
-            const value = focusedTrigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE);
+            const value = focusedTrigger.getAttribute(attributes.triggerValue);
             activate(instance, value);
           }
           break;
@@ -647,7 +648,7 @@ var Tabs = (function (exports) {
 
     // Activate if activate-on-focus is true
     if (config.activateOnFocus) {
-      const value = triggers[nextIndex].getAttribute(ATTRIBUTES.TRIGGER_VALUE);
+      const value = triggers[nextIndex].getAttribute(attributes.triggerValue);
       activate(instance, value);
     }
   }
@@ -663,7 +664,7 @@ var Tabs = (function (exports) {
     }
 
     if (config.activateOnFocus) {
-      const value = triggers[index].getAttribute(ATTRIBUTES.TRIGGER_VALUE);
+      const value = triggers[index].getAttribute(attributes.triggerValue);
       activate(instance, value);
     }
   }
@@ -695,7 +696,7 @@ var Tabs = (function (exports) {
     }
 
     // Priority 3: First trigger
-    const firstValue = triggers[0].getAttribute(ATTRIBUTES.TRIGGER_VALUE);
+    const firstValue = triggers[0].getAttribute(attributes.triggerValue);
     return normalizeValue(firstValue);
   }
 
@@ -703,8 +704,7 @@ var Tabs = (function (exports) {
   function activate(instance, value, options = {}) {
     const { silent = false, updateUrl = true } = options;
     const normalized = normalizeValue(value);
-    const { state, config, triggerMap, panelMap, triggers, panels, container } =
-      instance;
+    const { state, config, triggerMap, triggers, panels, container } = instance;
 
     if (!triggerMap.has(normalized)) {
       console.warn(`Tabs ${instance.id}: Value "${value}" not found.`);
@@ -723,12 +723,12 @@ var Tabs = (function (exports) {
       : -1;
 
     // Set active index CSS variable
-    container.style.setProperty(CSS_VARS.ACTIVE_INDEX, newIndex);
+    container.style.setProperty(cssProps.activeIndex, newIndex);
 
     // Set direction CSS variable (1 = forward, -1 = backward, 0 = initial)
     const direction =
       previousIndex === -1 ? 0 : newIndex > previousIndex ? 1 : -1;
-    container.style.setProperty(CSS_VARS.DIRECTION, direction);
+    container.style.setProperty(cssProps.direction, direction);
 
     // Update state
     state.activeValue = normalized;
@@ -744,54 +744,54 @@ var Tabs = (function (exports) {
     }
 
     // Add transitioning class
-    container.classList.add(CLASSES.TRANSITIONING);
+    container.classList.add(classes.transitioning);
 
     // Update trigger states
     triggers.forEach((trigger) => {
       const triggerValue = normalizeValue(
-        trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE)
+        trigger.getAttribute(attributes.triggerValue)
       );
       const isActive = triggerValue === normalized;
 
-      trigger.classList.toggle(CLASSES.ACTIVE, isActive);
-      trigger.classList.toggle(CLASSES.INACTIVE, !isActive);
+      trigger.classList.toggle(classes.active, isActive);
+      trigger.classList.toggle(classes.inactive, !isActive);
 
       // Reset progress on inactive triggers
       if (!isActive) {
-        trigger.style.setProperty(CSS_VARS.PROGRESS, '0');
+        trigger.style.setProperty(cssProps.progress, '0');
       }
     });
 
     // Update panel states
     panels.forEach((panel) => {
       const panelValue = normalizeValue(
-        panel.getAttribute(ATTRIBUTES.PANEL_VALUE)
+        panel.getAttribute(attributes.panelValue)
       );
       const isActive = panelValue === normalized;
       const wasActive = panelValue === previousValue;
 
       // Remove previous transition classes
-      panel.classList.remove(CLASSES.PANEL_ENTERING, CLASSES.PANEL_LEAVING);
+      panel.classList.remove(classes.panelEntering, classes.panelLeaving);
 
       if (isActive) {
-        panel.classList.add(CLASSES.ACTIVE, CLASSES.PANEL_ENTERING);
-        panel.classList.remove(CLASSES.INACTIVE);
+        panel.classList.add(classes.active, classes.panelEntering);
+        panel.classList.remove(classes.inactive);
       } else if (wasActive) {
-        panel.classList.add(CLASSES.INACTIVE, CLASSES.PANEL_LEAVING);
-        panel.classList.remove(CLASSES.ACTIVE);
+        panel.classList.add(classes.inactive, classes.panelLeaving);
+        panel.classList.remove(classes.active);
       } else {
-        panel.classList.add(CLASSES.INACTIVE);
-        panel.classList.remove(CLASSES.ACTIVE);
+        panel.classList.add(classes.inactive);
+        panel.classList.remove(classes.active);
       }
     });
 
     // Remove transition classes after animation
     setTimeout(() => {
-      container.classList.remove(CLASSES.TRANSITIONING);
+      container.classList.remove(classes.transitioning);
       panels.forEach((panel) => {
-        panel.classList.remove(CLASSES.PANEL_ENTERING, CLASSES.PANEL_LEAVING);
+        panel.classList.remove(classes.panelEntering, classes.panelLeaving);
       });
-    }, TIMING.TRANSITION_DURATION);
+    }, defaults.transitionDuration);
 
     // Update ARIA states
     updateAriaStates(instance);
@@ -801,7 +801,7 @@ var Tabs = (function (exports) {
 
     // Emit change event
     if (!silent) {
-      emit(instance, EVENTS.CHANGE, {
+      emit(instance, events.change, {
         value: normalized,
         previousValue,
       });
@@ -817,19 +817,19 @@ var Tabs = (function (exports) {
     if (!prevBtn && !nextBtn) return;
     if (config.loop) {
       // Never disabled when looping
-      prevBtn?.classList.remove(CLASSES.BUTTON_DISABLED);
-      nextBtn?.classList.remove(CLASSES.BUTTON_DISABLED);
+      prevBtn?.classList.remove(classes.buttonDisabled);
+      nextBtn?.classList.remove(classes.buttonDisabled);
       return;
     }
 
     const currentIndex = findTriggerIndex(triggers, state.activeValue);
 
     if (prevBtn) {
-      prevBtn.classList.toggle(CLASSES.BUTTON_DISABLED, currentIndex === 0);
+      prevBtn.classList.toggle(classes.buttonDisabled, currentIndex === 0);
     }
     if (nextBtn) {
       nextBtn.classList.toggle(
-        CLASSES.BUTTON_DISABLED,
+        classes.buttonDisabled,
         currentIndex === triggers.length - 1
       );
     }
@@ -851,7 +851,7 @@ var Tabs = (function (exports) {
     triggers.forEach((trigger) => {
       const handler = (e) => {
         e.preventDefault();
-        const value = trigger.getAttribute(ATTRIBUTES.TRIGGER_VALUE);
+        const value = trigger.getAttribute(attributes.triggerValue);
 
         // Pause autoplay on user interaction
         if (state.isAutoplaying) {
@@ -928,18 +928,18 @@ var Tabs = (function (exports) {
       instance;
 
     // Container: remove attributes and classes
-    container.removeAttribute('data-tabs-id');
+    container.removeAttribute(attributes.id);
     container.removeAttribute('aria-orientation');
     container.classList.remove(
-      CLASSES.TRANSITIONING,
-      CLASSES.AUTOPLAY_ACTIVE,
-      CLASSES.AUTOPLAY_PAUSED,
-      CLASSES.REDUCED_MOTION
+      classes.transitioning,
+      classes.autoplayActive,
+      classes.autoplayPaused,
+      classes.reducedMotion
     );
-    container.style.removeProperty(CSS_VARS.TAB_COUNT);
-    container.style.removeProperty(CSS_VARS.ACTIVE_INDEX);
-    container.style.removeProperty(CSS_VARS.DIRECTION);
-    container.style.removeProperty(CSS_VARS.AUTOPLAY_DURATION);
+    container.style.removeProperty(cssProps.tabCount);
+    container.style.removeProperty(cssProps.activeIndex);
+    container.style.removeProperty(cssProps.direction);
+    container.style.removeProperty(cssProps.autoplayDuration);
 
     // Triggers: remove ARIA, classes, CSS vars, generated IDs
     triggers.forEach((trigger) => {
@@ -953,9 +953,9 @@ var Tabs = (function (exports) {
         trigger.id = '';
       }
 
-      trigger.classList.remove(CLASSES.ACTIVE, CLASSES.INACTIVE);
-      trigger.style.removeProperty(CSS_VARS.TAB_INDEX);
-      trigger.style.removeProperty(CSS_VARS.PROGRESS);
+      trigger.classList.remove(classes.active, classes.inactive);
+      trigger.style.removeProperty(cssProps.tabIndex);
+      trigger.style.removeProperty(cssProps.progress);
     });
 
     // Panels: remove ARIA, classes, CSS vars, generated IDs
@@ -971,20 +971,20 @@ var Tabs = (function (exports) {
       }
 
       panel.classList.remove(
-        CLASSES.ACTIVE,
-        CLASSES.INACTIVE,
-        CLASSES.PANEL_ENTERING,
-        CLASSES.PANEL_LEAVING
+        classes.active,
+        classes.inactive,
+        classes.panelEntering,
+        classes.panelLeaving
       );
-      panel.style.removeProperty(CSS_VARS.TAB_INDEX);
+      panel.style.removeProperty(cssProps.tabIndex);
     });
 
     // Navigation buttons: remove disabled class
     if (prevBtn) {
-      prevBtn.classList.remove(CLASSES.BUTTON_DISABLED);
+      prevBtn.classList.remove(classes.buttonDisabled);
     }
     if (nextBtn) {
-      nextBtn.classList.remove(CLASSES.BUTTON_DISABLED);
+      nextBtn.classList.remove(classes.buttonDisabled);
     }
 
     // Play/pause button: remove aria-pressed
@@ -1006,12 +1006,12 @@ var Tabs = (function (exports) {
     }
 
     // Set CSS variables
-    container.style.setProperty(CSS_VARS.TAB_COUNT, instance.triggers.length);
+    container.style.setProperty(cssProps.tabCount, instance.triggers.length);
     instance.triggers.forEach((trigger, index) => {
-      trigger.style.setProperty(CSS_VARS.TAB_INDEX, index);
+      trigger.style.setProperty(cssProps.tabIndex, index);
     });
     instance.panels.forEach((panel, index) => {
-      panel.style.setProperty(CSS_VARS.TAB_INDEX, index);
+      panel.style.setProperty(cssProps.tabIndex, index);
     });
 
     // Setup accessibility
@@ -1031,13 +1031,13 @@ var Tabs = (function (exports) {
 
     // Check for reduced motion
     if (prefersReducedMotion()) {
-      container.classList.add(CLASSES.REDUCED_MOTION);
+      container.classList.add(classes.reducedMotion);
     }
 
     // Setup autoplay if enabled and reduced motion not preferred
     if (config.autoplay && !prefersReducedMotion()) {
       container.style.setProperty(
-        CSS_VARS.AUTOPLAY_DURATION,
+        cssProps.autoplayDuration,
         config.autoplayDuration + 'ms'
       );
       setupAutoplay(instance);
@@ -1045,7 +1045,7 @@ var Tabs = (function (exports) {
     }
 
     // Store instance ID on container for lookup
-    container.setAttribute('data-tabs-id', instance.id);
+    container.setAttribute(attributes.id, instance.id);
 
     return true;
   }
@@ -1081,6 +1081,7 @@ var Tabs = (function (exports) {
       const initialized = init(this);
       if (initialized) {
         this.container._tabs = this;
+        instances.set(this.id, this);
       } else {
         console.warn(`Tabs ${this.id}: Initialization failed.`);
       }
@@ -1105,7 +1106,7 @@ var Tabs = (function (exports) {
       }
 
       const nextValue = triggers[nextIndex].getAttribute(
-        ATTRIBUTES.TRIGGER_VALUE
+        attributes.triggerValue
       );
       activate(this, nextValue);
       return this;
@@ -1124,7 +1125,7 @@ var Tabs = (function (exports) {
       }
 
       const prevValue = triggers[prevIndex].getAttribute(
-        ATTRIBUTES.TRIGGER_VALUE
+        attributes.triggerValue
       );
       activate(this, prevValue);
       return this;
@@ -1140,7 +1141,7 @@ var Tabs = (function (exports) {
 
       // Set autoplay duration CSS variable
       this.container.style.setProperty(
-        CSS_VARS.AUTOPLAY_DURATION,
+        cssProps.autoplayDuration,
         this.config.autoplayDuration + 'ms'
       );
 
@@ -1198,31 +1199,21 @@ var Tabs = (function (exports) {
     getActiveValue() {
       return this.state.activeValue;
     }
-
-    // Static method for manual initialization
-    static init(container) {
-      if (typeof container === 'string') {
-        container = document.querySelector(container);
-      }
-      if (!container) {
-        throw new Error('Tabs.init(): Container element not found');
-      }
-      return new Tabs(container);
-    }
   }
 
-  const instances = new Map();
+  // Entry point for tabs library - auto-initialization only
+
 
   // Auto-initializes all tabs containers
   function autoInit() {
-    const containers = document.querySelectorAll(SELECTORS.CONTAINER);
+    const containers = document.querySelectorAll(selectors.container);
 
     containers.forEach((container) => {
+      // Skip if already initialized
+      if (container._tabs) return;
+
       try {
-        const tabs = new Tabs(container);
-        if (tabs.id) {
-          instances.set(tabs.id, tabs);
-        }
+        new Tabs(container);
       } catch (error) {
         console.warn('Tabs auto-initialization failed:', error);
       }
@@ -1233,80 +1224,6 @@ var Tabs = (function (exports) {
     document.addEventListener('DOMContentLoaded', autoInit);
   } else {
     autoInit();
-  }
-
-  // Global API object
-  const TabsAPI = {
-    // Initialize a new instance manually
-    init(selector) {
-      if (!selector) {
-        // Re-run auto-init for any new containers
-        autoInit();
-        return;
-      }
-
-      const container =
-        typeof selector === 'string'
-          ? document.querySelector(selector)
-          : selector;
-
-      if (!container) {
-        throw new Error('Tabs.init(): Container element not found');
-      }
-
-      const tabs = new Tabs(container);
-      if (tabs.id) {
-        instances.set(tabs.id, tabs);
-      }
-      return tabs;
-    },
-
-    // Get instance by ID or element
-    get(idOrElement) {
-      if (typeof idOrElement === 'string') {
-        // Try as ID first
-        if (instances.has(idOrElement)) {
-          return instances.get(idOrElement);
-        }
-        // Try as selector
-        const container = document.querySelector(idOrElement);
-        if (container) {
-          const id = container.getAttribute('data-tabs-id');
-          return id ? instances.get(id) : null;
-        }
-        return null;
-      }
-
-      // Element
-      const id = idOrElement.getAttribute('data-tabs-id');
-      return id ? instances.get(id) : null;
-    },
-
-    // Get all instances
-    getAll() {
-      return Array.from(instances.values());
-    },
-
-    // Destroy instances
-    destroy(selector) {
-      if (!selector) {
-        // Destroy all
-        instances.forEach((tabs) => tabs.destroy());
-        instances.clear();
-        return;
-      }
-
-      const tabs = this.get(selector);
-      if (tabs) {
-        instances.delete(tabs.id);
-        tabs.destroy();
-      }
-    },
-  };
-
-  // Expose to window
-  if (typeof window !== 'undefined') {
-    window.Tabs = TabsAPI;
   }
 
   exports.Tabs = Tabs;
