@@ -1,9 +1,12 @@
 node_modules
 .DS_Store
 
-temp/
+untracked/
 
 .cursor/
 .claude/
 
-packages/tabs/examples.html
+*examples.html
+
+CLAUDE.md
+DEPLOYMENT.md
