@@ -1,0 +1,23 @@
+{
+  "name": "scroll-fade",
+  "version": "0.1.0",
+  "description": "A library for managing scroll indicators (gradient fades) based on a container's scroll position.",
+  "main": "scroll-fade.js",
+  "type": "module",
+  "scripts": {
+    "build": "rollup -c",
+    "build:watch": "rollup -c --watch",
+    "release": "BUILD_MODE=release rollup -c"
+  },
+  "keywords": [
+    "scroll",
+    "fade",
+    "shadow",
+    "overflow",
+    "indicator",
+    "webflow",
+    "vanilla-js"
+  ],
+  "author": "Idrees Isse (https://github.com/idreezus)",
+  "license": "AGPL-3.0"
+}
