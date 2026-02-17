@@ -187,7 +187,9 @@ Add CSS transitions for smooth theme changes:
 
 ```css
 body {
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 ```
 

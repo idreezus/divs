@@ -17,8 +17,8 @@ var Tabs = (function (exports) {
   // Selectors for querying DOM elements
   const selectors = {
     container: '[data-tabs="container"]',
-    trigger: '[data-tabs-trigger-value]',
-    panel: '[data-tabs-panel-value]',
+    trigger: '[data-tabs-trigger-id]',
+    panel: '[data-tabs-panel-id]',
     prevBtn: '[data-tabs="prev"]',
     nextBtn: '[data-tabs="next"]',
     playPauseBtn: '[data-tabs="play-pause"]',
@@ -36,8 +36,8 @@ var Tabs = (function (exports) {
     id: 'data-tabs-id',
 
     // Content linking
-    triggerValue: 'data-tabs-trigger-value',
-    panelValue: 'data-tabs-panel-value',
+    triggerId: 'data-tabs-trigger-id',
+    panelId: 'data-tabs-panel-id',
 
     // Autoplay configuration
     autoplay: 'data-tabs-autoplay',
@@ -377,10 +377,10 @@ var Tabs = (function (exports) {
   // Finds the index of a trigger by its normalized value
   function findTriggerIndex(triggers, targetValue) {
     return triggers.findIndex((trigger) => {
-      const triggerValue = normalizeValue(
-        trigger.getAttribute(attributes.triggerValue)
+      const value = normalizeValue(
+        trigger.getAttribute(attributes.triggerId)
       );
-      return triggerValue === targetValue;
+      return value === targetValue;
     });
   }
 
@@ -423,14 +423,14 @@ var Tabs = (function (exports) {
 
     if (triggers.length === 0) {
       console.error(
-        `Tabs ${id}: No triggers found. Expected elements with [data-tabs-trigger-value].`
+        `Tabs ${id}: No triggers found. Expected elements with [data-tabs-trigger-id].`
       );
       return false;
     }
 
     if (panels.length === 0) {
       console.error(
-        `Tabs ${id}: No panels found. Expected elements with [data-tabs-panel-value].`
+        `Tabs ${id}: No panels found. Expected elements with [data-tabs-panel-id].`
       );
       return false;
     }
@@ -441,11 +441,11 @@ var Tabs = (function (exports) {
     let hasErrors = false;
 
     triggers.forEach((trigger) => {
-      const rawValue = trigger.getAttribute(attributes.triggerValue);
+      const rawValue = trigger.getAttribute(attributes.triggerId);
       const value = normalizeValue(rawValue);
 
       if (!value) {
-        console.error(`Tabs ${id}: Trigger has empty data-tabs-trigger-value.`);
+        console.error(`Tabs ${id}: Trigger has empty data-tabs-trigger-id.`);
         hasErrors = true;
         return;
       }
@@ -464,11 +464,11 @@ var Tabs = (function (exports) {
     });
 
     panels.forEach((panel) => {
-      const rawValue = panel.getAttribute(attributes.panelValue);
+      const rawValue = panel.getAttribute(attributes.panelId);
       const value = normalizeValue(rawValue);
 
       if (!value) {
-        console.error(`Tabs ${id}: Panel has empty data-tabs-panel-value.`);
+        console.error(`Tabs ${id}: Panel has empty data-tabs-panel-id.`);
         hasErrors = true;
         return;
       }
@@ -524,9 +524,7 @@ var Tabs = (function (exports) {
     instance.container.setAttribute('aria-orientation', config.orientation);
 
     triggers.forEach((trigger) => {
-      const value = normalizeValue(
-        trigger.getAttribute(attributes.triggerValue)
-      );
+      const value = normalizeValue(trigger.getAttribute(attributes.triggerId));
       const triggerId = trigger.id || `${id}-trigger-${value}`;
       const panelId = `${id}-panel-${value}`;
 
@@ -536,7 +534,7 @@ var Tabs = (function (exports) {
     });
 
     panels.forEach((panel) => {
-      const value = normalizeValue(panel.getAttribute(attributes.panelValue));
+      const value = normalizeValue(panel.getAttribute(attributes.panelId));
       const panelId = panel.id || `${id}-panel-${value}`;
       const triggerId = `${id}-trigger-${value}`;
 
@@ -552,9 +550,7 @@ var Tabs = (function (exports) {
     const { triggers, panels, state } = instance;
 
     triggers.forEach((trigger) => {
-      const value = normalizeValue(
-        trigger.getAttribute(attributes.triggerValue)
-      );
+      const value = normalizeValue(trigger.getAttribute(attributes.triggerId));
       const isActive = value === state.activeValue;
 
       trigger.setAttribute('aria-selected', isActive.toString());
@@ -562,7 +558,7 @@ var Tabs = (function (exports) {
     });
 
     panels.forEach((panel) => {
-      const value = normalizeValue(panel.getAttribute(attributes.panelValue));
+      const value = normalizeValue(panel.getAttribute(attributes.panelId));
       const isActive = value === state.activeValue;
 
       panel.setAttribute('aria-hidden', (!isActive).toString());
@@ -613,7 +609,7 @@ var Tabs = (function (exports) {
           // Only needed if activate-on-focus is false
           if (!config.activateOnFocus) {
             e.preventDefault();
-            const value = focusedTrigger.getAttribute(attributes.triggerValue);
+            const value = focusedTrigger.getAttribute(attributes.triggerId);
             activate(instance, value);
           }
           break;
@@ -648,7 +644,7 @@ var Tabs = (function (exports) {
 
     // Activate if activate-on-focus is true
     if (config.activateOnFocus) {
-      const value = triggers[nextIndex].getAttribute(attributes.triggerValue);
+      const value = triggers[nextIndex].getAttribute(attributes.triggerId);
       activate(instance, value);
     }
   }
@@ -664,7 +660,7 @@ var Tabs = (function (exports) {
     }
 
     if (config.activateOnFocus) {
-      const value = triggers[index].getAttribute(attributes.triggerValue);
+      const value = triggers[index].getAttribute(attributes.triggerId);
       activate(instance, value);
     }
   }
@@ -696,7 +692,7 @@ var Tabs = (function (exports) {
     }
 
     // Priority 3: First trigger
-    const firstValue = triggers[0].getAttribute(attributes.triggerValue);
+    const firstValue = triggers[0].getAttribute(attributes.triggerId);
     return normalizeValue(firstValue);
   }
 
@@ -748,10 +744,10 @@ var Tabs = (function (exports) {
 
     // Update trigger states
     triggers.forEach((trigger) => {
-      const triggerValue = normalizeValue(
-        trigger.getAttribute(attributes.triggerValue)
+      const value = normalizeValue(
+        trigger.getAttribute(attributes.triggerId)
       );
-      const isActive = triggerValue === normalized;
+      const isActive = value === normalized;
 
       trigger.classList.toggle(classes.active, isActive);
       trigger.classList.toggle(classes.inactive, !isActive);
@@ -764,11 +760,9 @@ var Tabs = (function (exports) {
 
     // Update panel states
     panels.forEach((panel) => {
-      const panelValue = normalizeValue(
-        panel.getAttribute(attributes.panelValue)
-      );
-      const isActive = panelValue === normalized;
-      const wasActive = panelValue === previousValue;
+      const value = normalizeValue(panel.getAttribute(attributes.panelId));
+      const isActive = value === normalized;
+      const wasActive = value === previousValue;
 
       // Remove previous transition classes
       panel.classList.remove(classes.panelEntering, classes.panelLeaving);
@@ -851,7 +845,7 @@ var Tabs = (function (exports) {
     triggers.forEach((trigger) => {
       const handler = (e) => {
         e.preventDefault();
-        const value = trigger.getAttribute(attributes.triggerValue);
+        const value = trigger.getAttribute(attributes.triggerId);
 
         // Pause autoplay on user interaction
         if (state.isAutoplaying) {
@@ -1105,9 +1099,7 @@ var Tabs = (function (exports) {
         nextIndex = Math.min(nextIndex, triggers.length - 1);
       }
 
-      const nextValue = triggers[nextIndex].getAttribute(
-        attributes.triggerValue
-      );
+      const nextValue = triggers[nextIndex].getAttribute(attributes.triggerId);
       activate(this, nextValue);
       return this;
     }
@@ -1124,9 +1116,7 @@ var Tabs = (function (exports) {
         prevIndex = Math.max(prevIndex, 0);
       }
 
-      const prevValue = triggers[prevIndex].getAttribute(
-        attributes.triggerValue
-      );
+      const prevValue = triggers[prevIndex].getAttribute(attributes.triggerId);
       activate(this, prevValue);
       return this;
     }

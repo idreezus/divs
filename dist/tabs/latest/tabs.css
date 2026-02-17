@@ -1,11 +1,11 @@
 /* Tabs default styles */
 
 /* Panel visibility - hidden by default, shown when active */
-[data-tabs-panel-value] {
+[data-tabs-panel-id] {
   display: none;
 }
 
-[data-tabs-panel-value].tabs-active {
+[data-tabs-panel-id].tabs-active {
   display: block;
 }
 
@@ -45,7 +45,7 @@
 }
 
 /* Trigger focus state for keyboard navigation */
-[data-tabs-trigger-value]:focus-visible {
+[data-tabs-trigger-id]:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 2px;
 }

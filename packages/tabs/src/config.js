@@ -3,8 +3,8 @@
 // Selectors for querying DOM elements
 export const selectors = {
   container: '[data-tabs="container"]',
-  trigger: '[data-tabs-trigger-value]',
-  panel: '[data-tabs-panel-value]',
+  trigger: '[data-tabs-trigger-id]',
+  panel: '[data-tabs-panel-id]',
   prevBtn: '[data-tabs="prev"]',
   nextBtn: '[data-tabs="next"]',
   playPauseBtn: '[data-tabs="play-pause"]',
@@ -22,8 +22,8 @@ export const attributes = {
   id: 'data-tabs-id',
 
   // Content linking
-  triggerValue: 'data-tabs-trigger-value',
-  panelValue: 'data-tabs-panel-value',
+  triggerId: 'data-tabs-trigger-id',
+  panelId: 'data-tabs-panel-id',
 
   // Autoplay configuration
   autoplay: 'data-tabs-autoplay',

@@ -20,7 +20,7 @@ Copy & paste this script in your Page Settings **Before `</body>` tag**
 
 ```html
 <!-- Divs Carousel Library -->
-<script src="https://cdn.jsdelivr.net/gh/idreezus/divs@v1.0.0/dist/carousel/v1.0.0/carousel.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/idreezus/divs@v1.1.0/dist/carousel/v1.1.0/carousel.min.js"></script>
 ```
 
 </Step>
@@ -62,7 +62,8 @@ Copy & paste this in an embed element or your Page Settings **Inside `<head>` ta
         (100% - min(var(--site-max-width), 100% - var(--site-padding) * 2)) / 2
       );
       --carousel-scroll-padding-breakout: calc(
-        (100vw - min(var(--site-max-width), 100vw - var(--site-padding) * 2)) / 2
+        (100vw - min(var(--site-max-width), 100vw - var(--site-padding) * 2)) /
+          2
       );
     }
   }
@@ -301,11 +302,11 @@ Add pagination dots anywhere inside the carousel container. The library finds al
 </div>
 ```
 
-| Attribute                          | Description                                           |
-| ---------------------------------- | ----------------------------------------------------- |
-| `data-carousel-dot`                | Individual dot element (first one is used as template)|
-| `data-carousel-pagination-current` | Element that displays current slide number (1-based)  |
-| `data-carousel-pagination-total`   | Element that displays total slide count               |
+| Attribute                          | Description                                            |
+| ---------------------------------- | ------------------------------------------------------ |
+| `data-carousel-dot`                | Individual dot element (first one is used as template) |
+| `data-carousel-pagination-current` | Element that displays current slide number (1-based)   |
+| `data-carousel-pagination-total`   | Element that displays total slide count                |
 
 For custom pagination displays like "2 of 5":
 
@@ -344,11 +345,11 @@ The library also works with CSS [`scroll-padding`](https://developer.mozilla.org
 
 The library exposes state as CSS custom properties on the container element. Use these for dynamic styling without JavaScript.
 
-| Property              | Values    | Description                              |
-| --------------------- | --------- | ---------------------------------------- |
-| `--carousel-index`    | `1, 2, 3…`| Current slide number (1-based)           |
-| `--carousel-total`    | `1, 2, 3…`| Total number of slides                   |
-| `--carousel-progress` | `0` – `1` | Scroll progress through the carousel     |
+| Property              | Values     | Description                          |
+| --------------------- | ---------- | ------------------------------------ |
+| `--carousel-index`    | `1, 2, 3…` | Current slide number (1-based)       |
+| `--carousel-total`    | `1, 2, 3…` | Total number of slides               |
+| `--carousel-progress` | `0` – `1`  | Scroll progress through the carousel |
 
 Example: a progress bar that fills as you scroll through the carousel.
 
@@ -365,14 +366,14 @@ Example: a progress bar that fills as you scroll through the carousel.
 
 The library applies state classes that you can style however you want.
 
-| Class                         | Applied to                                                            |
-| ----------------------------- | --------------------------------------------------------------------- |
-| `.carousel-item-active`       | The item that is currently active (i.e. aligned)                      |
-| `.carousel-button-disabled`   | Navigation buttons at start/end boundaries                            |
-| `.carousel-scrolling`         | The track while a user or programmatic scrolling is active            |
-| `.carousel-snap-disabled`     | The track to temporarily disable scroll-snap during button navigation |
-| `.carousel-animating`         | The track during programmatic scroll animations                       |
-| `.carousel-dot-active`        | The active pagination dot                                             |
+| Class                       | Applied to                                                            |
+| --------------------------- | --------------------------------------------------------------------- |
+| `.carousel-item-active`     | The item that is currently active (i.e. aligned)                      |
+| `.carousel-button-disabled` | Navigation buttons at start/end boundaries                            |
+| `.carousel-scrolling`       | The track while a user or programmatic scrolling is active            |
+| `.carousel-snap-disabled`   | The track to temporarily disable scroll-snap during button navigation |
+| `.carousel-animating`       | The track during programmatic scroll animations                       |
+| `.carousel-dot-active`      | The active pagination dot                                             |
 
 Here's an example from the prev/next buttons on all the variants on this page:
 
@@ -380,7 +381,9 @@ Here's an example from the prev/next buttons on all the variants on this page:
 /* Arrow initial styles */
 .carousel_arrow {
   cursor: pointer;
-  transition: opacity 200ms ease-in-out, color 150ms ease-in-out;
+  transition:
+    opacity 200ms ease-in-out,
+    color 150ms ease-in-out;
 }
 
 /* For a disabled arrow */

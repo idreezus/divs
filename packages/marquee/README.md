@@ -87,10 +87,7 @@ Add interactive hover effects with simple attributes:
 ### Pause on Hover
 
 ```html
-<div
-  data-marquee="true"
-  data-marquee-hover-effect="pause"
-  class="my-marquee">
+<div data-marquee="true" data-marquee-hover-effect="pause" class="my-marquee">
   <!-- items -->
 </div>
 ```
@@ -102,7 +99,8 @@ Add interactive hover effects with simple attributes:
   data-marquee="true"
   data-marquee-hover-effect="slow"
   data-marquee-hover-speed="0.3"
-  class="my-marquee">
+  class="my-marquee"
+>
   <!-- items -->
 </div>
 ```
@@ -114,7 +112,8 @@ Add interactive hover effects with simple attributes:
   data-marquee="true"
   data-marquee-hover-effect="pause"
   data-marquee-hover-trigger="items"
-  class="my-marquee">
+  class="my-marquee"
+>
   <!-- items -->
 </div>
 ```
@@ -123,38 +122,38 @@ Add interactive hover effects with simple attributes:
 
 ### Core Attributes
 
-| Attribute | Values | Default | Description |
-|-----------|--------|---------|-------------|
-| `data-marquee` | `"true"` | - | **Required** - Marks container for initialization |
-| `data-marquee-item` | `"true"` | - | **Required** - Marks items to animate |
-| `data-marquee-speed` | number | `0.7` | Speed multiplier where 1.0 ≈ 100px/second (higher = faster) |
-| `data-marquee-reverse` | `"true"` | - | Reverses animation direction |
-| `data-marquee-repeat` | number | `-1` | Number of times to loop. `-1` = infinite, `0` = play once, `5` = loop 5 times |
+| Attribute              | Values   | Default | Description                                                                   |
+| ---------------------- | -------- | ------- | ----------------------------------------------------------------------------- |
+| `data-marquee`         | `"true"` | -       | **Required** - Marks container for initialization                             |
+| `data-marquee-item`    | `"true"` | -       | **Required** - Marks items to animate                                         |
+| `data-marquee-speed`   | number   | `0.7`   | Speed multiplier where 1.0 ≈ 100px/second (higher = faster)                   |
+| `data-marquee-reverse` | `"true"` | -       | Reverses animation direction                                                  |
+| `data-marquee-repeat`  | number   | `-1`    | Number of times to loop. `-1` = infinite, `0` = play once, `5` = loop 5 times |
 
 ### Cloning Options
 
-| Attribute | Values | Default | Description |
-|-----------|--------|---------|-------------|
-| `data-marquee-auto-clone` | `"true"` / `"false"` | `"true"` | Auto-clone items for seamless loops |
-| `data-marquee-clones` | number | Auto-calculated | Number of clone sets (1-10). Auto-calculates if not set. |
+| Attribute                 | Values               | Default         | Description                                              |
+| ------------------------- | -------------------- | --------------- | -------------------------------------------------------- |
+| `data-marquee-auto-clone` | `"true"` / `"false"` | `"true"`        | Auto-clone items for seamless loops                      |
+| `data-marquee-clones`     | number               | Auto-calculated | Number of clone sets (1-10). Auto-calculates if not set. |
 
 ### Hover Effect Options
 
-| Attribute | Values | Default | Description |
-|-----------|--------|---------|-------------|
-| `data-marquee-hover-effect` | `"pause"` / `"slow"` | - | Type of hover effect |
-| `data-marquee-hover-trigger` | `"container"` / `"items"` | `"container"` | Where hover is detected |
-| `data-marquee-hover-speed` | 0-1 | `0.3` (slow)<br>`0.1` (pause) | Target speed during hover |
-| `data-marquee-hover-duration` | seconds | `0.4` | Duration to ramp to pause |
-| `data-marquee-hover-in` | seconds | `0.7` | Slow effect ramp in duration |
-| `data-marquee-hover-out` | seconds | `0.25` | Slow effect ramp out duration |
-| `data-marquee-hover-ease-in` | GSAP ease | `"power1.out"` | Ramp in easing function |
-| `data-marquee-hover-ease-out` | GSAP ease | `"power1.out"` | Ramp out easing function |
+| Attribute                     | Values                    | Default                       | Description                   |
+| ----------------------------- | ------------------------- | ----------------------------- | ----------------------------- |
+| `data-marquee-hover-effect`   | `"pause"` / `"slow"`      | -                             | Type of hover effect          |
+| `data-marquee-hover-trigger`  | `"container"` / `"items"` | `"container"`                 | Where hover is detected       |
+| `data-marquee-hover-speed`    | 0-1                       | `0.3` (slow)<br>`0.1` (pause) | Target speed during hover     |
+| `data-marquee-hover-duration` | seconds                   | `0.4`                         | Duration to ramp to pause     |
+| `data-marquee-hover-in`       | seconds                   | `0.7`                         | Slow effect ramp in duration  |
+| `data-marquee-hover-out`      | seconds                   | `0.25`                        | Slow effect ramp out duration |
+| `data-marquee-hover-ease-in`  | GSAP ease                 | `"power1.out"`                | Ramp in easing function       |
+| `data-marquee-hover-ease-out` | GSAP ease                 | `"power1.out"`                | Ramp out easing function      |
 
 ### Performance Options
 
-| Attribute | Values | Default | Description |
-|-----------|--------|---------|-------------|
+| Attribute                   | Values               | Default  | Description                                                                                                               |
+| --------------------------- | -------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------- |
 | `data-marquee-intersection` | `"true"` / `"false"` | `"true"` | Use IntersectionObserver to only animate when visible. Improves performance by pausing marquees that are out of viewport. |
 
 ## JavaScript API
@@ -184,19 +183,16 @@ const specificMarquees = window.Marquee.getAll('.my-marquees');
 const hasMarquee = window.Marquee.has(element);
 
 // Control multiple marquees
-window.Marquee.pauseAll();              // Pause all
+window.Marquee.pauseAll(); // Pause all
 window.Marquee.playAll('.my-marquees'); // Play specific ones
-window.Marquee.destroyAll();            // Destroy all
+window.Marquee.destroyAll(); // Destroy all
 
 // Manual direction refresh (for responsive breakpoints)
-window.Marquee.refresh(element);        // Refresh one
-window.Marquee.refreshAll();            // Refresh all
+window.Marquee.refresh(element); // Refresh one
+window.Marquee.refreshAll(); // Refresh all
 
 // Methods are chainable (except getters)
-window.Marquee
-  .pauseAll('.slow')
-  .playAll('.fast')
-  .refreshAll();
+window.Marquee.pauseAll('.slow').playAll('.fast').refreshAll();
 ```
 
 ## CSS Requirements
@@ -205,9 +201,9 @@ For optimal performance, your marquee container needs:
 
 ```css
 [data-marquee] {
-  display: flex;           /* Required */
-  overflow: hidden;        /* Required */
-  gap: 20px;              /* Recommended for spacing */
+  display: flex; /* Required */
+  overflow: hidden; /* Required */
+  gap: 20px; /* Recommended for spacing */
 }
 ```
 
@@ -215,7 +211,7 @@ Items should use:
 
 ```css
 [data-marquee-item] {
-  flex-shrink: 0;         /* Prevents items from compressing */
+  flex-shrink: 0; /* Prevents items from compressing */
 }
 ```
 
@@ -227,10 +223,10 @@ The library automatically applies `flex-shrink: 0` and `will-change: transform` 
 
 ```html
 <div data-marquee="true" class="logo-carousel">
-  <img data-marquee-item="true" src="logo1.png" alt="Brand 1">
-  <img data-marquee-item="true" src="logo2.png" alt="Brand 2">
-  <img data-marquee-item="true" src="logo3.png" alt="Brand 3">
-  <img data-marquee-item="true" src="logo4.png" alt="Brand 4">
+  <img data-marquee-item="true" src="logo1.png" alt="Brand 1" />
+  <img data-marquee-item="true" src="logo2.png" alt="Brand 2" />
+  <img data-marquee-item="true" src="logo3.png" alt="Brand 3" />
+  <img data-marquee-item="true" src="logo4.png" alt="Brand 4" />
 </div>
 
 <style>
@@ -255,7 +251,8 @@ The library automatically applies `flex-shrink: 0` and `will-change: transform` 
   data-marquee="true"
   data-marquee-speed="0.5"
   data-marquee-hover-effect="pause"
-  class="testimonials">
+  class="testimonials"
+>
   <div data-marquee-item="true" class="testimonial">
     <p>"Amazing product!"</p>
     <cite>- Jane Doe</cite>
@@ -279,7 +276,7 @@ The library automatically applies `flex-shrink: 0` and `will-change: transform` 
     padding: 30px;
     background: white;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
 </style>
 ```
@@ -291,7 +288,8 @@ The library automatically applies `flex-shrink: 0` and `will-change: transform` 
   data-marquee="true"
   data-marquee-reverse="true"
   data-marquee-speed="2"
-  class="fast-reverse">
+  class="fast-reverse"
+>
   <div data-marquee-item="true">Fast Item 1</div>
   <div data-marquee-item="true">Fast Item 2</div>
   <div data-marquee-item="true">Fast Item 3</div>
@@ -309,6 +307,7 @@ The library automatically handles accessibility:
 ## Browser Support
 
 Works in all modern browsers that support:
+
 - ES6 modules
 - CSS Flexbox
 - GSAP 3.x
@@ -397,7 +396,8 @@ window.Marquee.init();
   data-marquee="true"
   data-marquee-speed="0.5"
   data-marquee-reverse="true"
-  class="marquee">
+  class="marquee"
+>
   <!-- items -->
 </div>
 ```

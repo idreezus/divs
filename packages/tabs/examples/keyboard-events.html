@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -51,40 +51,40 @@
                 id="test6-tabs"
               >
                 <div class="tabs-trigger-list" role="tablist">
-                  <button class="tabs-trigger" data-tabs-trigger-value="tab-a">
+                  <button class="tabs-trigger" data-tabs-trigger-id="tab-a">
                     Tab A
                   </button>
-                  <button class="tabs-trigger" data-tabs-trigger-value="tab-b">
+                  <button class="tabs-trigger" data-tabs-trigger-id="tab-b">
                     Tab B
                   </button>
-                  <button class="tabs-trigger" data-tabs-trigger-value="tab-c">
+                  <button class="tabs-trigger" data-tabs-trigger-id="tab-c">
                     Tab C
                   </button>
-                  <button class="tabs-trigger" data-tabs-trigger-value="tab-d">
+                  <button class="tabs-trigger" data-tabs-trigger-id="tab-d">
                     Tab D
                   </button>
-                  <button class="tabs-trigger" data-tabs-trigger-value="tab-e">
+                  <button class="tabs-trigger" data-tabs-trigger-id="tab-e">
                     Tab E
                   </button>
                 </div>
                 <div class="tabs-panels">
-                  <div class="tabs-panel" data-tabs-panel-value="tab-a">
+                  <div class="tabs-panel" data-tabs-panel-id="tab-a">
                     <strong>Tab A Content</strong> - Press Arrow Right to go to
                     Tab B, or End to jump to Tab E.
                   </div>
-                  <div class="tabs-panel" data-tabs-panel-value="tab-b">
+                  <div class="tabs-panel" data-tabs-panel-id="tab-b">
                     <strong>Tab B Content</strong> - Press Arrow Left to go back
                     to Tab A.
                   </div>
-                  <div class="tabs-panel" data-tabs-panel-value="tab-c">
+                  <div class="tabs-panel" data-tabs-panel-id="tab-c">
                     <strong>Tab C Content</strong> - You're in the middle. Use
                     Home to jump to the start.
                   </div>
-                  <div class="tabs-panel" data-tabs-panel-value="tab-d">
+                  <div class="tabs-panel" data-tabs-panel-id="tab-d">
                     <strong>Tab D Content</strong> - Almost at the end. One more
                     to go!
                   </div>
-                  <div class="tabs-panel" data-tabs-panel-value="tab-e">
+                  <div class="tabs-panel" data-tabs-panel-id="tab-e">
                     <strong>Tab E Content</strong> - This is the last tab. Press
                     Home to return to the beginning.
                   </div>
@@ -111,34 +111,25 @@
             <div class="tabs-demo">
               <div data-tabs="container" id="test7-tabs" class="sliding-pill">
                 <div class="tabs-trigger-list" role="tablist">
-                  <button
-                    class="tabs-trigger"
-                    data-tabs-trigger-value="event-1"
-                  >
+                  <button class="tabs-trigger" data-tabs-trigger-id="event-1">
                     Event 1
                   </button>
-                  <button
-                    class="tabs-trigger"
-                    data-tabs-trigger-value="event-2"
-                  >
+                  <button class="tabs-trigger" data-tabs-trigger-id="event-2">
                     Event 2
                   </button>
-                  <button
-                    class="tabs-trigger"
-                    data-tabs-trigger-value="event-3"
-                  >
+                  <button class="tabs-trigger" data-tabs-trigger-id="event-3">
                     Event 3
                   </button>
                 </div>
                 <div class="tabs-panels">
-                  <div class="tabs-panel" data-tabs-panel-value="event-1">
+                  <div class="tabs-panel" data-tabs-panel-id="event-1">
                     Click on different tabs to see change events logged below.
                   </div>
-                  <div class="tabs-panel" data-tabs-panel-value="event-2">
+                  <div class="tabs-panel" data-tabs-panel-id="event-2">
                     Each tab change fires a "change" event with value and
                     previousValue.
                   </div>
-                  <div class="tabs-panel" data-tabs-panel-value="event-3">
+                  <div class="tabs-panel" data-tabs-panel-id="event-3">
                     Events can be subscribed to via instance.on() or DOM
                     addEventListener.
                   </div>

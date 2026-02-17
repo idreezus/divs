@@ -142,23 +142,23 @@ The library only manages visibility classes – all styling (positioning, sizing
 
 ### Core Attributes
 
-| Attribute                      | Element     | Values                       | Default      | Description                    |
-| ------------------------------ | ----------- | ---------------------------- | ------------ | ------------------------------ |
-| `data-scroll-fade-container`   | Wrapper     | (presence) or `"false"`      | -            | Required on wrapper element    |
-| `data-scroll-fade-list`        | Scrollable  | (presence) or `"false"`      | -            | Required on scrollable element |
-| `data-scroll-fade="start"`     | Shadow      | `"start"`                    | -            | Start edge shadow element      |
-| `data-scroll-fade="end"`       | Shadow      | `"end"`                      | -            | End edge shadow element        |
-| `data-scroll-fade-orientation` | List        | `"horizontal"` / `"vertical"`| `"horizontal"`| Scroll axis                   |
-| `data-scroll-fade-step`        | List        | Number (px)                  | list size    | Scroll amount for nav buttons  |
+| Attribute                      | Element    | Values                        | Default        | Description                    |
+| ------------------------------ | ---------- | ----------------------------- | -------------- | ------------------------------ |
+| `data-scroll-fade-container`   | Wrapper    | (presence) or `"false"`       | -              | Required on wrapper element    |
+| `data-scroll-fade-list`        | Scrollable | (presence) or `"false"`       | -              | Required on scrollable element |
+| `data-scroll-fade="start"`     | Shadow     | `"start"`                     | -              | Start edge shadow element      |
+| `data-scroll-fade="end"`       | Shadow     | `"end"`                       | -              | End edge shadow element        |
+| `data-scroll-fade-orientation` | List       | `"horizontal"` / `"vertical"` | `"horizontal"` | Scroll axis                    |
+| `data-scroll-fade-step`        | List       | Number (px)                   | list size      | Scroll amount for nav buttons  |
 
 ### Navigation Buttons
 
 Optional navigation controls placed inside the container:
 
-| Attribute              | Description                                       |
-| ---------------------- | ------------------------------------------------- |
-| `data-scroll-fade-prev`| Scrolls toward start (left/top)                   |
-| `data-scroll-fade-next`| Scrolls toward end (right/bottom)                 |
+| Attribute               | Description                       |
+| ----------------------- | --------------------------------- |
+| `data-scroll-fade-prev` | Scrolls toward start (left/top)   |
+| `data-scroll-fade-next` | Scrolls toward end (right/bottom) |
 
 ```html
 <div data-scroll-fade-container>
@@ -265,10 +265,10 @@ To temporarily disable a container, set the attribute value to `"false"`:
 
 The library applies state classes that you style however you want:
 
-| Class                         | Applied to                                  |
-| ----------------------------- | ------------------------------------------- |
-| `.scroll-fade-hidden`         | Shadow elements when at their respective edge |
-| `.scroll-fade-button-disabled`| Navigation buttons at start/end boundaries  |
+| Class                          | Applied to                                    |
+| ------------------------------ | --------------------------------------------- |
+| `.scroll-fade-hidden`          | Shadow elements when at their respective edge |
+| `.scroll-fade-button-disabled` | Navigation buttons at start/end boundaries    |
 
 ---
 
@@ -322,12 +322,12 @@ container.addEventListener('scroll-fade:hide', (e) => {
 
 Available events:
 
-| Event                    | Description               | Event Detail           |
-| ------------------------ | ------------------------- | ---------------------- |
-| `scroll-fade:reach-start`| Scrolled to start edge    | `{ scrollFade }`       |
-| `scroll-fade:reach-end`  | Scrolled to end edge      | `{ scrollFade }`       |
-| `scroll-fade:show`       | Shadow became visible     | `{ scrollFade, edge }` |
-| `scroll-fade:hide`       | Shadow became hidden      | `{ scrollFade, edge }` |
+| Event                     | Description            | Event Detail           |
+| ------------------------- | ---------------------- | ---------------------- |
+| `scroll-fade:reach-start` | Scrolled to start edge | `{ scrollFade }`       |
+| `scroll-fade:reach-end`   | Scrolled to end edge   | `{ scrollFade }`       |
+| `scroll-fade:show`        | Shadow became visible  | `{ scrollFade, edge }` |
+| `scroll-fade:hide`        | Shadow became hidden   | `{ scrollFade, edge }` |
 
 Events fire on initialization if the container starts at an edge.
 

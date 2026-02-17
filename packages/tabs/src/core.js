@@ -29,10 +29,10 @@ const instances = new Map();
 // Finds the index of a trigger by its normalized value
 function findTriggerIndex(triggers, targetValue) {
   return triggers.findIndex((trigger) => {
-    const triggerValue = normalizeValue(
-      trigger.getAttribute(attributes.triggerValue)
+    const value = normalizeValue(
+      trigger.getAttribute(attributes.triggerId)
     );
-    return triggerValue === targetValue;
+    return value === targetValue;
   });
 }
 
@@ -75,14 +75,14 @@ function findElements(instance) {
 
   if (triggers.length === 0) {
     console.error(
-      `Tabs ${id}: No triggers found. Expected elements with [data-tabs-trigger-value].`
+      `Tabs ${id}: No triggers found. Expected elements with [data-tabs-trigger-id].`
     );
     return false;
   }
 
   if (panels.length === 0) {
     console.error(
-      `Tabs ${id}: No panels found. Expected elements with [data-tabs-panel-value].`
+      `Tabs ${id}: No panels found. Expected elements with [data-tabs-panel-id].`
     );
     return false;
   }
@@ -93,11 +93,11 @@ function findElements(instance) {
   let hasErrors = false;
 
   triggers.forEach((trigger) => {
-    const rawValue = trigger.getAttribute(attributes.triggerValue);
+    const rawValue = trigger.getAttribute(attributes.triggerId);
     const value = normalizeValue(rawValue);
 
     if (!value) {
-      console.error(`Tabs ${id}: Trigger has empty data-tabs-trigger-value.`);
+      console.error(`Tabs ${id}: Trigger has empty data-tabs-trigger-id.`);
       hasErrors = true;
       return;
     }
@@ -116,11 +116,11 @@ function findElements(instance) {
   });
 
   panels.forEach((panel) => {
-    const rawValue = panel.getAttribute(attributes.panelValue);
+    const rawValue = panel.getAttribute(attributes.panelId);
     const value = normalizeValue(rawValue);
 
     if (!value) {
-      console.error(`Tabs ${id}: Panel has empty data-tabs-panel-value.`);
+      console.error(`Tabs ${id}: Panel has empty data-tabs-panel-id.`);
       hasErrors = true;
       return;
     }
@@ -176,9 +176,7 @@ function setupAccessibility(instance) {
   instance.container.setAttribute('aria-orientation', config.orientation);
 
   triggers.forEach((trigger) => {
-    const value = normalizeValue(
-      trigger.getAttribute(attributes.triggerValue)
-    );
+    const value = normalizeValue(trigger.getAttribute(attributes.triggerId));
     const triggerId = trigger.id || `${id}-trigger-${value}`;
     const panelId = `${id}-panel-${value}`;
 
@@ -188,7 +186,7 @@ function setupAccessibility(instance) {
   });
 
   panels.forEach((panel) => {
-    const value = normalizeValue(panel.getAttribute(attributes.panelValue));
+    const value = normalizeValue(panel.getAttribute(attributes.panelId));
     const panelId = panel.id || `${id}-panel-${value}`;
     const triggerId = `${id}-trigger-${value}`;
 
@@ -204,9 +202,7 @@ function updateAriaStates(instance) {
   const { triggers, panels, state } = instance;
 
   triggers.forEach((trigger) => {
-    const value = normalizeValue(
-      trigger.getAttribute(attributes.triggerValue)
-    );
+    const value = normalizeValue(trigger.getAttribute(attributes.triggerId));
     const isActive = value === state.activeValue;
 
     trigger.setAttribute('aria-selected', isActive.toString());
@@ -214,7 +210,7 @@ function updateAriaStates(instance) {
   });
 
   panels.forEach((panel) => {
-    const value = normalizeValue(panel.getAttribute(attributes.panelValue));
+    const value = normalizeValue(panel.getAttribute(attributes.panelId));
     const isActive = value === state.activeValue;
 
     panel.setAttribute('aria-hidden', (!isActive).toString());
@@ -265,7 +261,7 @@ function setupKeyboardNavigation(instance) {
         // Only needed if activate-on-focus is false
         if (!config.activateOnFocus) {
           e.preventDefault();
-          const value = focusedTrigger.getAttribute(attributes.triggerValue);
+          const value = focusedTrigger.getAttribute(attributes.triggerId);
           activate(instance, value);
         }
         break;
@@ -300,7 +296,7 @@ function moveFocus(instance, direction) {
 
   // Activate if activate-on-focus is true
   if (config.activateOnFocus) {
-    const value = triggers[nextIndex].getAttribute(attributes.triggerValue);
+    const value = triggers[nextIndex].getAttribute(attributes.triggerId);
     activate(instance, value);
   }
 }
@@ -316,7 +312,7 @@ function focusTriggerAt(instance, index) {
   }
 
   if (config.activateOnFocus) {
-    const value = triggers[index].getAttribute(attributes.triggerValue);
+    const value = triggers[index].getAttribute(attributes.triggerId);
     activate(instance, value);
   }
 }
@@ -348,7 +344,7 @@ function determineInitialValue(instance) {
   }
 
   // Priority 3: First trigger
-  const firstValue = triggers[0].getAttribute(attributes.triggerValue);
+  const firstValue = triggers[0].getAttribute(attributes.triggerId);
   return normalizeValue(firstValue);
 }
 
@@ -400,10 +396,10 @@ function activate(instance, value, options = {}) {
 
   // Update trigger states
   triggers.forEach((trigger) => {
-    const triggerValue = normalizeValue(
-      trigger.getAttribute(attributes.triggerValue)
+    const value = normalizeValue(
+      trigger.getAttribute(attributes.triggerId)
     );
-    const isActive = triggerValue === normalized;
+    const isActive = value === normalized;
 
     trigger.classList.toggle(classes.active, isActive);
     trigger.classList.toggle(classes.inactive, !isActive);
@@ -416,11 +412,9 @@ function activate(instance, value, options = {}) {
 
   // Update panel states
   panels.forEach((panel) => {
-    const panelValue = normalizeValue(
-      panel.getAttribute(attributes.panelValue)
-    );
-    const isActive = panelValue === normalized;
-    const wasActive = panelValue === previousValue;
+    const value = normalizeValue(panel.getAttribute(attributes.panelId));
+    const isActive = value === normalized;
+    const wasActive = value === previousValue;
 
     // Remove previous transition classes
     panel.classList.remove(classes.panelEntering, classes.panelLeaving);
@@ -503,7 +497,7 @@ function attachEventListeners(instance) {
   triggers.forEach((trigger) => {
     const handler = (e) => {
       e.preventDefault();
-      const value = trigger.getAttribute(attributes.triggerValue);
+      const value = trigger.getAttribute(attributes.triggerId);
 
       // Pause autoplay on user interaction
       if (state.isAutoplaying) {
@@ -757,9 +751,7 @@ export class Tabs {
       nextIndex = Math.min(nextIndex, triggers.length - 1);
     }
 
-    const nextValue = triggers[nextIndex].getAttribute(
-      attributes.triggerValue
-    );
+    const nextValue = triggers[nextIndex].getAttribute(attributes.triggerId);
     activate(this, nextValue);
     return this;
   }
@@ -776,9 +768,7 @@ export class Tabs {
       prevIndex = Math.max(prevIndex, 0);
     }
 
-    const prevValue = triggers[prevIndex].getAttribute(
-      attributes.triggerValue
-    );
+    const prevValue = triggers[prevIndex].getAttribute(attributes.triggerId);
     activate(this, prevValue);
     return this;
   }

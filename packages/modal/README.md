@@ -152,14 +152,14 @@ If you use a `<div>` instead of `<dialog>`, the library wraps it automatically:
 
 ### Core Attributes
 
-| Attribute | Values | Default | Description |
-| --------- | ------ | ------- | ----------- |
-| `data-modal-value` | String | - | Required on modal. Unique identifier. |
-| `data-modal-trigger-value` | String | - | Required on trigger. Opens matching modal. |
-| `data-modal-close` | - | - | Closes containing modal on click. |
-| `data-modal-scroll-lock` | `"false"` | `"true"` | Opt-out of automatic scroll lock. |
-| `data-modal-url-param` | String | - | Query param name for deep linking. |
-| `data-modal-position` | `"center"`, `"left"`, `"right"`, `"top"`, `"bottom"` | `"center"` | Position of the modal. Adds a CSS class for styling. |
+| Attribute                  | Values                                               | Default    | Description                                          |
+| -------------------------- | ---------------------------------------------------- | ---------- | ---------------------------------------------------- |
+| `data-modal-value`         | String                                               | -          | Required on modal. Unique identifier.                |
+| `data-modal-trigger-value` | String                                               | -          | Required on trigger. Opens matching modal.           |
+| `data-modal-close`         | -                                                    | -          | Closes containing modal on click.                    |
+| `data-modal-scroll-lock`   | `"false"`                                            | `"true"`   | Opt-out of automatic scroll lock.                    |
+| `data-modal-url-param`     | String                                               | -          | Query param name for deep linking.                   |
+| `data-modal-position`      | `"center"`, `"left"`, `"right"`, `"top"`, `"bottom"` | `"center"` | Position of the modal. Adds a CSS class for styling. |
 
 ### Close Button
 
@@ -282,14 +282,14 @@ Focus returns to the original trigger (the "Start" button) when all modals close
 
 The library applies these classes that you can style:
 
-| Class | Applied To | When |
-| ----- | ---------- | ---- |
-| `modal-open` | `<body>` | Any modal is open |
+| Class          | Applied To | When                                                 |
+| -------------- | ---------- | ---------------------------------------------------- |
+| `modal-open`   | `<body>`   | Any modal is open                                    |
 | `modal-center` | `<dialog>` | Default position (or `data-modal-position="center"`) |
-| `modal-left` | `<dialog>` | `data-modal-position="left"` |
-| `modal-right` | `<dialog>` | `data-modal-position="right"` |
-| `modal-top` | `<dialog>` | `data-modal-position="top"` |
-| `modal-bottom` | `<dialog>` | `data-modal-position="bottom"` |
+| `modal-left`   | `<dialog>` | `data-modal-position="left"`                         |
+| `modal-right`  | `<dialog>` | `data-modal-position="right"`                        |
+| `modal-top`    | `<dialog>` | `data-modal-position="top"`                          |
+| `modal-bottom` | `<dialog>` | `data-modal-position="bottom"`                       |
 
 Use `modal-open` for scroll lock:
 
@@ -321,10 +321,10 @@ const modal = document.querySelector('dialog')._modal;
 ### Methods
 
 ```javascript
-modal.open();     // Open the modal
-modal.close();    // Close the modal
-modal.refresh();  // Re-scan for new triggers/close buttons
-modal.destroy();  // Clean up and remove listeners
+modal.open(); // Open the modal
+modal.close(); // Close the modal
+modal.refresh(); // Re-scan for new triggers/close buttons
+modal.destroy(); // Clean up and remove listeners
 ```
 
 All methods except `destroy()` are chainable:
@@ -403,6 +403,7 @@ Get the instance from the element and call `open()`:
 ```javascript
 document.querySelector('[data-modal-value="my-modal"]')._modal.open();
 ```
+
 </Accordion>
 
 <Accordion title="What if my modal trigger doesn't exist yet?">

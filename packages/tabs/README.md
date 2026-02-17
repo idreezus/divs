@@ -56,7 +56,7 @@ Snag one of the variants below, or continue reading the documentation to learn m
 
 ## How It Works
 
-This library takes a different approach from traditional tab implementations. Instead of relying on array indices or DOM order, tabs are linked by matching `data-tabs-trigger-value` and `data-tabs-panel-value` attributes.
+This library takes a different approach from traditional tab implementations. Instead of relying on array indices or DOM order, tabs are linked by matching `data-tabs-trigger-id` and `data-tabs-panel-id` attributes.
 
 This value-based linking gives you superpowers:
 
@@ -72,20 +72,20 @@ In the background, the library handles all the accessibility requirements (ARIA 
 Three elements are required:
 
 - `[data-tabs="container"]` – the outermost container, used for scoping
-- `[data-tabs-trigger-value="..."]` – the tab trigger buttons
-- `[data-tabs-panel-value="..."]` – the content panels
+- `[data-tabs-trigger-id="..."]` – the tab trigger buttons
+- `[data-tabs-panel-id="..."]` – the content panels
 
 ```html
 <div data-tabs="container">
   <div role="tablist">
-    <button data-tabs-trigger-value="overview">Overview</button>
-    <button data-tabs-trigger-value="features">Features</button>
-    <button data-tabs-trigger-value="pricing">Pricing</button>
+    <button data-tabs-trigger-id="overview">Overview</button>
+    <button data-tabs-trigger-id="features">Features</button>
+    <button data-tabs-trigger-id="pricing">Pricing</button>
   </div>
   <div>
-    <div data-tabs-panel-value="overview">Overview content here</div>
-    <div data-tabs-panel-value="features">Features content here</div>
-    <div data-tabs-panel-value="pricing">Pricing content here</div>
+    <div data-tabs-panel-id="overview">Overview content here</div>
+    <div data-tabs-panel-id="features">Features content here</div>
+    <div data-tabs-panel-id="pricing">Pricing content here</div>
   </div>
 </div>
 ```
@@ -98,8 +98,8 @@ Three elements are required:
 The value-based approach works great with Webflow's Collection List structure:
 
 1. `[data-tabs="container"]` – goes on an ancestor of the `Collection List Wrapper`, or on the wrapper itself if you don't need navigation buttons inside
-2. `[data-tabs-trigger-value]` – goes on trigger elements (pull the value from a CMS field)
-3. `[data-tabs-panel-value]` – goes on the `Collection List Item` (use the same CMS field)
+2. `[data-tabs-trigger-id]` – goes on trigger elements (pull the value from a CMS field)
+3. `[data-tabs-panel-id]` – goes on the `Collection List Item` (use the same CMS field)
 
 Since triggers and panels are matched by value rather than position, you can have your tab triggers in one Collection List and your panels in another – as long as the values match, they'll connect.
 
@@ -128,10 +128,10 @@ Since triggers and panels are matched by value rather than position, you can hav
 
 ### Content Linking
 
-| Attribute                 | Description                              |
-| ------------------------- | ---------------------------------------- |
-| `data-tabs-trigger-value` | Value that links trigger to its panel    |
-| `data-tabs-panel-value`   | Value that links panel to its trigger(s) |
+| Attribute              | Description                              |
+| ---------------------- | ---------------------------------------- |
+| `data-tabs-trigger-id` | Value that links trigger to its panel    |
+| `data-tabs-panel-id`   | Value that links panel to its trigger(s) |
 
 ### Navigation Elements
 
@@ -199,8 +199,8 @@ Here's an example styling the active trigger:
 }
 
 /* Disabled navigation button */
-[data-tabs="prev"].tabs-button-disabled,
-[data-tabs="next"].tabs-button-disabled {
+[data-tabs='prev'].tabs-button-disabled,
+[data-tabs='next'].tabs-button-disabled {
   opacity: 0.3;
   pointer-events: none;
 }
@@ -208,14 +208,14 @@ Here's an example styling the active trigger:
 
 ### CSS Custom Properties
 
-| Property                   | Applied to        | Description                                                         |
-| -------------------------- | ----------------- | ------------------------------------------------------------------- |
-| `--tabs-progress`          | Active trigger    | Autoplay progress (0-1)                                             |
-| `--tabs-count`             | Container         | Total number of tabs                                                |
+| Property                   | Applied to            | Description                                                         |
+| -------------------------- | --------------------- | ------------------------------------------------------------------- |
+| `--tabs-progress`          | Active trigger        | Autoplay progress (0-1)                                             |
+| `--tabs-count`             | Container             | Total number of tabs                                                |
 | `--tabs-index`             | Triggers &amp; panels | Zero-based index of each element                                    |
-| `--tabs-active-index`      | Container         | Index of currently active tab                                       |
-| `--tabs-direction`         | Container         | Navigation direction: `1` (forward), `-1` (backward), `0` (initial) |
-| `--tabs-autoplay-duration` | Container         | Autoplay duration with unit (e.g., `5000ms`)                        |
+| `--tabs-active-index`      | Container             | Index of currently active tab                                       |
+| `--tabs-direction`         | Container             | Navigation direction: `1` (forward), `-1` (backward), `0` (initial) |
+| `--tabs-autoplay-duration` | Container             | Autoplay duration with unit (e.g., `5000ms`)                        |
 
 These enable powerful CSS-only effects:
 
@@ -241,7 +241,7 @@ These enable powerful CSS-only effects:
 
 /* Progress bar synced to autoplay timer */
 .tabs_trigger::after {
-  content: "";
+  content: '';
   position: absolute;
   bottom: 0;
   left: 0;
@@ -264,7 +264,7 @@ const tabs = window.Tabs.init('[data-tabs="container"]');
 ### Instance Methods
 
 ```javascript
-tabs.goTo("pricing"); // Go to specific tab by value
+tabs.goTo('pricing'); // Go to specific tab by value
 tabs.next(); // Go to next tab
 tabs.prev(); // Go to previous tab
 tabs.play(); // Start autoplay
@@ -277,7 +277,7 @@ tabs.getActiveValue(); // Returns current active value
 All methods are chainable except `getActiveValue` (returns data) and `destroy` (resets DOM to pre-init state):
 
 ```javascript
-tabs.goTo("overview").play();
+tabs.goTo('overview').play();
 ```
 
 ### Events
@@ -285,15 +285,15 @@ tabs.goTo("overview").play();
 Listen for events using native DOM `addEventListener`:
 
 ```javascript
-container.addEventListener("tabs:change", (e) => {
+container.addEventListener('tabs:change', (e) => {
   console.log(e.detail); // { tabs, value, previousValue }
 });
 
-container.addEventListener("tabs:autoplay-start", (e) => {
-  console.log("Autoplay started");
+container.addEventListener('tabs:autoplay-start', (e) => {
+  console.log('Autoplay started');
 });
 
-container.addEventListener("tabs:autoplay-pause", (e) => {
+container.addEventListener('tabs:autoplay-pause', (e) => {
   console.log(`Autoplay paused at ${e.detail.progress * 100}%`);
 });
 ```
@@ -310,13 +310,13 @@ Available events:
 
 ```javascript
 // Get instance by selector or element
-const tabs = window.Tabs.get(".my-tabs");
+const tabs = window.Tabs.get('.my-tabs');
 
 // Get all instances
 const allTabs = window.Tabs.getAll();
 
 // Destroy instance
-window.Tabs.destroy(".my-tabs");
+window.Tabs.destroy('.my-tabs');
 
 // Destroy all instances
 window.Tabs.destroy();
@@ -365,9 +365,9 @@ Priority order: URL parameter &gt; `data-tabs-default` &gt; first trigger.
 Yes! Just use the same value for multiple triggers:
 
 ```html
-<button data-tabs-trigger-value="overview">Overview (sidebar)</button>
+<button data-tabs-trigger-id="overview">Overview (sidebar)</button>
 <!-- ... elsewhere in the container ... -->
-<button data-tabs-trigger-value="overview">Overview (top nav)</button>
+<button data-tabs-trigger-id="overview">Overview (top nav)</button>
 ```
 
 Both will activate the same panel and stay in sync.
@@ -378,7 +378,7 @@ Use the `--tabs-progress` CSS custom property, which updates from 0 to 1 during 
 
 ```css
 .tabs_trigger::after {
-  content: "";
+  content: '';
   position: absolute;
   bottom: 0;
   left: 0;
@@ -463,7 +463,7 @@ By default, clicking a tab or using keyboard navigation permanently pauses autop
 const container = document.querySelector('[data-tabs="container"]');
 const tabs = window.Tabs.get(container);
 
-container.addEventListener("tabs:change", () => {
+container.addEventListener('tabs:change', () => {
   // Resume autoplay after 10 seconds of inactivity
   clearTimeout(window.autoplayTimeout);
   window.autoplayTimeout = setTimeout(() => {
@@ -478,10 +478,10 @@ container.addEventListener("tabs:change", () => {
 Make sure you've included the required CSS file. The base styles handle panel visibility:
 
 ```css
-[data-tabs-panel-value] {
+[data-tabs-panel-id] {
   display: none;
 }
-[data-tabs-panel-value].tabs-active {
+[data-tabs-panel-id].tabs-active {
   display: block;
 }
 ```
