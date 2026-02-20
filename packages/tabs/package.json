@@ -1,6 +1,6 @@
 {
   "name": "tabs",
-  "version": "1.0.0",
+  "version": "1.0.0-beta",
   "description": "An accessible, keyboard-navigable tabs component with autoplay support.",
   "main": "tabs.js",
   "type": "module",
