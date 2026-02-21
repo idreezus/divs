@@ -717,6 +717,7 @@
 
     // Get parent from first dot for appending clones
     const dotsParent = templateDot.parentElement;
+    instance.dotsParent = dotsParent;
 
     // Clone template to match total slides
     while (allDots.length < totalSlides) {
@@ -757,8 +758,62 @@
     // Update dots reference on instance
     instance.dots = preparedDots;
 
+    // Set up roving tabindex keyboard handler on dots parent
+    setupDotKeyboard(instance);
+
     // Set initial active state
     updatePagination(instance);
+  }
+
+  // Sets up delegated keyboard handler on dots parent for roving tabindex
+  function setupDotKeyboard(instance) {
+    const { dots, dotsParent, config } = instance;
+    if (!dots || dots.length <= 1) return;
+
+    // Remove existing handler if present (idempotent for rebuilds)
+    if (instance.boundHandlers.dotKeydown && dotsParent) {
+      dotsParent.removeEventListener('keydown', instance.boundHandlers.dotKeydown);
+    }
+
+    const handler = (event) => {
+      const currentDotIndex = instance.dots.indexOf(event.target);
+      if (currentDotIndex === -1) return;
+
+      const lastIndex = instance.dots.length - 1;
+      let targetIndex = null;
+
+      switch (event.key) {
+        case 'ArrowRight':
+          targetIndex = currentDotIndex < lastIndex
+            ? currentDotIndex + 1
+            : (config.loop ? 0 : lastIndex);
+          break;
+        case 'ArrowLeft':
+          targetIndex = currentDotIndex > 0
+            ? currentDotIndex - 1
+            : (config.loop ? lastIndex : 0);
+          break;
+        case 'Home':
+          targetIndex = 0;
+          break;
+        case 'End':
+          targetIndex = lastIndex;
+          break;
+        default:
+          return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (targetIndex !== currentDotIndex) {
+        instance.goTo(targetIndex);
+        instance.dots[targetIndex].focus();
+      }
+    };
+
+    dotsParent.addEventListener('keydown', handler);
+    instance.boundHandlers.dotKeydown = handler;
   }
 
   // Updates pagination dots to reflect current active item
@@ -771,6 +826,7 @@
       dots.forEach((dot, index) => {
         const isActive = index === currentIndex;
         dot.classList.toggle(CLASSES.DOT_ACTIVE, isActive);
+        dot.setAttribute('tabindex', isActive ? '0' : '-1');
 
         if (isActive) {
           dot.setAttribute('aria-current', 'true');
@@ -778,6 +834,11 @@
           dot.removeAttribute('aria-current');
         }
       });
+
+      // Move focus to active dot only when user is already interacting with dots
+      if (instance.dotsParent?.contains(document.activeElement)) {
+        dots[currentIndex].focus();
+      }
     }
 
     const currentEl = container.querySelector(SELECTORS.PAGINATION_CURRENT);
@@ -1208,6 +1269,11 @@
       // Remove keyboard listener if it exists
       if (instance.boundHandlers.keyboard) {
         container.removeEventListener('keydown', instance.boundHandlers.keyboard);
+      }
+
+      // Remove dot keyboard listener if it exists
+      if (instance.boundHandlers.dotKeydown && instance.dotsParent) {
+        instance.dotsParent.removeEventListener('keydown', instance.boundHandlers.dotKeydown);
       }
     }
 

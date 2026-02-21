@@ -350,6 +350,8 @@ For custom pagination displays like "2 of 5":
 
 The library automatically adds `aria-label="Go to slide X of Y"` and `aria-current="true"` on the active dot for accessibility.
 
+Pagination dots use roving tabindex for keyboard navigation. Only the active dot is in the tab order — pressing Tab skips past inactive dots. When a dot has focus, `Arrow Left` / `Arrow Right` move between dots (wrapping when `data-carousel-loop` is enabled), and `Home` / `End` jump to the first and last dot.
+
 ### Keyboard Navigation
 
 When enabled, `Arrow Left` and `Arrow Right` navigate between items. For those with huge keyboards, `Home` jumps to first item and `End` jumps to the last item.

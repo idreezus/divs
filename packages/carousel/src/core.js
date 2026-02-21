@@ -159,6 +159,11 @@ function cleanup(instance) {
     if (instance.boundHandlers.keyboard) {
       container.removeEventListener('keydown', instance.boundHandlers.keyboard);
     }
+
+    // Remove dot keyboard listener if it exists
+    if (instance.boundHandlers.dotKeydown && instance.dotsParent) {
+      instance.dotsParent.removeEventListener('keydown', instance.boundHandlers.dotKeydown);
+    }
   }
 
   // Remove pagination dot event listeners
