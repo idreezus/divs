@@ -4,6 +4,7 @@ import { CONFIG } from './config.js';
 import {
   generateUniqueId,
   parseConfig,
+  prefersReducedMotion,
   emit,
   calculateDimensions,
   updateCSSProperties,
@@ -19,6 +20,12 @@ import {
   updateUI,
 } from './navigation.js';
 import { setupKeyboardNavigation } from './keyboard.js';
+import {
+  setupAutoplay,
+  startAutoplay,
+  pauseAutoplay,
+  cleanupAutoplay,
+} from './autoplay.js';
 
 // Finds and validates all required and optional elements within the carousel container
 function findElements(instance) {
@@ -50,6 +57,9 @@ function findElements(instance) {
   // Find optional pagination dots (can be anywhere in container)
   const dots = [...container.querySelectorAll(SELECTORS.DOT)];
 
+  // Find optional play-pause button
+  const playPauseBtn = container.querySelector(SELECTORS.PLAY_PAUSE_BTN);
+
   // Add data-carousel-id for easier debugging in devtools
   container.setAttribute('data-carousel-id', id);
 
@@ -60,6 +70,7 @@ function findElements(instance) {
     prevBtn,
     nextBtn,
     dots,
+    playPauseBtn,
   });
 
   return true;
@@ -72,8 +83,18 @@ function attachEventListeners(instance) {
   // Create bound handlers and store them for later removal
   instance.boundHandlers = {
     scroll: () => handleScroll(instance),
-    prev: () => handlePrev(instance),
-    next: () => handleNext(instance),
+    prev: () => {
+      if (instance.state.isAutoplaying && !instance.state.isPaused) {
+        pauseAutoplay(instance, 'user');
+      }
+      handlePrev(instance);
+    },
+    next: () => {
+      if (instance.state.isAutoplaying && !instance.state.isPaused) {
+        pauseAutoplay(instance, 'user');
+      }
+      handleNext(instance);
+    },
   };
 
   // Attach scroll listener with passive flag for better performance
@@ -88,11 +109,30 @@ function attachEventListeners(instance) {
   if (nextBtn) {
     nextBtn.addEventListener('click', instance.boundHandlers.next);
   }
+
+  // Attach play-pause button handler
+  if (instance.playPauseBtn) {
+    instance.boundHandlers.playPause = () => {
+      if (instance.state.isAutoplaying && !instance.state.isPaused) {
+        instance.pause();
+      } else {
+        instance.play();
+      }
+    };
+    instance.playPauseBtn.addEventListener('click', instance.boundHandlers.playPause);
+  }
 }
 
 // Cleans up all event listeners, observers, and references
 function cleanup(instance) {
   const { prevBtn, nextBtn, track, container } = instance;
+
+  // Clean up autoplay before removing other listeners
+  cleanupAutoplay(instance);
+
+  if (instance.playPauseBtn && instance.boundHandlers?.playPause) {
+    instance.playPauseBtn.removeEventListener('click', instance.boundHandlers.playPause);
+  }
 
   // Remove event listeners using stored bound handlers
   if (instance.boundHandlers) {
@@ -132,6 +172,9 @@ function cleanup(instance) {
 
 // Initializes the carousel instance
 function init(instance) {
+  const { container, config } = instance;
+  const { CLASSES, CSS_VARS } = CONFIG;
+
   // Find and validate elements first
   const elementsFound = findElements(instance);
   if (!elementsFound) {
@@ -154,8 +197,18 @@ function init(instance) {
   setupPagination(instance);
 
   // Set up keyboard navigation if enabled
-  if (instance.config.keyboard) {
+  if (config.keyboard) {
     setupKeyboardNavigation(instance, handlePrev, handleNext);
+  }
+
+  // Set up autoplay if enabled and reduced motion is not preferred
+  if (prefersReducedMotion()) {
+    container.classList.add(CLASSES.REDUCED_MOTION);
+  }
+  if (config.autoplay && !prefersReducedMotion()) {
+    container.style.setProperty(CSS_VARS.AUTOPLAY_DURATION, config.autoplayDuration + 'ms');
+    setupAutoplay(instance);
+    startAutoplay(instance);
   }
 
   // Set initial UI state
@@ -183,6 +236,11 @@ export class Carousel {
       endInset: 0,
       hasEmittedStart: false,
       hasEmittedEnd: false,
+      isAutoplaying: false,
+      isPaused: false,
+      autoplayStartTime: null,
+      autoplayElapsed: 0,
+      autoplayPausedOnIndex: null,
     };
 
     // Store core properties on instance
@@ -195,6 +253,7 @@ export class Carousel {
       rafPending: false,
       boundHandlers: null,
       debouncedScrollHandler: null,
+      autoplay: null,
     });
 
     // Initialize the carousel
@@ -229,7 +288,28 @@ export class Carousel {
       );
       return this;
     }
+    // Reset autoplay timer when autoplay is running (not paused)
+    if (this.state.isAutoplaying && !this.state.isPaused) {
+      this.state.autoplayStartTime = performance.now();
+    }
     scrollToItem(this, index);
+    return this;
+  }
+
+  // Starts or resumes autoplay
+  play() {
+    const { CSS_VARS } = CONFIG;
+    if (prefersReducedMotion()) return this;
+    if (!this.autoplay) setupAutoplay(this);
+    this.container.style.setProperty(CSS_VARS.AUTOPLAY_DURATION, this.config.autoplayDuration + 'ms');
+    this.autoplay.pausedByUser = false;
+    startAutoplay(this);
+    return this;
+  }
+
+  // Pauses autoplay with sticky user-pause
+  pause() {
+    pauseAutoplay(this, 'user');
     return this;
   }
 

@@ -7,6 +7,7 @@ export const SELECTORS = {
   DOT: '[data-carousel-dot]',
   PAGINATION_CURRENT: '[data-carousel-pagination-current]',
   PAGINATION_TOTAL: '[data-carousel-pagination-total]',
+  PLAY_PAUSE_BTN: '[data-carousel-play-pause]',
 };
 
 // CSS classes applied to elements
@@ -19,6 +20,9 @@ export const CLASSES = {
   SNAP_DISABLED: 'carousel-snap-disabled', // Applied to track to temporarily disable scroll-snap during button navigation
   DOT_ACTIVE: 'carousel-dot-active', // Applied to the current active pagination dot
   LIVE_REGION: 'carousel-sr-only', // Applied to the live region for screen readers
+  AUTOPLAY_ACTIVE: 'carousel-autoplay-active',
+  AUTOPLAY_PAUSED: 'carousel-autoplay-paused',
+  REDUCED_MOTION: 'carousel-reduced-motion',
 };
 
 export const DEFAULTS = {
@@ -26,6 +30,10 @@ export const DEFAULTS = {
   KEYBOARD: false,
   SCROLL_BY: 'item',
   LOOP: false,
+  AUTOPLAY: false,
+  AUTOPLAY_DURATION: 5000,
+  AUTOPLAY_PAUSE_HOVER: true,
+  AUTOPLAY_PAUSE_FOCUS: true,
 };
 
 // Timing constants in milliseconds
@@ -47,6 +55,27 @@ export const CSS_VARS = {
   INDEX: '--carousel-index',
   TOTAL: '--carousel-total',
   PROGRESS: '--carousel-progress',
+  AUTOPLAY_PROGRESS: '--carousel-autoplay-progress',
+  AUTOPLAY_DURATION: '--carousel-autoplay-duration',
+};
+
+// Event names for CustomEvents
+export const EVENTS = {
+  CHANGE: 'change',
+  SCROLL: 'scroll',
+  REACH_START: 'reach-start',
+  REACH_END: 'reach-end',
+  AUTOPLAY_START: 'autoplay-start',
+  AUTOPLAY_PAUSE: 'autoplay-pause',
+};
+
+// Data attribute names for configuration
+export const ATTRIBUTES = {
+  AUTOPLAY: 'data-carousel-autoplay',
+  AUTOPLAY_DURATION: 'data-carousel-autoplay-duration',
+  AUTOPLAY_PAUSE_HOVER: 'data-carousel-autoplay-pause-hover',
+  AUTOPLAY_PAUSE_FOCUS: 'data-carousel-autoplay-pause-focus',
+  SCROLL_BY: 'data-carousel-scroll-by',
 };
 
 export const CONFIG = {
@@ -56,4 +85,6 @@ export const CONFIG = {
   TIMING,
   TOLERANCE,
   CSS_VARS,
+  EVENTS,
+  ATTRIBUTES,
 };

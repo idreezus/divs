@@ -16,12 +16,27 @@ export function parseConfig(container) {
   const align = container.getAttribute('data-carousel-align') || DEFAULTS.ALIGN;
   const keyboard = container.getAttribute('data-carousel-keyboard') === 'true';
   const loop = container.getAttribute('data-carousel-loop') === 'true';
+  const scrollBy = container.getAttribute('data-carousel-scroll-by') || DEFAULTS.SCROLL_BY;
+  const autoplay = container.getAttribute('data-carousel-autoplay') === 'true';
+  const autoplayDuration = parseInt(container.getAttribute('data-carousel-autoplay-duration'), 10) || DEFAULTS.AUTOPLAY_DURATION;
+  const autoplayPauseHover = container.getAttribute('data-carousel-autoplay-pause-hover') !== 'false';
+  const autoplayPauseFocus = container.getAttribute('data-carousel-autoplay-pause-focus') !== 'false';
 
   return {
     align,
     keyboard,
     loop,
+    scrollBy,
+    autoplay,
+    autoplayDuration,
+    autoplayPauseHover,
+    autoplayPauseFocus,
   };
+}
+
+// Checks if the user prefers reduced motion
+export function prefersReducedMotion() {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
 // Creates a debounced version of a function
@@ -104,6 +119,34 @@ export function findActiveIndex(
   });
 
   return closestIndex;
+}
+
+// Finds the target index when scrolling forward by one container width
+export function findNextPageIndex(instance) {
+  const { track, state, items, config } = instance;
+  const { itemPositions, containerWidth } = state;
+  const targetLeft = track.scrollLeft + containerWidth;
+
+  for (let i = state.currentIndex + 1; i < itemPositions.length; i++) {
+    if (itemPositions[i].left >= targetLeft) return i;
+  }
+
+  // Near the end
+  return config.loop ? 0 : items.length - 1;
+}
+
+// Finds the target index when scrolling backward by one container width
+export function findPrevPageIndex(instance) {
+  const { track, state, items, config } = instance;
+  const { itemPositions, containerWidth } = state;
+  const targetLeft = track.scrollLeft - containerWidth;
+
+  for (let i = state.currentIndex - 1; i >= 0; i--) {
+    if (itemPositions[i].left <= targetLeft) return i;
+  }
+
+  // Near the start
+  return config.loop ? items.length - 1 : 0;
 }
 
 // Returns the total number of slides for the provided collection of items

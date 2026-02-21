@@ -3,6 +3,8 @@
 import { CONFIG } from './config.js';
 import {
   findActiveIndex,
+  findNextPageIndex,
+  findPrevPageIndex,
   debounce,
   calculateTotalSlides,
   emit,
@@ -10,6 +12,7 @@ import {
   updateCSSProperties,
 } from './utils.js';
 import { updateActiveClasses } from './keyboard.js';
+import { pauseAutoplay } from './autoplay.js';
 
 // Detects which item is currently active based on scroll position
 export function detectActiveItem(instance) {
@@ -39,7 +42,7 @@ export function detectActiveItem(instance) {
 
 // Updates the disabled state of navigation buttons based on scroll position
 export function updateButtonStates(instance) {
-  const { track, prevBtn, nextBtn, state } = instance;
+  const { track, prevBtn, nextBtn, state, config } = instance;
   const { CLASSES, TOLERANCE } = CONFIG;
 
   const scrollLeft = track.scrollLeft;
@@ -50,32 +53,43 @@ export function updateButtonStates(instance) {
   const atStart = scrollLeft <= TOLERANCE.EDGE_DETECTION;
   const atEnd = scrollLeft >= maxScroll - TOLERANCE.EDGE_DETECTION;
 
-  // Update prev button state
-  if (prevBtn) {
-    prevBtn.classList.toggle(CLASSES.DISABLED, atStart);
-    prevBtn.disabled = atStart;
+  if (config.loop) {
+    // Never disable buttons when looping
+    if (prevBtn) {
+      prevBtn.classList.remove(CLASSES.DISABLED);
+      prevBtn.disabled = false;
+    }
+    if (nextBtn) {
+      nextBtn.classList.remove(CLASSES.DISABLED);
+      nextBtn.disabled = false;
+    }
+  } else {
+    // Update prev button state
+    if (prevBtn) {
+      prevBtn.classList.toggle(CLASSES.DISABLED, atStart);
+      prevBtn.disabled = atStart;
+    }
 
-    // Emit reach-start event only once when reaching start
-    if (atStart && !state.hasEmittedStart) {
-      emit(instance, 'reach-start');
-      state.hasEmittedStart = true;
-    } else if (!atStart) {
-      state.hasEmittedStart = false;
+    // Update next button state
+    if (nextBtn) {
+      nextBtn.classList.toggle(CLASSES.DISABLED, atEnd);
+      nextBtn.disabled = atEnd;
     }
   }
 
-  // Update next button state
-  if (nextBtn) {
-    nextBtn.classList.toggle(CLASSES.DISABLED, atEnd);
-    nextBtn.disabled = atEnd;
+  // Edge events fire regardless of loop mode (physical scroll position)
+  if (atStart && !state.hasEmittedStart) {
+    emit(instance, 'reach-start');
+    state.hasEmittedStart = true;
+  } else if (!atStart) {
+    state.hasEmittedStart = false;
+  }
 
-    // Emit reach-end event only once when reaching end
-    if (atEnd && !state.hasEmittedEnd) {
-      emit(instance, 'reach-end');
-      state.hasEmittedEnd = true;
-    } else if (!atEnd) {
-      state.hasEmittedEnd = false;
-    }
+  if (atEnd && !state.hasEmittedEnd) {
+    emit(instance, 'reach-end');
+    state.hasEmittedEnd = true;
+  } else if (!atEnd) {
+    state.hasEmittedEnd = false;
   }
 }
 
@@ -83,6 +97,11 @@ export function updateButtonStates(instance) {
 export function handleScroll(instance) {
   const { track } = instance;
   const { CLASSES, TIMING } = CONFIG;
+
+  // Detect user-initiated scroll (not programmatic) and pause autoplay
+  if (!instance.state.isAnimating && instance.state.isAutoplaying && !instance.state.isPaused) {
+    pauseAutoplay(instance, 'user');
+  }
 
   // Add scrolling class immediately for instant feedback
   track.classList.add(CLASSES.SCROLLING);
@@ -105,17 +124,27 @@ export function handleScroll(instance) {
 
 // Calculates the index of the next item for navigation
 export function calculateNextIndex(instance) {
-  const { state, items } = instance;
-  const { currentIndex } = state;
-  const nextIndex = Math.min(currentIndex + 1, items.length - 1);
+  const { state, items, config } = instance;
+
+  if (config.scrollBy === 'page') return findNextPageIndex(instance);
+
+  const nextIndex = state.currentIndex + 1;
+  if (nextIndex > items.length - 1) {
+    return config.loop ? 0 : items.length - 1;
+  }
   return nextIndex;
 }
 
 // Calculates the index of the previous item for navigation
 export function calculatePrevIndex(instance) {
-  const { state } = instance;
-  const { currentIndex } = state;
-  const prevIndex = Math.max(currentIndex - 1, 0);
+  const { state, items, config } = instance;
+
+  if (config.scrollBy === 'page') return findPrevPageIndex(instance);
+
+  const prevIndex = state.currentIndex - 1;
+  if (prevIndex < 0) {
+    return config.loop ? items.length - 1 : 0;
+  }
   return prevIndex;
 }
 
@@ -284,8 +313,13 @@ export function setupPagination(instance) {
       `Go to slide ${index + 1} of ${totalSlides}`
     );
 
-    // Bind click handler
-    const handler = () => instance.goTo(index);
+    // Bind click handler with autoplay pause
+    const handler = () => {
+      if (instance.state.isAutoplaying && !instance.state.isPaused) {
+        pauseAutoplay(instance, 'user');
+      }
+      instance.goTo(index);
+    };
     dot.addEventListener('click', handler);
     instance.boundDotHandlers.push({ dot, handler });
     preparedDots.push(dot);

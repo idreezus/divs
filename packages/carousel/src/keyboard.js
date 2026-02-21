@@ -1,6 +1,7 @@
 // Keyboard navigation support
 
 import { CONFIG } from './config.js';
+import { pauseAutoplay } from './autoplay.js';
 
 // Applies the active class to the current item and removes it from others
 export function updateActiveClasses(instance) {
@@ -33,21 +34,33 @@ export function setupKeyboardNavigation(instance, handlePrev, handleNext) {
     switch (event.key) {
       case 'ArrowLeft':
         event.preventDefault();
+        if (instance.state.isAutoplaying && !instance.state.isPaused) {
+          pauseAutoplay(instance, 'keyboard');
+        }
         handlePrev(instance);
         break;
 
       case 'ArrowRight':
         event.preventDefault();
+        if (instance.state.isAutoplaying && !instance.state.isPaused) {
+          pauseAutoplay(instance, 'keyboard');
+        }
         handleNext(instance);
         break;
 
       case 'Home':
         event.preventDefault();
+        if (instance.state.isAutoplaying && !instance.state.isPaused) {
+          pauseAutoplay(instance, 'keyboard');
+        }
         instance.goTo(0);
         break;
 
       case 'End':
         event.preventDefault();
+        if (instance.state.isAutoplaying && !instance.state.isPaused) {
+          pauseAutoplay(instance, 'keyboard');
+        }
         instance.goTo(instance.items.length - 1);
         break;
     }
