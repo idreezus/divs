@@ -1,11 +1,21 @@
 // Configuration constants for the modal library
 
-// DOM query selectors for querySelectorAll
+// Builds a presence-based selector with opt-out support
+const sel = (attr) => `[${attr}]:not([${attr}="false"])`;
+
+// Raw attribute names for marker (presence-based) elements
+export const selectorAttrs = {
+  close: 'data-modal-close',
+  closeTemplate: 'data-modal-close-template',
+};
+
+// DOM query selectors (marker attrs auto-derived, value attrs manual)
 export const selectors = {
+  ...Object.fromEntries(
+    Object.entries(selectorAttrs).map(([k, v]) => [k, sel(v)])
+  ),
   modal: '[data-modal-value]',
   trigger: '[data-modal-trigger-value]',
-  close: '[data-modal-close]',
-  closeTemplate: '[data-modal-close-template]',
 };
 
 // Data attribute names for getAttribute/hasAttribute

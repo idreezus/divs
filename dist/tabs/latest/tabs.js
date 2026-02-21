@@ -14,14 +14,24 @@ var Tabs = (function (exports) {
 
   // Configuration constants for the tabs library
 
-  // Selectors for querying DOM elements
+  // Builds a presence-based selector with opt-out support
+  const sel = (attr) => `[${attr}]:not([${attr}="false"])`;
+
+  // Raw attribute names for marker (presence-based) elements
+  const selectorAttrs = {
+    container: 'data-tabs-container',
+    prevBtn: 'data-tabs-prev',
+    nextBtn: 'data-tabs-next',
+    playPauseBtn: 'data-tabs-play-pause',
+  };
+
+  // DOM query selectors (marker attrs auto-derived, value attrs manual)
   const selectors = {
-    container: '[data-tabs-container]:not([data-tabs-container="false"])',
+    ...Object.fromEntries(
+      Object.entries(selectorAttrs).map(([k, v]) => [k, sel(v)])
+    ),
     trigger: '[data-tabs-trigger-id]',
     panel: '[data-tabs-panel-id]',
-    prevBtn: '[data-tabs-prev]:not([data-tabs-prev="false"])',
-    nextBtn: '[data-tabs-next]:not([data-tabs-next="false"])',
-    playPauseBtn: '[data-tabs-play-pause]:not([data-tabs-play-pause="false"])',
   };
 
   // Attribute names for configuration

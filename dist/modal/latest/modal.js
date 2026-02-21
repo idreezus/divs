@@ -12,22 +12,24 @@
 var Modal = (function (exports) {
   'use strict';
 
-  /**
-   * Modal configuration constants
-   *
-   * Organized by type following the component design guidelines:
-   * - selectors: DOM query strings
-   * - attributes: Data attribute names
-   * - classes: CSS class names for state
-   * - defaults: Fallback configuration values
-   */
+  // Configuration constants for the modal library
 
-  // DOM query selectors for querySelectorAll
+  // Builds a presence-based selector with opt-out support
+  const sel = (attr) => `[${attr}]:not([${attr}="false"])`;
+
+  // Raw attribute names for marker (presence-based) elements
+  const selectorAttrs = {
+    close: 'data-modal-close',
+    closeTemplate: 'data-modal-close-template',
+  };
+
+  // DOM query selectors (marker attrs auto-derived, value attrs manual)
   const selectors = {
+    ...Object.fromEntries(
+      Object.entries(selectorAttrs).map(([k, v]) => [k, sel(v)])
+    ),
     modal: '[data-modal-value]',
     trigger: '[data-modal-trigger-value]',
-    close: '[data-modal-close]',
-    closeTemplate: '[data-modal-close-template]',
   };
 
   // Data attribute names for getAttribute/hasAttribute
@@ -36,6 +38,7 @@ var Modal = (function (exports) {
     triggerValue: 'data-modal-trigger-value',
     urlParam: 'data-modal-url-param',
     scrollLock: 'data-modal-scroll-lock',
+    position: 'data-modal-position',
     wrapped: 'data-modal-wrapped',
     close: 'data-modal-close',
     closeTemplate: 'data-modal-close-template',
@@ -44,53 +47,40 @@ var Modal = (function (exports) {
   // CSS class names for state management
   const classes = {
     bodyOpen: 'modal-open',
-    closeDefault: 'modal-close-default',
+    closeDefault: 'modal-close-default'};
+
+  // Default configuration values
+  const defaults = {
+    position: 'center',
   };
 
-  /**
-   * Shared utility functions for the modal library
-   */
+  // Valid position values for validation
+  const validPositions = ['center', 'left', 'right', 'top', 'bottom'];
+
+  // Shared utility functions for the modal library
 
   let idCounter = 0;
 
-  /**
-   * Generates a unique ID for each modal instance
-   * @returns {string} Unique modal ID (e.g., 'modal-1')
-   */
+  // Generates a unique ID for each modal instance
   function generateUniqueId() {
     idCounter += 1;
     return `modal-${idCounter}`;
   }
 
-  /**
-   * Normalizes a value string to lowercase, hyphenated format
-   * @param {string} value - The value to normalize
-   * @returns {string} Normalized value
-   */
+  // Normalizes a value string to lowercase, hyphenated format
   function normalizeValue(value) {
     if (!value) return '';
     return value.toLowerCase().replace(/\s+/g, '-');
   }
 
-  /**
-   * Scroll lock module for modal dialogs
-   *
-   * Preserves scroll position when modal opens and restores it when closed.
-   * Adds 'modal-open' class to body for CSS scroll lock (user provides CSS).
-   *
-   * Example user CSS:
-   * body.modal-open { overflow: hidden; }
-   */
+  // Scroll lock module for modal dialogs
 
 
   // Track number of open modals for nested scroll lock
   let openCount = 0;
   let scrollY = 0;
 
-  /**
-   * Locks body scroll when a modal opens
-   * Only applies on first modal open (supports multiple open modals)
-   */
+  // Locks body scroll when a modal opens
   function lock() {
     openCount += 1;
 
@@ -101,10 +91,7 @@ var Modal = (function (exports) {
     }
   }
 
-  /**
-   * Unlocks body scroll when a modal closes
-   * Only restores on last modal close
-   */
+  // Unlocks body scroll when a modal closes
   function unlock() {
     openCount -= 1;
 
@@ -116,31 +103,33 @@ var Modal = (function (exports) {
     }
   }
 
-  /**
-   * Modal core module
-   *
-   * Main Modal class and lifecycle management built on native <dialog>.
-   * Handles initialization, triggers, close buttons, and cleanup.
-   */
+  // Core modal library with Modal class and initialization logic
 
 
-  /**
-   * Parses configuration from data attributes
-   * @param {HTMLDialogElement} dialog - The dialog element
-   * @returns {Object} Parsed configuration
-   */
+  // Parses configuration from data attributes on the dialog element
   function parseConfig(dialog) {
+    const positionAttr = dialog.getAttribute(attributes.position);
+    let position = defaults.position;
+
+    if (positionAttr) {
+      const normalizedPosition = positionAttr.toLowerCase();
+      if (validPositions.includes(normalizedPosition)) {
+        position = normalizedPosition;
+      } else {
+        console.warn(
+          `Modal: Invalid position "${positionAttr}". Valid values: ${validPositions.join(', ')}. Defaulting to "${defaults.position}".`
+        );
+      }
+    }
+
     return {
       scrollLock: dialog.getAttribute(attributes.scrollLock) !== 'false',
       urlParam: dialog.getAttribute(attributes.urlParam) || null,
+      position,
     };
   }
 
-  /**
-   * Wraps a non-dialog element in a real <dialog>
-   * @param {HTMLElement} element - Element with data-modal-value
-   * @returns {HTMLDialogElement} The dialog element (original or wrapper)
-   */
+  // Wraps a non-dialog element in a real <dialog>
   function ensureDialog(element) {
     if (element.tagName === 'DIALOG') {
       return element;
@@ -165,11 +154,7 @@ var Modal = (function (exports) {
     return dialog;
   }
 
-  /**
-   * Ensures a close button exists in the modal
-   * Injects default or clones from template if not present
-   * @param {Object} instance - Modal instance
-   */
+  // Ensures a close button exists, injecting default if needed
   function ensureCloseButton(instance) {
     const { dialog } = instance;
 
@@ -204,11 +189,7 @@ var Modal = (function (exports) {
     }
   }
 
-  /**
-   * Sets up backdrop click to close behavior
-   * Uses native closedby="any" if supported, otherwise fallback
-   * @param {Object} instance - Modal instance
-   */
+  // Sets up backdrop click to close using native closedby or fallback
   function setupBackdropClose(instance) {
     const { dialog } = instance;
 
@@ -229,11 +210,7 @@ var Modal = (function (exports) {
     instance.boundHandlers.backdropClick = handler;
   }
 
-  /**
-   * Sets up aria-controls on trigger if not already set
-   * @param {HTMLElement} trigger - Trigger element
-   * @param {HTMLDialogElement} dialog - Target dialog
-   */
+  // Sets up aria-controls on trigger if not already set
   function setupTriggerAria(trigger, dialog) {
     if (!trigger.hasAttribute('aria-controls')) {
       // Ensure dialog has an ID
@@ -244,11 +221,7 @@ var Modal = (function (exports) {
     }
   }
 
-  /**
-   * Finds a modal by its normalized value
-   * @param {string} value - Normalized modal value
-   * @returns {HTMLDialogElement|null} The dialog element or null
-   */
+  // Finds a modal by its normalized value
   function findModalByValue(value) {
     const modals = document.querySelectorAll(selectors.modal);
     for (const modal of modals) {
@@ -260,11 +233,7 @@ var Modal = (function (exports) {
     return null;
   }
 
-  /**
-   * Handles trigger click - opens modal, handles replacement
-   * @param {HTMLElement} trigger - The clicked trigger
-   * @param {string} targetValue - Normalized target modal value
-   */
+  // Handles trigger click, opening modal or replacing current modal
   function handleTriggerClick(trigger, targetValue) {
     // Check if trigger is inside an open modal
     const parentModal = trigger.closest('dialog[open]');
@@ -292,10 +261,7 @@ var Modal = (function (exports) {
     }
   }
 
-  /**
-   * Attaches event listeners for triggers and close buttons
-   * @param {Object} instance - Modal instance
-   */
+  // Attaches event listeners for close buttons and native close event
   function attachEventListeners(instance) {
     const { dialog } = instance;
 
@@ -322,11 +288,7 @@ var Modal = (function (exports) {
     instance.boundHandlers.close = closeHandler;
   }
 
-  /**
-   * Updates URL based on modal state
-   * @param {Object} instance - Modal instance
-   * @param {string} action - 'open' or 'close'
-   */
+  // Updates URL query parameter based on modal open/close state
   function updateUrl(instance, action) {
     const { dialog, config } = instance;
     const paramName = config.urlParam;
@@ -344,11 +306,14 @@ var Modal = (function (exports) {
     history.replaceState(null, '', url.toString());
   }
 
-  /**
-   * Initializes a modal instance
-   * @param {Object} instance - Modal instance
-   * @returns {boolean} Whether initialization succeeded
-   */
+  // Applies the position class to the dialog element
+  function applyPositionClass(instance) {
+    const { dialog, config } = instance;
+    const positionClass = `modal-${config.position}`;
+    dialog.classList.add(positionClass);
+  }
+
+  // Initializes a modal instance
   function init(instance) {
     const { dialog, id } = instance;
 
@@ -357,6 +322,9 @@ var Modal = (function (exports) {
       console.warn(`Modal ${id}: Invalid dialog element`);
       return false;
     }
+
+    // Apply position class
+    applyPositionClass(instance);
 
     // Ensure close button exists
     ensureCloseButton(instance);
@@ -370,10 +338,7 @@ var Modal = (function (exports) {
     return true;
   }
 
-  /**
-   * Cleans up event listeners
-   * @param {Object} instance - Modal instance
-   */
+  // Cleans up all event listeners
   function cleanup(instance) {
     const { dialog, boundHandlers } = instance;
 
@@ -395,12 +360,7 @@ var Modal = (function (exports) {
     }
   }
 
-  /**
-   * Modal class
-   *
-   * Built on native <dialog> element. Handles initialization, triggers,
-   * close buttons, scroll lock, and URL integration.
-   */
+  // Main Modal class
   class Modal {
     constructor(dialog) {
       this.id = generateUniqueId();
@@ -422,10 +382,7 @@ var Modal = (function (exports) {
       }
     }
 
-    /**
-     * Opens the modal
-     * @returns {Modal} The instance for chaining
-     */
+    // Opens the modal
     open() {
       const { dialog, state, config } = this;
 
@@ -446,10 +403,7 @@ var Modal = (function (exports) {
       return this;
     }
 
-    /**
-     * Closes the modal
-     * @returns {Modal} The instance for chaining
-     */
+    // Closes the modal
     close() {
       const { dialog, state } = this;
 
@@ -461,11 +415,7 @@ var Modal = (function (exports) {
       return this;
     }
 
-    /**
-     * Re-initializes the modal after DOM changes
-     * Also discovers and initializes any new modals
-     * @returns {Modal} The instance for chaining
-     */
+    // Re-initializes the modal after DOM changes
     refresh() {
       // Clean up current listeners
       cleanup(this);
@@ -477,9 +427,7 @@ var Modal = (function (exports) {
       return this;
     }
 
-    /**
-     * Destroys the modal instance and cleans up
-     */
+    // Destroys the modal instance and cleans up
     destroy() {
       cleanup(this);
 
@@ -494,10 +442,7 @@ var Modal = (function (exports) {
     }
   }
 
-  /**
-   * Sets up global trigger listeners
-   * Called once during auto-init
-   */
+  // Sets up global trigger listeners via event delegation
   function setupTriggerListeners() {
     // Use event delegation on document for all triggers
     document.addEventListener('click', (e) => {
@@ -520,10 +465,7 @@ var Modal = (function (exports) {
     });
   }
 
-  /**
-   * Opens modals based on URL parameters
-   * Called during auto-init
-   */
+  // Opens modals based on URL parameters
   function openFromUrl() {
     const params = new URLSearchParams(window.location.search);
 
@@ -535,29 +477,10 @@ var Modal = (function (exports) {
     });
   }
 
-  /**
-   * Modal library entry point
-   *
-   * Auto-initializes all modal elements on DOMContentLoaded.
-   * Built on native <dialog> element.
-   *
-   * @example
-   * <!-- Trigger (anywhere in document) -->
-   * <button data-modal-trigger-value="login">Open Login</button>
-   *
-   * <!-- Modal -->
-   * <dialog data-modal-value="login">
-   *   <button data-modal-close>Close</button>
-   *   <h2>Login</h2>
-   *   <form>...</form>
-   * </dialog>
-   */
+  // Entry point for modal library, handles auto-initialization
 
 
-  /**
-   * Auto-initializes all modals on the page
-   * Called on DOMContentLoaded or immediately if DOM is ready
-   */
+  // Auto-initializes all modals on the page
   function autoInit() {
     // Find all modal elements
     const modalElements = document.querySelectorAll(selectors.modal);

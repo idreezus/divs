@@ -1,5 +1,5 @@
 /*!
- * ScrollFade v1.0.0
+ * ScrollFade v0.1.0
  * A library for managing scroll indicators (gradient fades) based on a container's scroll position.
  *
  * A part of Divs by Idreezus, a component library
@@ -14,13 +14,24 @@ var ScrollFade = (function (exports) {
 
   // Configuration constants for the scroll-fade library
 
-  // Selectors for querying DOM elements
-  // Presence-based: attribute exists and value !== "false"
+  // Builds a presence-based selector with opt-out support
+  const sel = (attr) => `[${attr}]:not([${attr}="false"])`;
+
+  // Raw attribute names for marker (presence-based) elements
+  const selectorAttrs = {
+    container: 'data-scroll-fade-container',
+    list: 'data-scroll-fade-list',
+    prev: 'data-scroll-fade-prev',
+    next: 'data-scroll-fade-next',
+  };
+
+  // DOM query selectors (marker attrs auto-derived, value attrs manual)
   const selectors = {
-    container:
-      '[data-scroll-fade-container]:not([data-scroll-fade-container="false"])',
-    prev: '[data-scroll-fade-prev]:not([data-scroll-fade-prev="false"])',
-    next: '[data-scroll-fade-next]:not([data-scroll-fade-next="false"])',
+    ...Object.fromEntries(
+      Object.entries(selectorAttrs).map(([k, v]) => [k, sel(v)])
+    ),
+    start: '[data-scroll-fade="start"]',
+    end: '[data-scroll-fade="end"]',
   };
 
   // Attribute names for configuration
@@ -68,12 +79,12 @@ var ScrollFade = (function (exports) {
     return `scroll-fade-${idCounter}`;
   }
 
-  // Parses configuration from container data attributes
-  function parseConfig(container) {
+  // Parses configuration from element data attributes
+  function parseConfig(element) {
     const orientation =
-      container.getAttribute(attributes.orientation) || defaults.orientation;
+      element.getAttribute(attributes.orientation) || defaults.orientation;
 
-    const stepAttr = container.getAttribute(attributes.step);
+    const stepAttr = element.getAttribute(attributes.step);
     const step = stepAttr ? parseInt(stepAttr, 10) : defaults.step;
 
     return {
@@ -169,7 +180,8 @@ var ScrollFade = (function (exports) {
     constructor(container) {
       this.id = generateUniqueId();
       this.container = container;
-      this.config = parseConfig(container);
+      this.list = null;
+      this.config = null;
 
       this.state = {
         isAtStart: true,
@@ -203,17 +215,19 @@ var ScrollFade = (function (exports) {
     }
 
     init() {
-      // Validate container has overflow CSS
+      // Find required elements within container
+      if (!this.findElements()) {
+        return false;
+      }
+
+      // Parse config from list element
+      this.config = parseConfig(this.list);
+
+      // Validate list has overflow CSS
       this.validateOverflow();
 
       // Check initial scrollability
-      this.state.isScrollable = isScrollable(
-        this.container,
-        this.config.orientation
-      );
-
-      // Create and inject shadow elements
-      this.createShadowElements();
+      this.state.isScrollable = isScrollable(this.list, this.config.orientation);
 
       // Setup observers
       this.setupObservers();
@@ -231,61 +245,42 @@ var ScrollFade = (function (exports) {
     }
 
     validateOverflow() {
-      const style = getComputedStyle(this.container);
+      const style = getComputedStyle(this.list);
       const prop =
         this.config.orientation === 'horizontal' ? 'overflowX' : 'overflowY';
       const overflow = style[prop];
 
       if (overflow !== 'auto' && overflow !== 'scroll') {
         console.warn(
-          `ScrollFade: Container should have overflow-${this.config.orientation === 'horizontal' ? 'x' : 'y'}: auto or scroll.`,
-          this.container
+          `ScrollFade: List element should have overflow-${this.config.orientation === 'horizontal' ? 'x' : 'y'}: auto or scroll.`,
+          this.list
         );
       }
     }
 
-    createShadowElements() {
-      const isRtl = getTextDirection() === 'rtl';
-      const isHorizontal = this.config.orientation === 'horizontal';
-
-      // Create start shadow
-      this.startShadow = document.createElement('div');
-      this.startShadow.setAttribute('data-scroll-fade', 'start');
-      this.startShadow.setAttribute('aria-hidden', 'true');
-      this.startShadow.style.position = 'absolute';
-      this.startShadow.style.pointerEvents = 'none';
-
-      // Create end shadow
-      this.endShadow = document.createElement('div');
-      this.endShadow.setAttribute('data-scroll-fade', 'end');
-      this.endShadow.setAttribute('aria-hidden', 'true');
-      this.endShadow.style.position = 'absolute';
-      this.endShadow.style.pointerEvents = 'none';
-
-      // Apply edge positions based on orientation and RTL
-      if (isHorizontal) {
-        if (isRtl) {
-          // RTL: start is right, end is left
-          this.startShadow.style.right = '0';
-          this.endShadow.style.left = '0';
-        } else {
-          // LTR: start is left, end is right
-          this.startShadow.style.left = '0';
-          this.endShadow.style.right = '0';
-        }
-        this.startShadow.style.top = '0';
-        this.endShadow.style.top = '0';
-      } else {
-        // Vertical: start is top, end is bottom
-        this.startShadow.style.top = '0';
-        this.startShadow.style.left = '0';
-        this.endShadow.style.bottom = '0';
-        this.endShadow.style.left = '0';
+    findElements() {
+      // Find scrollable list element
+      this.list = this.container.querySelector(selectors.list);
+      if (!this.list) {
+        console.error(
+          `ScrollFade: No list element found. Expected [data-scroll-fade-list] inside container.`,
+          this.container
+        );
+        return false;
       }
 
-      // Append to container
-      this.container.appendChild(this.startShadow);
-      this.container.appendChild(this.endShadow);
+      // Find shadow elements (user provides these in markup)
+      this.startShadow = this.container.querySelector(selectors.start);
+      this.endShadow = this.container.querySelector(selectors.end);
+
+      if (!this.startShadow || !this.endShadow) {
+        console.warn(
+          `ScrollFade: Shadow elements not found. Expected [data-scroll-fade="start"] and [data-scroll-fade="end"].`,
+          this.container
+        );
+      }
+
+      return true;
     }
 
     setupObservers() {
@@ -293,7 +288,7 @@ var ScrollFade = (function (exports) {
       this.resizeObserver = new ResizeObserver(() => {
         this.recalculate();
       });
-      this.resizeObserver.observe(this.container);
+      this.resizeObserver.observe(this.list);
 
       // IntersectionObserver to pause when not visible
       this.intersectionObserver = new IntersectionObserver(
@@ -303,7 +298,7 @@ var ScrollFade = (function (exports) {
         },
         { threshold: 0 }
       );
-      this.intersectionObserver.observe(this.container);
+      this.intersectionObserver.observe(this.list);
     }
 
     bindHandlers() {
@@ -311,28 +306,24 @@ var ScrollFade = (function (exports) {
         scroll: () => this.handleScroll(),
       };
 
-      this.container.addEventListener('scroll', this.boundHandlers.scroll, {
+      this.list.addEventListener('scroll', this.boundHandlers.scroll, {
         passive: true,
       });
     }
 
     wireNavigationButtons() {
-      // Find prev button
-      this.prevBtn = document.querySelector(selectors.prev);
-      if (
-        this.prevBtn &&
-        this.prevBtn.closest(selectors.container) !== this.container
-      ) ;
-
-      // Find next button
-      this.nextBtn = document.querySelector(selectors.next);
+      // Find buttons scoped to this container
+      this.prevBtn = this.container.querySelector(selectors.prev);
+      this.nextBtn = this.container.querySelector(selectors.next);
 
       if (this.prevBtn) {
-        this.prevBtn.addEventListener('click', () => this.scrollPrev());
+        this.boundHandlers.prev = () => this.scrollPrev();
+        this.prevBtn.addEventListener('click', this.boundHandlers.prev);
       }
 
       if (this.nextBtn) {
-        this.nextBtn.addEventListener('click', () => this.scrollNext());
+        this.boundHandlers.next = () => this.scrollNext();
+        this.nextBtn.addEventListener('click', this.boundHandlers.next);
       }
     }
 
@@ -355,13 +346,10 @@ var ScrollFade = (function (exports) {
       const wasAtEnd = this.state.isAtEnd;
       const wasScrollable = this.state.isScrollable;
 
-      // Recalculate state
-      this.state.isScrollable = isScrollable(
-        this.container,
-        this.config.orientation
-      );
-      this.state.isAtStart = isAtStart(this.container, this.config.orientation);
-      this.state.isAtEnd = isAtEnd(this.container, this.config.orientation);
+      // Recalculate state using list element
+      this.state.isScrollable = isScrollable(this.list, this.config.orientation);
+      this.state.isAtStart = isAtStart(this.list, this.config.orientation);
+      this.state.isAtEnd = isAtEnd(this.list, this.config.orientation);
 
       // If not scrollable, both shadows should be hidden
       if (!this.state.isScrollable) {
@@ -446,19 +434,19 @@ var ScrollFade = (function (exports) {
     }
 
     scrollPrev() {
-      const step = getScrollStep(this.container, this.config);
+      const step = getScrollStep(this.list, this.config);
       const isRtl = getTextDirection() === 'rtl';
       const isHorizontal = this.config.orientation === 'horizontal';
 
       if (isHorizontal) {
         // In RTL, "prev" scrolls right (positive)
         const scrollAmount = isRtl ? step : -step;
-        this.container.scrollBy({
+        this.list.scrollBy({
           left: scrollAmount,
           behavior: 'smooth',
         });
       } else {
-        this.container.scrollBy({
+        this.list.scrollBy({
           top: -step,
           behavior: 'smooth',
         });
@@ -466,19 +454,19 @@ var ScrollFade = (function (exports) {
     }
 
     scrollNext() {
-      const step = getScrollStep(this.container, this.config);
+      const step = getScrollStep(this.list, this.config);
       const isRtl = getTextDirection() === 'rtl';
       const isHorizontal = this.config.orientation === 'horizontal';
 
       if (isHorizontal) {
         // In RTL, "next" scrolls left (negative)
         const scrollAmount = isRtl ? -step : step;
-        this.container.scrollBy({
+        this.list.scrollBy({
           left: scrollAmount,
           behavior: 'smooth',
         });
       } else {
-        this.container.scrollBy({
+        this.list.scrollBy({
           top: step,
           behavior: 'smooth',
         });
@@ -497,14 +485,14 @@ var ScrollFade = (function (exports) {
 
       if (isHorizontal) {
         const scrollTarget = isRtl
-          ? getMaxScroll(this.container, this.config.orientation)
+          ? getMaxScroll(this.list, this.config.orientation)
           : 0;
-        this.container.scrollTo({
+        this.list.scrollTo({
           left: scrollTarget,
           behavior: 'smooth',
         });
       } else {
-        this.container.scrollTo({
+        this.list.scrollTo({
           top: 0,
           behavior: 'smooth',
         });
@@ -516,16 +504,16 @@ var ScrollFade = (function (exports) {
     scrollToEnd() {
       const isHorizontal = this.config.orientation === 'horizontal';
       const isRtl = getTextDirection() === 'rtl';
-      const maxScroll = getMaxScroll(this.container, this.config.orientation);
+      const maxScroll = getMaxScroll(this.list, this.config.orientation);
 
       if (isHorizontal) {
         const scrollTarget = isRtl ? 0 : maxScroll;
-        this.container.scrollTo({
+        this.list.scrollTo({
           left: scrollTarget,
           behavior: 'smooth',
         });
       } else {
-        this.container.scrollTo({
+        this.list.scrollTo({
           top: maxScroll,
           behavior: 'smooth',
         });
@@ -566,23 +554,27 @@ var ScrollFade = (function (exports) {
         this.intersectionObserver.disconnect();
       }
 
-      // Remove event listeners
-      if (this.boundHandlers) {
-        this.container.removeEventListener('scroll', this.boundHandlers.scroll);
+      // Remove scroll listener from list
+      if (this.boundHandlers && this.list) {
+        this.list.removeEventListener('scroll', this.boundHandlers.scroll);
       }
 
-      // Remove navigation button listeners (by removing references)
-      // Note: We can't remove click listeners without storing bound references
-      // For simplicity, we just null the references
+      // Remove navigation button listeners
+      if (this.prevBtn && this.boundHandlers?.prev) {
+        this.prevBtn.removeEventListener('click', this.boundHandlers.prev);
+      }
+      if (this.nextBtn && this.boundHandlers?.next) {
+        this.nextBtn.removeEventListener('click', this.boundHandlers.next);
+      }
       this.prevBtn = null;
       this.nextBtn = null;
 
-      // Remove shadow elements from DOM
-      if (this.startShadow && this.startShadow.parentNode) {
-        this.startShadow.parentNode.removeChild(this.startShadow);
+      // Clean up shadow classes (don't remove elements - user owns them)
+      if (this.startShadow) {
+        this.startShadow.classList.remove(classes.hidden);
       }
-      if (this.endShadow && this.endShadow.parentNode) {
-        this.endShadow.parentNode.removeChild(this.endShadow);
+      if (this.endShadow) {
+        this.endShadow.classList.remove(classes.hidden);
       }
 
       // Remove instance reference from container

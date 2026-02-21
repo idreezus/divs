@@ -1,15 +1,23 @@
 // Configuration constants for the scroll-fade library
 
-// Selectors for querying DOM elements
-// Presence-based: attribute exists and value !== "false"
+// Builds a presence-based selector with opt-out support
+const sel = (attr) => `[${attr}]:not([${attr}="false"])`;
+
+// Raw attribute names for marker (presence-based) elements
+export const selectorAttrs = {
+  container: 'data-scroll-fade-container',
+  list: 'data-scroll-fade-list',
+  prev: 'data-scroll-fade-prev',
+  next: 'data-scroll-fade-next',
+};
+
+// DOM query selectors (marker attrs auto-derived, value attrs manual)
 export const selectors = {
-  container:
-    '[data-scroll-fade-container]:not([data-scroll-fade-container="false"])',
-  list: '[data-scroll-fade-list]:not([data-scroll-fade-list="false"])',
+  ...Object.fromEntries(
+    Object.entries(selectorAttrs).map(([k, v]) => [k, sel(v)])
+  ),
   start: '[data-scroll-fade="start"]',
   end: '[data-scroll-fade="end"]',
-  prev: '[data-scroll-fade-prev]:not([data-scroll-fade-prev="false"])',
-  next: '[data-scroll-fade-next]:not([data-scroll-fade-next="false"])',
 };
 
 // Attribute names for configuration
