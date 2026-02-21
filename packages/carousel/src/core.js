@@ -24,7 +24,7 @@ import { setupKeyboardNavigation } from './keyboard.js';
 import {
   setupAutoplay,
   startAutoplay,
-  pauseAutoplay,
+  stopAutoplay,
   cleanupAutoplay,
 } from './autoplay.js';
 
@@ -83,21 +83,15 @@ function attachEventListeners(instance) {
 
   // Create bound handlers and store them for later removal
   instance.boundHandlers = {
-    scroll: () => handleScroll(instance),
-    prev: () => {
-      // Reset autoplay timer without pausing (match tabs pattern)
-      if (instance.state.isAutoplaying && !instance.state.isPaused) {
-        instance.state.autoplayStartTime = performance.now();
+    scroll: () => {
+      // User scroll while autoplay is running → stop autoplay
+      if (!instance.state.isProgrammaticScroll && instance.state.isAutoplaying) {
+        stopAutoplay(instance, 'user');
       }
-      handlePrev(instance);
+      handleScroll(instance);
     },
-    next: () => {
-      // Reset autoplay timer without pausing (match tabs pattern)
-      if (instance.state.isAutoplaying && !instance.state.isPaused) {
-        instance.state.autoplayStartTime = performance.now();
-      }
-      handleNext(instance);
-    },
+    prev: () => instance.prev(),
+    next: () => instance.next(),
   };
 
   // Attach scroll listener with passive flag for better performance
@@ -116,8 +110,8 @@ function attachEventListeners(instance) {
   // Attach play-pause button handler
   if (instance.playPauseBtn) {
     instance.boundHandlers.playPause = () => {
-      if (instance.state.isAutoplaying && !instance.state.isPaused) {
-        instance.pause();
+      if (instance.state.isAutoplaying) {
+        stopAutoplay(instance, 'user');
       } else {
         instance.play();
       }
@@ -209,7 +203,7 @@ function init(instance) {
 
   // Set up keyboard navigation if enabled
   if (config.keyboard) {
-    setupKeyboardNavigation(instance, handlePrev, handleNext);
+    setupKeyboardNavigation(instance);
   }
 
   // Set up autoplay if enabled and reduced motion is not preferred
@@ -218,7 +212,7 @@ function init(instance) {
   }
   if (config.autoplay && !prefersReducedMotion()) {
     container.style.setProperty(CSS_VARS.AUTOPLAY_DURATION, config.autoplayDuration + 'ms');
-    setupAutoplay(instance);
+    setupAutoplay(instance, handleNext);
     startAutoplay(instance);
   }
 
@@ -279,12 +273,14 @@ export class Carousel {
 
   // Navigates to the next item
   next() {
+    if (this.state.isAutoplaying) stopAutoplay(this, 'user');
     handleNext(this);
     return this;
   }
 
   // Navigates to the previous item
   prev() {
+    if (this.state.isAutoplaying) stopAutoplay(this, 'user');
     handlePrev(this);
     return this;
   }
@@ -307,10 +303,7 @@ export class Carousel {
       index = state.maxReachableIndex;
     }
 
-    // Reset autoplay timer without pausing
-    if (state.isAutoplaying && !state.isPaused) {
-      state.autoplayStartTime = performance.now();
-    }
+    if (state.isAutoplaying) stopAutoplay(this, 'user');
 
     // Set index directly (decoupled)
     if (index !== state.currentIndex) {
@@ -324,20 +317,19 @@ export class Carousel {
     return this;
   }
 
-  // Starts or resumes autoplay
+  // Starts autoplay fresh (always full duration)
   play() {
     const { CSS_VARS } = CONFIG;
     if (prefersReducedMotion()) return this;
-    if (!this.autoplay) setupAutoplay(this);
+    if (!this.autoplay) setupAutoplay(this, handleNext);
     this.container.style.setProperty(CSS_VARS.AUTOPLAY_DURATION, this.config.autoplayDuration + 'ms');
-    this.autoplay.pausedByUser = false;
     startAutoplay(this);
     return this;
   }
 
-  // Pauses autoplay with sticky user-pause
-  pause() {
-    pauseAutoplay(this, 'user');
+  // Stops autoplay completely
+  stop() {
+    stopAutoplay(this, 'user');
     return this;
   }
 

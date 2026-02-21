@@ -20,8 +20,7 @@ export const CLASSES = {
   SNAP_DISABLED: 'carousel-snap-disabled', // Applied to track to temporarily disable scroll-snap during button navigation
   DOT_ACTIVE: 'carousel-dot-active', // Applied to the current active pagination dot
   LIVE_REGION: 'carousel-sr-only', // Applied to the live region for screen readers
-  AUTOPLAY_ACTIVE: 'carousel-autoplay-active',
-  AUTOPLAY_PAUSED: 'carousel-autoplay-paused',
+  PLAYING: 'carousel-playing',
   REDUCED_MOTION: 'carousel-reduced-motion',
 };
 
@@ -66,7 +65,7 @@ export const EVENTS = {
   REACH_START: 'reach-start',
   REACH_END: 'reach-end',
   AUTOPLAY_START: 'autoplay-start',
-  AUTOPLAY_PAUSE: 'autoplay-pause',
+  AUTOPLAY_STOP: 'autoplay-stop',
 };
 
 // Data attribute names for configuration

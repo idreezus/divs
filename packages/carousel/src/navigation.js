@@ -12,7 +12,6 @@ import {
   updateCSSProperties,
 } from './utils.js';
 import { updateActiveClasses } from './keyboard.js';
-import { pauseAutoplay } from './autoplay.js';
 
 // Detects which item is currently active based on scroll position
 export function detectActiveItem(instance) {
@@ -89,11 +88,6 @@ export function updateButtonStates(instance) {
 export function handleScroll(instance) {
   const { track } = instance;
   const { CLASSES, TIMING } = CONFIG;
-
-  // User scroll while autoplay is running → sticky pause
-  if (!instance.state.isProgrammaticScroll && instance.state.isAutoplaying && !instance.state.isPaused) {
-    pauseAutoplay(instance, 'user');
-  }
 
   track.classList.add(CLASSES.SCROLLING);
   emit(instance, 'scroll', { scrollLeft: track.scrollLeft });
@@ -347,11 +341,8 @@ export function setupPagination(instance) {
       `Go to slide ${index + 1} of ${totalSlides}`
     );
 
-    // Bind click handler with autoplay pause
+    // Bind click handler (goTo handles autoplay stop)
     const handler = () => {
-      if (instance.state.isAutoplaying && !instance.state.isPaused) {
-        pauseAutoplay(instance, 'user');
-      }
       instance.goTo(index);
     };
     dot.addEventListener('click', handler);

@@ -386,8 +386,8 @@ Automatically advance slides on a timer. Autoplay requires `data-carousel-loop="
 | -------------------------------------- | ------------------ | -------- | ------------------------------------ |
 | `data-carousel-autoplay`               | `"true"` / `"false"` | `"false"` | Enable timed autoplay               |
 | `data-carousel-autoplay-duration`      | number (ms)        | `5000`   | Time per slide in milliseconds       |
-| `data-carousel-autoplay-pause-hover`   | `"true"` / `"false"` | `"false"` | Pause autoplay on mouse hover       |
-| `data-carousel-autoplay-pause-focus`   | `"true"` / `"false"` | `"true"`  | Pause autoplay on keyboard focus    |
+| `data-carousel-autoplay-pause-hover`   | `"true"` / `"false"` | `"false"` | Temporarily pause autoplay on track hover |
+| `data-carousel-autoplay-pause-focus`   | `"true"` / `"false"` | `"true"`  | Temporarily pause autoplay on track focus |
 
 #### Autoplay with Custom Duration
 
@@ -423,16 +423,21 @@ Add a toggle button inside the container to let users control autoplay. The libr
 
 #### Pause Behavior
 
-Autoplay pauses in several situations:
+Autoplay uses a **stop-on-action** model. Any intentional user interaction fully stops autoplay. Only the play button (or calling `play()`) restarts it.
 
-- **Navigation buttons (prev/next):** Clicking prev/next **resets the autoplay timer** but keeps autoplay running. The full duration plays out on the new slide. This matches the behavior of `goTo()`.
-- **Dot clicks and dragging/swiping:** Clicking a pagination dot or dragging/swiping the carousel causes a **sticky pause**. The carousel stays paused until the user clicks the play/pause button or `play()` is called via JavaScript.
-- **Keyboard navigation:** Arrow keys, Home, and End also cause a sticky pause.
-- **Hover:** Mouse enters the carousel container (resumes on mouse leave). Opt-in via `data-carousel-autoplay-pause-hover="true"`.
-- **Focus:** A focusable element inside the carousel receives focus (resumes when focus leaves the container). Configurable via `data-carousel-autoplay-pause-focus`.
+**Actions that stop autoplay:**
+
+- **Navigation buttons (prev/next):** Clicking prev/next stops autoplay.
+- **Dot clicks:** Clicking a pagination dot stops autoplay.
+- **Keyboard navigation:** Arrow keys, Home, and End stop autoplay.
+- **Dragging/swiping:** Manually scrolling the track stops autoplay.
+- **JavaScript API:** Calling `next()`, `prev()`, `goTo()`, or `stop()` stops autoplay.
+
+**Temporary pauses (autoplay resumes automatically):**
+
+- **Hover:** Mouse enters the track (resumes on mouse leave). Opt-in via `data-carousel-autoplay-pause-hover="true"`. Only the track area triggers this — hovering nav buttons or pagination outside the track does not pause.
+- **Focus:** A focusable element inside the track receives focus (resumes when focus leaves the track). Configurable via `data-carousel-autoplay-pause-focus`. Focus moving to a nav button outside the track will resume autoplay.
 - **Viewport:** The carousel scrolls out of view (resumes when at least 50% is visible again). Uses `IntersectionObserver`.
-
-Hover, focus, and viewport pauses are temporary — the carousel resumes automatically when the condition clears. User and keyboard pauses are sticky.
 
 #### Reduced Motion
 
@@ -489,8 +494,7 @@ The library applies state classes that you can style however you want.
 | `.carousel-snap-disabled`     | The track to temporarily disable scroll-snap during button navigation |
 | `.carousel-animating`         | The track during programmatic scroll animations                       |
 | `.carousel-dot-active`        | The active pagination dot                                             |
-| `.carousel-autoplay-active`   | The container while autoplay is running (persists through pause)      |
-| `.carousel-autoplay-paused`   | The container while autoplay is paused                                |
+| `.carousel-playing`           | The container while autoplay is actively running                      |
 | `.carousel-reduced-motion`    | The container when `prefers-reduced-motion: reduce` is active         |
 
 Here's an example from the prev/next buttons on all the variants on this page:
@@ -519,11 +523,11 @@ Here's an example from the prev/next buttons on all the variants on this page:
 Example: style the play/pause button based on autoplay state.
 
 ```css
-/* Change button text/icon when paused */
-.carousel-autoplay-paused [data-carousel-play-pause] .pause-icon {
+/* Show pause icon while playing, play icon when stopped */
+.carousel-playing [data-carousel-play-pause] .play-icon {
   display: none;
 }
-.carousel-autoplay-paused [data-carousel-play-pause] .play-icon {
+.carousel-playing [data-carousel-play-pause] .pause-icon {
   display: block;
 }
 ```
@@ -546,12 +550,12 @@ const carousel = Carousel.init('.my-carousel');
 ### Instance Methods
 
 ```javascript
-carousel.next(); // Go to next item
-carousel.prev(); // Go to previous item
-carousel.goTo(2); // Go to specific index (0-based)
+carousel.next(); // Go to next item (stops autoplay)
+carousel.prev(); // Go to previous item (stops autoplay)
+carousel.goTo(2); // Go to specific index (stops autoplay)
 carousel.getActiveIndex(); // Returns current index
-carousel.play(); // Start or resume autoplay
-carousel.pause(); // Pause autoplay (sticky)
+carousel.play(); // Start autoplay fresh
+carousel.stop(); // Stop autoplay
 carousel.refresh(); // Recalculate dimensions and update
 carousel.destroy(); // Clean up and remove listeners
 ```
@@ -564,15 +568,15 @@ carousel.next().next().refresh();
 
 #### `play()`
 
-Starts autoplay or resumes it after a sticky pause. Clears the `pausedByUser` flag so hover/focus/viewport pauses behave normally again. Has no effect when `prefers-reduced-motion: reduce` is active. If autoplay was never configured via the data attribute, `play()` will set it up on the fly using the default duration (5000ms).
+Starts autoplay fresh with a full duration timer. Has no effect when `prefers-reduced-motion: reduce` is active. If autoplay was never configured via the data attribute, `play()` will set it up on the fly using the default duration (5000ms).
 
-#### `pause()`
+#### `stop()`
 
-Pauses autoplay with a sticky user-initiated pause. The carousel will not resume on hover-leave, focus-out, or viewport re-entry. Only `play()` or clicking the play/pause button will resume it.
+Stops autoplay completely. The `carousel-playing` class is removed and progress resets to 0. Only `play()` or clicking the play/pause button will restart it.
 
 #### `goTo(index)`
 
-Navigates to the given 0-based index. If the index is beyond the last navigable position (in multi-item carousels where the last few items share a scroll position), it is silently clamped. When autoplay is running (not paused), calling `goTo()` resets the slide timer so the full duration plays out on the new slide. It does **not** pause autoplay — the carousel keeps advancing.
+Navigates to the given 0-based index. If the index is beyond the last navigable position (in multi-item carousels where the last few items share a scroll position), it is silently clamped. If autoplay is running, it is stopped.
 
 ### Events
 
@@ -597,8 +601,8 @@ carousel.on('autoplay-start', (e) => {
   console.log(`Autoplay started at index: ${e.index}`);
 });
 
-carousel.on('autoplay-pause', (e) => {
-  console.log(`Autoplay paused at index: ${e.index}, progress: ${e.progress}`);
+carousel.on('autoplay-stop', (e) => {
+  console.log(`Autoplay stopped at index: ${e.index}, progress: ${e.progress}, reason: ${e.reason}`);
 });
 
 // Remove listener
@@ -621,8 +625,8 @@ Available events:
 | `scroll`         | Track scrolled          | `{ scrollLeft }`        |
 | `reach-start`    | Scrolled to first item  | -                       |
 | `reach-end`      | Scrolled to last item   | -                       |
-| `autoplay-start` | Autoplay started/resumed | `{ index }`            |
-| `autoplay-pause` | Autoplay paused         | `{ index, progress }`   |
+| `autoplay-start` | Autoplay started/resumed | `{ index }`                    |
+| `autoplay-stop`  | Autoplay stopped/paused  | `{ index, progress, reason }`  |
 
 > [!NOTE]
 > `reach-start` and `reach-end` fire based on physical scroll position, even when loop mode is enabled. They reflect the actual scroll edges, not the logical navigation boundaries.
@@ -712,8 +716,8 @@ carousel.refresh();
   `data-carousel-autoplay="true"`.
 </Accordion>
 
-<Accordion title="Do navigation buttons pause autoplay?">
-  No. Clicking the prev/next buttons resets the autoplay timer but keeps autoplay running. Only dot clicks, keyboard navigation, and dragging/swiping create a sticky pause. The idea is that buttons are a quick "skip" action, while other interactions signal the user wants manual control. To resume after a sticky pause, the user can click the play/pause button, or you can call `play()` via JavaScript.
+<Accordion title="Do navigation buttons stop autoplay?">
+  Yes. Any user interaction — prev/next buttons, dots, keyboard, or drag/swipe — stops autoplay. This is by design: autoplay is a "first impression" feature that runs until the user takes control. To restart, click the play/pause button or call `play()` via JavaScript.
 </Accordion>
 
 <Accordion title="Why do you call it 'Carousel' instead of 'Slider'?">

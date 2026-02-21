@@ -27,35 +27,35 @@ function runAutoplayTick(instance) {
   }
 
   if (progress >= 1) {
-    instance.next();
+    autoplay.advanceFn(instance);
     state.autoplayStartTime = performance.now();
   }
 
   autoplay.rafId = requestAnimationFrame(() => runAutoplayTick(instance));
 }
 
-// Checks if autoplay can resume based on all pause conditions
+// Checks if autoplay can resume from a temporary pause
 function canResume(instance) {
-  const { autoplay } = instance;
+  const { autoplay, state } = instance;
   return (
+    state.isAutoplaying &&
     autoplay.isVisible &&
     !autoplay.pausedByHover &&
-    !autoplay.pausedByFocus &&
-    !autoplay.pausedByUser
+    !autoplay.pausedByFocus
   );
 }
 
 // Sets up autoplay with IntersectionObserver and pause handlers
-export function setupAutoplay(instance) {
+export function setupAutoplay(instance, advanceFn) {
   const { container, config } = instance;
 
   instance.autoplay = {
     rafId: null,
     observer: null,
+    advanceFn,
     isVisible: true,
     pausedByHover: false,
     pausedByFocus: false,
-    pausedByUser: false,
   };
 
   // IntersectionObserver to pause when out of viewport
@@ -74,7 +74,7 @@ export function setupAutoplay(instance) {
   );
   instance.autoplay.observer.observe(container);
 
-  // Hover pause handlers
+  // Hover pause handlers (target the track, not container)
   if (config.autoplayPauseHover) {
     instance.autoplay.handleMouseEnter = () => {
       instance.autoplay.pausedByHover = true;
@@ -86,27 +86,27 @@ export function setupAutoplay(instance) {
         resumeAutoplay(instance);
       }
     };
-    container.addEventListener('mouseenter', instance.autoplay.handleMouseEnter);
-    container.addEventListener('mouseleave', instance.autoplay.handleMouseLeave);
+    instance.track.addEventListener('mouseenter', instance.autoplay.handleMouseEnter);
+    instance.track.addEventListener('mouseleave', instance.autoplay.handleMouseLeave);
   }
 
-  // Focus pause handlers
+  // Focus pause handlers (target the track, not container)
   if (config.autoplayPauseFocus) {
     instance.autoplay.handleFocusIn = () => {
       instance.autoplay.pausedByFocus = true;
       pauseAutoplay(instance, 'focus');
     };
     instance.autoplay.handleFocusOut = (e) => {
-      // Only resume if focus leaves the container entirely
-      if (!container.contains(e.relatedTarget)) {
+      // Only resume if focus leaves the track entirely
+      if (!instance.track.contains(e.relatedTarget)) {
         instance.autoplay.pausedByFocus = false;
         if (canResume(instance)) {
           resumeAutoplay(instance);
         }
       }
     };
-    container.addEventListener('focusin', instance.autoplay.handleFocusIn);
-    container.addEventListener('focusout', instance.autoplay.handleFocusOut);
+    instance.track.addEventListener('focusin', instance.autoplay.handleFocusIn);
+    instance.track.addEventListener('focusout', instance.autoplay.handleFocusOut);
   }
 }
 
@@ -118,8 +118,7 @@ export function startAutoplay(instance) {
   state.isPaused = false;
   state.autoplayStartTime = performance.now();
 
-  container.classList.add(CLASSES.AUTOPLAY_ACTIVE);
-  container.classList.remove(CLASSES.AUTOPLAY_PAUSED);
+  container.classList.add(CLASSES.PLAYING);
 
   // Update play/pause button
   if (instance.playPauseBtn) {
@@ -133,7 +132,7 @@ export function startAutoplay(instance) {
   );
 }
 
-// Pauses autoplay
+// Temporarily pauses autoplay (for hover, focus, visibility)
 export function pauseAutoplay(instance, reason = 'user') {
   const { state, container } = instance;
 
@@ -141,18 +140,13 @@ export function pauseAutoplay(instance, reason = 'user') {
 
   state.isPaused = true;
 
-  // Track user-initiated pause separately (sticky)
-  if (reason === 'user' || reason === 'keyboard') {
-    instance.autoplay.pausedByUser = true;
-  }
-
   // Cancel RAF
   if (instance.autoplay.rafId) {
     cancelAnimationFrame(instance.autoplay.rafId);
     instance.autoplay.rafId = null;
   }
 
-  container.classList.add(CLASSES.AUTOPLAY_PAUSED);
+  container.classList.remove(CLASSES.PLAYING);
 
   // Update play/pause button
   if (instance.playPauseBtn) {
@@ -165,9 +159,10 @@ export function pauseAutoplay(instance, reason = 'user') {
   state.autoplayPausedOnIndex = state.currentIndex;
   const progress = Math.min(elapsed / instance.config.autoplayDuration, 1);
 
-  emit(instance, EVENTS.AUTOPLAY_PAUSE, {
+  emit(instance, EVENTS.AUTOPLAY_STOP, {
     index: state.currentIndex,
     progress,
+    reason,
   });
 }
 
@@ -185,7 +180,7 @@ export function resumeAutoplay(instance) {
     ? performance.now() - (state.autoplayElapsed || 0)
     : performance.now();
 
-  container.classList.remove(CLASSES.AUTOPLAY_PAUSED);
+  container.classList.add(CLASSES.PLAYING);
 
   // Update play/pause button
   if (instance.playPauseBtn) {
@@ -200,8 +195,14 @@ export function resumeAutoplay(instance) {
 }
 
 // Stops autoplay completely
-export function stopAutoplay(instance) {
+export function stopAutoplay(instance, reason = 'user') {
   const { state, container } = instance;
+
+  if (!state.isAutoplaying) return;
+
+  // Compute progress before resetting
+  const elapsed = performance.now() - state.autoplayStartTime;
+  const progress = Math.min(elapsed / instance.config.autoplayDuration, 1);
 
   state.isAutoplaying = false;
   state.isPaused = false;
@@ -211,7 +212,18 @@ export function stopAutoplay(instance) {
     instance.autoplay.rafId = null;
   }
 
-  container.classList.remove(CLASSES.AUTOPLAY_ACTIVE, CLASSES.AUTOPLAY_PAUSED);
+  container.classList.remove(CLASSES.PLAYING);
+
+  // Update play/pause button
+  if (instance.playPauseBtn) {
+    instance.playPauseBtn.setAttribute('aria-pressed', 'false');
+  }
+
+  emit(instance, EVENTS.AUTOPLAY_STOP, {
+    index: state.currentIndex,
+    progress,
+    reason,
+  });
 
   // Reset progress on container
   container.style.setProperty(CSS_VARS.AUTOPLAY_PROGRESS, '0');
@@ -226,7 +238,7 @@ export function stopAutoplay(instance) {
 
 // Cleans up autoplay listeners and observer
 export function cleanupAutoplay(instance) {
-  const { container, config, autoplay } = instance;
+  const { config, autoplay } = instance;
 
   if (!autoplay) return;
 
@@ -240,16 +252,16 @@ export function cleanupAutoplay(instance) {
     autoplay.observer.disconnect();
   }
 
-  // Remove hover listeners
+  // Remove hover listeners from track
   if (config.autoplayPauseHover && autoplay.handleMouseEnter) {
-    container.removeEventListener('mouseenter', autoplay.handleMouseEnter);
-    container.removeEventListener('mouseleave', autoplay.handleMouseLeave);
+    instance.track.removeEventListener('mouseenter', autoplay.handleMouseEnter);
+    instance.track.removeEventListener('mouseleave', autoplay.handleMouseLeave);
   }
 
-  // Remove focus listeners
+  // Remove focus listeners from track
   if (config.autoplayPauseFocus && autoplay.handleFocusIn) {
-    container.removeEventListener('focusin', autoplay.handleFocusIn);
-    container.removeEventListener('focusout', autoplay.handleFocusOut);
+    instance.track.removeEventListener('focusin', autoplay.handleFocusIn);
+    instance.track.removeEventListener('focusout', autoplay.handleFocusOut);
   }
 
   instance.autoplay = null;
