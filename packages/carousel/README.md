@@ -86,7 +86,7 @@ Copy & paste this in an embed element or your Page Settings **Inside `<head>` ta
   }
 
   /* Default alignment when no attributes set */
-  [data-carousel='container']:not([data-carousel-align])
+  [data-carousel-container]:not([data-carousel-align])
     [data-carousel='item'] {
     scroll-snap-align: start;
   }
@@ -141,18 +141,18 @@ The benefit of leveraging native browser features instead of a library like Swip
 
 There's three elements required:
 
-- `[data-carousel="container"]` – the outermost container, used for scoping a specific instance.
+- `[data-carousel-container]` – the outermost container, used for scoping a specific instance.
 - `[data-carousel="track"]` – the horizontal list that houses all the items.
 - `[data-carousel="item"]` – the individual slides.
 
-The purpose of the `[data-carousel="container"]` element is three-fold:
+The purpose of the `[data-carousel-container]` element is three-fold:
 
-- **It allows for automatic unique instance detection**. Translation: you can simply have elements like the previous/next navigation buttons exist within the `[data-carousel="container"]` , and the code already knows those buttons are for _that_ specific carousel. It won't randomly start moving another carousel on another part of the page.
+- **It allows for automatic unique instance detection**. Translation: you can simply have elements like the previous/next navigation buttons exist within the `[data-carousel-container]` , and the code already knows those buttons are for _that_ specific carousel. It won't randomly start moving another carousel on another part of the page.
 - **It works perfectly with Webflow CMS.** How do you get navigation buttons inside Webflow's Collection List if you can't put non-CMS things inside a Collection List? Exactly. Now you can.
 - **Flexibility for future features.** Wink.
 
 > [!IMPORTANT]
-> You can put whatever you want inside of the `[data-carousel="container"]` element. The `[data-carousel="track"]` can be nested arbitrarily deep.
+> You can put whatever you want inside of the `[data-carousel-container]` element. The `[data-carousel="track"]` can be nested arbitrarily deep.
 >
 > The only restraints: there can only be one carousel within a container, and all the `[data-carousel="item"]` elements must be **direct children** of the track.
 
@@ -160,12 +160,12 @@ The purpose of the `[data-carousel="container"]` element is three-fold:
 
 To match up with the Webflow Collection List structure:
 
-1. `[data-carousel="container"]` – goes **on** the `Collection List Wrapper` (if you don't care for navigation buttons), or anywhere as an ancestor of the `Collection List Wrapper`.
+1. `[data-carousel-container]` – goes **on** the `Collection List Wrapper` (if you don't care for navigation buttons), or anywhere as an ancestor of the `Collection List Wrapper`.
 2. `[data-carousel="track"]` – goes on the `Collection List`
 3. `[data-carousel="item"]` – goes on the (you guessed it!) `Collection List Item`
 
 ```html
-<div data-carousel="container">
+<div data-carousel-container>
   <div data-carousel="track">
     <div data-carousel="item">Item 1</div>
     <div data-carousel="item">Item 2</div>
@@ -272,7 +272,7 @@ Configure the carousel with data attributes on the container element:
 
 | Attribute                | Values                           | Default   | Description                   |
 | ------------------------ | -------------------------------- | --------- | ----------------------------- |
-| `data-carousel`          | `"container"`                    | -         | Required on container element |
+| `data-carousel-container`| presence (skip with `"false"`)   | -         | Required on container element |
 | `data-carousel`          | `"track"`                        | -         | Required on track element     |
 | `data-carousel`          | `"item"`                         | -         | Required on each item element |
 | `data-carousel-align`    | `"start"` / `"center"` / `"end"` | `"start"` | Snap alignment of items       |
@@ -285,7 +285,7 @@ Configure the carousel with data attributes on the container element:
 Enable infinite-style navigation so the carousel wraps around when reaching either end. When loop is active, the previous/next buttons are never disabled.
 
 ```html
-<div data-carousel="container" data-carousel-loop="true">
+<div data-carousel-container data-carousel-loop="true">
   <!-- ... -->
 </div>
 ```
@@ -297,7 +297,7 @@ Loop applies to all forms of navigation: buttons, keyboard, pagination dots, aut
 By default, the carousel advances one item at a time. Set `data-carousel-scroll-by="page"` to advance by the number of items currently visible in the viewport. This is useful for multi-item carousels where you want to scroll a full "page" of content at once.
 
 ```html
-<div data-carousel="container" data-carousel-scroll-by="page">
+<div data-carousel-container data-carousel-scroll-by="page">
   <!-- ... -->
 </div>
 ```
@@ -321,7 +321,7 @@ Add pagination dots anywhere inside the carousel container. The library finds al
 > When items are narrower than the container (multi-item carousels), the last few items may share the same scroll position due to the browser's scroll ceiling. The library detects this and groups them into a single "snap position." Dot count reflects navigable positions, not raw item count. A console warning is logged when `loop` or `autoplay` is enabled with unreachable items. To make every item individually reachable, use wider items or add `padding-inline-end` to the track.
 
 ```html
-<div data-carousel="container">
+<div data-carousel-container>
   <div data-carousel="track">
     <div data-carousel="item">...</div>
     <div data-carousel="item">...</div>
@@ -361,7 +361,7 @@ When enabled, `Arrow Left` and `Arrow Right` navigate between items. For those w
 To enable keyboard navigation:
 
 ```html
-<div data-carousel="container" data-carousel-keyboard="true">
+<div data-carousel-container data-carousel-keyboard="true">
   <!-- Rest of the track/items -->
 </div>
 ```
@@ -372,7 +372,7 @@ Automatically advance slides on a timer. Autoplay requires `data-carousel-loop="
 
 ```html
 <div
-  data-carousel="container"
+  data-carousel-container
   data-carousel-loop="true"
   data-carousel-autoplay="true"
 >
@@ -393,7 +393,7 @@ Automatically advance slides on a timer. Autoplay requires `data-carousel-loop="
 
 ```html
 <div
-  data-carousel="container"
+  data-carousel-container
   data-carousel-loop="true"
   data-carousel-autoplay="true"
   data-carousel-autoplay-duration="3000"
@@ -408,7 +408,7 @@ Add a toggle button inside the container to let users control autoplay. The libr
 
 ```html
 <div
-  data-carousel="container"
+  data-carousel-container
   data-carousel-loop="true"
   data-carousel-autoplay="true"
 >
@@ -509,7 +509,7 @@ Here's an example from the prev/next buttons on all the variants on this page:
 }
 
 /* For a disabled arrow */
-[data-carousel='container'] .carousel_arrow.carousel-button-disabled {
+[data-carousel-container] .carousel_arrow.carousel-button-disabled {
   cursor: default;
   opacity: 0.5;
 }
@@ -540,7 +540,7 @@ Example: style the play/pause button based on autoplay state.
 // Auto-initializes on page load by default
 // Or manually initialize:
 const carousel = new Carousel(
-  document.querySelector('[data-carousel="container"]')
+  document.querySelector('[data-carousel-container]')
 );
 
 // Or using selector:

@@ -2,7 +2,7 @@
 
 // Selectors for querying DOM elements
 export const selectors = {
-  container: '[data-tabs="container"]',
+  container: '[data-tabs-container]:not([data-tabs-container="false"])',
   trigger: '[data-tabs-trigger-id]',
   panel: '[data-tabs-panel-id]',
   prevBtn: '[data-tabs="prev"]',

@@ -1,5 +1,5 @@
 export const SELECTORS = {
-  CONTAINER: '[data-carousel="container"]',
+  CONTAINER: '[data-carousel-container]:not([data-carousel-container="false"])',
   TRACK: '[data-carousel="track"]',
   ITEM: '[data-carousel="item"]',
   PREV_BTN: '[data-carousel="prev"]',

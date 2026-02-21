@@ -71,12 +71,12 @@ In the background, the library handles all the accessibility requirements (ARIA 
 
 Three elements are required:
 
-- `[data-tabs="container"]` – the outermost container, used for scoping
+- `[data-tabs-container]` – the outermost container, used for scoping
 - `[data-tabs-trigger-id="..."]` – the tab trigger buttons
 - `[data-tabs-panel-id="..."]` – the content panels
 
 ```html
-<div data-tabs="container">
+<div data-tabs-container>
   <div role="tablist">
     <button data-tabs-trigger-id="overview">Overview</button>
     <button data-tabs-trigger-id="features">Features</button>
@@ -97,7 +97,7 @@ Three elements are required:
 
 The value-based approach works great with Webflow's Collection List structure:
 
-1. `[data-tabs="container"]` – goes on an ancestor of the `Collection List Wrapper`, or on the wrapper itself if you don't need navigation buttons inside
+1. `[data-tabs-container]` – goes on an ancestor of the `Collection List Wrapper`, or on the wrapper itself if you don't need navigation buttons inside
 2. `[data-tabs-trigger-id]` – goes on trigger elements (pull the value from a CMS field)
 3. `[data-tabs-panel-id]` – goes on the `Collection List Item` (use the same CMS field)
 
@@ -109,7 +109,7 @@ Since triggers and panels are matched by value rather than position, you can hav
 
 | Attribute                     | Values                        | Default        | Description                         |
 | ----------------------------- | ----------------------------- | -------------- | ----------------------------------- |
-| `data-tabs`                   | `"container"`                 | -              | Required on container element       |
+| `data-tabs-container`         | presence (skip with `"false"`)| -              | Required on container element       |
 | `data-tabs-default`           | any value                     | first trigger  | Initial active tab value            |
 | `data-tabs-group-name`        | string                        | -              | URL parameter name for deep linking |
 | `data-tabs-orientation`       | `"horizontal"` / `"vertical"` | `"horizontal"` | Arrow key navigation direction      |
@@ -144,7 +144,7 @@ Optional controls that work automatically when placed inside the container:
 | `data-tabs="play-pause"` | Toggle autoplay button |
 
 ```html
-<div data-tabs="container" data-tabs-autoplay="true">
+<div data-tabs-container data-tabs-autoplay="true">
   <!-- Triggers and panels here -->
   <div>
     <button data-tabs="prev">Previous</button>
@@ -257,7 +257,7 @@ These enable powerful CSS-only effects:
 ```javascript
 // Auto-initializes on page load by default
 // Or manually initialize:
-const tabs = window.Tabs.init('[data-tabs="container"]');
+const tabs = window.Tabs.init('[data-tabs-container]');
 ```
 
 ### Instance Methods
@@ -337,7 +337,7 @@ The refresh method attempts to maintain the current active tab if it still exist
 Enable URL syncing with the `data-tabs-group-name` attribute:
 
 ```html
-<div data-tabs="container" data-tabs-group-name="section">
+<div data-tabs-container data-tabs-group-name="section">
   <!-- tabs... -->
 </div>
 ```
@@ -354,7 +354,7 @@ Priority order for initial tab: **URL parameter** &gt; **`data-tabs-default`** &
 Use the `data-tabs-default` attribute:
 
 ```html
-<div data-tabs="container" data-tabs-default="pricing"></div>
+<div data-tabs-container data-tabs-default="pricing"></div>
 ```
 
 Priority order: URL parameter &gt; `data-tabs-default` &gt; first trigger.
@@ -459,7 +459,7 @@ Yes! Use the `--tabs-direction` CSS variable. It's `1` when navigating forward, 
 By default, any user interaction (clicking a tab, using keyboard navigation, calling `next()`/`prev()`/`goTo()`) fully stops autoplay. Only `play()` or the play button restarts it. If you want autoplay to resume after a delay, you can use the events API:
 
 ```javascript
-const container = document.querySelector('[data-tabs="container"]');
+const container = document.querySelector('[data-tabs-container]');
 const tabs = window.Tabs.get(container);
 
 container.addEventListener('tabs:autoplay-stop', (e) => {

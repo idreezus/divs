@@ -13,7 +13,7 @@
   'use strict';
 
   const SELECTORS = {
-    CONTAINER: '[data-carousel="container"]',
+    CONTAINER: '[data-carousel-container]:not([data-carousel-container="false"])',
     TRACK: '[data-carousel="track"]',
     ITEM: '[data-carousel="item"]',
     PREV_BTN: '[data-carousel="prev"]',
@@ -1501,7 +1501,10 @@
 
   // Auto-initializes all carousels on the page when DOM is ready
   function autoInit() {
-    const containers = document.querySelectorAll(SELECTORS.CONTAINER);
+    // Query new attribute, with silent fallback for legacy data-carousel="container"
+    const containers = document.querySelectorAll(
+      `${SELECTORS.CONTAINER}, [data-carousel="container"]`
+    );
 
     containers.forEach((container) => {
       try {

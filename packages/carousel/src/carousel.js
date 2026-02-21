@@ -8,7 +8,10 @@ const instances = new Map();
 
 // Auto-initializes all carousels on the page when DOM is ready
 function autoInit() {
-  const containers = document.querySelectorAll(SELECTORS.CONTAINER);
+  // Query new attribute, with silent fallback for legacy data-carousel="container"
+  const containers = document.querySelectorAll(
+    `${SELECTORS.CONTAINER}, [data-carousel="container"]`
+  );
 
   containers.forEach((container) => {
     try {

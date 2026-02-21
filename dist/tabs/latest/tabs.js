@@ -16,7 +16,7 @@ var Tabs = (function (exports) {
 
   // Selectors for querying DOM elements
   const selectors = {
-    container: '[data-tabs="container"]',
+    container: '[data-tabs-container]:not([data-tabs-container="false"])',
     trigger: '[data-tabs-trigger-id]',
     panel: '[data-tabs-panel-id]',
     prevBtn: '[data-tabs="prev"]',
