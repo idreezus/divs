@@ -11,7 +11,7 @@ import {
 import {
   setupAutoplay,
   startAutoplay,
-  pauseAutoplay,
+  stopAutoplay,
   cleanupAutoplay,
 } from './autoplay.js';
 import {
@@ -52,7 +52,7 @@ function parseConfig(container) {
       parseInt(container.getAttribute(attributes.autoplayDuration), 10) ||
       defaults.autoplayDuration,
     autoplayPauseHover:
-      container.getAttribute(attributes.autoplayPauseHover) !== 'false',
+      container.getAttribute(attributes.autoplayPauseHover) === 'true',
     autoplayPauseFocus:
       container.getAttribute(attributes.autoplayPauseFocus) !== 'false',
   };
@@ -289,9 +289,9 @@ function moveFocus(instance, direction) {
 
   triggers[nextIndex].focus();
 
-  // Pause autoplay on keyboard interaction
+  // Stop autoplay on keyboard interaction
   if (state.isAutoplaying) {
-    pauseAutoplay(instance, 'keyboard');
+    stopAutoplay(instance, 'user');
   }
 
   // Activate if activate-on-focus is true
@@ -308,7 +308,7 @@ function focusTriggerAt(instance, index) {
   triggers[index].focus();
 
   if (state.isAutoplaying) {
-    pauseAutoplay(instance, 'keyboard');
+    stopAutoplay(instance, 'user');
   }
 
   if (config.activateOnFocus) {
@@ -380,11 +380,6 @@ function activate(instance, value, options = {}) {
 
   // Update state
   state.activeValue = normalized;
-
-  // Reset autoplay timer if active
-  if (state.isAutoplaying && !state.isPaused) {
-    state.autoplayStartTime = performance.now();
-  }
 
   // Update URL
   if (updateUrl && config.groupName) {
@@ -499,9 +494,9 @@ function attachEventListeners(instance) {
       e.preventDefault();
       const value = trigger.getAttribute(attributes.triggerId);
 
-      // Pause autoplay on user interaction
+      // Stop autoplay on user interaction
       if (state.isAutoplaying) {
-        pauseAutoplay(instance, 'user');
+        stopAutoplay(instance, 'user');
       }
 
       activate(instance, value);
@@ -526,8 +521,8 @@ function attachEventListeners(instance) {
   // Play/pause button
   if (playPauseBtn) {
     instance.boundHandlers.playPause = () => {
-      if (state.isAutoplaying && !state.isPaused) {
-        instance.pause();
+      if (state.isAutoplaying) {
+        stopAutoplay(instance, 'user');
       } else {
         instance.play();
       }
@@ -578,8 +573,7 @@ function resetDOM(instance) {
   container.removeAttribute('aria-orientation');
   container.classList.remove(
     classes.transitioning,
-    classes.autoplayActive,
-    classes.autoplayPaused,
+    classes.playing,
     classes.reducedMotion
   );
   container.style.removeProperty(cssProps.tabCount);
@@ -642,6 +636,22 @@ function resetDOM(instance) {
   delete container._tabs;
 }
 
+// Advances to next tab without stopping autoplay (used by autoplay tick)
+function advanceToNextTab(instance) {
+  const { triggers, config, state } = instance;
+  const currentIndex = findTriggerIndex(triggers, state.activeValue);
+
+  let nextIndex = currentIndex + 1;
+  if (config.loop) {
+    nextIndex = nextIndex % triggers.length;
+  } else {
+    nextIndex = Math.min(nextIndex, triggers.length - 1);
+  }
+
+  const nextValue = triggers[nextIndex].getAttribute(attributes.triggerId);
+  activate(instance, nextValue);
+}
+
 // Initializes a tabs instance
 function init(instance) {
   const { container, config } = instance;
@@ -686,7 +696,7 @@ function init(instance) {
       cssProps.autoplayDuration,
       config.autoplayDuration + 'ms'
     );
-    setupAutoplay(instance);
+    setupAutoplay(instance, advanceToNextTab);
     startAutoplay(instance);
   }
 
@@ -735,29 +745,22 @@ export class Tabs {
 
   // Navigates to a tab by value
   goTo(value) {
+    if (this.state.isAutoplaying) stopAutoplay(this, 'user');
     activate(this, value);
     return this;
   }
 
   // Navigates to the next tab
   next() {
-    const { triggers, config, state } = this;
-    const currentIndex = findTriggerIndex(triggers, state.activeValue);
-
-    let nextIndex = currentIndex + 1;
-    if (config.loop) {
-      nextIndex = nextIndex % triggers.length;
-    } else {
-      nextIndex = Math.min(nextIndex, triggers.length - 1);
-    }
-
-    const nextValue = triggers[nextIndex].getAttribute(attributes.triggerId);
-    activate(this, nextValue);
+    if (this.state.isAutoplaying) stopAutoplay(this, 'user');
+    advanceToNextTab(this);
     return this;
   }
 
   // Navigates to the previous tab
   prev() {
+    if (this.state.isAutoplaying) stopAutoplay(this, 'user');
+
     const { triggers, config, state } = this;
     const currentIndex = findTriggerIndex(triggers, state.activeValue);
 
@@ -778,7 +781,7 @@ export class Tabs {
     if (prefersReducedMotion()) return this;
 
     if (!this.autoplay) {
-      setupAutoplay(this);
+      setupAutoplay(this, advanceToNextTab);
     }
 
     // Set autoplay duration CSS variable
@@ -787,14 +790,13 @@ export class Tabs {
       this.config.autoplayDuration + 'ms'
     );
 
-    this.autoplay.pausedByUser = false;
     startAutoplay(this);
     return this;
   }
 
-  // Pauses autoplay
-  pause() {
-    pauseAutoplay(this, 'user');
+  // Stops autoplay
+  stop() {
+    stopAutoplay(this, 'user');
     return this;
   }
 

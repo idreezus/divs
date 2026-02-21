@@ -123,7 +123,7 @@ Since triggers and panels are matched by value rather than position, you can hav
 | -------------------------------- | -------------------- | --------- | --------------- |
 | `data-tabs-autoplay`             | `"true"` / `"false"` | `"false"` | Enable autoplay |
 | `data-tabs-autoplay-duration`    | milliseconds         | `5000`    | Time per tab    |
-| `data-tabs-autoplay-pause-hover` | `"true"` / `"false"` | `"true"`  | Pause on hover  |
+| `data-tabs-autoplay-pause-hover` | `"true"` / `"false"` | `"false"` | Pause on hover  |
 | `data-tabs-autoplay-pause-focus` | `"true"` / `"false"` | `"true"`  | Pause on focus  |
 
 ### Content Linking
@@ -179,8 +179,7 @@ The library applies state classes that you can style however you want.
 | `.tabs-panel-entering`  | Panel that is becoming active              |
 | `.tabs-panel-leaving`   | Panel that is becoming inactive            |
 | `.tabs-button-disabled` | Prev/next buttons at boundaries            |
-| `.tabs-autoplay-active` | Container when autoplay is running         |
-| `.tabs-autoplay-paused` | Container when autoplay is paused          |
+| `.tabs-playing`         | Container when autoplay is running         |
 | `.tabs-reduced-motion`  | Container when reduced motion is preferred |
 
 Here's an example styling the active trigger:
@@ -264,17 +263,17 @@ const tabs = window.Tabs.init('[data-tabs="container"]');
 ### Instance Methods
 
 ```javascript
-tabs.goTo('pricing'); // Go to specific tab by value
-tabs.next(); // Go to next tab
-tabs.prev(); // Go to previous tab
+tabs.goTo('pricing'); // Go to specific tab by value (stops autoplay)
+tabs.next(); // Go to next tab (stops autoplay)
+tabs.prev(); // Go to previous tab (stops autoplay)
 tabs.play(); // Start autoplay
-tabs.pause(); // Pause autoplay
+tabs.stop(); // Stop autoplay
 tabs.refresh(); // Re-initialize after DOM changes
 tabs.destroy(); // Clean up and remove listeners
 tabs.getActiveValue(); // Returns current active value
 ```
 
-All methods are chainable except `getActiveValue` (returns data) and `destroy` (resets DOM to pre-init state):
+All methods are chainable except `getActiveValue` (returns data) and `destroy` (resets DOM to pre-init state). Note that `goTo()`, `next()`, and `prev()` stop autoplay when called:
 
 ```javascript
 tabs.goTo('overview').play();
@@ -293,18 +292,18 @@ container.addEventListener('tabs:autoplay-start', (e) => {
   console.log('Autoplay started');
 });
 
-container.addEventListener('tabs:autoplay-pause', (e) => {
-  console.log(`Autoplay paused at ${e.detail.progress * 100}%`);
+container.addEventListener('tabs:autoplay-stop', (e) => {
+  console.log(`Autoplay stopped (${e.detail.reason}) at ${e.detail.progress * 100}%`);
 });
 ```
 
 Available events:
 
-| Event                 | Description              | Event Data                 |
-| --------------------- | ------------------------ | -------------------------- |
-| `tabs:change`         | Active tab changed       | `{ value, previousValue }` |
-| `tabs:autoplay-start` | Autoplay started/resumed | `{ value }`                |
-| `tabs:autoplay-pause` | Autoplay paused          | `{ value, progress }`      |
+| Event                 | Description              | Event Data                          |
+| --------------------- | ------------------------ | ----------------------------------- |
+| `tabs:change`         | Active tab changed       | `{ value, previousValue }`          |
+| `tabs:autoplay-start` | Autoplay started/resumed | `{ value }`                         |
+| `tabs:autoplay-stop`  | Autoplay stopped/paused  | `{ value, progress, reason }`       |
 
 ### Global API
 
@@ -457,13 +456,14 @@ Yes! Use the `--tabs-direction` CSS variable. It's `1` when navigating forward, 
 </Accordion>
 
 <Accordion title="How do I make autoplay resume after user interaction?">
-By default, clicking a tab or using keyboard navigation permanently pauses autoplay until the user clicks a play button. If you want autoplay to resume after a delay, you can use the events API:
+By default, any user interaction (clicking a tab, using keyboard navigation, calling `next()`/`prev()`/`goTo()`) fully stops autoplay. Only `play()` or the play button restarts it. If you want autoplay to resume after a delay, you can use the events API:
 
 ```javascript
 const container = document.querySelector('[data-tabs="container"]');
 const tabs = window.Tabs.get(container);
 
-container.addEventListener('tabs:change', () => {
+container.addEventListener('tabs:autoplay-stop', (e) => {
+  if (e.detail.reason !== 'user') return;
   // Resume autoplay after 10 seconds of inactivity
   clearTimeout(window.autoplayTimeout);
   window.autoplayTimeout = setTimeout(() => {
@@ -505,12 +505,17 @@ Each tabs instance also gets a `data-tabs-id` attribute for easier identificatio
 </Accordion>
 
 <Accordion title="Does autoplay work on mobile?">
-Yes, but with smart pausing. Autoplay pauses when:
+Yes, but with smart behavior. Autoplay temporarily pauses when:
 
 - The tabs scroll out of view (IntersectionObserver)
-- The user hovers over the container (if `pause-hover` is enabled)
+- The user hovers over the container (if `pause-hover` is opted in)
 - The user focuses any element inside (if `pause-focus` is enabled)
-- The user manually clicks a tab or uses keyboard navigation
+
+Autoplay fully stops (requires `play()` to restart) when:
+
+- The user clicks a tab
+- The user uses keyboard navigation
+- `next()`, `prev()`, or `goTo()` are called
 
 On touch devices, hover pausing doesn't apply, but visibility and focus pausing still work.
 </Accordion>

@@ -67,14 +67,16 @@ src/
 - `classes` - State class names
 - `cssProps` - CSS custom property names
 - `defaults` - Default configuration values (includes transition timing)
-- `events` - CustomEvent names (change, autoplay-start, autoplay-pause)
+- `events` - CustomEvent names (change, autoplay-start, autoplay-stop)
 
 **Autoplay System (src/autoplay.js)**
 
 - RAF-based progress updates with `--tabs-progress` CSS variable
 - IntersectionObserver pauses when out of viewport
-- Separate pause states: hover, focus, user, visibility
-- `canResume()` checks all conditions before resuming
+- Stop-on-action model: any user interaction fully stops autoplay
+- Temporary pauses: hover, focus, visibility (auto-resume)
+- `canResume()` checks temporary pause conditions before resuming
+- `advanceFn` parameter decouples tick advancement from public `next()`
 
 ### Key Architectural Patterns
 
@@ -93,7 +95,7 @@ src/
 
 **Event System**
 
-- DOM CustomEvents only (`tabs:change`, `tabs:autoplay-start`, `tabs:autoplay-pause`)
+- DOM CustomEvents only (`tabs:change`, `tabs:autoplay-start`, `tabs:autoplay-stop`)
 - Events bubble from container element
 - Listen via `container.addEventListener('tabs:change', handler)`
 
@@ -134,7 +136,7 @@ All configuration via `data-tabs-*` attributes on container element:
 
 - `data-tabs-autoplay` - `"true"` or `"false"` (default)
 - `data-tabs-autoplay-duration` - Milliseconds per tab (default: 5000)
-- `data-tabs-autoplay-pause-hover` - `"true"` (default) or `"false"`
+- `data-tabs-autoplay-pause-hover` - `"true"` or `"false"` (default)
 - `data-tabs-autoplay-pause-focus` - `"true"` (default) or `"false"`
 
 **Navigation buttons (place inside container):**
@@ -152,11 +154,11 @@ All configuration via `data-tabs-*` attributes on container element:
 const tabs = container._tabs; // Direct access to instance
 
 // Instance methods (chainable except getActiveValue/destroy)
-tabs.goTo(value); // Activate by value
-tabs.next(); // Next tab
-tabs.prev(); // Previous tab
+tabs.goTo(value); // Activate by value (stops autoplay)
+tabs.next(); // Next tab (stops autoplay)
+tabs.prev(); // Previous tab (stops autoplay)
 tabs.play(); // Start autoplay
-tabs.pause(); // Pause autoplay
+tabs.stop(); // Stop autoplay
 tabs.refresh(); // Re-initialize after DOM changes
 tabs.destroy(); // Clean up and reset DOM
 tabs.getActiveValue(); // Returns current active value

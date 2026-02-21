@@ -47,8 +47,7 @@ export const classes = {
   buttonDisabled: 'tabs-button-disabled',
 
   // Autoplay state classes
-  autoplayActive: 'tabs-autoplay-active',
-  autoplayPaused: 'tabs-autoplay-paused',
+  playing: 'tabs-playing',
 
   // Accessibility
   reducedMotion: 'tabs-reduced-motion',
@@ -73,7 +72,7 @@ export const defaults = {
   keyboard: true,
   autoplay: false,
   autoplayDuration: 5000,
-  autoplayPauseHover: true,
+  autoplayPauseHover: false,
   autoplayPauseFocus: true,
   transitionDuration: 200,
 };
@@ -82,5 +81,5 @@ export const defaults = {
 export const events = {
   change: 'change',
   autoplayStart: 'autoplay-start',
-  autoplayPause: 'autoplay-pause',
+  autoplayStop: 'autoplay-stop',
 };

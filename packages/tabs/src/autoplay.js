@@ -21,7 +21,7 @@ function runAutoplayTick(instance) {
   }
 
   if (progress >= 1) {
-    instance.next();
+    autoplay.advanceFn(instance);
     state.autoplayStartTime = performance.now();
   }
 
@@ -29,16 +29,16 @@ function runAutoplayTick(instance) {
 }
 
 // Sets up autoplay with IntersectionObserver and pause handlers
-export function setupAutoplay(instance) {
+export function setupAutoplay(instance, advanceFn) {
   const { container, config } = instance;
 
   instance.autoplay = {
     rafId: null,
     observer: null,
+    advanceFn,
     isVisible: true,
     pausedByHover: false,
     pausedByFocus: false,
-    pausedByUser: false,
   };
 
   // IntersectionObserver to pause when out of viewport
@@ -101,12 +101,12 @@ export function setupAutoplay(instance) {
 
 // Checks if autoplay can resume based on all pause conditions
 function canResume(instance) {
-  const { autoplay } = instance;
+  const { autoplay, state } = instance;
   return (
+    state.isAutoplaying &&
     autoplay.isVisible &&
     !autoplay.pausedByHover &&
-    !autoplay.pausedByFocus &&
-    !autoplay.pausedByUser
+    !autoplay.pausedByFocus
   );
 }
 
@@ -118,8 +118,7 @@ export function startAutoplay(instance) {
   state.isPaused = false;
   state.autoplayStartTime = performance.now();
 
-  container.classList.add(classes.autoplayActive);
-  container.classList.remove(classes.autoplayPaused);
+  container.classList.add(classes.playing);
 
   // Update play/pause button
   if (instance.playPauseBtn) {
@@ -133,7 +132,7 @@ export function startAutoplay(instance) {
   );
 }
 
-// Pauses autoplay
+// Pauses autoplay temporarily (hover, focus, visibility)
 export function pauseAutoplay(instance, reason = 'user') {
   const { state, container } = instance;
 
@@ -141,18 +140,13 @@ export function pauseAutoplay(instance, reason = 'user') {
 
   state.isPaused = true;
 
-  // Track user-initiated pause separately
-  if (reason === 'user' || reason === 'keyboard') {
-    instance.autoplay.pausedByUser = true;
-  }
-
   // Cancel RAF
   if (instance.autoplay.rafId) {
     cancelAnimationFrame(instance.autoplay.rafId);
     instance.autoplay.rafId = null;
   }
 
-  container.classList.add(classes.autoplayPaused);
+  container.classList.remove(classes.playing);
 
   // Update play/pause button
   if (instance.playPauseBtn) {
@@ -165,9 +159,10 @@ export function pauseAutoplay(instance, reason = 'user') {
   state.autoplayPausedOnValue = state.activeValue;
   const progress = Math.min(elapsed / instance.config.autoplayDuration, 1);
 
-  emit(instance, events.autoplayPause, {
+  emit(instance, events.autoplayStop, {
     value: state.activeValue,
     progress,
+    reason,
   });
 }
 
@@ -185,7 +180,7 @@ export function resumeAutoplay(instance) {
     ? performance.now() - (state.autoplayElapsed || 0)
     : performance.now();
 
-  container.classList.remove(classes.autoplayPaused);
+  container.classList.add(classes.playing);
 
   // Update play/pause button
   if (instance.playPauseBtn) {
@@ -200,8 +195,14 @@ export function resumeAutoplay(instance) {
 }
 
 // Stops autoplay completely
-export function stopAutoplay(instance) {
+export function stopAutoplay(instance, reason = 'user') {
   const { state, container } = instance;
+
+  if (!state.isAutoplaying) return;
+
+  // Compute progress before resetting
+  const elapsed = performance.now() - state.autoplayStartTime;
+  const progress = Math.min(elapsed / instance.config.autoplayDuration, 1);
 
   state.isAutoplaying = false;
   state.isPaused = false;
@@ -211,7 +212,18 @@ export function stopAutoplay(instance) {
     instance.autoplay.rafId = null;
   }
 
-  container.classList.remove(classes.autoplayActive, classes.autoplayPaused);
+  container.classList.remove(classes.playing);
+
+  // Update play/pause button
+  if (instance.playPauseBtn) {
+    instance.playPauseBtn.setAttribute('aria-pressed', 'false');
+  }
+
+  emit(instance, events.autoplayStop, {
+    value: state.activeValue,
+    progress,
+    reason,
+  });
 
   // Reset progress on all triggers
   instance.triggers.forEach((trigger) => {
