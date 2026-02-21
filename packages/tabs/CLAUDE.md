@@ -119,7 +119,7 @@ All configuration via `data-tabs-*` attributes on container element:
 
 **Core:**
 
-- `data-tabs="container"` - Marks container for initialization (required)
+- `data-tabs-container` - Marks container for initialization (required, skip with `"false"`)
 - `data-tabs-trigger-value` - Links trigger to panel (required on triggers)
 - `data-tabs-panel-value` - Links panel to trigger(s) (required on panels)
 - `data-tabs-default` - Initial active tab value

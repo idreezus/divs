@@ -137,19 +137,19 @@ Since triggers and panels are matched by value rather than position, you can hav
 
 Optional controls that work automatically when placed inside the container:
 
-| Attribute                | Description            |
-| ------------------------ | ---------------------- |
-| `data-tabs="prev"`       | Previous tab button    |
-| `data-tabs="next"`       | Next tab button        |
-| `data-tabs="play-pause"` | Toggle autoplay button |
+| Attribute              | Description            |
+| ---------------------- | ---------------------- |
+| `data-tabs-prev`       | Previous tab button    |
+| `data-tabs-next`       | Next tab button        |
+| `data-tabs-play-pause` | Toggle autoplay button |
 
 ```html
 <div data-tabs-container data-tabs-autoplay="true">
   <!-- Triggers and panels here -->
   <div>
-    <button data-tabs="prev">Previous</button>
-    <button data-tabs="next">Next</button>
-    <button data-tabs="play-pause">Pause</button>
+    <button data-tabs-prev>Previous</button>
+    <button data-tabs-next>Next</button>
+    <button data-tabs-play-pause>Pause</button>
   </div>
 </div>
 ```
@@ -198,8 +198,8 @@ Here's an example styling the active trigger:
 }
 
 /* Disabled navigation button */
-[data-tabs='prev'].tabs-button-disabled,
-[data-tabs='next'].tabs-button-disabled {
+[data-tabs-prev].tabs-button-disabled,
+[data-tabs-next].tabs-button-disabled {
   opacity: 0.3;
   pointer-events: none;
 }

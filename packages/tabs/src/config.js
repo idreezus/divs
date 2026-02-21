@@ -5,9 +5,9 @@ export const selectors = {
   container: '[data-tabs-container]:not([data-tabs-container="false"])',
   trigger: '[data-tabs-trigger-id]',
   panel: '[data-tabs-panel-id]',
-  prevBtn: '[data-tabs="prev"]',
-  nextBtn: '[data-tabs="next"]',
-  playPauseBtn: '[data-tabs="play-pause"]',
+  prevBtn: '[data-tabs-prev]:not([data-tabs-prev="false"])',
+  nextBtn: '[data-tabs-next]:not([data-tabs-next="false"])',
+  playPauseBtn: '[data-tabs-play-pause]:not([data-tabs-play-pause="false"])',
 };
 
 // Attribute names for configuration

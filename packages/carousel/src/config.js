@@ -1,14 +1,21 @@
-export const SELECTORS = {
-  CONTAINER: '[data-carousel-container]:not([data-carousel-container="false"])',
-  TRACK: '[data-carousel="track"]',
-  ITEM: '[data-carousel="item"]',
-  PREV_BTN: '[data-carousel="prev"]',
-  NEXT_BTN: '[data-carousel="next"]',
-  DOT: '[data-carousel-dot]',
-  PAGINATION_CURRENT: '[data-carousel-pagination-current]',
-  PAGINATION_TOTAL: '[data-carousel-pagination-total]',
-  PLAY_PAUSE_BTN: '[data-carousel-play-pause]',
+// Builds a presence-based selector with opt-out support
+const sel = (attr) => `[${attr}]:not([${attr}="false"])`;
+
+export const SELECTOR_ATTRS = {
+  CONTAINER:          'data-carousel-container',
+  TRACK:              'data-carousel-track',
+  ITEM:               'data-carousel-item',
+  PREV_BTN:           'data-carousel-prev',
+  NEXT_BTN:           'data-carousel-next',
+  DOT:                'data-carousel-dot',
+  PAGINATION_CURRENT: 'data-carousel-pagination-current',
+  PAGINATION_TOTAL:   'data-carousel-pagination-total',
+  PLAY_PAUSE_BTN:     'data-carousel-play-pause',
 };
+
+export const SELECTORS = Object.fromEntries(
+  Object.entries(SELECTOR_ATTRS).map(([k, v]) => [k, sel(v)])
+);
 
 // CSS classes applied to elements
 export const CLASSES = {

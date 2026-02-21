@@ -33,27 +33,27 @@ function findElements(instance) {
   const { container, id } = instance;
   const { SELECTORS } = CONFIG;
 
-  // Find required track element
-  const track = container.querySelector(SELECTORS.TRACK);
+  // Find required track element (legacy backwards compat)
+  const track = container.querySelector(`${SELECTORS.TRACK}, [data-carousel="track"]`);
   if (!track) {
     console.warn(
-      `Carousel ${id}: Track element not found. Expected element with data-carousel="track".`
+      `Carousel ${id}: Track element not found. Expected element with data-carousel-track.`
     );
     return false;
   }
 
-  // Find required item elements
-  const items = [...container.querySelectorAll(SELECTORS.ITEM)];
+  // Find required item elements (legacy backwards compat)
+  const items = [...container.querySelectorAll(`${SELECTORS.ITEM}, [data-carousel="item"]`)];
   if (items.length === 0) {
     console.warn(
-      `Carousel ${id}: No items found. Expected at least one element with data-carousel="item".`
+      `Carousel ${id}: No items found. Expected at least one element with data-carousel-item.`
     );
     return false;
   }
 
-  // Find optional navigation buttons (no warning if missing)
-  const prevBtn = container.querySelector(SELECTORS.PREV_BTN);
-  const nextBtn = container.querySelector(SELECTORS.NEXT_BTN);
+  // Find optional navigation buttons (legacy backwards compat)
+  const prevBtn = container.querySelector(`${SELECTORS.PREV_BTN}, [data-carousel="prev"]`);
+  const nextBtn = container.querySelector(`${SELECTORS.NEXT_BTN}, [data-carousel="next"]`);
 
   // Find optional pagination dots (can be anywhere in container)
   const dots = [...container.querySelectorAll(SELECTORS.DOT)];

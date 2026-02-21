@@ -51,8 +51,8 @@
 }
 
 /* Navigation button disabled state */
-[data-tabs='prev'].tabs-button-disabled,
-[data-tabs='next'].tabs-button-disabled {
+[data-tabs-prev].tabs-button-disabled,
+[data-tabs-next].tabs-button-disabled {
   opacity: 0.5;
   pointer-events: none;
 }

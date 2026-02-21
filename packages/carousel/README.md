@@ -142,8 +142,8 @@ The benefit of leveraging native browser features instead of a library like Swip
 There's three elements required:
 
 - `[data-carousel-container]` – the outermost container, used for scoping a specific instance.
-- `[data-carousel="track"]` – the horizontal list that houses all the items.
-- `[data-carousel="item"]` – the individual slides.
+- `[data-carousel-track]` – the horizontal list that houses all the items.
+- `[data-carousel-item]` – the individual slides.
 
 The purpose of the `[data-carousel-container]` element is three-fold:
 
@@ -152,17 +152,17 @@ The purpose of the `[data-carousel-container]` element is three-fold:
 - **Flexibility for future features.** Wink.
 
 > [!IMPORTANT]
-> You can put whatever you want inside of the `[data-carousel-container]` element. The `[data-carousel="track"]` can be nested arbitrarily deep.
+> You can put whatever you want inside of the `[data-carousel-container]` element. The `[data-carousel-track]` can be nested arbitrarily deep.
 >
-> The only restraints: there can only be one carousel within a container, and all the `[data-carousel="item"]` elements must be **direct children** of the track.
+> The only restraints: there can only be one carousel within a container, and all the `[data-carousel-item]` elements must be **direct children** of the track.
 
 ### Webflow CMS
 
 To match up with the Webflow Collection List structure:
 
 1. `[data-carousel-container]` – goes **on** the `Collection List Wrapper` (if you don't care for navigation buttons), or anywhere as an ancestor of the `Collection List Wrapper`.
-2. `[data-carousel="track"]` – goes on the `Collection List`
-3. `[data-carousel="item"]` – goes on the (you guessed it!) `Collection List Item`
+2. `[data-carousel-track]` – goes on the `Collection List`
+3. `[data-carousel-item]` – goes on the (you guessed it!) `Collection List Item`
 
 ```html
 <div data-carousel-container>
@@ -273,8 +273,8 @@ Configure the carousel with data attributes on the container element:
 | Attribute                | Values                           | Default   | Description                   |
 | ------------------------ | -------------------------------- | --------- | ----------------------------- |
 | `data-carousel-container`| presence (skip with `"false"`)   | -         | Required on container element |
-| `data-carousel`          | `"track"`                        | -         | Required on track element     |
-| `data-carousel`          | `"item"`                         | -         | Required on each item element |
+| `data-carousel-track`   | presence (skip with `"false"`)   | -         | Required on track element     |
+| `data-carousel-item`    | presence (skip with `"false"`)   | -         | Required on each item element |
 | `data-carousel-align`    | `"start"` / `"center"` / `"end"` | `"start"` | Snap alignment of items       |
 | `data-carousel-keyboard` | `"true"` / `"false"`             | `"false"` | Enable keyboard navigation    |
 | `data-carousel-loop`     | `"true"` / `"false"`             | `"false"` | Loop from last item to first (and vice versa) |
@@ -310,8 +310,8 @@ Optional navigation controls that work automatically when placed inside the cont
 
 | Attribute              | Description     |
 | ---------------------- | --------------- |
-| `data-carousel="prev"` | Previous button |
-| `data-carousel="next"` | Next button     |
+| `data-carousel-prev`  | Previous button |
+| `data-carousel-next`  | Next button     |
 
 ### Pagination
 
@@ -445,7 +445,7 @@ When the user's operating system has `prefers-reduced-motion: reduce` enabled, a
 
 ### Spacing and Positioning
 
-Use CSS `gap` on the `[data-carousel="track"]` to control spacing.
+Use CSS `gap` on the `[data-carousel-track]` to control spacing.
 
 The library also works with CSS [`scroll-padding`](https://developer.mozilla.org/en-US/docs/Web/CSS/scroll-padding) (container insets) and [`scroll-margin`](https://developer.mozilla.org/en-US/docs/Web/CSS/scroll-margin) (per-item offsets) for controlling snap positioning. For the variants on this page, all of them have `scroll-padding` on the track element.
 
@@ -655,7 +655,7 @@ When adding/removing items, call `refresh()`:
 ```javascript
 const track = carousel.track;
 const newItem = document.createElement('div');
-newItem.setAttribute('data-carousel', 'item');
+newItem.setAttribute('data-carousel-item', '');
 newItem.textContent = 'New Item';
 track.appendChild(newItem);
 
@@ -679,7 +679,8 @@ const newCarousel = new Carousel(container);
 The library automatically adds the `.carousel-button-disabled` class when at the start or end. Style that class however you like. When loop mode is enabled, buttons are never disabled.
 
 ```css
-button[data-carousel].carousel-button-disabled {
+button[data-carousel-prev].carousel-button-disabled,
+button[data-carousel-next].carousel-button-disabled {
   opacity: 0.3;
   pointer-events: none;
 }
