@@ -123,22 +123,23 @@ export function findActiveIndex(
 
 // Finds the target index when scrolling forward by one container width
 export function findNextPageIndex(instance) {
-  const { track, state, items, config } = instance;
-  const { itemPositions, containerWidth } = state;
+  const { track, state, config } = instance;
+  const { itemPositions, containerWidth, maxReachableIndex } = state;
   const targetLeft = track.scrollLeft + containerWidth;
 
   for (let i = state.currentIndex + 1; i < itemPositions.length; i++) {
+    if (i > maxReachableIndex) return config.loop ? 0 : maxReachableIndex;
     if (itemPositions[i].left >= targetLeft) return i;
   }
 
   // Near the end
-  return config.loop ? 0 : items.length - 1;
+  return config.loop ? 0 : maxReachableIndex;
 }
 
 // Finds the target index when scrolling backward by one container width
 export function findPrevPageIndex(instance) {
-  const { track, state, items, config } = instance;
-  const { itemPositions, containerWidth } = state;
+  const { track, state, config } = instance;
+  const { itemPositions, containerWidth, maxReachableIndex } = state;
   const targetLeft = track.scrollLeft - containerWidth;
 
   for (let i = state.currentIndex - 1; i >= 0; i--) {
@@ -146,16 +147,12 @@ export function findPrevPageIndex(instance) {
   }
 
   // Near the start
-  return config.loop ? items.length - 1 : 0;
+  return config.loop ? maxReachableIndex : 0;
 }
 
-// Returns the total number of slides for the provided collection of items
-export function calculateTotalSlides(items) {
-  if (!Array.isArray(items)) {
-    return 0;
-  }
-
-  return items.length;
+// Returns the total number of navigable positions (snap groups)
+export function calculateTotalSlides(instance) {
+  return instance.state.totalPositions;
 }
 
 // Emits custom events both through the instance event system and as DOM events
@@ -270,6 +267,25 @@ export function calculateDimensions(instance) {
 
   // Store snap alignment on instance for reference
   instance.snapAlign = config.align;
+
+  // Compute the highest index findActiveIndex can detect at max scroll
+  const maxScroll = scrollWidth - containerWidth;
+  let maxReachableIndex;
+  if (maxScroll <= 0) {
+    maxReachableIndex = 0;
+  } else {
+    maxReachableIndex = findActiveIndex(
+      itemPositions, maxScroll, containerWidth, config.align,
+      { startInset, endInset }
+    );
+  }
+
+  const totalPositions = maxReachableIndex + 1;
+
+  Object.assign(state, {
+    maxReachableIndex,
+    totalPositions,
+  });
 }
 
 // Updates CSS custom properties on the carousel container
@@ -280,8 +296,8 @@ export function updateCSSProperties(instance) {
   // Set one-based index for display friendliness
   container.style.setProperty(CSS_VARS.INDEX, currentIndex + 1);
 
-  // Set total item count
-  container.style.setProperty(CSS_VARS.TOTAL, items.length);
+  // Set total navigable positions (snap groups)
+  container.style.setProperty(CSS_VARS.TOTAL, state.totalPositions);
 
   // Calculate progress (0-1) based on scroll position
   const maxScroll = scrollWidth - containerWidth;
@@ -289,4 +305,20 @@ export function updateCSSProperties(instance) {
   const progress =
     maxScroll > 0 ? Math.min(1, Math.max(0, scrollLeft / maxScroll)) : 0;
   container.style.setProperty(CSS_VARS.PROGRESS, progress);
+}
+
+// Logs a console warning when loop/autoplay is enabled with unreachable items
+export function warnUnreachableItems(instance) {
+  const { config, state, items, id } = instance;
+  if (state.maxReachableIndex >= items.length - 1) return;
+  if (!config.loop && !config.autoplay) return;
+
+  const unreachableCount = items.length - 1 - state.maxReachableIndex;
+  const features = [config.loop && 'loop', config.autoplay && 'autoplay'].filter(Boolean).join(' and ');
+  console.warn(
+    `Carousel ${id}: ${unreachableCount} item(s) (indices ${state.maxReachableIndex + 1}-${items.length - 1}) ` +
+    `share the same scroll position as item ${state.maxReachableIndex} and cannot be individually activated. ` +
+    `${features} will cycle through ${state.totalPositions} positions instead of ${items.length}. ` +
+    `To make every item individually reachable, use wider items or add padding-inline-end to the track.`
+  );
 }

@@ -40,44 +40,36 @@ export function detectActiveItem(instance) {
   }
 }
 
-// Updates the disabled state of navigation buttons based on scroll position
+// Updates the disabled state of navigation buttons based on current index
 export function updateButtonStates(instance) {
   const { track, prevBtn, nextBtn, state, config } = instance;
   const { CLASSES, TOLERANCE } = CONFIG;
 
+  // Edge detection still uses physical scroll position (for reach-start/reach-end events)
   const scrollLeft = track.scrollLeft;
-  const { scrollWidth, containerWidth } = state;
-  const maxScroll = scrollWidth - containerWidth;
-
-  // Detect edges with tolerance for fractional pixels
+  const maxScroll = state.scrollWidth - state.containerWidth;
   const atStart = scrollLeft <= TOLERANCE.EDGE_DETECTION;
   const atEnd = scrollLeft >= maxScroll - TOLERANCE.EDGE_DETECTION;
 
-  if (config.loop) {
-    // Never disable buttons when looping
-    if (prevBtn) {
-      prevBtn.classList.remove(CLASSES.DISABLED);
-      prevBtn.disabled = false;
-    }
-    if (nextBtn) {
-      nextBtn.classList.remove(CLASSES.DISABLED);
-      nextBtn.disabled = false;
-    }
-  } else {
-    // Update prev button state
-    if (prevBtn) {
-      prevBtn.classList.toggle(CLASSES.DISABLED, atStart);
-      prevBtn.disabled = atStart;
-    }
+  // Button disabled state uses index (not scroll position)
+  const atFirstPosition = state.currentIndex <= 0;
+  const atLastPosition = state.currentIndex >= state.maxReachableIndex;
 
-    // Update next button state
+  if (config.loop) {
+    if (prevBtn) { prevBtn.classList.remove(CLASSES.DISABLED); prevBtn.disabled = false; }
+    if (nextBtn) { nextBtn.classList.remove(CLASSES.DISABLED); nextBtn.disabled = false; }
+  } else {
+    if (prevBtn) {
+      prevBtn.classList.toggle(CLASSES.DISABLED, atFirstPosition);
+      prevBtn.disabled = atFirstPosition;
+    }
     if (nextBtn) {
-      nextBtn.classList.toggle(CLASSES.DISABLED, atEnd);
-      nextBtn.disabled = atEnd;
+      nextBtn.classList.toggle(CLASSES.DISABLED, atLastPosition);
+      nextBtn.disabled = atLastPosition;
     }
   }
 
-  // Edge events fire regardless of loop mode (physical scroll position)
+  // Edge events still fire based on physical scroll position
   if (atStart && !state.hasEmittedStart) {
     emit(instance, 'reach-start');
     state.hasEmittedStart = true;
@@ -98,52 +90,50 @@ export function handleScroll(instance) {
   const { track } = instance;
   const { CLASSES, TIMING } = CONFIG;
 
-  // Detect user-initiated scroll (not programmatic) and pause autoplay
-  if (!instance.state.isAnimating && instance.state.isAutoplaying && !instance.state.isPaused) {
+  // User scroll while autoplay is running → sticky pause
+  if (!instance.state.isProgrammaticScroll && instance.state.isAutoplaying && !instance.state.isPaused) {
     pauseAutoplay(instance, 'user');
   }
 
-  // Add scrolling class immediately for instant feedback
   track.classList.add(CLASSES.SCROLLING);
-
-  // Emit scroll event with current position
   emit(instance, 'scroll', { scrollLeft: track.scrollLeft });
 
-  // Create debounced handler on first scroll (lazy initialization)
-  if (!instance.debouncedScrollHandler) {
-    instance.debouncedScrollHandler = debounce(() => {
-      detectActiveItem(instance);
-      updateButtonStates(instance);
-      track.classList.remove(CLASSES.SCROLLING);
-    }, TIMING.DEBOUNCE_SCROLL);
+  // Only run debounced detection for user-initiated scrolls.
+  // For programmatic scrolls, currentIndex is already set by the caller.
+  if (!instance.state.isProgrammaticScroll) {
+    if (!instance.debouncedScrollHandler) {
+      instance.debouncedScrollHandler = debounce(() => {
+        detectActiveItem(instance);
+        updateButtonStates(instance);
+        track.classList.remove(CLASSES.SCROLLING);
+      }, TIMING.DEBOUNCE_SCROLL);
+    }
+    instance.debouncedScrollHandler();
   }
-
-  // Execute debounced handler
-  instance.debouncedScrollHandler();
 }
 
 // Calculates the index of the next item for navigation
 export function calculateNextIndex(instance) {
-  const { state, items, config } = instance;
+  const { state, config } = instance;
 
   if (config.scrollBy === 'page') return findNextPageIndex(instance);
 
   const nextIndex = state.currentIndex + 1;
-  if (nextIndex > items.length - 1) {
-    return config.loop ? 0 : items.length - 1;
+  if (nextIndex > state.maxReachableIndex) {
+    return config.loop ? 0 : state.maxReachableIndex;
   }
   return nextIndex;
 }
 
 // Calculates the index of the previous item for navigation
 export function calculatePrevIndex(instance) {
-  const { state, items, config } = instance;
+  const { state, config } = instance;
 
   if (config.scrollBy === 'page') return findPrevPageIndex(instance);
 
   const prevIndex = state.currentIndex - 1;
   if (prevIndex < 0) {
-    return config.loop ? items.length - 1 : 0;
+    return config.loop ? state.maxReachableIndex : 0;
   }
   return prevIndex;
 }
@@ -159,46 +149,85 @@ export function scrollToItem(instance, index) {
     return;
   }
 
-  // Mark as animating to prevent concurrent navigation
-  state.isAnimating = true;
+  // Cancel any pending scroll cleanup from a previous scrollToItem call
+  if (instance._scrollCleanup) {
+    instance._scrollCleanup();
+  }
+
+  state.isProgrammaticScroll = true;
   track.classList.add(CLASSES.ANIMATING);
   track.classList.add(CLASSES.SNAP_DISABLED);
 
-  // Browser handles positioning with respect to scroll-padding and scroll-margin
-  targetItem.scrollIntoView({
-    behavior: 'smooth',
-    block: 'nearest',
-    container: 'nearest',
-    inline: snapAlign, // 'start', 'center', or 'end'
-  });
-
-  // Re-enable scroll-snap after short delay so native snap can take over
+  // Re-enable scroll-snap after short delay
   setTimeout(() => {
     track.classList.remove(CLASSES.SNAP_DISABLED);
   }, TIMING.SNAP_DISABLE_DURATION);
 
-  // Remove animating state after cooldown period
-  setTimeout(() => {
-    state.isAnimating = false;
+  // One-shot scrollend listener to clear programmatic scroll flag
+  const onScrollEnd = () => {
+    clearTimeout(fallbackTimer);
+    state.isProgrammaticScroll = false;
     track.classList.remove(CLASSES.ANIMATING);
-  }, TIMING.BUTTON_COOLDOWN);
+    track.classList.remove(CLASSES.SCROLLING);
+    instance._scrollCleanup = null;
+  };
+  track.addEventListener('scrollend', onScrollEnd, { once: true });
+
+  // Fallback timeout: if scrollIntoView produces no scroll (item already in view),
+  // scrollend won't fire. Clear the flag after a generous timeout.
+  const fallbackTimer = setTimeout(() => {
+    track.removeEventListener('scrollend', onScrollEnd);
+    state.isProgrammaticScroll = false;
+    track.classList.remove(CLASSES.ANIMATING);
+    track.classList.remove(CLASSES.SCROLLING);
+    instance._scrollCleanup = null;
+  }, TIMING.SCROLL_END_FALLBACK);
+
+  // Store cleanup function so a subsequent scrollToItem can cancel this one
+  instance._scrollCleanup = () => {
+    track.removeEventListener('scrollend', onScrollEnd);
+    clearTimeout(fallbackTimer);
+    state.isProgrammaticScroll = false;
+    track.classList.remove(CLASSES.ANIMATING);
+    instance._scrollCleanup = null;
+  };
+
+  targetItem.scrollIntoView({
+    behavior: 'smooth',
+    block: 'nearest',
+    inline: snapAlign,
+  });
 }
 
 // Handles next button click
 export function handleNext(instance) {
   const { state } = instance;
-  if (state.isAnimating) return;
+  if (state.isProgrammaticScroll) return;
 
   const targetIndex = calculateNextIndex(instance);
+  if (targetIndex === state.currentIndex) return;
+
+  // Set index directly (decoupled from scroll detection)
+  state.currentIndex = targetIndex;
+  updateUI(instance);
+  emit(instance, 'change', { index: targetIndex });
+
+  // Scroll as visual effect
   scrollToItem(instance, targetIndex);
 }
 
 // Handles previous button click
 export function handlePrev(instance) {
   const { state } = instance;
-  if (state.isAnimating) return;
+  if (state.isProgrammaticScroll) return;
 
   const targetIndex = calculatePrevIndex(instance);
+  if (targetIndex === state.currentIndex) return;
+
+  state.currentIndex = targetIndex;
+  updateUI(instance);
+  emit(instance, 'change', { index: targetIndex });
+
   scrollToItem(instance, targetIndex);
 }
 
@@ -207,30 +236,35 @@ export function setupResizeObserver(instance) {
   const { container, track } = instance;
   const { TIMING } = CONFIG;
 
-  // Create debounced resize handler
   const debouncedResize = debounce(() => {
-    // Skip if container is hidden (offsetParent === null)
     if (container.offsetParent === null) return;
 
-    // Recalculate everything and update UI
+    const prevTotalPositions = instance.state.totalPositions;
+
     calculateDimensions(instance);
+
+    // If the number of snap positions changed, re-setup pagination
+    if (instance.state.totalPositions !== prevTotalPositions) {
+      setupPagination(instance);
+    }
+
+    // Clamp currentIndex to new maxReachableIndex
+    if (instance.state.currentIndex > instance.state.maxReachableIndex) {
+      instance.state.currentIndex = instance.state.maxReachableIndex;
+    }
+
     detectActiveItem(instance);
     updateButtonStates(instance);
   }, TIMING.DEBOUNCE_RESIZE);
 
-  // Store debounced handler for cleanup
   instance.debouncedResizeHandler = debouncedResize;
 
-  // Create ResizeObserver instance
   const resizeObserver = new ResizeObserver(() => {
     debouncedResize();
   });
 
-  // Observe container and track only (not items for performance)
   resizeObserver.observe(container);
   resizeObserver.observe(track);
-
-  // Store observer on instance for cleanup
   instance.resizeObserver = resizeObserver;
 }
 
@@ -252,7 +286,7 @@ export function setupPagination(instance) {
   // Initialize handler storage
   instance.boundDotHandlers = [];
 
-  const totalSlides = calculateTotalSlides(items);
+  const totalSlides = calculateTotalSlides(instance);
 
   // Converts any provided dot into a semantic button for accessibility
   const normalizeDotElement = (dot) => {
@@ -334,11 +368,10 @@ export function setupPagination(instance) {
 
 // Updates pagination dots to reflect current active item
 export function updatePagination(instance) {
-  const { dots, container, items, state } = instance;
+  const { dots, container, state } = instance;
   const { CLASSES, SELECTORS } = CONFIG;
   const { currentIndex } = state;
 
-  // Update each dot's active state and aria-current
   if (dots && dots.length > 0) {
     dots.forEach((dot, index) => {
       const isActive = index === currentIndex;
@@ -352,7 +385,6 @@ export function updatePagination(instance) {
     });
   }
 
-  // Inject text content for pagination display elements (silent skip if not found)
   const currentEl = container.querySelector(SELECTORS.PAGINATION_CURRENT);
   if (currentEl) {
     currentEl.textContent = currentIndex + 1;
@@ -360,7 +392,7 @@ export function updatePagination(instance) {
 
   const totalEl = container.querySelector(SELECTORS.PAGINATION_TOTAL);
   if (totalEl) {
-    totalEl.textContent = items.length;
+    totalEl.textContent = state.totalPositions;
   }
 }
 

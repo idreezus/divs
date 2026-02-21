@@ -40,8 +40,8 @@ export const DEFAULTS = {
 export const TIMING = {
   DEBOUNCE_RESIZE: 150,
   DEBOUNCE_SCROLL: 100,
-  BUTTON_COOLDOWN: 100,
   SNAP_DISABLE_DURATION: 50,
+  SCROLL_END_FALLBACK: 800,
 };
 
 // Pixel tolerance for fractional pixel calculations

@@ -8,6 +8,7 @@ import {
   emit,
   calculateDimensions,
   updateCSSProperties,
+  warnUnreachableItems,
 } from './utils.js';
 import {
   detectActiveItem,
@@ -84,14 +85,16 @@ function attachEventListeners(instance) {
   instance.boundHandlers = {
     scroll: () => handleScroll(instance),
     prev: () => {
+      // Reset autoplay timer without pausing (match tabs pattern)
       if (instance.state.isAutoplaying && !instance.state.isPaused) {
-        pauseAutoplay(instance, 'user');
+        instance.state.autoplayStartTime = performance.now();
       }
       handlePrev(instance);
     },
     next: () => {
+      // Reset autoplay timer without pausing (match tabs pattern)
       if (instance.state.isAutoplaying && !instance.state.isPaused) {
-        pauseAutoplay(instance, 'user');
+        instance.state.autoplayStartTime = performance.now();
       }
       handleNext(instance);
     },
@@ -126,6 +129,11 @@ function attachEventListeners(instance) {
 // Cleans up all event listeners, observers, and references
 function cleanup(instance) {
   const { prevBtn, nextBtn, track, container } = instance;
+
+  // Cancel pending scroll cleanup
+  if (instance._scrollCleanup) {
+    instance._scrollCleanup();
+  }
 
   // Clean up autoplay before removing other listeners
   cleanupAutoplay(instance);
@@ -184,6 +192,9 @@ function init(instance) {
   // Calculate initial dimensions
   calculateDimensions(instance);
 
+  // Warn if loop/autoplay enabled with unreachable items
+  warnUnreachableItems(instance);
+
   // Set initial CSS custom properties before first paint
   updateCSSProperties(instance);
 
@@ -226,14 +237,15 @@ export class Carousel {
     // Initialize state object with all tracking properties
     const state = {
       currentIndex: 0,
-      isScrolling: false,
-      isAnimating: false,
+      isProgrammaticScroll: false,
       itemPositions: [],
       gap: 0,
       containerWidth: 0,
       scrollWidth: 0,
       startInset: 0,
       endInset: 0,
+      maxReachableIndex: 0,
+      totalPositions: 0,
       hasEmittedStart: false,
       hasEmittedEnd: false,
       isAutoplaying: false,
@@ -279,7 +291,8 @@ export class Carousel {
 
   // Navigates to a specific item by index
   goTo(index) {
-    const { items } = this;
+    const { items, state } = this;
+
     if (index < 0 || index >= items.length) {
       console.warn(
         `Carousel ${this.id}: Invalid index ${index}. Must be between 0 and ${
@@ -288,10 +301,25 @@ export class Carousel {
       );
       return this;
     }
-    // Reset autoplay timer when autoplay is running (not paused)
-    if (this.state.isAutoplaying && !this.state.isPaused) {
-      this.state.autoplayStartTime = performance.now();
+
+    // Clamp to maxReachableIndex (indices beyond it share the last snap position)
+    if (index > state.maxReachableIndex) {
+      index = state.maxReachableIndex;
     }
+
+    // Reset autoplay timer without pausing
+    if (state.isAutoplaying && !state.isPaused) {
+      state.autoplayStartTime = performance.now();
+    }
+
+    // Set index directly (decoupled)
+    if (index !== state.currentIndex) {
+      state.currentIndex = index;
+      updateUI(this);
+      emit(this, 'change', { index });
+    }
+
+    // Scroll as visual effect
     scrollToItem(this, index);
     return this;
   }
@@ -320,7 +348,20 @@ export class Carousel {
 
   // Manually recalculates dimensions and updates UI
   refresh() {
+    const prevTotalPositions = this.state.totalPositions;
+
     calculateDimensions(this);
+
+    // Re-setup pagination if snap group count changed
+    if (this.state.totalPositions !== prevTotalPositions) {
+      setupPagination(this);
+    }
+
+    // Clamp currentIndex
+    if (this.state.currentIndex > this.state.maxReachableIndex) {
+      this.state.currentIndex = this.state.maxReachableIndex;
+    }
+
     detectActiveItem(this);
     updateUI(this);
     return this;

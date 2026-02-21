@@ -315,7 +315,10 @@ Optional navigation controls that work automatically when placed inside the cont
 
 ### Pagination
 
-Add pagination dots anywhere inside the carousel container. The library finds all `[data-carousel-dot]` elements and clones the first one to match the total item count.
+Add pagination dots anywhere inside the carousel container. The library finds all `[data-carousel-dot]` elements and clones the first one to match the number of navigable positions.
+
+> [!NOTE]
+> When items are narrower than the container (multi-item carousels), the last few items may share the same scroll position due to the browser's scroll ceiling. The library detects this and groups them into a single "snap position." Dot count reflects navigable positions, not raw item count. A console warning is logged when `loop` or `autoplay` is enabled with unreachable items. To make every item individually reachable, use wider items or add `padding-inline-end` to the track.
 
 ```html
 <div data-carousel="container">
@@ -334,7 +337,7 @@ Add pagination dots anywhere inside the carousel container. The library finds al
 | ---------------------------------- | ------------------------------------------------------ |
 | `data-carousel-dot`                | Individual dot element (first one is used as template) |
 | `data-carousel-pagination-current` | Element that displays current slide number (1-based)   |
-| `data-carousel-pagination-total`   | Element that displays total slide count                |
+| `data-carousel-pagination-total`   | Element that displays total navigable positions        |
 
 For custom pagination displays like "2 of 5":
 
@@ -422,7 +425,8 @@ Add a toggle button inside the container to let users control autoplay. The libr
 
 Autoplay pauses in several situations:
 
-- **User interaction:** Clicking a navigation button, a pagination dot, or dragging/swiping the carousel causes a **sticky pause**. The carousel stays paused until the user clicks the play/pause button or `play()` is called via JavaScript.
+- **Navigation buttons (prev/next):** Clicking prev/next **resets the autoplay timer** but keeps autoplay running. The full duration plays out on the new slide. This matches the behavior of `goTo()`.
+- **Dot clicks and dragging/swiping:** Clicking a pagination dot or dragging/swiping the carousel causes a **sticky pause**. The carousel stays paused until the user clicks the play/pause button or `play()` is called via JavaScript.
 - **Keyboard navigation:** Arrow keys, Home, and End also cause a sticky pause.
 - **Hover:** Mouse enters the carousel container (resumes on mouse leave). Configurable via `data-carousel-autoplay-pause-hover`.
 - **Focus:** A focusable element inside the carousel receives focus (resumes when focus leaves the container). Configurable via `data-carousel-autoplay-pause-focus`.
@@ -447,7 +451,7 @@ The library exposes state as CSS custom properties on the container element. Use
 | Property                        | Values     | Set On              | Description                                 |
 | ------------------------------- | ---------- | ------------------- | ------------------------------------------- |
 | `--carousel-index`              | `1, 2, 3…` | Container           | Current slide number (1-based)              |
-| `--carousel-total`              | `1, 2, 3…` | Container           | Total number of slides                      |
+| `--carousel-total`              | `1, 2, 3…` | Container           | Total navigable positions (may be fewer than item count in multi-item carousels) |
 | `--carousel-progress`           | `0` – `1`  | Container           | Scroll progress through the carousel        |
 | `--carousel-autoplay-progress`  | `0` – `1`  | Container + active dot | Per-slide autoplay timer progress          |
 | `--carousel-autoplay-duration`  | e.g. `5000ms` | Container        | Configured autoplay duration                |
@@ -568,7 +572,7 @@ Pauses autoplay with a sticky user-initiated pause. The carousel will not resume
 
 #### `goTo(index)`
 
-When autoplay is running (not paused), calling `goTo()` resets the slide timer so the full duration plays out on the new slide. It does **not** pause autoplay — the carousel keeps advancing.
+Navigates to the given 0-based index. If the index is beyond the last navigable position (in multi-item carousels where the last few items share a scroll position), it is silently clamped. When autoplay is running (not paused), calling `goTo()` resets the slide timer so the full duration plays out on the new slide. It does **not** pause autoplay — the carousel keeps advancing.
 
 ### Events
 
@@ -708,12 +712,8 @@ carousel.refresh();
   `data-carousel-autoplay="true"`.
 </Accordion>
 
-<Accordion title="Why does clicking a button pause autoplay permanently?">
-  Manual interactions (button clicks, dot clicks, dragging/swiping, keyboard
-  navigation) create a sticky pause to respect user intent. The idea is that if
-  someone is manually navigating, they probably want to stay in control. To
-  resume, the user can click the play/pause button, or you can call `play()` via
-  JavaScript.
+<Accordion title="Do navigation buttons pause autoplay?">
+  No. Clicking the prev/next buttons resets the autoplay timer but keeps autoplay running. Only dot clicks, keyboard navigation, and dragging/swiping create a sticky pause. The idea is that buttons are a quick "skip" action, while other interactions signal the user wants manual control. To resume after a sticky pause, the user can click the play/pause button, or you can call `play()` via JavaScript.
 </Accordion>
 
 <Accordion title="Why do you call it 'Carousel' instead of 'Slider'?">

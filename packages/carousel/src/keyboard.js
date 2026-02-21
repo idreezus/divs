@@ -61,7 +61,7 @@ export function setupKeyboardNavigation(instance, handlePrev, handleNext) {
         if (instance.state.isAutoplaying && !instance.state.isPaused) {
           pauseAutoplay(instance, 'keyboard');
         }
-        instance.goTo(instance.items.length - 1);
+        instance.goTo(instance.state.maxReachableIndex);
         break;
     }
   };
