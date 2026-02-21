@@ -75,10 +75,6 @@ Copy & paste this in an embed element or your Page Settings **Inside `<head>` ta
     display: none;
   }
 
-  [data-carousel='track'].carousel-snap-disabled {
-    scroll-snap-type: none;
-  }
-
   @media (prefers-reduced-motion: reduce) {
     [data-carousel='track'] {
       scroll-behavior: auto !important;
@@ -276,8 +272,8 @@ Configure the carousel with data attributes on the container element:
 | `data-carousel-track`   | presence (skip with `"false"`)   | -         | Required on track element     |
 | `data-carousel-item`    | presence (skip with `"false"`)   | -         | Required on each item element |
 | `data-carousel-align`    | `"start"` / `"center"` / `"end"` | `"start"` | Snap alignment of items       |
-| `data-carousel-keyboard` | `"true"` / `"false"`             | `"false"` | Enable keyboard navigation    |
-| `data-carousel-loop`     | `"true"` / `"false"`             | `"false"` | Loop from last item to first (and vice versa) |
+| `data-carousel-keyboard` | presence (skip with `"false"`)   | -         | Enable keyboard navigation    |
+| `data-carousel-loop`     | presence (skip with `"false"`)   | -         | Loop from last item to first (and vice versa) |
 | `data-carousel-scroll-by`| `"item"` / `"page"`              | `"item"`  | Navigate by single item or full page of visible items |
 
 ### Loop
@@ -285,7 +281,7 @@ Configure the carousel with data attributes on the container element:
 Enable infinite-style navigation so the carousel wraps around when reaching either end. When loop is active, the previous/next buttons are never disabled.
 
 ```html
-<div data-carousel-container data-carousel-loop="true">
+<div data-carousel-container data-carousel-loop>
   <!-- ... -->
 </div>
 ```
@@ -361,7 +357,7 @@ When enabled, `Arrow Left` and `Arrow Right` navigate between items. For those w
 To enable keyboard navigation:
 
 ```html
-<div data-carousel-container data-carousel-keyboard="true">
+<div data-carousel-container data-carousel-keyboard>
   <!-- Rest of the track/items -->
 </div>
 ```
@@ -373,8 +369,8 @@ Automatically advance slides on a timer. Autoplay requires `data-carousel-loop="
 ```html
 <div
   data-carousel-container
-  data-carousel-loop="true"
-  data-carousel-autoplay="true"
+  data-carousel-loop
+  data-carousel-autoplay
 >
   <!-- ... -->
 </div>
@@ -384,9 +380,9 @@ Automatically advance slides on a timer. Autoplay requires `data-carousel-loop="
 
 | Attribute                              | Values             | Default  | Description                          |
 | -------------------------------------- | ------------------ | -------- | ------------------------------------ |
-| `data-carousel-autoplay`               | `"true"` / `"false"` | `"false"` | Enable timed autoplay               |
+| `data-carousel-autoplay`               | presence (skip with `"false"`) | -        | Enable timed autoplay               |
 | `data-carousel-autoplay-duration`      | number (ms)        | `5000`   | Time per slide in milliseconds       |
-| `data-carousel-autoplay-pause-hover`   | `"true"` / `"false"` | `"false"` | Temporarily pause autoplay on track hover |
+| `data-carousel-autoplay-pause-hover`   | presence (skip with `"false"`) | -        | Temporarily pause autoplay on track hover |
 | `data-carousel-autoplay-pause-focus`   | `"true"` / `"false"` | `"true"`  | Temporarily pause autoplay on track focus |
 
 #### Autoplay with Custom Duration
@@ -394,8 +390,8 @@ Automatically advance slides on a timer. Autoplay requires `data-carousel-loop="
 ```html
 <div
   data-carousel-container
-  data-carousel-loop="true"
-  data-carousel-autoplay="true"
+  data-carousel-loop
+  data-carousel-autoplay
   data-carousel-autoplay-duration="3000"
 >
   <!-- Advances every 3 seconds -->
@@ -409,8 +405,8 @@ Add a toggle button inside the container to let users control autoplay. The libr
 ```html
 <div
   data-carousel-container
-  data-carousel-loop="true"
-  data-carousel-autoplay="true"
+  data-carousel-loop
+  data-carousel-autoplay
 >
   <div data-carousel="track">
     <div data-carousel="item">...</div>
@@ -490,9 +486,7 @@ The library applies state classes that you can style however you want.
 | ----------------------------- | --------------------------------------------------------------------- |
 | `.carousel-item-active`       | The item that is currently active (i.e. aligned)                      |
 | `.carousel-button-disabled`   | Navigation buttons at start/end boundaries (never applied when looping) |
-| `.carousel-scrolling`         | The track while a user or programmatic scrolling is active            |
-| `.carousel-snap-disabled`     | The track to temporarily disable scroll-snap during button navigation |
-| `.carousel-animating`         | The track during programmatic scroll animations                       |
+| `.carousel-scrolling`         | The track while scrolling is active                                   |
 | `.carousel-dot-active`        | The active pagination dot                                             |
 | `.carousel-playing`           | The container while autoplay is actively running                      |
 | `.carousel-reduced-motion`    | The container when `prefers-reduced-motion: reduce` is active         |
@@ -713,8 +707,8 @@ carousel.refresh();
 
 <Accordion title="Does autoplay work without loop?">
   Yes, but autoplay will stop advancing when it reaches the last slide. For
-  continuous cycling, combine `data-carousel-loop="true"` with
-  `data-carousel-autoplay="true"`.
+  continuous cycling, combine `data-carousel-loop` with
+  `data-carousel-autoplay`.
 </Accordion>
 
 <Accordion title="Do navigation buttons stop autoplay?">

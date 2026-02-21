@@ -140,6 +140,12 @@ export function pauseAutoplay(instance, reason = 'user') {
 
   state.isPaused = true;
 
+  // Store elapsed time and active index so we can resume from this point
+  const elapsed = performance.now() - state.autoplayStartTime;
+  const progress = Math.min(elapsed / instance.config.autoplayDuration, 1);
+  state.autoplayElapsed = elapsed;
+  state.autoplayPausedOnIndex = state.currentIndex;
+
   // Cancel RAF
   if (instance.autoplay.rafId) {
     cancelAnimationFrame(instance.autoplay.rafId);
@@ -152,12 +158,6 @@ export function pauseAutoplay(instance, reason = 'user') {
   if (instance.playPauseBtn) {
     instance.playPauseBtn.setAttribute('aria-pressed', 'false');
   }
-
-  // Store elapsed time and active index so we can resume from this point
-  const elapsed = performance.now() - state.autoplayStartTime;
-  state.autoplayElapsed = elapsed;
-  state.autoplayPausedOnIndex = state.currentIndex;
-  const progress = Math.min(elapsed / instance.config.autoplayDuration, 1);
 
   emit(instance, EVENTS.AUTOPLAY_STOP, {
     index: state.currentIndex,

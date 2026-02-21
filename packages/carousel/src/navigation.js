@@ -92,18 +92,14 @@ export function handleScroll(instance) {
   track.classList.add(CLASSES.SCROLLING);
   emit(instance, 'scroll', { scrollLeft: track.scrollLeft });
 
-  // Only run debounced detection for user-initiated scrolls.
-  // For programmatic scrolls, currentIndex is already set by the caller.
-  if (!instance.state.isProgrammaticScroll) {
-    if (!instance.debouncedScrollHandler) {
-      instance.debouncedScrollHandler = debounce(() => {
-        detectActiveItem(instance);
-        updateButtonStates(instance);
-        track.classList.remove(CLASSES.SCROLLING);
-      }, TIMING.DEBOUNCE_SCROLL);
-    }
-    instance.debouncedScrollHandler();
+  if (!instance.debouncedScrollHandler) {
+    instance.debouncedScrollHandler = debounce(() => {
+      detectActiveItem(instance);
+      updateButtonStates(instance);
+      track.classList.remove(CLASSES.SCROLLING);
+    }, TIMING.DEBOUNCE_SCROLL);
   }
+  instance.debouncedScrollHandler();
 }
 
 // Calculates the index of the next item for navigation
@@ -134,57 +130,12 @@ export function calculatePrevIndex(instance) {
 
 // Scrolls to a specific item index with smooth animation
 export function scrollToItem(instance, index) {
-  const { track, items, state, snapAlign } = instance;
-  const { CLASSES, TIMING } = CONFIG;
-
+  const { items, snapAlign } = instance;
   const targetItem = items[index];
   if (!targetItem) {
     console.warn(`Carousel ${instance.id}: No item found at index ${index}`);
     return;
   }
-
-  // Cancel any pending scroll cleanup from a previous scrollToItem call
-  if (instance._scrollCleanup) {
-    instance._scrollCleanup();
-  }
-
-  state.isProgrammaticScroll = true;
-  track.classList.add(CLASSES.ANIMATING);
-  track.classList.add(CLASSES.SNAP_DISABLED);
-
-  // Re-enable scroll-snap after short delay
-  setTimeout(() => {
-    track.classList.remove(CLASSES.SNAP_DISABLED);
-  }, TIMING.SNAP_DISABLE_DURATION);
-
-  // One-shot scrollend listener to clear programmatic scroll flag
-  const onScrollEnd = () => {
-    clearTimeout(fallbackTimer);
-    state.isProgrammaticScroll = false;
-    track.classList.remove(CLASSES.ANIMATING);
-    track.classList.remove(CLASSES.SCROLLING);
-    instance._scrollCleanup = null;
-  };
-  track.addEventListener('scrollend', onScrollEnd, { once: true });
-
-  // Fallback timeout: if scrollIntoView produces no scroll (item already in view),
-  // scrollend won't fire. Clear the flag after a generous timeout.
-  const fallbackTimer = setTimeout(() => {
-    track.removeEventListener('scrollend', onScrollEnd);
-    state.isProgrammaticScroll = false;
-    track.classList.remove(CLASSES.ANIMATING);
-    track.classList.remove(CLASSES.SCROLLING);
-    instance._scrollCleanup = null;
-  }, TIMING.SCROLL_END_FALLBACK);
-
-  // Store cleanup function so a subsequent scrollToItem can cancel this one
-  instance._scrollCleanup = () => {
-    track.removeEventListener('scrollend', onScrollEnd);
-    clearTimeout(fallbackTimer);
-    state.isProgrammaticScroll = false;
-    track.classList.remove(CLASSES.ANIMATING);
-    instance._scrollCleanup = null;
-  };
 
   targetItem.scrollIntoView({
     behavior: 'smooth',
@@ -196,7 +147,6 @@ export function scrollToItem(instance, index) {
 // Handles next button click
 export function handleNext(instance) {
   const { state } = instance;
-  if (state.isProgrammaticScroll) return;
 
   const targetIndex = calculateNextIndex(instance);
   if (targetIndex === state.currentIndex) return;
@@ -213,7 +163,6 @@ export function handleNext(instance) {
 // Handles previous button click
 export function handlePrev(instance) {
   const { state } = instance;
-  if (state.isProgrammaticScroll) return;
 
   const targetIndex = calculatePrevIndex(instance);
   if (targetIndex === state.currentIndex) return;

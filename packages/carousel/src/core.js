@@ -79,15 +79,11 @@ function findElements(instance) {
 
 // Attaches event listeners for user interactions
 function attachEventListeners(instance) {
-  const { track, prevBtn, nextBtn, id } = instance;
+  const { track, prevBtn, nextBtn } = instance;
 
   // Create bound handlers and store them for later removal
   instance.boundHandlers = {
     scroll: () => {
-      // User scroll while autoplay is running → stop autoplay
-      if (!instance.state.isProgrammaticScroll && instance.state.isAutoplaying) {
-        stopAutoplay(instance, 'user');
-      }
       handleScroll(instance);
     },
     prev: () => instance.prev(),
@@ -98,6 +94,16 @@ function attachEventListeners(instance) {
   track.addEventListener('scroll', instance.boundHandlers.scroll, {
     passive: true,
   });
+
+  // Stop autoplay on direct user interaction with the track
+  instance.boundHandlers.trackPointerDown = () => {
+    if (instance.state.isAutoplaying) stopAutoplay(instance, 'user');
+  };
+  instance.boundHandlers.trackWheel = () => {
+    if (instance.state.isAutoplaying) stopAutoplay(instance, 'user');
+  };
+  track.addEventListener('pointerdown', instance.boundHandlers.trackPointerDown);
+  track.addEventListener('wheel', instance.boundHandlers.trackWheel, { passive: true });
 
   // Attach button listeners if buttons exist
   if (prevBtn) {
@@ -124,11 +130,6 @@ function attachEventListeners(instance) {
 function cleanup(instance) {
   const { prevBtn, nextBtn, track, container } = instance;
 
-  // Cancel pending scroll cleanup
-  if (instance._scrollCleanup) {
-    instance._scrollCleanup();
-  }
-
   // Clean up autoplay before removing other listeners
   cleanupAutoplay(instance);
 
@@ -139,6 +140,13 @@ function cleanup(instance) {
   // Remove event listeners using stored bound handlers
   if (instance.boundHandlers) {
     track.removeEventListener('scroll', instance.boundHandlers.scroll);
+
+    if (instance.boundHandlers.trackPointerDown) {
+      track.removeEventListener('pointerdown', instance.boundHandlers.trackPointerDown);
+    }
+    if (instance.boundHandlers.trackWheel) {
+      track.removeEventListener('wheel', instance.boundHandlers.trackWheel);
+    }
 
     if (prevBtn) {
       prevBtn.removeEventListener('click', instance.boundHandlers.prev);
@@ -231,7 +239,6 @@ export class Carousel {
     // Initialize state object with all tracking properties
     const state = {
       currentIndex: 0,
-      isProgrammaticScroll: false,
       itemPositions: [],
       gap: 0,
       containerWidth: 0,

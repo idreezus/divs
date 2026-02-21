@@ -41,11 +41,6 @@
   display: none;
 }
 
-[data-carousel-track].carousel-snap-disabled,
-[data-carousel='track'].carousel-snap-disabled {
-  scroll-snap-type: none;
-}
-
 @media (prefers-reduced-motion: reduce) {
   [data-carousel-track],
   [data-carousel='track'] {

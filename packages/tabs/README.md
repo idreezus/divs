@@ -24,7 +24,7 @@ Paste this script into your Page Settings "Before `</body>` tag".
 
 ```html
 <!-- Divs Tabs Library -->
-<script src="https://cdn.jsdelivr.net/gh/idreezus/divs@tabs-v1.0.0/dist/tabs/v1.0.0/tabs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/idreezus/divs@main/dist/tabs/latest/tabs.min.js"></script>
 ```
 
 </Step>
@@ -107,15 +107,15 @@ Since triggers and panels are matched by value rather than position, you can hav
 
 ### Container Configuration
 
-| Attribute                     | Values                        | Default        | Description                         |
-| ----------------------------- | ----------------------------- | -------------- | ----------------------------------- |
-| `data-tabs-container`         | presence (skip with `"false"`)| -              | Required on container element       |
-| `data-tabs-default`           | any value                     | first trigger  | Initial active tab value            |
-| `data-tabs-group-name`        | string                        | -              | URL parameter name for deep linking |
-| `data-tabs-orientation`       | `"horizontal"` / `"vertical"` | `"horizontal"` | Arrow key navigation direction      |
-| `data-tabs-activate-on-focus` | `"true"` / `"false"`          | `"true"`       | Activate tab on arrow key focus     |
-| `data-tabs-loop`              | `"true"` / `"false"`          | `"false"`      | Loop keyboard navigation            |
-| `data-tabs-keyboard`          | `"true"` / `"false"`          | `"true"`       | Enable keyboard navigation          |
+| Attribute                     | Values                         | Default        | Description                         |
+| ----------------------------- | ------------------------------ | -------------- | ----------------------------------- |
+| `data-tabs-container`         | presence (skip with `"false"`) | -              | Required on container element       |
+| `data-tabs-default`           | any value                      | first trigger  | Initial active tab value            |
+| `data-tabs-group-name`        | string                         | -              | URL parameter name for deep linking |
+| `data-tabs-orientation`       | `"horizontal"` / `"vertical"`  | `"horizontal"` | Arrow key navigation direction      |
+| `data-tabs-activate-on-focus` | `"true"` / `"false"`           | `"true"`       | Activate tab on arrow key focus     |
+| `data-tabs-loop`              | `"true"` / `"false"`           | `"false"`      | Loop keyboard navigation            |
+| `data-tabs-keyboard`          | `"true"` / `"false"`           | `"true"`       | Enable keyboard navigation          |
 
 ### Autoplay Configuration
 
@@ -293,17 +293,19 @@ container.addEventListener('tabs:autoplay-start', (e) => {
 });
 
 container.addEventListener('tabs:autoplay-stop', (e) => {
-  console.log(`Autoplay stopped (${e.detail.reason}) at ${e.detail.progress * 100}%`);
+  console.log(
+    `Autoplay stopped (${e.detail.reason}) at ${e.detail.progress * 100}%`
+  );
 });
 ```
 
 Available events:
 
-| Event                 | Description              | Event Data                          |
-| --------------------- | ------------------------ | ----------------------------------- |
-| `tabs:change`         | Active tab changed       | `{ value, previousValue }`          |
-| `tabs:autoplay-start` | Autoplay started/resumed | `{ value }`                         |
-| `tabs:autoplay-stop`  | Autoplay stopped/paused  | `{ value, progress, reason }`       |
+| Event                 | Description              | Event Data                    |
+| --------------------- | ------------------------ | ----------------------------- |
+| `tabs:change`         | Active tab changed       | `{ value, previousValue }`    |
+| `tabs:autoplay-start` | Autoplay started/resumed | `{ value }`                   |
+| `tabs:autoplay-stop`  | Autoplay stopped/paused  | `{ value, progress, reason }` |
 
 ### Global API
 

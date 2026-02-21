@@ -1,6 +1,6 @@
 // Pure utility functions for the carousel library
 
-import { DEFAULTS, CSS_VARS } from './config.js';
+import { DEFAULTS, CSS_VARS, SELECTORS, SELECTOR_ATTRS, ATTRIBUTES } from './config.js';
 
 // Counter for generating unique carousel IDs
 let idCounter = 0;
@@ -13,25 +13,16 @@ export function generateUniqueId() {
 
 // Parses configuration from data attributes on the container element
 export function parseConfig(container) {
-  const align = container.getAttribute('data-carousel-align') || DEFAULTS.ALIGN;
-  const keyboard = container.getAttribute('data-carousel-keyboard') === 'true';
-  const loop = container.getAttribute('data-carousel-loop') === 'true';
-  const scrollBy = container.getAttribute('data-carousel-scroll-by') || DEFAULTS.SCROLL_BY;
-  const autoplay = container.getAttribute('data-carousel-autoplay') === 'true';
-  const autoplayDuration = parseInt(container.getAttribute('data-carousel-autoplay-duration'), 10) || DEFAULTS.AUTOPLAY_DURATION;
-  const autoplayPauseHover = container.getAttribute('data-carousel-autoplay-pause-hover') === 'true';
-  const autoplayPauseFocus = container.getAttribute('data-carousel-autoplay-pause-focus') !== 'false';
+  const align = container.getAttribute(ATTRIBUTES.ALIGN) || DEFAULTS.ALIGN;
+  const keyboard = container.matches(SELECTORS.KEYBOARD);
+  const loop = container.matches(SELECTORS.LOOP);
+  const scrollBy = container.getAttribute(ATTRIBUTES.SCROLL_BY) || DEFAULTS.SCROLL_BY;
+  const autoplay = container.matches(SELECTORS.AUTOPLAY);
+  const autoplayDuration = parseInt(container.getAttribute(ATTRIBUTES.AUTOPLAY_DURATION), 10) || DEFAULTS.AUTOPLAY_DURATION;
+  const autoplayPauseHover = container.matches(SELECTORS.AUTOPLAY_PAUSE_HOVER);
+  const autoplayPauseFocus = container.getAttribute(SELECTOR_ATTRS.AUTOPLAY_PAUSE_FOCUS) !== 'false';
 
-  return {
-    align,
-    keyboard,
-    loop,
-    scrollBy,
-    autoplay,
-    autoplayDuration,
-    autoplayPauseHover,
-    autoplayPauseFocus,
-  };
+  return { align, keyboard, loop, scrollBy, autoplay, autoplayDuration, autoplayPauseHover, autoplayPauseFocus };
 }
 
 // Checks if the user prefers reduced motion

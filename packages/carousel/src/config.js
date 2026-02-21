@@ -2,6 +2,7 @@
 const sel = (attr) => `[${attr}]:not([${attr}="false"])`;
 
 export const SELECTOR_ATTRS = {
+  // Structural
   CONTAINER:          'data-carousel-container',
   TRACK:              'data-carousel-track',
   ITEM:               'data-carousel-item',
@@ -11,6 +12,12 @@ export const SELECTOR_ATTRS = {
   PAGINATION_CURRENT: 'data-carousel-pagination-current',
   PAGINATION_TOTAL:   'data-carousel-pagination-total',
   PLAY_PAUSE_BTN:     'data-carousel-play-pause',
+  // Boolean config
+  KEYBOARD:              'data-carousel-keyboard',
+  LOOP:                  'data-carousel-loop',
+  AUTOPLAY:              'data-carousel-autoplay',
+  AUTOPLAY_PAUSE_HOVER:  'data-carousel-autoplay-pause-hover',
+  AUTOPLAY_PAUSE_FOCUS:  'data-carousel-autoplay-pause-focus',
 };
 
 export const SELECTORS = Object.fromEntries(
@@ -19,12 +26,10 @@ export const SELECTORS = Object.fromEntries(
 
 // CSS classes applied to elements
 export const CLASSES = {
-  SCROLLING: 'carousel-scrolling', // Applied to track while user or programmatic scroll is active
+  SCROLLING: 'carousel-scrolling', // Applied to track while scrolling is active
   DISABLED: 'carousel-button-disabled', // Applied to buttons when at start/end edges
   ACTIVE: 'carousel-item-active', // Applied to the current active item
   VISIBLE: 'carousel-item-visible', // Applied to items currently in viewport (reserved for future use)
-  ANIMATING: 'carousel-animating', // Applied to track during programmatic scroll
-  SNAP_DISABLED: 'carousel-snap-disabled', // Applied to track to temporarily disable scroll-snap during button navigation
   DOT_ACTIVE: 'carousel-dot-active', // Applied to the current active pagination dot
   LIVE_REGION: 'carousel-sr-only', // Applied to the live region for screen readers
   PLAYING: 'carousel-playing',
@@ -46,8 +51,6 @@ export const DEFAULTS = {
 export const TIMING = {
   DEBOUNCE_RESIZE: 150,
   DEBOUNCE_SCROLL: 100,
-  SNAP_DISABLE_DURATION: 50,
-  SCROLL_END_FALLBACK: 800,
 };
 
 // Pixel tolerance for fractional pixel calculations
@@ -75,13 +78,11 @@ export const EVENTS = {
   AUTOPLAY_STOP: 'autoplay-stop',
 };
 
-// Data attribute names for configuration
+// Data attribute names for value-based configuration
 export const ATTRIBUTES = {
-  AUTOPLAY: 'data-carousel-autoplay',
-  AUTOPLAY_DURATION: 'data-carousel-autoplay-duration',
-  AUTOPLAY_PAUSE_HOVER: 'data-carousel-autoplay-pause-hover',
-  AUTOPLAY_PAUSE_FOCUS: 'data-carousel-autoplay-pause-focus',
+  ALIGN: 'data-carousel-align',
   SCROLL_BY: 'data-carousel-scroll-by',
+  AUTOPLAY_DURATION: 'data-carousel-autoplay-duration',
 };
 
 export const CONFIG = {

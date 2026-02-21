@@ -6,6 +6,7 @@ untracked/
 .cursor/
 .claude/
 
+**/examples/
 *examples.html
 
 CLAUDE.md

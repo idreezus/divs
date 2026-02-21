@@ -16,6 +16,7 @@
   const sel = (attr) => `[${attr}]:not([${attr}="false"])`;
 
   const SELECTOR_ATTRS = {
+    // Structural
     CONTAINER:          'data-carousel-container',
     TRACK:              'data-carousel-track',
     ITEM:               'data-carousel-item',
@@ -25,6 +26,12 @@
     PAGINATION_CURRENT: 'data-carousel-pagination-current',
     PAGINATION_TOTAL:   'data-carousel-pagination-total',
     PLAY_PAUSE_BTN:     'data-carousel-play-pause',
+    // Boolean config
+    KEYBOARD:              'data-carousel-keyboard',
+    LOOP:                  'data-carousel-loop',
+    AUTOPLAY:              'data-carousel-autoplay',
+    AUTOPLAY_PAUSE_HOVER:  'data-carousel-autoplay-pause-hover',
+    AUTOPLAY_PAUSE_FOCUS:  'data-carousel-autoplay-pause-focus',
   };
 
   const SELECTORS = Object.fromEntries(
@@ -33,11 +40,9 @@
 
   // CSS classes applied to elements
   const CLASSES = {
-    SCROLLING: 'carousel-scrolling', // Applied to track while user or programmatic scroll is active
+    SCROLLING: 'carousel-scrolling', // Applied to track while scrolling is active
     DISABLED: 'carousel-button-disabled', // Applied to buttons when at start/end edges
     ACTIVE: 'carousel-item-active', // Applied to the current active item
-    ANIMATING: 'carousel-animating', // Applied to track during programmatic scroll
-    SNAP_DISABLED: 'carousel-snap-disabled', // Applied to track to temporarily disable scroll-snap during button navigation
     DOT_ACTIVE: 'carousel-dot-active', // Applied to the current active pagination dot
     PLAYING: 'carousel-playing',
     REDUCED_MOTION: 'carousel-reduced-motion',
@@ -52,8 +57,6 @@
   const TIMING = {
     DEBOUNCE_RESIZE: 150,
     DEBOUNCE_SCROLL: 100,
-    SNAP_DISABLE_DURATION: 50,
-    SCROLL_END_FALLBACK: 800,
   };
 
   // Pixel tolerance for fractional pixel calculations
@@ -73,6 +76,13 @@
   const EVENTS = {
     AUTOPLAY_START: 'autoplay-start',
     AUTOPLAY_STOP: 'autoplay-stop',
+  };
+
+  // Data attribute names for value-based configuration
+  const ATTRIBUTES = {
+    ALIGN: 'data-carousel-align',
+    SCROLL_BY: 'data-carousel-scroll-by',
+    AUTOPLAY_DURATION: 'data-carousel-autoplay-duration',
   };
 
   const CONFIG = {
@@ -96,25 +106,16 @@
 
   // Parses configuration from data attributes on the container element
   function parseConfig(container) {
-    const align = container.getAttribute('data-carousel-align') || DEFAULTS.ALIGN;
-    const keyboard = container.getAttribute('data-carousel-keyboard') === 'true';
-    const loop = container.getAttribute('data-carousel-loop') === 'true';
-    const scrollBy = container.getAttribute('data-carousel-scroll-by') || DEFAULTS.SCROLL_BY;
-    const autoplay = container.getAttribute('data-carousel-autoplay') === 'true';
-    const autoplayDuration = parseInt(container.getAttribute('data-carousel-autoplay-duration'), 10) || DEFAULTS.AUTOPLAY_DURATION;
-    const autoplayPauseHover = container.getAttribute('data-carousel-autoplay-pause-hover') === 'true';
-    const autoplayPauseFocus = container.getAttribute('data-carousel-autoplay-pause-focus') !== 'false';
+    const align = container.getAttribute(ATTRIBUTES.ALIGN) || DEFAULTS.ALIGN;
+    const keyboard = container.matches(SELECTORS.KEYBOARD);
+    const loop = container.matches(SELECTORS.LOOP);
+    const scrollBy = container.getAttribute(ATTRIBUTES.SCROLL_BY) || DEFAULTS.SCROLL_BY;
+    const autoplay = container.matches(SELECTORS.AUTOPLAY);
+    const autoplayDuration = parseInt(container.getAttribute(ATTRIBUTES.AUTOPLAY_DURATION), 10) || DEFAULTS.AUTOPLAY_DURATION;
+    const autoplayPauseHover = container.matches(SELECTORS.AUTOPLAY_PAUSE_HOVER);
+    const autoplayPauseFocus = container.getAttribute(SELECTOR_ATTRS.AUTOPLAY_PAUSE_FOCUS) !== 'false';
 
-    return {
-      align,
-      keyboard,
-      loop,
-      scrollBy,
-      autoplay,
-      autoplayDuration,
-      autoplayPauseHover,
-      autoplayPauseFocus,
-    };
+    return { align, keyboard, loop, scrollBy, autoplay, autoplayDuration, autoplayPauseHover, autoplayPauseFocus };
   }
 
   // Checks if the user prefers reduced motion
@@ -546,18 +547,14 @@
     track.classList.add(CLASSES.SCROLLING);
     emit(instance, 'scroll', { scrollLeft: track.scrollLeft });
 
-    // Only run debounced detection for user-initiated scrolls.
-    // For programmatic scrolls, currentIndex is already set by the caller.
-    if (!instance.state.isProgrammaticScroll) {
-      if (!instance.debouncedScrollHandler) {
-        instance.debouncedScrollHandler = debounce(() => {
-          detectActiveItem(instance);
-          updateButtonStates(instance);
-          track.classList.remove(CLASSES.SCROLLING);
-        }, TIMING.DEBOUNCE_SCROLL);
-      }
-      instance.debouncedScrollHandler();
+    if (!instance.debouncedScrollHandler) {
+      instance.debouncedScrollHandler = debounce(() => {
+        detectActiveItem(instance);
+        updateButtonStates(instance);
+        track.classList.remove(CLASSES.SCROLLING);
+      }, TIMING.DEBOUNCE_SCROLL);
     }
+    instance.debouncedScrollHandler();
   }
 
   // Calculates the index of the next item for navigation
@@ -588,57 +585,12 @@
 
   // Scrolls to a specific item index with smooth animation
   function scrollToItem(instance, index) {
-    const { track, items, state, snapAlign } = instance;
-    const { CLASSES, TIMING } = CONFIG;
-
+    const { items, snapAlign } = instance;
     const targetItem = items[index];
     if (!targetItem) {
       console.warn(`Carousel ${instance.id}: No item found at index ${index}`);
       return;
     }
-
-    // Cancel any pending scroll cleanup from a previous scrollToItem call
-    if (instance._scrollCleanup) {
-      instance._scrollCleanup();
-    }
-
-    state.isProgrammaticScroll = true;
-    track.classList.add(CLASSES.ANIMATING);
-    track.classList.add(CLASSES.SNAP_DISABLED);
-
-    // Re-enable scroll-snap after short delay
-    setTimeout(() => {
-      track.classList.remove(CLASSES.SNAP_DISABLED);
-    }, TIMING.SNAP_DISABLE_DURATION);
-
-    // One-shot scrollend listener to clear programmatic scroll flag
-    const onScrollEnd = () => {
-      clearTimeout(fallbackTimer);
-      state.isProgrammaticScroll = false;
-      track.classList.remove(CLASSES.ANIMATING);
-      track.classList.remove(CLASSES.SCROLLING);
-      instance._scrollCleanup = null;
-    };
-    track.addEventListener('scrollend', onScrollEnd, { once: true });
-
-    // Fallback timeout: if scrollIntoView produces no scroll (item already in view),
-    // scrollend won't fire. Clear the flag after a generous timeout.
-    const fallbackTimer = setTimeout(() => {
-      track.removeEventListener('scrollend', onScrollEnd);
-      state.isProgrammaticScroll = false;
-      track.classList.remove(CLASSES.ANIMATING);
-      track.classList.remove(CLASSES.SCROLLING);
-      instance._scrollCleanup = null;
-    }, TIMING.SCROLL_END_FALLBACK);
-
-    // Store cleanup function so a subsequent scrollToItem can cancel this one
-    instance._scrollCleanup = () => {
-      track.removeEventListener('scrollend', onScrollEnd);
-      clearTimeout(fallbackTimer);
-      state.isProgrammaticScroll = false;
-      track.classList.remove(CLASSES.ANIMATING);
-      instance._scrollCleanup = null;
-    };
 
     targetItem.scrollIntoView({
       behavior: 'smooth',
@@ -650,7 +602,6 @@
   // Handles next button click
   function handleNext(instance) {
     const { state } = instance;
-    if (state.isProgrammaticScroll) return;
 
     const targetIndex = calculateNextIndex(instance);
     if (targetIndex === state.currentIndex) return;
@@ -667,7 +618,6 @@
   // Handles previous button click
   function handlePrev(instance) {
     const { state } = instance;
-    if (state.isProgrammaticScroll) return;
 
     const targetIndex = calculatePrevIndex(instance);
     if (targetIndex === state.currentIndex) return;
@@ -998,6 +948,12 @@
 
     state.isPaused = true;
 
+    // Store elapsed time and active index so we can resume from this point
+    const elapsed = performance.now() - state.autoplayStartTime;
+    const progress = Math.min(elapsed / instance.config.autoplayDuration, 1);
+    state.autoplayElapsed = elapsed;
+    state.autoplayPausedOnIndex = state.currentIndex;
+
     // Cancel RAF
     if (instance.autoplay.rafId) {
       cancelAnimationFrame(instance.autoplay.rafId);
@@ -1010,12 +966,6 @@
     if (instance.playPauseBtn) {
       instance.playPauseBtn.setAttribute('aria-pressed', 'false');
     }
-
-    // Store elapsed time and active index so we can resume from this point
-    const elapsed = performance.now() - state.autoplayStartTime;
-    state.autoplayElapsed = elapsed;
-    state.autoplayPausedOnIndex = state.currentIndex;
-    const progress = Math.min(elapsed / instance.config.autoplayDuration, 1);
 
     emit(instance, EVENTS.AUTOPLAY_STOP, {
       index: state.currentIndex,
@@ -1179,15 +1129,11 @@
 
   // Attaches event listeners for user interactions
   function attachEventListeners(instance) {
-    const { track, prevBtn, nextBtn, id } = instance;
+    const { track, prevBtn, nextBtn } = instance;
 
     // Create bound handlers and store them for later removal
     instance.boundHandlers = {
       scroll: () => {
-        // User scroll while autoplay is running → stop autoplay
-        if (!instance.state.isProgrammaticScroll && instance.state.isAutoplaying) {
-          stopAutoplay(instance, 'user');
-        }
         handleScroll(instance);
       },
       prev: () => instance.prev(),
@@ -1198,6 +1144,16 @@
     track.addEventListener('scroll', instance.boundHandlers.scroll, {
       passive: true,
     });
+
+    // Stop autoplay on direct user interaction with the track
+    instance.boundHandlers.trackPointerDown = () => {
+      if (instance.state.isAutoplaying) stopAutoplay(instance, 'user');
+    };
+    instance.boundHandlers.trackWheel = () => {
+      if (instance.state.isAutoplaying) stopAutoplay(instance, 'user');
+    };
+    track.addEventListener('pointerdown', instance.boundHandlers.trackPointerDown);
+    track.addEventListener('wheel', instance.boundHandlers.trackWheel, { passive: true });
 
     // Attach button listeners if buttons exist
     if (prevBtn) {
@@ -1224,11 +1180,6 @@
   function cleanup(instance) {
     const { prevBtn, nextBtn, track, container } = instance;
 
-    // Cancel pending scroll cleanup
-    if (instance._scrollCleanup) {
-      instance._scrollCleanup();
-    }
-
     // Clean up autoplay before removing other listeners
     cleanupAutoplay(instance);
 
@@ -1239,6 +1190,13 @@
     // Remove event listeners using stored bound handlers
     if (instance.boundHandlers) {
       track.removeEventListener('scroll', instance.boundHandlers.scroll);
+
+      if (instance.boundHandlers.trackPointerDown) {
+        track.removeEventListener('pointerdown', instance.boundHandlers.trackPointerDown);
+      }
+      if (instance.boundHandlers.trackWheel) {
+        track.removeEventListener('wheel', instance.boundHandlers.trackWheel);
+      }
 
       if (prevBtn) {
         prevBtn.removeEventListener('click', instance.boundHandlers.prev);
@@ -1331,7 +1289,6 @@
       // Initialize state object with all tracking properties
       const state = {
         currentIndex: 0,
-        isProgrammaticScroll: false,
         itemPositions: [],
         gap: 0,
         containerWidth: 0,
