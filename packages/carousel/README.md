@@ -386,7 +386,7 @@ Automatically advance slides on a timer. Autoplay requires `data-carousel-loop="
 | -------------------------------------- | ------------------ | -------- | ------------------------------------ |
 | `data-carousel-autoplay`               | `"true"` / `"false"` | `"false"` | Enable timed autoplay               |
 | `data-carousel-autoplay-duration`      | number (ms)        | `5000`   | Time per slide in milliseconds       |
-| `data-carousel-autoplay-pause-hover`   | `"true"` / `"false"` | `"true"`  | Pause autoplay on mouse hover       |
+| `data-carousel-autoplay-pause-hover`   | `"true"` / `"false"` | `"false"` | Pause autoplay on mouse hover       |
 | `data-carousel-autoplay-pause-focus`   | `"true"` / `"false"` | `"true"`  | Pause autoplay on keyboard focus    |
 
 #### Autoplay with Custom Duration
@@ -428,7 +428,7 @@ Autoplay pauses in several situations:
 - **Navigation buttons (prev/next):** Clicking prev/next **resets the autoplay timer** but keeps autoplay running. The full duration plays out on the new slide. This matches the behavior of `goTo()`.
 - **Dot clicks and dragging/swiping:** Clicking a pagination dot or dragging/swiping the carousel causes a **sticky pause**. The carousel stays paused until the user clicks the play/pause button or `play()` is called via JavaScript.
 - **Keyboard navigation:** Arrow keys, Home, and End also cause a sticky pause.
-- **Hover:** Mouse enters the carousel container (resumes on mouse leave). Configurable via `data-carousel-autoplay-pause-hover`.
+- **Hover:** Mouse enters the carousel container (resumes on mouse leave). Opt-in via `data-carousel-autoplay-pause-hover="true"`.
 - **Focus:** A focusable element inside the carousel receives focus (resumes when focus leaves the container). Configurable via `data-carousel-autoplay-pause-focus`.
 - **Viewport:** The carousel scrolls out of view (resumes when at least 50% is visible again). Uses `IntersectionObserver`.
 

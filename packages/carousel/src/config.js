@@ -32,7 +32,7 @@ export const DEFAULTS = {
   LOOP: false,
   AUTOPLAY: false,
   AUTOPLAY_DURATION: 5000,
-  AUTOPLAY_PAUSE_HOVER: true,
+  AUTOPLAY_PAUSE_HOVER: false,
   AUTOPLAY_PAUSE_FOCUS: true,
 };
 

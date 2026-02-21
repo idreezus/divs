@@ -19,7 +19,7 @@ export function parseConfig(container) {
   const scrollBy = container.getAttribute('data-carousel-scroll-by') || DEFAULTS.SCROLL_BY;
   const autoplay = container.getAttribute('data-carousel-autoplay') === 'true';
   const autoplayDuration = parseInt(container.getAttribute('data-carousel-autoplay-duration'), 10) || DEFAULTS.AUTOPLAY_DURATION;
-  const autoplayPauseHover = container.getAttribute('data-carousel-autoplay-pause-hover') !== 'false';
+  const autoplayPauseHover = container.getAttribute('data-carousel-autoplay-pause-hover') === 'true';
   const autoplayPauseFocus = container.getAttribute('data-carousel-autoplay-pause-focus') !== 'false';
 
   return {
