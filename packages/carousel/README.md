@@ -586,7 +586,7 @@ carousel.next().next().refresh();
 
 #### `play()`
 
-Starts autoplay fresh with a full duration timer. Has no effect when `prefers-reduced-motion: reduce` is active. If autoplay was never configured via the data attribute, `play()` will set it up on the fly using the default duration (5000ms).
+Starts autoplay fresh with a full duration timer. Has no effect when `prefers-reduced-motion: reduce` is active. Requires `data-carousel-autoplay` on the container — logs a warning if called without it.
 
 #### `stop()`
 
