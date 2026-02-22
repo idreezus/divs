@@ -22,9 +22,9 @@
     ITEM:               'data-carousel-item',
     PREV_BTN:           'data-carousel-prev',
     NEXT_BTN:           'data-carousel-next',
-    DOT:                'data-carousel-dot',
-    PAGINATION_CURRENT: 'data-carousel-pagination-current',
-    PAGINATION_TOTAL:   'data-carousel-pagination-total',
+    MARKER:             'data-carousel-marker',
+    COUNTER_CURRENT:    'data-carousel-counter-current',
+    COUNTER_TOTAL:      'data-carousel-counter-total',
     PLAY_PAUSE_BTN:     'data-carousel-play-pause',
     RESTART_BTN:        'data-carousel-restart',
     // Boolean config
@@ -42,9 +42,9 @@
   // CSS classes applied to elements
   const CLASSES = {
     SCROLLING: 'carousel-scrolling', // Applied to track while scrolling is active
-    DISABLED: 'carousel-button-disabled', // Applied to buttons when at start/end edges
+    DISABLED: 'carousel-nav-disabled', // Applied to nav buttons when at start/end edges
     ACTIVE: 'carousel-item-active', // Applied to the current active item
-    DOT_ACTIVE: 'carousel-dot-active', // Applied to the current active pagination dot
+    MARKER_ACTIVE: 'carousel-marker-active', // Applied to the current active marker
     PLAYING: 'carousel-playing',
     AT_END: 'carousel-at-end',
     REDUCED_MOTION: 'carousel-reduced-motion',
@@ -234,7 +234,7 @@
   }
 
   // Returns the total number of navigable positions (snap groups)
-  function calculateTotalSlides(instance) {
+  function calculateTotalPositions(instance) {
     return instance.state.totalPositions;
   }
 
@@ -467,7 +467,7 @@
     container.addEventListener('keydown', handleKeydown);
   }
 
-  // Navigation and pagination functionality
+  // Navigation and marker functionality
 
 
   // Detects which item is currently active based on scroll position
@@ -492,7 +492,7 @@
     if (activeIndex !== currentIndex) {
       state.currentIndex = activeIndex;
       updateUI(instance);
-      emit(instance, 'change', { index: activeIndex });
+      emit(instance, 'snapchange', { index: activeIndex });
     }
   }
 
@@ -618,7 +618,7 @@
     // Set index directly (decoupled from scroll detection)
     state.currentIndex = targetIndex;
     updateUI(instance);
-    emit(instance, 'change', { index: targetIndex });
+    emit(instance, 'snapchange', { index: targetIndex });
 
     // Scroll as visual effect
     scrollToItem(instance, targetIndex);
@@ -633,7 +633,7 @@
 
     state.currentIndex = targetIndex;
     updateUI(instance);
-    emit(instance, 'change', { index: targetIndex });
+    emit(instance, 'snapchange', { index: targetIndex });
 
     scrollToItem(instance, targetIndex);
   }
@@ -650,9 +650,9 @@
 
       calculateDimensions(instance);
 
-      // If the number of snap positions changed, re-setup pagination
+      // If the number of snap positions changed, re-setup markers
       if (instance.state.totalPositions !== prevTotalPositions) {
-        setupPagination(instance);
+        setupMarkers(instance);
       }
 
       // Clamp currentIndex to new maxReachableIndex
@@ -675,131 +675,131 @@
     instance.resizeObserver = resizeObserver;
   }
 
-  // Sets up pagination dots if any exist in the container
-  function setupPagination(instance) {
-    const { dots: existingDots, container, items, id } = instance;
+  // Sets up markers if any exist in the container
+  function setupMarkers(instance) {
+    const { markers: existingMarkers, container, items, id } = instance;
     const { CLASSES } = CONFIG;
 
-    // Skip if no dots exist
-    if (!existingDots || existingDots.length === 0) return;
+    // Skip if no markers exist
+    if (!existingMarkers || existingMarkers.length === 0) return;
 
-    // Remove previously bound handlers before rebuilding dots
-    if (instance.boundDotHandlers) {
-      instance.boundDotHandlers.forEach(({ dot, handler }) => {
-        dot.removeEventListener('click', handler);
+    // Remove previously bound handlers before rebuilding markers
+    if (instance.boundMarkerHandlers) {
+      instance.boundMarkerHandlers.forEach(({ marker, handler }) => {
+        marker.removeEventListener('click', handler);
       });
     }
 
     // Initialize handler storage
-    instance.boundDotHandlers = [];
+    instance.boundMarkerHandlers = [];
 
-    const totalSlides = calculateTotalSlides(instance);
+    const totalPositions = calculateTotalPositions(instance);
 
-    // Converts any provided dot into a semantic button for accessibility
-    const normalizeDotElement = (dot) => {
-      if (dot.tagName && dot.tagName.toLowerCase() === 'button') {
-        return dot;
+    // Converts any provided marker into a semantic button for accessibility
+    const normalizeMarkerElement = (marker) => {
+      if (marker.tagName && marker.tagName.toLowerCase() === 'button') {
+        return marker;
       }
 
       const button = document.createElement('button');
 
-      [...dot.attributes].forEach((attribute) => {
+      [...marker.attributes].forEach((attribute) => {
         button.setAttribute(attribute.name, attribute.value);
       });
 
-      while (dot.firstChild) {
-        button.appendChild(dot.firstChild);
+      while (marker.firstChild) {
+        button.appendChild(marker.firstChild);
       }
 
-      dot.replaceWith(button);
+      marker.replaceWith(button);
       return button;
     };
 
-    // Use first dot as template
-    const templateDot = normalizeDotElement(existingDots[0]);
-    const allDots = [templateDot];
+    // Use first marker as template
+    const templateMarker = normalizeMarkerElement(existingMarkers[0]);
+    const allMarkers = [templateMarker];
 
-    // Normalize remaining existing dots
-    for (let i = 1; i < existingDots.length; i++) {
-      allDots.push(normalizeDotElement(existingDots[i]));
+    // Normalize remaining existing markers
+    for (let i = 1; i < existingMarkers.length; i++) {
+      allMarkers.push(normalizeMarkerElement(existingMarkers[i]));
     }
 
-    // Get parent from first dot for appending clones
-    const dotsParent = templateDot.parentElement;
-    instance.dotsParent = dotsParent;
+    // Get parent from first marker for appending clones
+    const markerGroup = templateMarker.parentElement;
+    instance.markerGroup = markerGroup;
 
-    // Clone template to match total slides
-    while (allDots.length < totalSlides) {
-      const duplicate = templateDot.cloneNode(true);
-      dotsParent.appendChild(duplicate);
-      allDots.push(duplicate);
+    // Clone template to match total positions
+    while (allMarkers.length < totalPositions) {
+      const duplicate = templateMarker.cloneNode(true);
+      markerGroup.appendChild(duplicate);
+      allMarkers.push(duplicate);
     }
 
-    // Remove excess dots
-    while (allDots.length > totalSlides) {
-      const removed = allDots.pop();
+    // Remove excess markers
+    while (allMarkers.length > totalPositions) {
+      const removed = allMarkers.pop();
       removed.remove();
     }
 
-    // Prepare each dot with attributes, aria-label, and click handler
-    const preparedDots = [];
-    allDots.forEach((dot, index) => {
-      dot.setAttribute('type', 'button');
+    // Prepare each marker with attributes, aria-label, and click handler
+    const preparedMarkers = [];
+    allMarkers.forEach((marker, index) => {
+      marker.setAttribute('type', 'button');
 
       // Remove any pre-existing active class so scripted state controls visuals
-      dot.classList.remove(CLASSES.DOT_ACTIVE);
+      marker.classList.remove(CLASSES.MARKER_ACTIVE);
 
       // Add accessible label
-      dot.setAttribute(
+      marker.setAttribute(
         'aria-label',
-        `Go to slide ${index + 1} of ${totalSlides}`
+        `Scroll to item ${index + 1} of ${totalPositions}`
       );
 
       // Bind click handler (goTo handles autoplay stop)
       const handler = () => {
         instance.goTo(index);
       };
-      dot.addEventListener('click', handler);
-      instance.boundDotHandlers.push({ dot, handler });
-      preparedDots.push(dot);
+      marker.addEventListener('click', handler);
+      instance.boundMarkerHandlers.push({ marker, handler });
+      preparedMarkers.push(marker);
     });
 
-    // Update dots reference on instance
-    instance.dots = preparedDots;
+    // Update markers reference on instance
+    instance.markers = preparedMarkers;
 
-    // Set up roving tabindex keyboard handler on dots parent
-    setupDotKeyboard(instance);
+    // Set up roving tabindex keyboard handler on marker group
+    setupMarkerKeyboard(instance);
 
     // Set initial active state
-    updatePagination(instance);
+    updateMarkers(instance);
   }
 
-  // Sets up delegated keyboard handler on dots parent for roving tabindex
-  function setupDotKeyboard(instance) {
-    const { dots, dotsParent, config } = instance;
-    if (!dots || dots.length <= 1) return;
+  // Sets up delegated keyboard handler on marker group for roving tabindex
+  function setupMarkerKeyboard(instance) {
+    const { markers, markerGroup, config } = instance;
+    if (!markers || markers.length <= 1) return;
 
     // Remove existing handler if present (idempotent for rebuilds)
-    if (instance.boundHandlers.dotKeydown && dotsParent) {
-      dotsParent.removeEventListener('keydown', instance.boundHandlers.dotKeydown);
+    if (instance.boundHandlers.markerKeydown && markerGroup) {
+      markerGroup.removeEventListener('keydown', instance.boundHandlers.markerKeydown);
     }
 
     const handler = (event) => {
-      const currentDotIndex = instance.dots.indexOf(event.target);
-      if (currentDotIndex === -1) return;
+      const currentMarkerIndex = instance.markers.indexOf(event.target);
+      if (currentMarkerIndex === -1) return;
 
-      const lastIndex = instance.dots.length - 1;
+      const lastIndex = instance.markers.length - 1;
       let targetIndex = null;
 
       switch (event.key) {
         case 'ArrowRight':
-          targetIndex = currentDotIndex < lastIndex
-            ? currentDotIndex + 1
+          targetIndex = currentMarkerIndex < lastIndex
+            ? currentMarkerIndex + 1
             : (config.loop ? 0 : lastIndex);
           break;
         case 'ArrowLeft':
-          targetIndex = currentDotIndex > 0
-            ? currentDotIndex - 1
+          targetIndex = currentMarkerIndex > 0
+            ? currentMarkerIndex - 1
             : (config.loop ? lastIndex : 0);
           break;
         case 'Home':
@@ -815,47 +815,47 @@
       event.preventDefault();
       event.stopPropagation();
 
-      if (targetIndex !== currentDotIndex) {
+      if (targetIndex !== currentMarkerIndex) {
         instance.goTo(targetIndex);
-        instance.dots[targetIndex].focus();
+        instance.markers[targetIndex].focus();
       }
     };
 
-    dotsParent.addEventListener('keydown', handler);
-    instance.boundHandlers.dotKeydown = handler;
+    markerGroup.addEventListener('keydown', handler);
+    instance.boundHandlers.markerKeydown = handler;
   }
 
-  // Updates pagination dots to reflect current active item
-  function updatePagination(instance) {
-    const { dots, container, state } = instance;
+  // Updates markers to reflect current active item
+  function updateMarkers(instance) {
+    const { markers, container, state } = instance;
     const { CLASSES, SELECTORS } = CONFIG;
     const { currentIndex } = state;
 
-    if (dots && dots.length > 0) {
-      dots.forEach((dot, index) => {
+    if (markers && markers.length > 0) {
+      markers.forEach((marker, index) => {
         const isActive = index === currentIndex;
-        dot.classList.toggle(CLASSES.DOT_ACTIVE, isActive);
-        dot.setAttribute('tabindex', isActive ? '0' : '-1');
+        marker.classList.toggle(CLASSES.MARKER_ACTIVE, isActive);
+        marker.setAttribute('tabindex', isActive ? '0' : '-1');
 
         if (isActive) {
-          dot.setAttribute('aria-current', 'true');
+          marker.setAttribute('aria-current', 'true');
         } else {
-          dot.removeAttribute('aria-current');
+          marker.removeAttribute('aria-current');
         }
       });
 
-      // Move focus to active dot only when user is already interacting with dots
-      if (instance.dotsParent?.contains(document.activeElement)) {
-        dots[currentIndex].focus();
+      // Move focus to active marker only when user is already interacting with markers
+      if (instance.markerGroup?.contains(document.activeElement)) {
+        markers[currentIndex].focus();
       }
     }
 
-    const currentEl = container.querySelector(SELECTORS.PAGINATION_CURRENT);
+    const currentEl = container.querySelector(SELECTORS.COUNTER_CURRENT);
     if (currentEl) {
       currentEl.textContent = currentIndex + 1;
     }
 
-    const totalEl = container.querySelector(SELECTORS.PAGINATION_TOTAL);
+    const totalEl = container.querySelector(SELECTORS.COUNTER_TOTAL);
     if (totalEl) {
       totalEl.textContent = state.totalPositions;
     }
@@ -872,7 +872,7 @@
     requestAnimationFrame(() => {
       updateActiveClasses(instance);
       updateButtonStates(instance);
-      updatePagination(instance);
+      updateMarkers(instance);
       updateCSSProperties(instance);
       instance.rafPending = false;
     });
@@ -893,13 +893,13 @@
     // Update progress on container
     instance.container.style.setProperty(CSS_VARS.AUTOPLAY_PROGRESS, progress.toString());
 
-    // Update progress on active dot, reset inactive dots
-    if (instance.dots?.length > 0) {
-      instance.dots.forEach((dot, index) => {
+    // Update progress on active marker, reset inactive markers
+    if (instance.markers?.length > 0) {
+      instance.markers.forEach((marker, index) => {
         if (index === state.currentIndex) {
-          dot.style.setProperty(CSS_VARS.AUTOPLAY_PROGRESS, progress.toString());
+          marker.style.setProperty(CSS_VARS.AUTOPLAY_PROGRESS, progress.toString());
         } else {
-          dot.style.setProperty(CSS_VARS.AUTOPLAY_PROGRESS, '0');
+          marker.style.setProperty(CSS_VARS.AUTOPLAY_PROGRESS, '0');
         }
       });
     }
@@ -1067,9 +1067,9 @@
     if (!canResume(instance)) return;
 
     state.isPaused = false;
-    // Resume from stored elapsed time only if still on the same slide, otherwise reset
-    const sameSlide = state.autoplayPausedOnIndex === state.currentIndex;
-    state.autoplayStartTime = sameSlide
+    // Resume from stored elapsed time only if still on the same item, otherwise reset
+    const sameItem = state.autoplayPausedOnIndex === state.currentIndex;
+    state.autoplayStartTime = sameItem
       ? performance.now() - (state.autoplayElapsed || 0)
       : performance.now();
 
@@ -1121,10 +1121,10 @@
     // Reset progress on container
     container.style.setProperty(CSS_VARS.AUTOPLAY_PROGRESS, '0');
 
-    // Reset progress on all dots
-    if (instance.dots?.length > 0) {
-      instance.dots.forEach((dot) => {
-        dot.style.setProperty(CSS_VARS.AUTOPLAY_PROGRESS, '0');
+    // Reset progress on all markers
+    if (instance.markers?.length > 0) {
+      instance.markers.forEach((marker) => {
+        marker.style.setProperty(CSS_VARS.AUTOPLAY_PROGRESS, '0');
       });
     }
   }
@@ -1190,8 +1190,8 @@
     const prevBtn = container.querySelector(`${SELECTORS.PREV_BTN}, [data-carousel="prev"]`);
     const nextBtn = container.querySelector(`${SELECTORS.NEXT_BTN}, [data-carousel="next"]`);
 
-    // Find optional pagination dots (can be anywhere in container)
-    const dots = [...container.querySelectorAll(SELECTORS.DOT)];
+    // Find optional markers (can be anywhere in container)
+    const markers = [...container.querySelectorAll(SELECTORS.MARKER)];
 
     // Find autoplay-specific elements only when autoplay is configured
     let playPauseBtn = null;
@@ -1222,7 +1222,7 @@
       items,
       prevBtn,
       nextBtn,
-      dots,
+      markers,
       playPauseBtn,
       restartBtn,
     });
@@ -1327,16 +1327,16 @@
         container.removeEventListener('keydown', instance.boundHandlers.keyboard);
       }
 
-      // Remove dot keyboard listener if it exists
-      if (instance.boundHandlers.dotKeydown && instance.dotsParent) {
-        instance.dotsParent.removeEventListener('keydown', instance.boundHandlers.dotKeydown);
+      // Remove marker keyboard listener if it exists
+      if (instance.boundHandlers.markerKeydown && instance.markerGroup) {
+        instance.markerGroup.removeEventListener('keydown', instance.boundHandlers.markerKeydown);
       }
     }
 
-    // Remove pagination dot event listeners
-    if (instance.boundDotHandlers) {
-      instance.boundDotHandlers.forEach(({ dot, handler }) => {
-        dot.removeEventListener('click', handler);
+    // Remove marker event listeners
+    if (instance.boundMarkerHandlers) {
+      instance.boundMarkerHandlers.forEach(({ marker, handler }) => {
+        marker.removeEventListener('click', handler);
       });
     }
 
@@ -1378,8 +1378,8 @@
     // Set up responsive behavior
     setupResizeObserver(instance);
 
-    // Set up pagination if dots exist
-    setupPagination(instance);
+    // Set up markers if they exist
+    setupMarkers(instance);
 
     // Set up keyboard navigation if enabled
     if (config.keyboard) {
@@ -1483,7 +1483,7 @@
       if (index !== state.currentIndex) {
         state.currentIndex = index;
         updateUI(this);
-        emit(this, 'change', { index });
+        emit(this, 'snapchange', { index });
       }
 
       // Scroll as visual effect
@@ -1527,9 +1527,9 @@
 
       calculateDimensions(this);
 
-      // Re-setup pagination if snap group count changed
+      // Re-setup markers if snap group count changed
       if (this.state.totalPositions !== prevTotalPositions) {
-        setupPagination(this);
+        setupMarkers(this);
       }
 
       // Clamp currentIndex

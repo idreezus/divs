@@ -17,7 +17,7 @@ import {
   handleNext,
   handlePrev,
   setupResizeObserver,
-  setupPagination,
+  setupMarkers,
   updateUI,
 } from './navigation.js';
 import { setupKeyboardNavigation } from './keyboard.js';
@@ -55,8 +55,8 @@ function findElements(instance) {
   const prevBtn = container.querySelector(`${SELECTORS.PREV_BTN}, [data-carousel="prev"]`);
   const nextBtn = container.querySelector(`${SELECTORS.NEXT_BTN}, [data-carousel="next"]`);
 
-  // Find optional pagination dots (can be anywhere in container)
-  const dots = [...container.querySelectorAll(SELECTORS.DOT)];
+  // Find optional markers (can be anywhere in container)
+  const markers = [...container.querySelectorAll(SELECTORS.MARKER)];
 
   // Find autoplay-specific elements only when autoplay is configured
   let playPauseBtn = null;
@@ -87,7 +87,7 @@ function findElements(instance) {
     items,
     prevBtn,
     nextBtn,
-    dots,
+    markers,
     playPauseBtn,
     restartBtn,
   });
@@ -192,16 +192,16 @@ function cleanup(instance) {
       container.removeEventListener('keydown', instance.boundHandlers.keyboard);
     }
 
-    // Remove dot keyboard listener if it exists
-    if (instance.boundHandlers.dotKeydown && instance.dotsParent) {
-      instance.dotsParent.removeEventListener('keydown', instance.boundHandlers.dotKeydown);
+    // Remove marker keyboard listener if it exists
+    if (instance.boundHandlers.markerKeydown && instance.markerGroup) {
+      instance.markerGroup.removeEventListener('keydown', instance.boundHandlers.markerKeydown);
     }
   }
 
-  // Remove pagination dot event listeners
-  if (instance.boundDotHandlers) {
-    instance.boundDotHandlers.forEach(({ dot, handler }) => {
-      dot.removeEventListener('click', handler);
+  // Remove marker event listeners
+  if (instance.boundMarkerHandlers) {
+    instance.boundMarkerHandlers.forEach(({ marker, handler }) => {
+      marker.removeEventListener('click', handler);
     });
   }
 
@@ -243,8 +243,8 @@ function init(instance) {
   // Set up responsive behavior
   setupResizeObserver(instance);
 
-  // Set up pagination if dots exist
-  setupPagination(instance);
+  // Set up markers if they exist
+  setupMarkers(instance);
 
   // Set up keyboard navigation if enabled
   if (config.keyboard) {
@@ -348,7 +348,7 @@ export class Carousel {
     if (index !== state.currentIndex) {
       state.currentIndex = index;
       updateUI(this);
-      emit(this, 'change', { index });
+      emit(this, 'snapchange', { index });
     }
 
     // Scroll as visual effect
@@ -392,9 +392,9 @@ export class Carousel {
 
     calculateDimensions(this);
 
-    // Re-setup pagination if snap group count changed
+    // Re-setup markers if snap group count changed
     if (this.state.totalPositions !== prevTotalPositions) {
-      setupPagination(this);
+      setupMarkers(this);
     }
 
     // Clamp currentIndex

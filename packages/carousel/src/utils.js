@@ -142,7 +142,7 @@ export function findPrevPageIndex(instance) {
 }
 
 // Returns the total number of navigable positions (snap groups)
-export function calculateTotalSlides(instance) {
+export function calculateTotalPositions(instance) {
   return instance.state.totalPositions;
 }
 

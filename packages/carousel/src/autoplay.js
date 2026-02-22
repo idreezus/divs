@@ -15,13 +15,13 @@ function runAutoplayTick(instance) {
   // Update progress on container
   instance.container.style.setProperty(CSS_VARS.AUTOPLAY_PROGRESS, progress.toString());
 
-  // Update progress on active dot, reset inactive dots
-  if (instance.dots?.length > 0) {
-    instance.dots.forEach((dot, index) => {
+  // Update progress on active marker, reset inactive markers
+  if (instance.markers?.length > 0) {
+    instance.markers.forEach((marker, index) => {
       if (index === state.currentIndex) {
-        dot.style.setProperty(CSS_VARS.AUTOPLAY_PROGRESS, progress.toString());
+        marker.style.setProperty(CSS_VARS.AUTOPLAY_PROGRESS, progress.toString());
       } else {
-        dot.style.setProperty(CSS_VARS.AUTOPLAY_PROGRESS, '0');
+        marker.style.setProperty(CSS_VARS.AUTOPLAY_PROGRESS, '0');
       }
     });
   }
@@ -189,9 +189,9 @@ export function resumeAutoplay(instance) {
   if (!canResume(instance)) return;
 
   state.isPaused = false;
-  // Resume from stored elapsed time only if still on the same slide, otherwise reset
-  const sameSlide = state.autoplayPausedOnIndex === state.currentIndex;
-  state.autoplayStartTime = sameSlide
+  // Resume from stored elapsed time only if still on the same item, otherwise reset
+  const sameItem = state.autoplayPausedOnIndex === state.currentIndex;
+  state.autoplayStartTime = sameItem
     ? performance.now() - (state.autoplayElapsed || 0)
     : performance.now();
 
@@ -243,10 +243,10 @@ export function stopAutoplay(instance, reason = 'user') {
   // Reset progress on container
   container.style.setProperty(CSS_VARS.AUTOPLAY_PROGRESS, '0');
 
-  // Reset progress on all dots
-  if (instance.dots?.length > 0) {
-    instance.dots.forEach((dot) => {
-      dot.style.setProperty(CSS_VARS.AUTOPLAY_PROGRESS, '0');
+  // Reset progress on all markers
+  if (instance.markers?.length > 0) {
+    instance.markers.forEach((marker) => {
+      marker.style.setProperty(CSS_VARS.AUTOPLAY_PROGRESS, '0');
     });
   }
 }

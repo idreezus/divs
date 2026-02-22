@@ -71,9 +71,9 @@
   scroll-snap-align: end;
 }
 
-/* Pagination dot focus state for keyboard navigation */
-[data-carousel-dot]:focus-visible,
-[data-carousel='dot']:focus-visible {
+/* Marker focus state for keyboard navigation */
+[data-carousel-marker]:focus-visible,
+[data-carousel='marker']:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 2px;
 }

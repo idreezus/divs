@@ -8,9 +8,9 @@ export const SELECTOR_ATTRS = {
   ITEM:               'data-carousel-item',
   PREV_BTN:           'data-carousel-prev',
   NEXT_BTN:           'data-carousel-next',
-  DOT:                'data-carousel-dot',
-  PAGINATION_CURRENT: 'data-carousel-pagination-current',
-  PAGINATION_TOTAL:   'data-carousel-pagination-total',
+  MARKER:             'data-carousel-marker',
+  COUNTER_CURRENT:    'data-carousel-counter-current',
+  COUNTER_TOTAL:      'data-carousel-counter-total',
   PLAY_PAUSE_BTN:     'data-carousel-play-pause',
   RESTART_BTN:        'data-carousel-restart',
   // Boolean config
@@ -28,10 +28,10 @@ export const SELECTORS = Object.fromEntries(
 // CSS classes applied to elements
 export const CLASSES = {
   SCROLLING: 'carousel-scrolling', // Applied to track while scrolling is active
-  DISABLED: 'carousel-button-disabled', // Applied to buttons when at start/end edges
+  DISABLED: 'carousel-nav-disabled', // Applied to nav buttons when at start/end edges
   ACTIVE: 'carousel-item-active', // Applied to the current active item
   VISIBLE: 'carousel-item-visible', // Applied to items currently in viewport (reserved for future use)
-  DOT_ACTIVE: 'carousel-dot-active', // Applied to the current active pagination dot
+  MARKER_ACTIVE: 'carousel-marker-active', // Applied to the current active marker
   LIVE_REGION: 'carousel-sr-only', // Applied to the live region for screen readers
   PLAYING: 'carousel-playing',
   AT_END: 'carousel-at-end',
@@ -72,7 +72,7 @@ export const CSS_VARS = {
 
 // Event names for CustomEvents
 export const EVENTS = {
-  CHANGE: 'change',
+  SNAPCHANGE: 'snapchange',
   SCROLL: 'scroll',
   REACH_START: 'reach-start',
   REACH_END: 'reach-end',
