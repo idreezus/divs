@@ -68,6 +68,13 @@ export function updateButtonStates(instance) {
     }
   }
 
+  // Toggle at-end class for autoplay-configured carousels
+  if (instance.autoplay && !config.loop) {
+    instance.container.classList.toggle(CLASSES.AT_END, atLastPosition && !state.isAutoplaying);
+  } else {
+    instance.container.classList.remove(CLASSES.AT_END);
+  }
+
   // Edge events still fire based on physical scroll position
   if (atStart && !state.hasEmittedStart) {
     emit(instance, 'reach-start');

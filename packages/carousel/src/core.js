@@ -58,8 +58,25 @@ function findElements(instance) {
   // Find optional pagination dots (can be anywhere in container)
   const dots = [...container.querySelectorAll(SELECTORS.DOT)];
 
-  // Find optional play-pause button
-  const playPauseBtn = container.querySelector(SELECTORS.PLAY_PAUSE_BTN);
+  // Find autoplay-specific elements only when autoplay is configured
+  let playPauseBtn = null;
+  let restartBtn = null;
+
+  if (instance.config.autoplay) {
+    playPauseBtn = container.querySelector(SELECTORS.PLAY_PAUSE_BTN);
+    restartBtn = container.querySelector(SELECTORS.RESTART_BTN);
+  } else {
+    if (container.querySelector(SELECTORS.PLAY_PAUSE_BTN)) {
+      console.warn(
+        `Carousel ${id}: Play/pause button found but autoplay is not enabled. Add data-carousel-autoplay to the container.`
+      );
+    }
+    if (container.querySelector(SELECTORS.RESTART_BTN)) {
+      console.warn(
+        `Carousel ${id}: Restart button found but autoplay is not enabled. Add data-carousel-autoplay to the container.`
+      );
+    }
+  }
 
   // Add data-carousel-id for easier debugging in devtools
   container.setAttribute('data-carousel-id', id);
@@ -72,6 +89,7 @@ function findElements(instance) {
     nextBtn,
     dots,
     playPauseBtn,
+    restartBtn,
   });
 
   return true;
@@ -95,16 +113,6 @@ function attachEventListeners(instance) {
     passive: true,
   });
 
-  // Stop autoplay on direct user interaction with the track
-  instance.boundHandlers.trackPointerDown = () => {
-    if (instance.state.isAutoplaying) stopAutoplay(instance, 'user');
-  };
-  instance.boundHandlers.trackWheel = () => {
-    if (instance.state.isAutoplaying) stopAutoplay(instance, 'user');
-  };
-  track.addEventListener('pointerdown', instance.boundHandlers.trackPointerDown);
-  track.addEventListener('wheel', instance.boundHandlers.trackWheel, { passive: true });
-
   // Attach button listeners if buttons exist
   if (prevBtn) {
     prevBtn.addEventListener('click', instance.boundHandlers.prev);
@@ -113,16 +121,36 @@ function attachEventListeners(instance) {
     nextBtn.addEventListener('click', instance.boundHandlers.next);
   }
 
-  // Attach play-pause button handler
-  if (instance.playPauseBtn) {
-    instance.boundHandlers.playPause = () => {
-      if (instance.state.isAutoplaying) {
-        stopAutoplay(instance, 'user');
-      } else {
-        instance.play();
-      }
+  // Autoplay-specific listeners (only when autoplay is configured)
+  if (instance.config.autoplay) {
+    // Stop autoplay on direct user interaction with the track
+    instance.boundHandlers.trackPointerDown = () => {
+      if (instance.state.isAutoplaying) stopAutoplay(instance, 'user');
     };
-    instance.playPauseBtn.addEventListener('click', instance.boundHandlers.playPause);
+    instance.boundHandlers.trackWheel = () => {
+      if (instance.state.isAutoplaying) stopAutoplay(instance, 'user');
+    };
+    track.addEventListener('pointerdown', instance.boundHandlers.trackPointerDown);
+    track.addEventListener('wheel', instance.boundHandlers.trackWheel, { passive: true });
+
+    if (instance.playPauseBtn) {
+      instance.boundHandlers.playPause = () => {
+        if (instance.state.isAutoplaying) {
+          stopAutoplay(instance, 'user');
+        } else {
+          instance.play();
+        }
+      };
+      instance.playPauseBtn.addEventListener('click', instance.boundHandlers.playPause);
+    }
+
+    if (instance.restartBtn) {
+      instance.boundHandlers.restart = () => {
+        instance.goTo(0);
+        instance.play();
+      };
+      instance.restartBtn.addEventListener('click', instance.boundHandlers.restart);
+    }
   }
 }
 
@@ -135,6 +163,10 @@ function cleanup(instance) {
 
   if (instance.playPauseBtn && instance.boundHandlers?.playPause) {
     instance.playPauseBtn.removeEventListener('click', instance.boundHandlers.playPause);
+  }
+
+  if (instance.restartBtn && instance.boundHandlers?.restart) {
+    instance.restartBtn.removeEventListener('click', instance.boundHandlers.restart);
   }
 
   // Remove event listeners using stored bound handlers
@@ -254,11 +286,6 @@ export class Carousel {
       totalPositions: 0,
       hasEmittedStart: false,
       hasEmittedEnd: false,
-      isAutoplaying: false,
-      isPaused: false,
-      autoplayStartTime: null,
-      autoplayElapsed: 0,
-      autoplayPausedOnIndex: null,
     };
 
     // Store core properties on instance
@@ -271,7 +298,6 @@ export class Carousel {
       rafPending: false,
       boundHandlers: null,
       debouncedScrollHandler: null,
-      autoplay: null,
     });
 
     // Initialize the carousel
@@ -285,14 +311,14 @@ export class Carousel {
 
   // Navigates to the next item
   next() {
-    if (this.state.isAutoplaying) stopAutoplay(this, 'user');
+    if (this.autoplay) stopAutoplay(this, 'user');
     handleNext(this);
     return this;
   }
 
   // Navigates to the previous item
   prev() {
-    if (this.state.isAutoplaying) stopAutoplay(this, 'user');
+    if (this.autoplay) stopAutoplay(this, 'user');
     handlePrev(this);
     return this;
   }
@@ -315,7 +341,7 @@ export class Carousel {
       index = state.maxReachableIndex;
     }
 
-    if (state.isAutoplaying) stopAutoplay(this, 'user');
+    if (this.autoplay) stopAutoplay(this, 'user');
 
     // Set index directly (decoupled)
     if (index !== state.currentIndex) {
@@ -331,6 +357,12 @@ export class Carousel {
 
   // Starts autoplay fresh (always full duration)
   play() {
+    if (!this.config.autoplay) {
+      console.warn(
+        `Carousel ${this.id}: Autoplay is not enabled. Add data-carousel-autoplay to the container.`
+      );
+      return this;
+    }
     const { CSS_VARS } = CONFIG;
     if (prefersReducedMotion()) return this;
     if (!this.autoplay) setupAutoplay(this, handleNext);

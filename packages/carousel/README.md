@@ -306,8 +306,9 @@ Optional navigation controls that work automatically when placed inside the cont
 
 | Attribute              | Description     |
 | ---------------------- | --------------- |
-| `data-carousel-prev`  | Previous button |
-| `data-carousel-next`  | Next button     |
+| `data-carousel-prev`    | Previous button |
+| `data-carousel-next`    | Next button     |
+| `data-carousel-restart` | Restart button (go to first slide + play) |
 
 ### Pagination
 
@@ -366,7 +367,7 @@ To enable keyboard navigation:
 
 ### Autoplay
 
-Automatically advance slides on a timer. Autoplay requires `data-carousel-loop="true"` to cycle continuously (otherwise it stops at the last slide).
+Automatically advance slides on a timer. Combine with `data-carousel-loop` for continuous cycling. Without loop, autoplay advances through all slides, completes the progress animation on the last slide, then stops cleanly — the container receives the `.carousel-at-end` class.
 
 ```html
 <div
@@ -418,6 +419,26 @@ Add a toggle button inside the container to let users control autoplay. The libr
   <button data-carousel-play-pause>Pause</button>
 </div>
 ```
+
+#### Restart Button
+
+Add a restart button to let users go back to the first slide and start autoplay again. Useful for non-loop carousels where autoplay has completed.
+
+```html
+<div
+  data-carousel-container
+  data-carousel-autoplay
+>
+  <div data-carousel="track">
+    <div data-carousel="item">...</div>
+    <div data-carousel="item">...</div>
+    <div data-carousel="item">...</div>
+  </div>
+  <button data-carousel-restart>Start Over</button>
+</div>
+```
+
+Clicking the restart button navigates to the first slide and starts autoplay fresh. The `.carousel-at-end` class is removed when autoplay restarts.
 
 #### Pause Behavior
 
@@ -491,6 +512,7 @@ The library applies state classes that you can style however you want.
 | `.carousel-scrolling`         | The track while scrolling is active                                   |
 | `.carousel-dot-active`        | The active pagination dot                                             |
 | `.carousel-playing`           | The container while autoplay is actively running                      |
+| `.carousel-at-end`            | The container when autoplay has completed on a non-loop carousel      |
 | `.carousel-reduced-motion`    | The container when `prefers-reduced-motion: reduce` is active         |
 
 Here's an example from the prev/next buttons on all the variants on this page:
@@ -708,9 +730,7 @@ carousel.refresh();
 </Accordion>
 
 <Accordion title="Does autoplay work without loop?">
-  Yes, but autoplay will stop advancing when it reaches the last slide. For
-  continuous cycling, combine `data-carousel-loop` with
-  `data-carousel-autoplay`.
+  Yes. Autoplay advances through all slides, completes the progress animation on the last slide, then stops. The container receives the `.carousel-at-end` class so you can style a "finished" state. Add a `data-carousel-restart` button to let users go back to slide 1 and restart autoplay. For continuous cycling, combine `data-carousel-loop` with `data-carousel-autoplay`.
 </Accordion>
 
 <Accordion title="Do navigation buttons stop autoplay?">

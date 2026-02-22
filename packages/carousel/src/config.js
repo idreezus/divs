@@ -12,6 +12,7 @@ export const SELECTOR_ATTRS = {
   PAGINATION_CURRENT: 'data-carousel-pagination-current',
   PAGINATION_TOTAL:   'data-carousel-pagination-total',
   PLAY_PAUSE_BTN:     'data-carousel-play-pause',
+  RESTART_BTN:        'data-carousel-restart',
   // Boolean config
   KEYBOARD:              'data-carousel-keyboard',
   LOOP:                  'data-carousel-loop',
@@ -33,6 +34,7 @@ export const CLASSES = {
   DOT_ACTIVE: 'carousel-dot-active', // Applied to the current active pagination dot
   LIVE_REGION: 'carousel-sr-only', // Applied to the live region for screen readers
   PLAYING: 'carousel-playing',
+  AT_END: 'carousel-at-end',
   REDUCED_MOTION: 'carousel-reduced-motion',
 };
 

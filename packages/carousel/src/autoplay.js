@@ -27,6 +27,11 @@ function runAutoplayTick(instance) {
   }
 
   if (progress >= 1) {
+    const atEnd = state.currentIndex >= state.maxReachableIndex && !instance.config.loop;
+    if (atEnd) {
+      stopAutoplay(instance, 'complete');
+      return;
+    }
     autoplay.advanceFn(instance);
     state.autoplayStartTime = performance.now();
   }
@@ -57,6 +62,15 @@ export function setupAutoplay(instance, advanceFn) {
     pausedByHover: false,
     pausedByFocus: false,
   };
+
+  // Initialize autoplay state fields on the instance
+  Object.assign(instance.state, {
+    isAutoplaying: false,
+    isPaused: false,
+    autoplayStartTime: null,
+    autoplayElapsed: 0,
+    autoplayPausedOnIndex: null,
+  });
 
   // IntersectionObserver to pause when out of viewport
   instance.autoplay.observer = new IntersectionObserver(
