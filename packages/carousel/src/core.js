@@ -205,6 +205,9 @@ function cleanup(instance) {
     });
   }
 
+  // Remove live region element
+  instance.liveRegion?.remove();
+
   // Disconnect ResizeObserver
   if (instance.resizeObserver) {
     instance.resizeObserver.disconnect();
@@ -228,6 +231,21 @@ function init(instance) {
     return false;
   }
 
+  // Set semantic roles on track and items (only if not already set by author)
+  if (!instance.track.hasAttribute('role')) {
+    instance.track.setAttribute('role', 'list');
+  }
+  instance.items.forEach((item) => {
+    if (!item.hasAttribute('role')) {
+      item.setAttribute('role', 'listitem');
+    }
+  });
+
+  // Add accessible label to restart button
+  if (instance.restartBtn && !instance.restartBtn.hasAttribute('aria-label')) {
+    instance.restartBtn.setAttribute('aria-label', 'Restart autoplay');
+  }
+
   // Calculate initial dimensions
   calculateDimensions(instance);
 
@@ -236,6 +254,24 @@ function init(instance) {
 
   // Set initial CSS custom properties before first paint
   updateCSSProperties(instance);
+
+  // Create live region for screen reader announcements
+  const liveRegion = document.createElement('div');
+  Object.assign(liveRegion.style, {
+    position: 'absolute',
+    width: '1px',
+    height: '1px',
+    padding: '0',
+    margin: '-1px',
+    overflow: 'hidden',
+    clip: 'rect(0,0,0,0)',
+    whiteSpace: 'nowrap',
+    border: '0',
+  });
+  liveRegion.setAttribute('aria-live', 'polite');
+  liveRegion.setAttribute('aria-atomic', 'true');
+  container.appendChild(liveRegion);
+  instance.liveRegion = liveRegion;
 
   // Attach event listeners
   attachEventListeners(instance);

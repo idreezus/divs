@@ -99,18 +99,6 @@ Copy & paste this in an embed element or your Page Settings **Inside `<head>` ta
     scroll-snap-align: end;
   }
 
-  /* Screen reader only utility for visually hidden live region */
-  .carousel-sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
 </style>
 ```
 
@@ -349,7 +337,7 @@ For custom counter displays like "2 of 5":
 </div>
 ```
 
-The library automatically adds `aria-label="Scroll to item X of Y"` and `aria-current="true"` on the active marker for accessibility.
+The library automatically adds `aria-label="Scroll to item X of Y"` and `aria-selected="true"` on the active marker for accessibility.
 
 Scroll markers use roving tabindex for keyboard navigation. Only the active marker is in the tab order — pressing Tab skips past inactive markers. When a marker has focus, `Arrow Left` / `Arrow Right` move between markers (wrapping when `data-carousel-loop` is enabled), and `Home` / `End` jump to the first and last marker.
 
@@ -403,7 +391,7 @@ Automatically advance items on a timer. Combine with `data-carousel-loop` for co
 
 #### Play/Pause Button
 
-Add a toggle button inside the container to let users control autoplay. The library manages `aria-pressed` automatically.
+Add a toggle button inside the container to let users control autoplay. The library toggles `aria-label` between "Stop autoplay" and "Start autoplay" automatically.
 
 ```html
 <div
@@ -686,6 +674,22 @@ For major structural changes, destroy and reinitialize:
 carousel.destroy();
 const newCarousel = new Carousel(container);
 ```
+
+## Accessibility
+
+The library adds semantic ARIA attributes automatically. You don't need to add any of these yourself — they're listed here so you know what to expect in the DOM.
+
+| Feature | What the library does |
+| --- | --- |
+| **Track & items** | Sets `role="list"` on the track and `role="listitem"` on each item |
+| **Markers** | Sets `role="tablist"` on the marker group and `role="tab"` on each marker. The active marker gets `aria-selected="true"` |
+| **Live region** | Injects a visually hidden `<div>` with `aria-live="polite"` that announces "Item X of Y" on slide changes |
+| **Autoplay suppression** | Switches the live region to `aria-live="off"` while autoplay is running so screen readers aren't flooded with updates |
+| **Play/pause button** | Toggles `aria-label` between "Stop autoplay" and "Start autoplay" |
+| **Restart button** | Adds `aria-label="Restart autoplay"` |
+| **Reduced motion** | Autoplay is blocked entirely when `prefers-reduced-motion: reduce` is active |
+
+All role attributes respect existing values — if you set a `role` on the track or markers in your HTML, the library won't override it.
 
 ## FAQ
 

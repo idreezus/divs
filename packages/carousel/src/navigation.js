@@ -271,6 +271,11 @@ export function setupMarkers(instance) {
   const markerGroup = templateMarker.parentElement;
   instance.markerGroup = markerGroup;
 
+  // Set semantic roles on marker group (only if not already set by author)
+  if (!markerGroup.hasAttribute('role')) {
+    markerGroup.setAttribute('role', 'tablist');
+  }
+
   // Clone template to match total positions
   while (allMarkers.length < totalPositions) {
     const duplicate = templateMarker.cloneNode(true);
@@ -288,6 +293,11 @@ export function setupMarkers(instance) {
   const preparedMarkers = [];
   allMarkers.forEach((marker, index) => {
     marker.setAttribute('type', 'button');
+
+    // Set semantic role on marker (only if not already set by author)
+    if (!marker.hasAttribute('role')) {
+      marker.setAttribute('role', 'tab');
+    }
 
     // Remove any pre-existing active class so scripted state controls visuals
     marker.classList.remove(CLASSES.MARKER_ACTIVE);
@@ -380,11 +390,7 @@ export function updateMarkers(instance) {
       marker.classList.toggle(CLASSES.MARKER_ACTIVE, isActive);
       marker.setAttribute('tabindex', isActive ? '0' : '-1');
 
-      if (isActive) {
-        marker.setAttribute('aria-current', 'true');
-      } else {
-        marker.removeAttribute('aria-current');
-      }
+      marker.setAttribute('aria-selected', isActive ? 'true' : 'false');
     });
 
     // Move focus to active marker only when user is already interacting with markers
@@ -417,6 +423,9 @@ export function updateUI(instance) {
     updateButtonStates(instance);
     updateMarkers(instance);
     updateCSSProperties(instance);
+    if (instance.liveRegion) {
+      instance.liveRegion.textContent = `Item ${instance.state.currentIndex + 1} of ${instance.state.totalPositions}`;
+    }
     instance.rafPending = false;
   });
 }

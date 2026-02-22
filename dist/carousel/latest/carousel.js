@@ -728,6 +728,11 @@
     const markerGroup = templateMarker.parentElement;
     instance.markerGroup = markerGroup;
 
+    // Set semantic roles on marker group (only if not already set by author)
+    if (!markerGroup.hasAttribute('role')) {
+      markerGroup.setAttribute('role', 'tablist');
+    }
+
     // Clone template to match total positions
     while (allMarkers.length < totalPositions) {
       const duplicate = templateMarker.cloneNode(true);
@@ -745,6 +750,11 @@
     const preparedMarkers = [];
     allMarkers.forEach((marker, index) => {
       marker.setAttribute('type', 'button');
+
+      // Set semantic role on marker (only if not already set by author)
+      if (!marker.hasAttribute('role')) {
+        marker.setAttribute('role', 'tab');
+      }
 
       // Remove any pre-existing active class so scripted state controls visuals
       marker.classList.remove(CLASSES.MARKER_ACTIVE);
@@ -837,11 +847,7 @@
         marker.classList.toggle(CLASSES.MARKER_ACTIVE, isActive);
         marker.setAttribute('tabindex', isActive ? '0' : '-1');
 
-        if (isActive) {
-          marker.setAttribute('aria-current', 'true');
-        } else {
-          marker.removeAttribute('aria-current');
-        }
+        marker.setAttribute('aria-selected', isActive ? 'true' : 'false');
       });
 
       // Move focus to active marker only when user is already interacting with markers
@@ -874,6 +880,9 @@
       updateButtonStates(instance);
       updateMarkers(instance);
       updateCSSProperties(instance);
+      if (instance.liveRegion) {
+        instance.liveRegion.textContent = `Item ${instance.state.currentIndex + 1} of ${instance.state.totalPositions}`;
+      }
       instance.rafPending = false;
     });
   }
@@ -1015,7 +1024,12 @@
 
     // Update play/pause button
     if (instance.playPauseBtn) {
-      instance.playPauseBtn.setAttribute('aria-pressed', 'true');
+      instance.playPauseBtn.setAttribute('aria-label', 'Stop autoplay');
+    }
+
+    // Suppress live region announcements during autoplay
+    if (instance.liveRegion) {
+      instance.liveRegion.setAttribute('aria-live', 'off');
     }
 
     emit(instance, EVENTS.AUTOPLAY_START, { index: state.currentIndex });
@@ -1049,7 +1063,12 @@
 
     // Update play/pause button
     if (instance.playPauseBtn) {
-      instance.playPauseBtn.setAttribute('aria-pressed', 'false');
+      instance.playPauseBtn.setAttribute('aria-label', 'Start autoplay');
+    }
+
+    // Re-enable live region announcements
+    if (instance.liveRegion) {
+      instance.liveRegion.setAttribute('aria-live', 'polite');
     }
 
     emit(instance, EVENTS.AUTOPLAY_STOP, {
@@ -1077,7 +1096,12 @@
 
     // Update play/pause button
     if (instance.playPauseBtn) {
-      instance.playPauseBtn.setAttribute('aria-pressed', 'true');
+      instance.playPauseBtn.setAttribute('aria-label', 'Stop autoplay');
+    }
+
+    // Suppress live region announcements during autoplay
+    if (instance.liveRegion) {
+      instance.liveRegion.setAttribute('aria-live', 'off');
     }
 
     emit(instance, EVENTS.AUTOPLAY_START, { index: state.currentIndex });
@@ -1109,7 +1133,12 @@
 
     // Update play/pause button
     if (instance.playPauseBtn) {
-      instance.playPauseBtn.setAttribute('aria-pressed', 'false');
+      instance.playPauseBtn.setAttribute('aria-label', 'Start autoplay');
+    }
+
+    // Re-enable live region announcements
+    if (instance.liveRegion) {
+      instance.liveRegion.setAttribute('aria-live', 'polite');
     }
 
     emit(instance, EVENTS.AUTOPLAY_STOP, {
@@ -1340,6 +1369,9 @@
       });
     }
 
+    // Remove live region element
+    instance.liveRegion?.remove();
+
     // Disconnect ResizeObserver
     if (instance.resizeObserver) {
       instance.resizeObserver.disconnect();
@@ -1363,6 +1395,21 @@
       return false;
     }
 
+    // Set semantic roles on track and items (only if not already set by author)
+    if (!instance.track.hasAttribute('role')) {
+      instance.track.setAttribute('role', 'list');
+    }
+    instance.items.forEach((item) => {
+      if (!item.hasAttribute('role')) {
+        item.setAttribute('role', 'listitem');
+      }
+    });
+
+    // Add accessible label to restart button
+    if (instance.restartBtn && !instance.restartBtn.hasAttribute('aria-label')) {
+      instance.restartBtn.setAttribute('aria-label', 'Restart autoplay');
+    }
+
     // Calculate initial dimensions
     calculateDimensions(instance);
 
@@ -1371,6 +1418,24 @@
 
     // Set initial CSS custom properties before first paint
     updateCSSProperties(instance);
+
+    // Create live region for screen reader announcements
+    const liveRegion = document.createElement('div');
+    Object.assign(liveRegion.style, {
+      position: 'absolute',
+      width: '1px',
+      height: '1px',
+      padding: '0',
+      margin: '-1px',
+      overflow: 'hidden',
+      clip: 'rect(0,0,0,0)',
+      whiteSpace: 'nowrap',
+      border: '0',
+    });
+    liveRegion.setAttribute('aria-live', 'polite');
+    liveRegion.setAttribute('aria-atomic', 'true');
+    container.appendChild(liveRegion);
+    instance.liveRegion = liveRegion;
 
     // Attach event listeners
     attachEventListeners(instance);

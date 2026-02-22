@@ -137,7 +137,12 @@ export function startAutoplay(instance) {
 
   // Update play/pause button
   if (instance.playPauseBtn) {
-    instance.playPauseBtn.setAttribute('aria-pressed', 'true');
+    instance.playPauseBtn.setAttribute('aria-label', 'Stop autoplay');
+  }
+
+  // Suppress live region announcements during autoplay
+  if (instance.liveRegion) {
+    instance.liveRegion.setAttribute('aria-live', 'off');
   }
 
   emit(instance, EVENTS.AUTOPLAY_START, { index: state.currentIndex });
@@ -171,7 +176,12 @@ export function pauseAutoplay(instance, reason = 'user') {
 
   // Update play/pause button
   if (instance.playPauseBtn) {
-    instance.playPauseBtn.setAttribute('aria-pressed', 'false');
+    instance.playPauseBtn.setAttribute('aria-label', 'Start autoplay');
+  }
+
+  // Re-enable live region announcements
+  if (instance.liveRegion) {
+    instance.liveRegion.setAttribute('aria-live', 'polite');
   }
 
   emit(instance, EVENTS.AUTOPLAY_STOP, {
@@ -199,7 +209,12 @@ export function resumeAutoplay(instance) {
 
   // Update play/pause button
   if (instance.playPauseBtn) {
-    instance.playPauseBtn.setAttribute('aria-pressed', 'true');
+    instance.playPauseBtn.setAttribute('aria-label', 'Stop autoplay');
+  }
+
+  // Suppress live region announcements during autoplay
+  if (instance.liveRegion) {
+    instance.liveRegion.setAttribute('aria-live', 'off');
   }
 
   emit(instance, EVENTS.AUTOPLAY_START, { index: state.currentIndex });
@@ -231,7 +246,12 @@ export function stopAutoplay(instance, reason = 'user') {
 
   // Update play/pause button
   if (instance.playPauseBtn) {
-    instance.playPauseBtn.setAttribute('aria-pressed', 'false');
+    instance.playPauseBtn.setAttribute('aria-label', 'Start autoplay');
+  }
+
+  // Re-enable live region announcements
+  if (instance.liveRegion) {
+    instance.liveRegion.setAttribute('aria-live', 'polite');
   }
 
   emit(instance, EVENTS.AUTOPLAY_STOP, {
