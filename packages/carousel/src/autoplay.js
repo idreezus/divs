@@ -129,6 +129,9 @@ export function setupAutoplay(instance, advanceFn) {
 export function startAutoplay(instance) {
   const { container, state } = instance;
 
+  // Nothing to cycle through — skip autoplay entirely
+  if (state.totalPositions <= 1) return;
+
   state.isAutoplaying = true;
   state.isPaused = false;
   state.autoplayStartTime = performance.now();

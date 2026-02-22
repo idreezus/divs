@@ -306,6 +306,11 @@ function init(instance) {
     container.classList.add(CLASSES.REDUCED_MOTION);
   }
   if (config.autoplay && !prefersReducedMotion()) {
+    if (instance.state.totalPositions <= 1) {
+      console.warn(
+        `Carousel ${id}: Autoplay has nothing to cycle through (only 1 item). Add more items or remove data-carousel-autoplay.`
+      );
+    }
     container.style.setProperty(CSS_VARS.AUTOPLAY_DURATION, config.autoplayDuration + 'ms');
     setupAutoplay(instance, handleNext);
     instance.autoplay.onStop = () => updateUI(instance);

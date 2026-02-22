@@ -1016,6 +1016,9 @@
   function startAutoplay(instance) {
     const { container, state } = instance;
 
+    // Nothing to cycle through — skip autoplay entirely
+    if (state.totalPositions <= 1) return;
+
     state.isAutoplaying = true;
     state.isPaused = false;
     state.autoplayStartTime = performance.now();
@@ -1470,6 +1473,11 @@
       container.classList.add(CLASSES.REDUCED_MOTION);
     }
     if (config.autoplay && !prefersReducedMotion()) {
+      if (instance.state.totalPositions <= 1) {
+        console.warn(
+          `Carousel ${id}: Autoplay has nothing to cycle through (only 1 item). Add more items or remove data-carousel-autoplay.`
+        );
+      }
       container.style.setProperty(CSS_VARS.AUTOPLAY_DURATION, config.autoplayDuration + 'ms');
       setupAutoplay(instance, handleNext);
       instance.autoplay.onStop = () => updateUI(instance);
