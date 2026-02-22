@@ -30,6 +30,7 @@ function runAutoplayTick(instance) {
     const atEnd = state.currentIndex >= state.maxReachableIndex && !instance.config.loop;
     if (atEnd) {
       stopAutoplay(instance, 'complete');
+      autoplay.onStop?.();
       return;
     }
     autoplay.advanceFn(instance);

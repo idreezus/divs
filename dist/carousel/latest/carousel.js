@@ -908,6 +908,7 @@
       const atEnd = state.currentIndex >= state.maxReachableIndex && !instance.config.loop;
       if (atEnd) {
         stopAutoplay(instance, 'complete');
+        autoplay.onStop?.();
         return;
       }
       autoplay.advanceFn(instance);
@@ -1392,6 +1393,7 @@
     if (config.autoplay && !prefersReducedMotion()) {
       container.style.setProperty(CSS_VARS.AUTOPLAY_DURATION, config.autoplayDuration + 'ms');
       setupAutoplay(instance, handleNext);
+      instance.autoplay.onStop = () => updateUI(instance);
       startAutoplay(instance);
     }
 
@@ -1499,7 +1501,10 @@
       }
       const { CSS_VARS } = CONFIG;
       if (prefersReducedMotion()) return this;
-      if (!this.autoplay) setupAutoplay(this, handleNext);
+      if (!this.autoplay) {
+        setupAutoplay(this, handleNext);
+        this.autoplay.onStop = () => updateUI(this);
+      }
       this.container.style.setProperty(CSS_VARS.AUTOPLAY_DURATION, this.config.autoplayDuration + 'ms');
       startAutoplay(this);
       return this;
