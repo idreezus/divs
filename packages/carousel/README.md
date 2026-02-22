@@ -75,30 +75,6 @@ Copy & paste this in an embed element or your Page Settings **Inside `<head>` ta
     display: none;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    [data-carousel='track'] {
-      scroll-behavior: auto !important;
-    }
-  }
-
-  /* Default alignment when no attributes set */
-  [data-carousel-container]:not([data-carousel-align])
-    [data-carousel='item'] {
-    scroll-snap-align: start;
-  }
-
-  [data-carousel-align='start'] [data-carousel='item'] {
-    scroll-snap-align: start;
-  }
-
-  [data-carousel-align='center'] [data-carousel='item'] {
-    scroll-snap-align: center;
-  }
-
-  [data-carousel-align='end'] [data-carousel='item'] {
-    scroll-snap-align: end;
-  }
-
 </style>
 ```
 

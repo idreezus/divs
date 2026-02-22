@@ -205,6 +205,14 @@ function cleanup(instance) {
     });
   }
 
+  // Remove inline styles from track and items
+  if (instance.track) {
+    instance.track.style.removeProperty('scroll-behavior');
+  }
+  if (instance.items) {
+    instance.items.forEach((item) => item.style.removeProperty('scroll-snap-align'));
+  }
+
   // Remove live region element
   instance.liveRegion?.remove();
 
@@ -231,6 +239,11 @@ function init(instance) {
     return false;
   }
 
+  // Force instant scrolling when user prefers reduced motion
+  if (prefersReducedMotion()) {
+    instance.track.style.scrollBehavior = 'auto';
+  }
+
   // Set semantic roles on track and items (only if not already set by author)
   if (!instance.track.hasAttribute('role')) {
     instance.track.setAttribute('role', 'list');
@@ -239,6 +252,7 @@ function init(instance) {
     if (!item.hasAttribute('role')) {
       item.setAttribute('role', 'listitem');
     }
+    item.style.scrollSnapAlign = config.align;
   });
 
   // Add accessible label to restart button
