@@ -46,6 +46,7 @@
     ACTIVE: 'carousel-item-active', // Applied to the current active item
     MARKER_ACTIVE: 'carousel-marker-active', // Applied to the current active marker
     PLAYING: 'carousel-playing',
+    AT_START: 'carousel-at-start',
     AT_END: 'carousel-at-end',
     REDUCED_MOTION: 'carousel-reduced-motion',
   };
@@ -525,10 +526,12 @@
       }
     }
 
-    // Toggle at-end class for autoplay-configured carousels
-    if (instance.autoplay && !config.loop) {
-      instance.container.classList.toggle(CLASSES.AT_END, atLastPosition && !state.isAutoplaying);
+    // Toggle position classes for non-loop carousels
+    if (!config.loop) {
+      instance.container.classList.toggle(CLASSES.AT_START, atFirstPosition);
+      instance.container.classList.toggle(CLASSES.AT_END, atLastPosition);
     } else {
+      instance.container.classList.remove(CLASSES.AT_START);
       instance.container.classList.remove(CLASSES.AT_END);
     }
 

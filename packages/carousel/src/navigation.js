@@ -68,10 +68,12 @@ export function updateButtonStates(instance) {
     }
   }
 
-  // Toggle at-end class for autoplay-configured carousels
-  if (instance.autoplay && !config.loop) {
-    instance.container.classList.toggle(CLASSES.AT_END, atLastPosition && !state.isAutoplaying);
+  // Toggle position classes for non-loop carousels
+  if (!config.loop) {
+    instance.container.classList.toggle(CLASSES.AT_START, atFirstPosition);
+    instance.container.classList.toggle(CLASSES.AT_END, atLastPosition);
   } else {
+    instance.container.classList.remove(CLASSES.AT_START);
     instance.container.classList.remove(CLASSES.AT_END);
   }
 

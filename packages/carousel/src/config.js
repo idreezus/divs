@@ -33,6 +33,7 @@ export const CLASSES = {
   VISIBLE: 'carousel-item-visible', // Applied to items currently in viewport (reserved for future use)
   MARKER_ACTIVE: 'carousel-marker-active', // Applied to the current active marker
   PLAYING: 'carousel-playing',
+  AT_START: 'carousel-at-start',
   AT_END: 'carousel-at-end',
   REDUCED_MOTION: 'carousel-reduced-motion',
 };

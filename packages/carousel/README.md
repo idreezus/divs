@@ -331,7 +331,7 @@ To enable keyboard navigation:
 
 ### Autoplay
 
-Automatically advance items on a timer. Combine with `data-carousel-loop` for continuous cycling. Without loop, autoplay advances through all items, completes the progress animation on the last item, then stops cleanly — the container receives the `.carousel-at-end` class.
+Automatically advance items on a timer. Combine with `data-carousel-loop` for continuous cycling. Without loop, autoplay advances through all items, completes the progress animation on the last item, then stops cleanly — the container will have both `.carousel-at-end` (position) and not `.carousel-playing` (stopped).
 
 ```html
 <div
@@ -402,7 +402,7 @@ Add a restart button to let users go back to the first item and start autoplay a
 </div>
 ```
 
-Clicking the restart button navigates to the first item and starts autoplay fresh. The `.carousel-at-end` class is removed when autoplay restarts.
+Clicking the restart button navigates to the first item and starts autoplay fresh. Since navigating to the first item updates position classes, `.carousel-at-end` is removed and `.carousel-at-start` is added.
 
 #### Pause Behavior
 
@@ -476,8 +476,42 @@ The library applies state classes that you can style however you want.
 | `.carousel-scrolling`         | The track while scrolling is active                                   |
 | `.carousel-marker-active`     | The active scroll marker                                              |
 | `.carousel-playing`           | The container while autoplay is actively running                      |
-| `.carousel-at-end`            | The container when autoplay has completed on a non-loop carousel      |
+| `.carousel-at-start`          | The container when at the first navigable position (never applied when looping) |
+| `.carousel-at-end`            | The container when at the last navigable position (never applied when looping)  |
 | `.carousel-reduced-motion`    | The container when `prefers-reduced-motion: reduce` is active         |
+
+Example: gradient edge fades that hide when there's no more content to scroll to.
+
+```css
+/* Fade edges to hint at scrollable content */
+[data-carousel-container]::before,
+[data-carousel-container]::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3rem;
+  pointer-events: none;
+  transition: opacity 200ms ease;
+  z-index: 1;
+}
+
+[data-carousel-container]::before {
+  left: 0;
+  background: linear-gradient(to right, white, transparent);
+}
+
+[data-carousel-container]::after {
+  right: 0;
+  background: linear-gradient(to left, white, transparent);
+}
+
+/* Hide the left fade at the start, right fade at the end */
+[data-carousel-container].carousel-at-start::before,
+[data-carousel-container].carousel-at-end::after {
+  opacity: 0;
+}
+```
 
 Here's an example from the prev/next buttons on all the variants on this page:
 
@@ -710,7 +744,7 @@ carousel.refresh();
 </Accordion>
 
 <Accordion title="Does autoplay work without loop?">
-  Yes. Autoplay advances through all items, completes the progress animation on the last item, then stops. The container receives the `.carousel-at-end` class so you can style a "finished" state. Add a `data-carousel-restart` button to let users go back to item 1 and restart autoplay. For continuous cycling, combine `data-carousel-loop` with `data-carousel-autoplay`.
+  Yes. Autoplay advances through all items, completes the progress animation on the last item, then stops. Since it's a non-loop carousel, the container will have `.carousel-at-end` (position-based) and won't have `.carousel-playing` (stopped). You can target this state with `.carousel-at-end:not(.carousel-playing)` to style a "finished" state. Add a `data-carousel-restart` button to let users go back to item 1 and restart autoplay. For continuous cycling, combine `data-carousel-loop` with `data-carousel-autoplay`.
 </Accordion>
 
 <Accordion title="Do navigation buttons stop autoplay?">
