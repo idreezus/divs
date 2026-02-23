@@ -1,19 +1,21 @@
 // Autoplay behavior for tabs: timer, progress updates, pause/resume
 
-import { classes, cssProps, events } from './config.js';
-import { emit } from './utils.js';
+import { classes, cssProps, events } from './config';
+import { emit } from './utils';
+import type { TabsInstance } from './types';
 
 // Shared RAF tick loop for autoplay progress
-function runAutoplayTick(instance) {
-  const { state, config, triggerMap, autoplay } = instance;
+function runAutoplayTick(instance: TabsInstance): void {
+  const { state, config, triggerMap } = instance;
+  const autoplay = instance.autoplay!;
 
   if (!state.isAutoplaying || state.isPaused) return;
 
-  const elapsed = performance.now() - state.autoplayStartTime;
+  const elapsed = performance.now() - state.autoplayStartTime!;
   const progress = Math.min(elapsed / config.autoplayDuration, 1);
 
   // Update --tabs-progress on active trigger(s)
-  const activeTriggers = triggerMap.get(state.activeValue);
+  const activeTriggers = triggerMap.get(state.activeValue!);
   if (activeTriggers) {
     activeTriggers.forEach((trigger) => {
       trigger.style.setProperty(cssProps.progress, progress.toString());
@@ -34,7 +36,7 @@ function runAutoplayTick(instance) {
 }
 
 // Sets up autoplay with IntersectionObserver and pause handlers
-export function setupAutoplay(instance, advanceFn) {
+export function setupAutoplay(instance: TabsInstance, advanceFn: (instance: TabsInstance) => void): void {
   const { container, config } = instance;
 
   instance.autoplay = {
@@ -47,10 +49,10 @@ export function setupAutoplay(instance, advanceFn) {
   };
 
   // IntersectionObserver to pause when out of viewport
-  instance.autoplay.observer = new IntersectionObserver(
+  instance.autoplay!.observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
-        instance.autoplay.isVisible = entry.isIntersecting;
+        instance.autoplay!.isVisible = entry.isIntersecting;
         if (!entry.isIntersecting) {
           pauseAutoplay(instance, 'visibility');
         } else if (canResume(instance)) {
@@ -60,53 +62,54 @@ export function setupAutoplay(instance, advanceFn) {
     },
     { threshold: 0.5 }
   );
-  instance.autoplay.observer.observe(container);
+  instance.autoplay!.observer.observe(container);
 
   // Hover pause handlers
   if (config.autoplayPauseHover) {
-    instance.autoplay.handleMouseEnter = () => {
-      instance.autoplay.pausedByHover = true;
+    instance.autoplay!.handleMouseEnter = () => {
+      instance.autoplay!.pausedByHover = true;
       pauseAutoplay(instance, 'hover');
     };
-    instance.autoplay.handleMouseLeave = () => {
-      instance.autoplay.pausedByHover = false;
+    instance.autoplay!.handleMouseLeave = () => {
+      instance.autoplay!.pausedByHover = false;
       if (canResume(instance)) {
         resumeAutoplay(instance);
       }
     };
     container.addEventListener(
       'mouseenter',
-      instance.autoplay.handleMouseEnter
+      instance.autoplay!.handleMouseEnter
     );
     container.addEventListener(
       'mouseleave',
-      instance.autoplay.handleMouseLeave
+      instance.autoplay!.handleMouseLeave
     );
   }
 
   // Focus pause handlers
   if (config.autoplayPauseFocus) {
-    instance.autoplay.handleFocusIn = () => {
-      instance.autoplay.pausedByFocus = true;
+    instance.autoplay!.handleFocusIn = () => {
+      instance.autoplay!.pausedByFocus = true;
       pauseAutoplay(instance, 'focus');
     };
-    instance.autoplay.handleFocusOut = (e) => {
+    instance.autoplay!.handleFocusOut = (e: FocusEvent) => {
       // Only resume if focus leaves the container entirely
-      if (!container.contains(e.relatedTarget)) {
-        instance.autoplay.pausedByFocus = false;
+      if (!container.contains(e.relatedTarget as Node | null)) {
+        instance.autoplay!.pausedByFocus = false;
         if (canResume(instance)) {
           resumeAutoplay(instance);
         }
       }
     };
-    container.addEventListener('focusin', instance.autoplay.handleFocusIn);
-    container.addEventListener('focusout', instance.autoplay.handleFocusOut);
+    container.addEventListener('focusin', instance.autoplay!.handleFocusIn);
+    container.addEventListener('focusout', instance.autoplay!.handleFocusOut);
   }
 }
 
 // Checks if autoplay can resume based on all pause conditions
-function canResume(instance) {
-  const { autoplay, state } = instance;
+function canResume(instance: TabsInstance): boolean {
+  const autoplay = instance.autoplay!;
+  const { state } = instance;
   return (
     state.isAutoplaying &&
     autoplay.isVisible &&
@@ -116,7 +119,7 @@ function canResume(instance) {
 }
 
 // Starts autoplay timer with RAF progress updates
-export function startAutoplay(instance) {
+export function startAutoplay(instance: TabsInstance): void {
   const { container, state } = instance;
 
   state.isAutoplaying = true;
@@ -132,13 +135,13 @@ export function startAutoplay(instance) {
 
   emit(instance, events.autoplayStart, { value: state.activeValue });
 
-  instance.autoplay.rafId = requestAnimationFrame(() =>
+  instance.autoplay!.rafId = requestAnimationFrame(() =>
     runAutoplayTick(instance)
   );
 }
 
 // Pauses autoplay temporarily (hover, focus, visibility)
-function pauseAutoplay(instance, reason = 'user') {
+function pauseAutoplay(instance: TabsInstance, reason = 'user'): void {
   const { state, container } = instance;
 
   if (!state.isAutoplaying || state.isPaused) return;
@@ -146,9 +149,9 @@ function pauseAutoplay(instance, reason = 'user') {
   state.isPaused = true;
 
   // Cancel RAF
-  if (instance.autoplay.rafId) {
-    cancelAnimationFrame(instance.autoplay.rafId);
-    instance.autoplay.rafId = null;
+  if (instance.autoplay!.rafId) {
+    cancelAnimationFrame(instance.autoplay!.rafId);
+    instance.autoplay!.rafId = null;
   }
 
   container.classList.remove(classes.playing);
@@ -159,7 +162,7 @@ function pauseAutoplay(instance, reason = 'user') {
   }
 
   // Store elapsed time and active tab so we can resume from this point
-  const elapsed = performance.now() - state.autoplayStartTime;
+  const elapsed = performance.now() - state.autoplayStartTime!;
   state.autoplayElapsed = elapsed;
   state.autoplayPausedOnValue = state.activeValue;
   const progress = Math.min(elapsed / instance.config.autoplayDuration, 1);
@@ -172,7 +175,7 @@ function pauseAutoplay(instance, reason = 'user') {
 }
 
 // Resumes autoplay from where it was paused
-function resumeAutoplay(instance) {
+function resumeAutoplay(instance: TabsInstance): void {
   const { state, container } = instance;
 
   if (!state.isAutoplaying || !state.isPaused) return;
@@ -194,19 +197,19 @@ function resumeAutoplay(instance) {
 
   emit(instance, events.autoplayStart, { value: state.activeValue });
 
-  instance.autoplay.rafId = requestAnimationFrame(() =>
+  instance.autoplay!.rafId = requestAnimationFrame(() =>
     runAutoplayTick(instance)
   );
 }
 
 // Stops autoplay completely
-export function stopAutoplay(instance, reason = 'user') {
+export function stopAutoplay(instance: TabsInstance, reason = 'user'): void {
   const { state, container } = instance;
 
   if (!state.isAutoplaying) return;
 
   // Compute progress before resetting
-  const elapsed = performance.now() - state.autoplayStartTime;
+  const elapsed = performance.now() - state.autoplayStartTime!;
   const progress = Math.min(elapsed / instance.config.autoplayDuration, 1);
 
   state.isAutoplaying = false;
@@ -237,7 +240,7 @@ export function stopAutoplay(instance, reason = 'user') {
 }
 
 // Cleans up autoplay listeners and observer
-export function cleanupAutoplay(instance) {
+export function cleanupAutoplay(instance: TabsInstance): void {
   const { container, config, autoplay } = instance;
 
   if (!autoplay) return;
@@ -255,13 +258,13 @@ export function cleanupAutoplay(instance) {
   // Remove hover listeners
   if (config.autoplayPauseHover && autoplay.handleMouseEnter) {
     container.removeEventListener('mouseenter', autoplay.handleMouseEnter);
-    container.removeEventListener('mouseleave', autoplay.handleMouseLeave);
+    container.removeEventListener('mouseleave', autoplay.handleMouseLeave!);
   }
 
   // Remove focus listeners
   if (config.autoplayPauseFocus && autoplay.handleFocusIn) {
     container.removeEventListener('focusin', autoplay.handleFocusIn);
-    container.removeEventListener('focusout', autoplay.handleFocusOut);
+    container.removeEventListener('focusout', autoplay.handleFocusOut!);
   }
 
   instance.autoplay = null;

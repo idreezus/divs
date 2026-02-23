@@ -7,13 +7,13 @@ import {
   cssProps,
   defaults,
   events,
-} from './config.js';
+} from './config';
 import {
   setupAutoplay,
   startAutoplay,
   stopAutoplay,
   cleanupAutoplay,
-} from './autoplay.js';
+} from './autoplay';
 import {
   emit,
   normalizeValue,
@@ -21,17 +21,27 @@ import {
   prefersReducedMotion,
   getUrlParam,
   setUrlParam,
-} from './utils.js';
+} from './utils';
+import type {
+  TabsInstance,
+  TabsConfig,
+  TabsState,
+  BoundHandlers,
+  AutoplayState,
+  ActivateOptions,
+  TabsHTMLElement,
+  TabElement,
+} from './types';
 
 // Finds the index of a trigger by its normalized value
-function findTriggerIndex(triggers, targetValue) {
+function findTriggerIndex(triggers: HTMLElement[], targetValue: string | null): number {
   return triggers.findIndex(
-    (trigger) => trigger._tabValue === targetValue
+    (trigger) => (trigger as TabElement)._tabValue === targetValue
   );
 }
 
 // Parses configuration from data attributes on the container
-function parseConfig(container) {
+function parseConfig(container: HTMLElement): TabsConfig {
   return {
     groupName: container.getAttribute(attributes.groupName) || null,
     defaultValue: container.getAttribute(attributes.default) || null,
@@ -43,7 +53,7 @@ function parseConfig(container) {
     keyboard: container.getAttribute(attributes.keyboard) !== 'false',
     autoplay: container.getAttribute(attributes.autoplay) === 'true',
     autoplayDuration:
-      parseInt(container.getAttribute(attributes.autoplayDuration), 10) ||
+      parseInt(container.getAttribute(attributes.autoplayDuration) || '', 10) ||
       defaults.autoplayDuration,
     autoplayPauseHover:
       container.getAttribute(attributes.autoplayPauseHover) === 'true',
@@ -53,14 +63,14 @@ function parseConfig(container) {
 }
 
 // Finds and validates all elements within the tabs container
-function findElements(instance) {
+function findElements(instance: TabsInstance): boolean {
   const { container, id } = instance;
 
   // Scope to this container to support nested tabs
-  const scopedQuery = (selector) => {
+  const scopedQuery = (selector: string): HTMLElement[] => {
     return [...container.querySelectorAll(selector)].filter((el) => {
       return el.closest(selectors.container) === container;
-    });
+    }) as HTMLElement[];
   };
 
   // Find triggers and panels
@@ -96,7 +106,7 @@ function findElements(instance) {
       return;
     }
 
-    trigger._tabValue = value;
+    (trigger as TabElement)._tabValue = value;
 
     // Warn if trigger is an <a> tag
     if (trigger.tagName.toLowerCase() === 'a') {
@@ -121,7 +131,7 @@ function findElements(instance) {
       return;
     }
 
-    panel._tabValue = value;
+    (panel as TabElement)._tabValue = value;
     panelMap.set(value, panel);
   });
 
@@ -166,14 +176,14 @@ function findElements(instance) {
 }
 
 // Sets up ARIA attributes for triggers and panels
-function setupAccessibility(instance) {
+function setupAccessibility(instance: TabsInstance): void {
   const { triggers, panels, id, config } = instance;
 
   // Set orientation on container
   instance.container.setAttribute('aria-orientation', config.orientation);
 
   triggers.forEach((trigger) => {
-    const value = trigger._tabValue;
+    const value = (trigger as TabElement)._tabValue;
     const triggerId = trigger.id || `${id}-trigger-${value}`;
     const panelId = `${id}-panel-${value}`;
 
@@ -183,7 +193,7 @@ function setupAccessibility(instance) {
   });
 
   panels.forEach((panel) => {
-    const value = panel._tabValue;
+    const value = (panel as TabElement)._tabValue;
     const panelId = panel.id || `${id}-panel-${value}`;
     const triggerId = `${id}-trigger-${value}`;
 
@@ -195,30 +205,30 @@ function setupAccessibility(instance) {
 }
 
 // Updates ARIA states when active tab changes
-function updateAriaStates(instance) {
+function updateAriaStates(instance: TabsInstance): void {
   const { triggers, panels, state } = instance;
 
   triggers.forEach((trigger) => {
-    const isActive = trigger._tabValue === state.activeValue;
+    const isActive = (trigger as TabElement)._tabValue === state.activeValue;
 
     trigger.setAttribute('aria-selected', isActive.toString());
     trigger.setAttribute('tabindex', isActive ? '0' : '-1');
   });
 
   panels.forEach((panel) => {
-    const isActive = panel._tabValue === state.activeValue;
+    const isActive = (panel as TabElement)._tabValue === state.activeValue;
 
     panel.setAttribute('aria-hidden', (!isActive).toString());
   });
 }
 
 // Sets up keyboard navigation for triggers
-function setupKeyboardNavigation(instance) {
+function setupKeyboardNavigation(instance: TabsInstance): void {
   const { container, config } = instance;
 
-  const handleKeydown = (e) => {
+  const handleKeydown = (e: KeyboardEvent): void => {
     // Only handle if a trigger within this container has focus
-    const focusedTrigger = document.activeElement;
+    const focusedTrigger = document.activeElement as HTMLElement;
     if (
       !instance.triggers.includes(focusedTrigger) ||
       focusedTrigger.closest(selectors.container) !== container
@@ -256,7 +266,7 @@ function setupKeyboardNavigation(instance) {
         // Only needed if activate-on-focus is false
         if (!config.activateOnFocus) {
           e.preventDefault();
-          activate(instance, focusedTrigger._tabValue);
+          activate(instance, (focusedTrigger as TabElement)._tabValue!);
         }
         break;
     }
@@ -267,9 +277,9 @@ function setupKeyboardNavigation(instance) {
 }
 
 // Moves focus by a given direction (-1 or +1)
-function moveFocus(instance, direction) {
+function moveFocus(instance: TabsInstance, direction: number): void {
   const { triggers, config, state } = instance;
-  const currentIndex = triggers.indexOf(document.activeElement);
+  const currentIndex = triggers.indexOf(document.activeElement as HTMLElement);
 
   if (currentIndex === -1) return;
 
@@ -290,12 +300,12 @@ function moveFocus(instance, direction) {
 
   // Activate if activate-on-focus is true
   if (config.activateOnFocus) {
-    activate(instance, triggers[nextIndex]._tabValue);
+    activate(instance, (triggers[nextIndex] as TabElement)._tabValue!);
   }
 }
 
 // Focuses trigger at a specific index
-function focusTriggerAt(instance, index) {
+function focusTriggerAt(instance: TabsInstance, index: number): void {
   const { triggers, config, state } = instance;
 
   triggers[index].focus();
@@ -305,12 +315,12 @@ function focusTriggerAt(instance, index) {
   }
 
   if (config.activateOnFocus) {
-    activate(instance, triggers[index]._tabValue);
+    activate(instance, (triggers[index] as TabElement)._tabValue!);
   }
 }
 
 // Determines the initial active value
-function determineInitialValue(instance) {
+function determineInitialValue(instance: TabsInstance): string {
   const { config, triggerMap, triggers } = instance;
 
   // Priority 1: URL parameter
@@ -336,11 +346,11 @@ function determineInitialValue(instance) {
   }
 
   // Priority 3: First trigger
-  return triggers[0]._tabValue;
+  return (triggers[0] as TabElement)._tabValue!;
 }
 
 // Activates a tab by its value
-function activate(instance, value, options = {}) {
+function activate(instance: TabsInstance, value: string, options: ActivateOptions = {}): boolean {
   const { silent = false, updateUrl = true } = options;
   const normalized = normalizeValue(value);
   const { state, config, triggerMap, triggers, panels, container } = instance;
@@ -362,12 +372,12 @@ function activate(instance, value, options = {}) {
     : -1;
 
   // Set active index CSS variable
-  container.style.setProperty(cssProps.activeIndex, newIndex);
+  container.style.setProperty(cssProps.activeIndex, String(newIndex));
 
   // Set direction CSS variable (1 = forward, -1 = backward, 0 = initial)
   const direction =
     previousIndex === -1 ? 0 : newIndex > previousIndex ? 1 : -1;
-  container.style.setProperty(cssProps.direction, direction);
+  container.style.setProperty(cssProps.direction, String(direction));
 
   // Update state
   state.activeValue = normalized;
@@ -378,14 +388,14 @@ function activate(instance, value, options = {}) {
   }
 
   // Clear any pending transition cleanup
-  clearTimeout(instance._transitionTimer);
+  if (instance._transitionTimer !== null) clearTimeout(instance._transitionTimer);
 
   // Add transitioning class
   container.classList.add(classes.transitioning);
 
   // Update trigger states
   triggers.forEach((trigger) => {
-    const triggerValue = trigger._tabValue;
+    const triggerValue = (trigger as TabElement)._tabValue;
     const isActive = triggerValue === normalized;
 
     trigger.classList.toggle(classes.active, isActive);
@@ -399,7 +409,7 @@ function activate(instance, value, options = {}) {
 
   // Update panel states
   panels.forEach((panel) => {
-    const panelValue = panel._tabValue;
+    const panelValue = (panel as TabElement)._tabValue;
     const isActive = panelValue === normalized;
     const wasActive = panelValue === previousValue;
 
@@ -444,7 +454,7 @@ function activate(instance, value, options = {}) {
 }
 
 // Updates prev/next button disabled states
-function updateButtonStates(instance) {
+function updateButtonStates(instance: TabsInstance): void {
   const { triggers, prevBtn, nextBtn, config, state } = instance;
 
   if (!prevBtn && !nextBtn) return;
@@ -469,19 +479,19 @@ function updateButtonStates(instance) {
 }
 
 // Attaches click handlers to triggers and navigation buttons
-function attachEventListeners(instance) {
+function attachEventListeners(instance: TabsInstance): void {
   const { triggers, prevBtn, nextBtn, playPauseBtn, state } = instance;
 
   // Trigger click handlers
   triggers.forEach((trigger) => {
-    const handler = (e) => {
+    const handler = (e: Event): void => {
       e.preventDefault();
       // Stop autoplay on user interaction
       if (state.isAutoplaying) {
         stopAutoplay(instance, 'user');
       }
 
-      activate(instance, trigger._tabValue);
+      activate(instance, (trigger as TabElement)._tabValue!);
     };
 
     trigger.addEventListener('click', handler);
@@ -515,11 +525,11 @@ function attachEventListeners(instance) {
 }
 
 // Cleans up all event listeners and references
-function cleanup(instance) {
+function cleanup(instance: TabsInstance): void {
   const { container, prevBtn, nextBtn, playPauseBtn, boundHandlers } = instance;
 
   // Cancel pending transition timer
-  clearTimeout(instance._transitionTimer);
+  if (instance._transitionTimer !== null) clearTimeout(instance._transitionTimer);
 
   // Remove trigger click handlers
   if (boundHandlers?.triggerClicks) {
@@ -549,7 +559,7 @@ function cleanup(instance) {
 }
 
 // Resets DOM to pre-initialization state
-function resetDOM(instance) {
+function resetDOM(instance: TabsInstance): void {
   const { id, container, triggers, panels, prevBtn, nextBtn, playPauseBtn } =
     instance;
 
@@ -581,7 +591,7 @@ function resetDOM(instance) {
     trigger.classList.remove(classes.active, classes.inactive);
     trigger.style.removeProperty(cssProps.tabIndex);
     trigger.style.removeProperty(cssProps.progress);
-    delete trigger._tabValue;
+    delete (trigger as TabElement)._tabValue;
   });
 
   // Panels: remove ARIA, classes, CSS vars, generated IDs
@@ -603,7 +613,7 @@ function resetDOM(instance) {
       classes.panelLeaving
     );
     panel.style.removeProperty(cssProps.tabIndex);
-    delete panel._tabValue;
+    delete (panel as TabElement)._tabValue;
   });
 
   // Navigation buttons: remove disabled class
@@ -620,11 +630,11 @@ function resetDOM(instance) {
   }
 
   // Remove instance reference from element
-  delete container._tabs;
+  delete (container as TabsHTMLElement)._tabs;
 }
 
 // Advances to next tab without stopping autoplay (used by autoplay tick)
-function advanceToNextTab(instance) {
+function advanceToNextTab(instance: TabsInstance): void {
   const { triggers, config, state } = instance;
   const currentIndex = findTriggerIndex(triggers, state.activeValue);
 
@@ -635,11 +645,11 @@ function advanceToNextTab(instance) {
     nextIndex = Math.min(nextIndex, triggers.length - 1);
   }
 
-  activate(instance, triggers[nextIndex]._tabValue);
+  activate(instance, (triggers[nextIndex] as TabElement)._tabValue!);
 }
 
 // Initializes a tabs instance
-function init(instance) {
+function init(instance: TabsInstance): boolean {
   const { container, config } = instance;
 
   // Find and validate elements
@@ -648,12 +658,12 @@ function init(instance) {
   }
 
   // Set CSS variables
-  container.style.setProperty(cssProps.tabCount, instance.triggers.length);
+  container.style.setProperty(cssProps.tabCount, String(instance.triggers.length));
   instance.triggers.forEach((trigger, index) => {
-    trigger.style.setProperty(cssProps.tabIndex, index);
+    trigger.style.setProperty(cssProps.tabIndex, String(index));
   });
   instance.panels.forEach((panel, index) => {
-    panel.style.setProperty(cssProps.tabIndex, index);
+    panel.style.setProperty(cssProps.tabIndex, String(index));
   });
 
   // Setup accessibility
@@ -694,7 +704,22 @@ function init(instance) {
 
 // Main Tabs class
 export class Tabs {
-  constructor(container) {
+  id!: string;
+  container!: HTMLElement;
+  config!: TabsConfig;
+  state!: TabsState;
+  boundHandlers!: BoundHandlers;
+  autoplay!: AutoplayState | null;
+  _transitionTimer!: ReturnType<typeof setTimeout> | null;
+  triggers!: HTMLElement[];
+  panels!: HTMLElement[];
+  triggerMap!: Map<string, HTMLElement[]>;
+  panelMap!: Map<string, HTMLElement>;
+  prevBtn!: HTMLElement | null;
+  nextBtn!: HTMLElement | null;
+  playPauseBtn!: HTMLElement | null;
+
+  constructor(container: HTMLElement) {
     this.id = generateUniqueId();
     this.container = container;
     this.config = parseConfig(container);
@@ -727,31 +752,31 @@ export class Tabs {
     this.nextBtn = null;
     this.playPauseBtn = null;
 
-    const initialized = init(this);
+    const initialized = init(this as unknown as TabsInstance);
     if (initialized) {
-      this.container._tabs = this;
+      (this.container as TabsHTMLElement)._tabs = this;
     } else {
       console.warn(`Tabs ${this.id}: Initialization failed.`);
     }
   }
 
   // Navigates to a tab by value
-  goTo(value) {
-    if (this.state.isAutoplaying) stopAutoplay(this, 'user');
-    activate(this, value);
+  goTo(value: string): this {
+    if (this.state.isAutoplaying) stopAutoplay(this as unknown as TabsInstance, 'user');
+    activate(this as unknown as TabsInstance, value);
     return this;
   }
 
   // Navigates to the next tab
-  next() {
-    if (this.state.isAutoplaying) stopAutoplay(this, 'user');
-    advanceToNextTab(this);
+  next(): this {
+    if (this.state.isAutoplaying) stopAutoplay(this as unknown as TabsInstance, 'user');
+    advanceToNextTab(this as unknown as TabsInstance);
     return this;
   }
 
   // Navigates to the previous tab
-  prev() {
-    if (this.state.isAutoplaying) stopAutoplay(this, 'user');
+  prev(): this {
+    if (this.state.isAutoplaying) stopAutoplay(this as unknown as TabsInstance, 'user');
 
     const { triggers, config, state } = this;
     const currentIndex = findTriggerIndex(triggers, state.activeValue);
@@ -763,16 +788,16 @@ export class Tabs {
       prevIndex = Math.max(prevIndex, 0);
     }
 
-    activate(this, triggers[prevIndex]._tabValue);
+    activate(this as unknown as TabsInstance, (triggers[prevIndex] as TabElement)._tabValue!);
     return this;
   }
 
   // Starts autoplay
-  play() {
+  play(): this {
     if (prefersReducedMotion()) return this;
 
     if (!this.autoplay) {
-      setupAutoplay(this, advanceToNextTab);
+      setupAutoplay(this as unknown as TabsInstance, advanceToNextTab);
     }
 
     // Set autoplay duration CSS variable
@@ -781,21 +806,21 @@ export class Tabs {
       this.config.autoplayDuration + 'ms'
     );
 
-    startAutoplay(this);
+    startAutoplay(this as unknown as TabsInstance);
     return this;
   }
 
   // Stops autoplay
-  stop() {
-    stopAutoplay(this, 'user');
+  stop(): this {
+    stopAutoplay(this as unknown as TabsInstance, 'user');
     return this;
   }
 
   // Re-initializes after DOM changes
-  refresh() {
+  refresh(): this {
     const currentValue = this.state.activeValue;
 
-    cleanup(this);
+    cleanup(this as unknown as TabsInstance);
 
     this.config = parseConfig(this.container);
     this.state = {
@@ -820,24 +845,24 @@ export class Tabs {
     this.triggerMap = new Map();
     this.panelMap = new Map();
 
-    init(this);
+    init(this as unknown as TabsInstance);
 
     // Try to restore previous active value
     if (currentValue && this.triggerMap.has(currentValue)) {
-      activate(this, currentValue, { silent: true });
+      activate(this as unknown as TabsInstance, currentValue, { silent: true });
     }
 
     return this;
   }
 
   // Destroys the instance and resets DOM to pre-init state
-  destroy() {
-    cleanup(this);
-    resetDOM(this);
+  destroy(): void {
+    cleanup(this as unknown as TabsInstance);
+    resetDOM(this as unknown as TabsInstance);
   }
 
   // Returns the current active value
-  getActiveValue() {
+  getActiveValue(): string | null {
     return this.state.activeValue;
   }
 }

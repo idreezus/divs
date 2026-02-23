@@ -1,4 +1,6 @@
 import terser from '@rollup/plugin-terser';
+import { swc } from 'rollup-plugin-swc3';
+import nodeResolve from '@rollup/plugin-node-resolve';
 import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -80,9 +82,13 @@ function createOutputs(basePath) {
 
 // Configuration for the main tabs library bundle
 const mainConfig = {
-  input: 'src/tabs.js',
+  input: 'src/tabs.ts',
   output: outputPaths.flatMap(createOutputs),
-  plugins: [cssPlugin()],
+  plugins: [
+    nodeResolve({ extensions: ['.ts', '.js'] }),
+    swc({ jsc: { target: 'es2022' }, sourceMaps: true }),
+    cssPlugin(),
+  ],
 };
 
 export default [mainConfig];

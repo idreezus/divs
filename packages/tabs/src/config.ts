@@ -1,10 +1,10 @@
 // Configuration constants for the tabs library
 
 // Builds a presence-based selector with opt-out support
-const sel = (attr) => `[${attr}]:not([${attr}="false"])`;
+const sel = (attr: string): string => `[${attr}]:not([${attr}="false"])`;
 
 // Raw attribute names for marker (presence-based) elements
-const selectorAttrs = {
+const selectorAttrs: Record<string, string> = {
   container: 'data-tabs-container',
   prevBtn: 'data-tabs-prev',
   nextBtn: 'data-tabs-next',
@@ -18,7 +18,7 @@ export const selectors = {
   ),
   trigger: '[data-tabs-trigger-id]',
   panel: '[data-tabs-panel-id]',
-};
+} as Record<string, string>;
 
 // Attribute names for configuration
 export const attributes = {

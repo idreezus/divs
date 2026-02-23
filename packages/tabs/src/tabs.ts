@@ -1,18 +1,19 @@
 // Entry point for tabs library - auto-initialization only
 
-import { Tabs } from './core.js';
-import { selectors } from './config.js';
+import { Tabs } from './core';
+import { selectors } from './config';
+import type { TabsHTMLElement } from './types';
 
 // Auto-initializes all tabs containers
-function autoInit() {
+function autoInit(): void {
   const containers = document.querySelectorAll(selectors.container);
 
   containers.forEach((container) => {
     // Skip if already initialized
-    if (container._tabs) return;
+    if ((container as TabsHTMLElement)._tabs) return;
 
     try {
-      new Tabs(container);
+      new Tabs(container as HTMLElement);
     } catch (error) {
       console.warn('Tabs auto-initialization failed:', error);
     }
