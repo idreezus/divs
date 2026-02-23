@@ -1,0 +1,50 @@
+/* Things you could change */
+:root {
+  --site-max-width: 80rem; /* your site's container width here */
+  --site-padding: 2.5rem; /* your site's padding here */
+}
+
+@media (max-width: 767px) {
+  :root {
+    --site-padding: 1.25rem; /* your site's padding on mobile (landscape) and below */
+  }
+}
+
+/*
+*	Things for nerds
+*/
+
+/* Variables used in the `.carousel_track` `.carousel_track.is-breakout` classes */
+:root {
+  --carousel-scroll-padding: calc(
+    (100% - min(var(--site-max-width), 100% - var(--site-padding) * 2)) / 2
+  );
+  --carousel-scroll-padding-breakout: calc(
+    (100vw - min(var(--site-max-width), 100vw - var(--site-padding) * 2)) / 2
+  );
+}
+
+@media (max-width: 767px) {
+  :root {
+    --carousel-scroll-padding: calc(
+      (100% - min(var(--site-max-width), 100% - var(--site-padding) * 2)) / 2
+    );
+    --carousel-scroll-padding-breakout: calc(
+      (100vw - min(var(--site-max-width), 100vw - var(--site-padding) * 2)) / 2
+    );
+  }
+}
+
+/* Hide scrollbar in WebKit browsers */
+[data-carousel-track]::-webkit-scrollbar,
+[data-carousel='track']::-webkit-scrollbar {
+  display: none;
+}
+
+/* Marker focus state for keyboard navigation */
+[data-carousel-marker]:focus-visible,
+[data-carousel='marker']:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+

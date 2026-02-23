@@ -86,7 +86,7 @@ const mainConfig = {
   output: outputPaths.flatMap(createOutputs),
   plugins: [
     nodeResolve({ extensions: ['.ts', '.js'] }),
-    swc({ jsc: { target: 'es2022' } }),
+    swc({ jsc: { target: 'es2022' }, sourceMaps: true }),
     cssPlugin(),
   ],
 };
