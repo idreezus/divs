@@ -1,4 +1,5 @@
 import js from '@eslint/js';
+import globals from 'globals';
 
 export default [
   {
@@ -18,21 +19,8 @@ export default [
       ecmaVersion: 2022,
       sourceType: 'module',
       globals: {
-        window: 'readonly',
-        document: 'readonly',
-        console: 'readonly',
-        setTimeout: 'readonly',
-        clearTimeout: 'readonly',
-        performance: 'readonly',
-        CustomEvent: 'readonly',
-        URL: 'readonly',
-        URLSearchParams: 'readonly',
-        matchMedia: 'readonly',
+        ...globals.browser,
         gsap: 'readonly',
-        ResizeObserver: 'readonly',
-        IntersectionObserver: 'readonly',
-        requestAnimationFrame: 'readonly',
-        cancelAnimationFrame: 'readonly',
         Draggable: 'readonly',
         InertiaPlugin: 'readonly',
       },
@@ -49,6 +37,9 @@ export default [
       'no-console': 'off',
       'no-undef': 'error',
       'no-var': 'error',
+      'no-shadow': 'warn',
+      'no-use-before-define': ['error', { functions: false }],
+      eqeqeq: ['error', 'always'],
       'prefer-const': [
         'error',
         {

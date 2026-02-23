@@ -17,6 +17,9 @@ importers:
       eslint:
         specifier: ^9.38.0
         version: 9.38.0
+      globals:
+        specifier: ^17.3.0
+        version: 17.3.0
       rollup:
         specifier: ^4.9.6
         version: 4.52.4
@@ -28,6 +31,10 @@ importers:
       gsap:
         specifier: ^3.0.0
         version: 3.13.0
+
+  packages/modal: {}
+
+  packages/scroll-fade: {}
 
   packages/tabs: {}
 
@@ -377,6 +384,10 @@ packages:
 
   globals@14.0.0:
     resolution: {integrity: sha512-oahGvuMGQlPw/ivIYBjVSrWAfWLBeku5tpPE2fOPLi+WHffIWbuh2tCjhyQhTBPMf5E9jDEH4FOmTYgYwbKwtQ==}
+    engines: {node: '>=18'}
+
+  globals@17.3.0:
+    resolution: {integrity: sha512-yMqGUQVVCkD4tqjOJf3TnrvaaHDMYp4VlUSObbkIiuCPe/ofdMBFIAcBbCSRFWOnos6qRiTVStDwqPLUclaxIw==}
     engines: {node: '>=18'}
 
   gsap@3.13.0:
@@ -857,6 +868,8 @@ snapshots:
       is-glob: 4.0.3
 
   globals@14.0.0: {}
+
+  globals@17.3.0: {}
 
   gsap@3.13.0: {}
 
