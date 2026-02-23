@@ -256,6 +256,8 @@ Optional navigation controls that work automatically when placed inside the cont
 | `data-carousel-next`    | Next button                              |
 | `data-carousel-restart` | Restart button (go to first item + play) |
 
+You can place multiple instances of any navigation button or counter element within the same container. All of them will receive click listeners, disabled states, and content updates. This is useful for placing prev/next buttons in multiple locations (e.g., above and below the track).
+
 ### Scroll Markers
 
 Add scroll markers anywhere inside the carousel container. The library finds all `[data-carousel-marker]` elements and clones the first one to match the number of navigable positions.

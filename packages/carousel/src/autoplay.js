@@ -138,10 +138,8 @@ export function startAutoplay(instance) {
 
   container.classList.add(CLASSES.PLAYING);
 
-  // Update play/pause button
-  if (instance.playPauseBtn) {
-    instance.playPauseBtn.setAttribute('aria-label', 'Stop autoplay');
-  }
+  // Update play/pause buttons
+  instance.playPauseBtns.forEach(btn => btn.setAttribute('aria-label', 'Stop autoplay'));
 
   // Suppress live region announcements during autoplay
   if (instance.liveRegion) {
@@ -177,10 +175,8 @@ export function pauseAutoplay(instance, reason = 'user') {
 
   container.classList.remove(CLASSES.PLAYING);
 
-  // Update play/pause button
-  if (instance.playPauseBtn) {
-    instance.playPauseBtn.setAttribute('aria-label', 'Start autoplay');
-  }
+  // Update play/pause buttons
+  instance.playPauseBtns.forEach(btn => btn.setAttribute('aria-label', 'Start autoplay'));
 
   // Re-enable live region announcements
   if (instance.liveRegion) {
@@ -210,10 +206,8 @@ export function resumeAutoplay(instance) {
 
   container.classList.add(CLASSES.PLAYING);
 
-  // Update play/pause button
-  if (instance.playPauseBtn) {
-    instance.playPauseBtn.setAttribute('aria-label', 'Stop autoplay');
-  }
+  // Update play/pause buttons
+  instance.playPauseBtns.forEach(btn => btn.setAttribute('aria-label', 'Stop autoplay'));
 
   // Suppress live region announcements during autoplay
   if (instance.liveRegion) {
@@ -247,10 +241,8 @@ export function stopAutoplay(instance, reason = 'user') {
 
   container.classList.remove(CLASSES.PLAYING);
 
-  // Update play/pause button
-  if (instance.playPauseBtn) {
-    instance.playPauseBtn.setAttribute('aria-label', 'Start autoplay');
-  }
+  // Update play/pause buttons
+  instance.playPauseBtns.forEach(btn => btn.setAttribute('aria-label', 'Start autoplay'));
 
   // Re-enable live region announcements
   if (instance.liveRegion) {

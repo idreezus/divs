@@ -52,19 +52,23 @@ function findElements(instance) {
   }
 
   // Find optional navigation buttons (legacy backwards compat)
-  const prevBtn = container.querySelector(`${SELECTORS.PREV_BTN}, [data-carousel="prev"]`);
-  const nextBtn = container.querySelector(`${SELECTORS.NEXT_BTN}, [data-carousel="next"]`);
+  const prevBtns = [...container.querySelectorAll(`${SELECTORS.PREV_BTN}, [data-carousel="prev"]`)];
+  const nextBtns = [...container.querySelectorAll(`${SELECTORS.NEXT_BTN}, [data-carousel="next"]`)];
 
   // Find optional markers (can be anywhere in container)
   const markers = [...container.querySelectorAll(SELECTORS.MARKER)];
 
+  // Find optional counter elements
+  const counterCurrentEls = [...container.querySelectorAll(SELECTORS.COUNTER_CURRENT)];
+  const counterTotalEls = [...container.querySelectorAll(SELECTORS.COUNTER_TOTAL)];
+
   // Find autoplay-specific elements only when autoplay is configured
-  let playPauseBtn = null;
-  let restartBtn = null;
+  let playPauseBtns = [];
+  let restartBtns = [];
 
   if (instance.config.autoplay) {
-    playPauseBtn = container.querySelector(SELECTORS.PLAY_PAUSE_BTN);
-    restartBtn = container.querySelector(SELECTORS.RESTART_BTN);
+    playPauseBtns = [...container.querySelectorAll(SELECTORS.PLAY_PAUSE_BTN)];
+    restartBtns = [...container.querySelectorAll(SELECTORS.RESTART_BTN)];
   } else {
     if (container.querySelector(SELECTORS.PLAY_PAUSE_BTN)) {
       console.warn(
@@ -85,11 +89,13 @@ function findElements(instance) {
   Object.assign(instance, {
     track,
     items,
-    prevBtn,
-    nextBtn,
+    prevBtns,
+    nextBtns,
     markers,
-    playPauseBtn,
-    restartBtn,
+    playPauseBtns,
+    restartBtns,
+    counterCurrentEls,
+    counterTotalEls,
   });
 
   return true;
@@ -97,7 +103,7 @@ function findElements(instance) {
 
 // Attaches event listeners for user interactions
 function attachEventListeners(instance) {
-  const { track, prevBtn, nextBtn } = instance;
+  const { track } = instance;
 
   // Create bound handlers and store them for later removal
   instance.boundHandlers = {
@@ -114,16 +120,12 @@ function attachEventListeners(instance) {
   });
 
   // Attach button listeners if buttons exist
-  if (prevBtn) {
-    prevBtn.addEventListener('click', instance.boundHandlers.prev);
-  }
-  if (nextBtn) {
-    nextBtn.addEventListener('click', instance.boundHandlers.next);
-  }
+  instance.prevBtns.forEach(btn => btn.addEventListener('click', instance.boundHandlers.prev));
+  instance.nextBtns.forEach(btn => btn.addEventListener('click', instance.boundHandlers.next));
 
   // Autoplay-specific listeners (only when autoplay is configured)
   if (instance.config.autoplay) {
-    if (instance.playPauseBtn) {
+    if (instance.playPauseBtns.length > 0) {
       instance.boundHandlers.playPause = () => {
         if (instance.state.isAutoplaying) {
           stopAutoplay(instance, 'user');
@@ -131,44 +133,40 @@ function attachEventListeners(instance) {
           instance.play();
         }
       };
-      instance.playPauseBtn.addEventListener('click', instance.boundHandlers.playPause);
+      instance.playPauseBtns.forEach(btn => btn.addEventListener('click', instance.boundHandlers.playPause));
     }
 
-    if (instance.restartBtn) {
+    if (instance.restartBtns.length > 0) {
       instance.boundHandlers.restart = () => {
         instance.goTo(0);
         instance.play();
       };
-      instance.restartBtn.addEventListener('click', instance.boundHandlers.restart);
+      instance.restartBtns.forEach(btn => btn.addEventListener('click', instance.boundHandlers.restart));
     }
   }
 }
 
 // Cleans up all event listeners, observers, and references
 function cleanup(instance) {
-  const { prevBtn, nextBtn, track, container } = instance;
+  const { track, container } = instance;
 
   // Clean up autoplay before removing other listeners
   cleanupAutoplay(instance);
 
-  if (instance.playPauseBtn && instance.boundHandlers?.playPause) {
-    instance.playPauseBtn.removeEventListener('click', instance.boundHandlers.playPause);
+  if (instance.boundHandlers?.playPause) {
+    instance.playPauseBtns?.forEach(btn => btn.removeEventListener('click', instance.boundHandlers.playPause));
   }
 
-  if (instance.restartBtn && instance.boundHandlers?.restart) {
-    instance.restartBtn.removeEventListener('click', instance.boundHandlers.restart);
+  if (instance.boundHandlers?.restart) {
+    instance.restartBtns?.forEach(btn => btn.removeEventListener('click', instance.boundHandlers.restart));
   }
 
   // Remove event listeners using stored bound handlers
   if (instance.boundHandlers) {
     track.removeEventListener('scroll', instance.boundHandlers.scroll);
 
-    if (prevBtn) {
-      prevBtn.removeEventListener('click', instance.boundHandlers.prev);
-    }
-    if (nextBtn) {
-      nextBtn.removeEventListener('click', instance.boundHandlers.next);
-    }
+    instance.prevBtns?.forEach(btn => btn.removeEventListener('click', instance.boundHandlers.prev));
+    instance.nextBtns?.forEach(btn => btn.removeEventListener('click', instance.boundHandlers.next));
 
     // Remove keyboard listener if it exists
     if (instance.boundHandlers.keyboard) {
@@ -238,10 +236,10 @@ function init(instance) {
     item.style.scrollSnapAlign = config.align;
   });
 
-  // Add accessible label to restart button
-  if (instance.restartBtn && !instance.restartBtn.hasAttribute('aria-label')) {
-    instance.restartBtn.setAttribute('aria-label', 'Restart autoplay');
-  }
+  // Add accessible label to restart buttons
+  instance.restartBtns.forEach(btn => {
+    if (!btn.hasAttribute('aria-label')) btn.setAttribute('aria-label', 'Restart autoplay');
+  });
 
   // Calculate initial dimensions
   calculateDimensions(instance);

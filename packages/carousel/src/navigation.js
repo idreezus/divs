@@ -43,7 +43,7 @@ export function detectActiveItem(instance) {
 
 // Updates the disabled state of navigation buttons based on current index
 export function updateButtonStates(instance) {
-  const { track, prevBtn, nextBtn, state, config } = instance;
+  const { track, prevBtns, nextBtns, state, config } = instance;
   const { CLASSES, TOLERANCE } = CONFIG;
 
   // Edge detection still uses physical scroll position (for reach-start/reach-end events)
@@ -57,17 +57,11 @@ export function updateButtonStates(instance) {
   const atLastPosition = state.currentIndex >= state.maxReachableIndex;
 
   if (config.loop) {
-    if (prevBtn) { prevBtn.classList.remove(CLASSES.DISABLED); prevBtn.disabled = false; }
-    if (nextBtn) { nextBtn.classList.remove(CLASSES.DISABLED); nextBtn.disabled = false; }
+    prevBtns.forEach(btn => { btn.classList.remove(CLASSES.DISABLED); btn.disabled = false; });
+    nextBtns.forEach(btn => { btn.classList.remove(CLASSES.DISABLED); btn.disabled = false; });
   } else {
-    if (prevBtn) {
-      prevBtn.classList.toggle(CLASSES.DISABLED, atFirstPosition);
-      prevBtn.disabled = atFirstPosition;
-    }
-    if (nextBtn) {
-      nextBtn.classList.toggle(CLASSES.DISABLED, atLastPosition);
-      nextBtn.disabled = atLastPosition;
-    }
+    prevBtns.forEach(btn => { btn.classList.toggle(CLASSES.DISABLED, atFirstPosition); btn.disabled = atFirstPosition; });
+    nextBtns.forEach(btn => { btn.classList.toggle(CLASSES.DISABLED, atLastPosition); btn.disabled = atLastPosition; });
   }
 
   // Toggle position classes for non-loop carousels
@@ -384,8 +378,8 @@ function setupMarkerKeyboard(instance) {
 
 // Updates markers to reflect current active item
 export function updateMarkers(instance) {
-  const { markers, container, state } = instance;
-  const { CLASSES, SELECTORS } = CONFIG;
+  const { markers, state } = instance;
+  const { CLASSES } = CONFIG;
   const { currentIndex } = state;
 
   if (markers && markers.length > 0) {
@@ -403,15 +397,8 @@ export function updateMarkers(instance) {
     }
   }
 
-  const currentEl = container.querySelector(SELECTORS.COUNTER_CURRENT);
-  if (currentEl) {
-    currentEl.textContent = currentIndex + 1;
-  }
-
-  const totalEl = container.querySelector(SELECTORS.COUNTER_TOTAL);
-  if (totalEl) {
-    totalEl.textContent = state.totalPositions;
-  }
+  instance.counterCurrentEls.forEach(el => { el.textContent = currentIndex + 1; });
+  instance.counterTotalEls.forEach(el => { el.textContent = state.totalPositions; });
 }
 
 // Batches DOM updates using requestAnimationFrame for better performance
