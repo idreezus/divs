@@ -1,15 +1,16 @@
 // Autoplay behavior for carousel: timer, progress updates, pause/resume
 
-import { CLASSES, CSS_VARS, EVENTS } from './config.js';
-import { emit } from './utils.js';
+import { CLASSES, CSS_VARS, EVENTS } from './config';
+import { emit } from './utils';
+import type { CarouselInstance } from './types';
 
 // RAF tick loop for autoplay progress
-function runAutoplayTick(instance) {
+function runAutoplayTick(instance: CarouselInstance): void {
   const { state, config, autoplay } = instance;
 
   if (!state.isAutoplaying || state.isPaused) return;
 
-  const elapsed = performance.now() - state.autoplayStartTime;
+  const elapsed = performance.now() - state.autoplayStartTime!;
   const progress = Math.min(elapsed / config.autoplayDuration, 1);
 
   // Update progress on container
@@ -30,29 +31,29 @@ function runAutoplayTick(instance) {
     const atEnd = state.currentIndex >= state.maxReachableIndex && !instance.config.loop;
     if (atEnd) {
       stopAutoplay(instance, 'complete');
-      autoplay.onStop?.();
+      autoplay!.onStop?.();
       return;
     }
-    autoplay.advanceFn(instance);
+    autoplay!.advanceFn(instance);
     state.autoplayStartTime = performance.now();
   }
 
-  autoplay.rafId = requestAnimationFrame(() => runAutoplayTick(instance));
+  autoplay!.rafId = requestAnimationFrame(() => runAutoplayTick(instance));
 }
 
 // Checks if autoplay can resume from a temporary pause
-function canResume(instance) {
+function canResume(instance: CarouselInstance): boolean {
   const { autoplay, state } = instance;
   return (
-    state.isAutoplaying &&
-    autoplay.isVisible &&
+    !!state.isAutoplaying &&
+    !!autoplay?.isVisible &&
     !autoplay.pausedByHover &&
     !autoplay.pausedByFocus
   );
 }
 
 // Sets up autoplay with IntersectionObserver and pause handlers
-export function setupAutoplay(instance, advanceFn) {
+export function setupAutoplay(instance: CarouselInstance, advanceFn: (instance: CarouselInstance) => void): void {
   const { container, config } = instance;
 
   instance.autoplay = {
@@ -77,7 +78,7 @@ export function setupAutoplay(instance, advanceFn) {
   instance.autoplay.observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
-        instance.autoplay.isVisible = entry.isIntersecting;
+        instance.autoplay!.isVisible = entry.isIntersecting;
         if (!entry.isIntersecting) {
           pauseAutoplay(instance, 'visibility');
         } else if (canResume(instance)) {
@@ -92,41 +93,41 @@ export function setupAutoplay(instance, advanceFn) {
   // Hover pause handlers (target the track, not container)
   if (config.autoplayPauseHover) {
     instance.autoplay.handleMouseEnter = () => {
-      instance.autoplay.pausedByHover = true;
+      instance.autoplay!.pausedByHover = true;
       pauseAutoplay(instance, 'hover');
     };
     instance.autoplay.handleMouseLeave = () => {
-      instance.autoplay.pausedByHover = false;
+      instance.autoplay!.pausedByHover = false;
       if (canResume(instance)) {
         resumeAutoplay(instance);
       }
     };
-    instance.track.addEventListener('mouseenter', instance.autoplay.handleMouseEnter);
-    instance.track.addEventListener('mouseleave', instance.autoplay.handleMouseLeave);
+    instance.track!.addEventListener('mouseenter', instance.autoplay.handleMouseEnter);
+    instance.track!.addEventListener('mouseleave', instance.autoplay.handleMouseLeave);
   }
 
   // Focus pause handlers (target the track, not container)
   if (config.autoplayPauseFocus) {
     instance.autoplay.handleFocusIn = () => {
-      instance.autoplay.pausedByFocus = true;
+      instance.autoplay!.pausedByFocus = true;
       pauseAutoplay(instance, 'focus');
     };
-    instance.autoplay.handleFocusOut = (e) => {
+    instance.autoplay.handleFocusOut = (e: FocusEvent) => {
       // Only resume if focus leaves the track entirely
-      if (!instance.track.contains(e.relatedTarget)) {
-        instance.autoplay.pausedByFocus = false;
+      if (!instance.track!.contains(e.relatedTarget as Node | null)) {
+        instance.autoplay!.pausedByFocus = false;
         if (canResume(instance)) {
           resumeAutoplay(instance);
         }
       }
     };
-    instance.track.addEventListener('focusin', instance.autoplay.handleFocusIn);
-    instance.track.addEventListener('focusout', instance.autoplay.handleFocusOut);
+    instance.track!.addEventListener('focusin', instance.autoplay.handleFocusIn);
+    instance.track!.addEventListener('focusout', instance.autoplay.handleFocusOut);
   }
 }
 
 // Starts autoplay timer with RAF progress updates
-export function startAutoplay(instance) {
+export function startAutoplay(instance: CarouselInstance): void {
   const { container, state } = instance;
 
   // Nothing to cycle through — skip autoplay entirely
@@ -148,13 +149,13 @@ export function startAutoplay(instance) {
 
   emit(instance, EVENTS.AUTOPLAY_START, { index: state.currentIndex });
 
-  instance.autoplay.rafId = requestAnimationFrame(() =>
+  instance.autoplay!.rafId = requestAnimationFrame(() =>
     runAutoplayTick(instance)
   );
 }
 
 // Temporarily pauses autoplay (for hover, focus, visibility)
-function pauseAutoplay(instance, reason = 'user') {
+function pauseAutoplay(instance: CarouselInstance, reason = 'user'): void {
   const { state, container } = instance;
 
   if (!state.isAutoplaying || state.isPaused) return;
@@ -162,15 +163,15 @@ function pauseAutoplay(instance, reason = 'user') {
   state.isPaused = true;
 
   // Store elapsed time and active index so we can resume from this point
-  const elapsed = performance.now() - state.autoplayStartTime;
+  const elapsed = performance.now() - state.autoplayStartTime!;
   const progress = Math.min(elapsed / instance.config.autoplayDuration, 1);
   state.autoplayElapsed = elapsed;
   state.autoplayPausedOnIndex = state.currentIndex;
 
   // Cancel RAF
-  if (instance.autoplay.rafId) {
-    cancelAnimationFrame(instance.autoplay.rafId);
-    instance.autoplay.rafId = null;
+  if (instance.autoplay!.rafId) {
+    cancelAnimationFrame(instance.autoplay!.rafId);
+    instance.autoplay!.rafId = null;
   }
 
   container.classList.remove(CLASSES.PLAYING);
@@ -191,7 +192,7 @@ function pauseAutoplay(instance, reason = 'user') {
 }
 
 // Resumes autoplay from where it was paused
-function resumeAutoplay(instance) {
+function resumeAutoplay(instance: CarouselInstance): void {
   const { state, container } = instance;
 
   if (!state.isAutoplaying || !state.isPaused) return;
@@ -216,19 +217,19 @@ function resumeAutoplay(instance) {
 
   emit(instance, EVENTS.AUTOPLAY_START, { index: state.currentIndex });
 
-  instance.autoplay.rafId = requestAnimationFrame(() =>
+  instance.autoplay!.rafId = requestAnimationFrame(() =>
     runAutoplayTick(instance)
   );
 }
 
 // Stops autoplay completely
-export function stopAutoplay(instance, reason = 'user') {
+export function stopAutoplay(instance: CarouselInstance, reason = 'user'): void {
   const { state, container } = instance;
 
   if (!state.isAutoplaying) return;
 
   // Compute progress before resetting
-  const elapsed = performance.now() - state.autoplayStartTime;
+  const elapsed = performance.now() - state.autoplayStartTime!;
   const progress = Math.min(elapsed / instance.config.autoplayDuration, 1);
 
   state.isAutoplaying = false;
@@ -267,7 +268,7 @@ export function stopAutoplay(instance, reason = 'user') {
 }
 
 // Cleans up autoplay listeners and observer
-export function cleanupAutoplay(instance) {
+export function cleanupAutoplay(instance: CarouselInstance): void {
   const { config, autoplay } = instance;
 
   if (!autoplay) return;
@@ -284,14 +285,14 @@ export function cleanupAutoplay(instance) {
 
   // Remove hover listeners from track
   if (config.autoplayPauseHover && autoplay.handleMouseEnter) {
-    instance.track.removeEventListener('mouseenter', autoplay.handleMouseEnter);
-    instance.track.removeEventListener('mouseleave', autoplay.handleMouseLeave);
+    instance.track!.removeEventListener('mouseenter', autoplay.handleMouseEnter);
+    instance.track!.removeEventListener('mouseleave', autoplay.handleMouseLeave!);
   }
 
   // Remove focus listeners from track
   if (config.autoplayPauseFocus && autoplay.handleFocusIn) {
-    instance.track.removeEventListener('focusin', autoplay.handleFocusIn);
-    instance.track.removeEventListener('focusout', autoplay.handleFocusOut);
+    instance.track!.removeEventListener('focusin', autoplay.handleFocusIn);
+    instance.track!.removeEventListener('focusout', autoplay.handleFocusOut!);
   }
 
   instance.autoplay = null;

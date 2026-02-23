@@ -1,9 +1,10 @@
 // Keyboard navigation support
 
-import { CLASSES } from './config.js';
+import { CLASSES } from './config';
+import type { CarouselInstance } from './types';
 
 // Applies the active class to the current item and removes it from others
-export function updateActiveClasses(instance) {
+export function updateActiveClasses(instance: CarouselInstance): void {
   const { items, state } = instance;
   const { currentIndex } = state;
 
@@ -13,7 +14,7 @@ export function updateActiveClasses(instance) {
 }
 
 // Sets up keyboard event listeners for navigation
-export function setupKeyboardNavigation(instance) {
+export function setupKeyboardNavigation(instance: CarouselInstance): void {
   const { container } = instance;
 
   // Make container focusable if not already
@@ -22,9 +23,9 @@ export function setupKeyboardNavigation(instance) {
   }
 
   // Create and store bound handler
-  const handleKeydown = (event) => {
+  const handleKeydown = (event: KeyboardEvent) => {
     // Only handle keys if focus is on container or its children
-    if (!container.contains(event.target)) {
+    if (!container.contains(event.target as Node)) {
       return;
     }
 
@@ -53,7 +54,7 @@ export function setupKeyboardNavigation(instance) {
   };
 
   // Store handler for cleanup
-  instance.boundHandlers.keyboard = handleKeydown;
+  instance.boundHandlers!.keyboard = handleKeydown;
 
   // Attach listener to container
   container.addEventListener('keydown', handleKeydown);

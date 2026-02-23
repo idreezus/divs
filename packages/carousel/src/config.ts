@@ -1,5 +1,5 @@
 // Builds a presence-based selector with opt-out support
-const sel = (attr) => `[${attr}]:not([${attr}="false"])`;
+const sel = (attr: string): string => `[${attr}]:not([${attr}="false"])`;
 
 export const SELECTOR_ATTRS = {
   // Structural
@@ -19,11 +19,11 @@ export const SELECTOR_ATTRS = {
   AUTOPLAY:              'data-carousel-autoplay',
   AUTOPLAY_PAUSE_HOVER:  'data-carousel-autoplay-pause-hover',
   AUTOPLAY_PAUSE_FOCUS:  'data-carousel-autoplay-pause-focus',
-};
+} as const;
 
 export const SELECTORS = Object.fromEntries(
   Object.entries(SELECTOR_ATTRS).map(([k, v]) => [k, sel(v)])
-);
+) as { [K in keyof typeof SELECTOR_ATTRS]: string };
 
 // CSS classes applied to elements
 export const CLASSES = {
@@ -35,25 +35,25 @@ export const CLASSES = {
   AT_START: 'carousel-at-start',
   AT_END: 'carousel-at-end',
   REDUCED_MOTION: 'carousel-reduced-motion',
-};
+} as const;
 
 export const DEFAULTS = {
   ALIGN: 'start',
   SCROLL_BY: 'item',
   AUTOPLAY_DURATION: 5000,
-};
+} as const;
 
 // Timing constants in milliseconds
 export const TIMING = {
   DEBOUNCE_RESIZE: 150,
   DEBOUNCE_SCROLL: 100,
-};
+} as const;
 
 // Pixel tolerance for fractional pixel calculations
 export const TOLERANCE = {
   EDGE_DETECTION: 1,
   ACTIVE_DETECTION: 2,
-};
+} as const;
 
 // CSS custom property names
 export const CSS_VARS = {
@@ -62,7 +62,7 @@ export const CSS_VARS = {
   PROGRESS: '--carousel-progress',
   AUTOPLAY_PROGRESS: '--carousel-autoplay-progress',
   AUTOPLAY_DURATION: '--carousel-autoplay-duration',
-};
+} as const;
 
 // Event names for CustomEvents
 export const EVENTS = {
@@ -72,11 +72,11 @@ export const EVENTS = {
   REACH_END: 'reach-end',
   AUTOPLAY_START: 'autoplay-start',
   AUTOPLAY_STOP: 'autoplay-stop',
-};
+} as const;
 
 // Data attribute names for value-based configuration
 export const ATTRIBUTES = {
   ALIGN: 'data-carousel-align',
   SCROLL_BY: 'data-carousel-scroll-by',
   AUTOPLAY_DURATION: 'data-carousel-autoplay-duration',
-};
+} as const;

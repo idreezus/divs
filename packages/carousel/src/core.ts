@@ -1,6 +1,6 @@
 // Main Carousel class and core functionality
 
-import { CLASSES, CSS_VARS, EVENTS, SELECTORS } from './config.js';
+import { CLASSES, CSS_VARS, EVENTS, SELECTORS } from './config';
 import {
   generateUniqueId,
   parseConfig,
@@ -9,7 +9,7 @@ import {
   calculateDimensions,
   updateCSSProperties,
   warnUnreachableItems,
-} from './utils.js';
+} from './utils';
 import {
   detectActiveItem,
   handleScroll,
@@ -19,21 +19,31 @@ import {
   setupResizeObserver,
   setupMarkers,
   updateUI,
-} from './navigation.js';
-import { setupKeyboardNavigation } from './keyboard.js';
+} from './navigation';
+import { setupKeyboardNavigation } from './keyboard';
 import {
   setupAutoplay,
   startAutoplay,
   stopAutoplay,
   cleanupAutoplay,
-} from './autoplay.js';
+} from './autoplay';
+import type {
+  CarouselInstance,
+  CarouselConfig,
+  CarouselState,
+  BoundHandlers,
+  BoundMarkerHandler,
+  AutoplayState,
+  DebouncedFunction,
+  CarouselHTMLElement,
+} from './types';
 
 // Finds and validates all required and optional elements within the carousel container
-function findElements(instance) {
+function findElements(instance: CarouselInstance): boolean {
   const { container, id } = instance;
 
   // Find required track element (legacy backwards compat)
-  const track = container.querySelector(`${SELECTORS.TRACK}, [data-carousel="track"]`);
+  const track = container.querySelector<HTMLElement>(`${SELECTORS.TRACK}, [data-carousel="track"]`);
   if (!track) {
     console.warn(
       `Carousel ${id}: Track element not found. Expected element with data-carousel-track.`
@@ -42,7 +52,7 @@ function findElements(instance) {
   }
 
   // Find required item elements (legacy backwards compat)
-  const items = [...container.querySelectorAll(`${SELECTORS.ITEM}, [data-carousel="item"]`)];
+  const items = [...container.querySelectorAll<HTMLElement>(`${SELECTORS.ITEM}, [data-carousel="item"]`)];
   if (items.length === 0) {
     console.warn(
       `Carousel ${id}: No items found. Expected at least one element with data-carousel-item.`
@@ -51,23 +61,23 @@ function findElements(instance) {
   }
 
   // Find optional navigation buttons (legacy backwards compat)
-  const prevBtns = [...container.querySelectorAll(`${SELECTORS.PREV_BTN}, [data-carousel="prev"]`)];
-  const nextBtns = [...container.querySelectorAll(`${SELECTORS.NEXT_BTN}, [data-carousel="next"]`)];
+  const prevBtns = [...container.querySelectorAll<HTMLElement>(`${SELECTORS.PREV_BTN}, [data-carousel="prev"]`)];
+  const nextBtns = [...container.querySelectorAll<HTMLElement>(`${SELECTORS.NEXT_BTN}, [data-carousel="next"]`)];
 
   // Find optional markers (can be anywhere in container)
-  const markers = [...container.querySelectorAll(SELECTORS.MARKER)];
+  const markers = [...container.querySelectorAll<HTMLElement>(SELECTORS.MARKER)];
 
   // Find optional counter elements
-  const counterCurrentEls = [...container.querySelectorAll(SELECTORS.COUNTER_CURRENT)];
-  const counterTotalEls = [...container.querySelectorAll(SELECTORS.COUNTER_TOTAL)];
+  const counterCurrentEls = [...container.querySelectorAll<HTMLElement>(SELECTORS.COUNTER_CURRENT)];
+  const counterTotalEls = [...container.querySelectorAll<HTMLElement>(SELECTORS.COUNTER_TOTAL)];
 
   // Find autoplay-specific elements only when autoplay is configured
-  let playPauseBtns = [];
-  let restartBtns = [];
+  let playPauseBtns: HTMLElement[] = [];
+  let restartBtns: HTMLElement[] = [];
 
   if (instance.config.autoplay) {
-    playPauseBtns = [...container.querySelectorAll(SELECTORS.PLAY_PAUSE_BTN)];
-    restartBtns = [...container.querySelectorAll(SELECTORS.RESTART_BTN)];
+    playPauseBtns = [...container.querySelectorAll<HTMLElement>(SELECTORS.PLAY_PAUSE_BTN)];
+    restartBtns = [...container.querySelectorAll<HTMLElement>(SELECTORS.RESTART_BTN)];
   } else {
     if (container.querySelector(SELECTORS.PLAY_PAUSE_BTN)) {
       console.warn(
@@ -101,7 +111,7 @@ function findElements(instance) {
 }
 
 // Attaches event listeners for user interactions
-function attachEventListeners(instance) {
+function attachEventListeners(instance: CarouselInstance): void {
   const { track } = instance;
 
   // Create bound handlers and store them for later removal
@@ -114,13 +124,13 @@ function attachEventListeners(instance) {
   };
 
   // Attach scroll listener with passive flag for better performance
-  track.addEventListener('scroll', instance.boundHandlers.scroll, {
+  track!.addEventListener('scroll', instance.boundHandlers.scroll, {
     passive: true,
   });
 
   // Attach button listeners if buttons exist
-  instance.prevBtns.forEach(btn => btn.addEventListener('click', instance.boundHandlers.prev));
-  instance.nextBtns.forEach(btn => btn.addEventListener('click', instance.boundHandlers.next));
+  instance.prevBtns.forEach(btn => btn.addEventListener('click', instance.boundHandlers!.prev));
+  instance.nextBtns.forEach(btn => btn.addEventListener('click', instance.boundHandlers!.next));
 
   // Autoplay-specific listeners (only when autoplay is configured)
   if (instance.config.autoplay) {
@@ -132,7 +142,7 @@ function attachEventListeners(instance) {
           instance.play();
         }
       };
-      instance.playPauseBtns.forEach(btn => btn.addEventListener('click', instance.boundHandlers.playPause));
+      instance.playPauseBtns.forEach(btn => btn.addEventListener('click', instance.boundHandlers!.playPause!));
     }
 
     if (instance.restartBtns.length > 0) {
@@ -140,32 +150,32 @@ function attachEventListeners(instance) {
         instance.goTo(0);
         instance.play();
       };
-      instance.restartBtns.forEach(btn => btn.addEventListener('click', instance.boundHandlers.restart));
+      instance.restartBtns.forEach(btn => btn.addEventListener('click', instance.boundHandlers!.restart!));
     }
   }
 }
 
 // Cleans up all event listeners, observers, and references
-function cleanup(instance) {
+function cleanup(instance: CarouselInstance): void {
   const { track, container } = instance;
 
   // Clean up autoplay before removing other listeners
   cleanupAutoplay(instance);
 
   if (instance.boundHandlers?.playPause) {
-    instance.playPauseBtns?.forEach(btn => btn.removeEventListener('click', instance.boundHandlers.playPause));
+    instance.playPauseBtns?.forEach(btn => btn.removeEventListener('click', instance.boundHandlers!.playPause!));
   }
 
   if (instance.boundHandlers?.restart) {
-    instance.restartBtns?.forEach(btn => btn.removeEventListener('click', instance.boundHandlers.restart));
+    instance.restartBtns?.forEach(btn => btn.removeEventListener('click', instance.boundHandlers!.restart!));
   }
 
   // Remove event listeners using stored bound handlers
   if (instance.boundHandlers) {
-    track.removeEventListener('scroll', instance.boundHandlers.scroll);
+    track!.removeEventListener('scroll', instance.boundHandlers.scroll);
 
-    instance.prevBtns?.forEach(btn => btn.removeEventListener('click', instance.boundHandlers.prev));
-    instance.nextBtns?.forEach(btn => btn.removeEventListener('click', instance.boundHandlers.next));
+    instance.prevBtns?.forEach(btn => btn.removeEventListener('click', instance.boundHandlers!.prev));
+    instance.nextBtns?.forEach(btn => btn.removeEventListener('click', instance.boundHandlers!.next));
 
     // Remove keyboard listener if it exists
     if (instance.boundHandlers.keyboard) {
@@ -203,7 +213,7 @@ function cleanup(instance) {
   }
 
   if (instance.container) {
-    delete instance.container._carousel;
+    delete (instance.container as CarouselHTMLElement)._carousel;
   }
 
   instance.debouncedScrollHandler?.cancel();
@@ -211,12 +221,12 @@ function cleanup(instance) {
 
   // Clear all instance properties to help garbage collection
   Object.keys(instance).forEach((key) => {
-    instance[key] = null;
+    (instance as Record<string, unknown>)[key] = null;
   });
 }
 
 // Initializes the carousel instance
-function init(instance) {
+function init(instance: CarouselInstance): boolean {
   const { container, config } = instance;
 
   // Find and validate elements first
@@ -227,12 +237,12 @@ function init(instance) {
 
   // Force instant scrolling when user prefers reduced motion
   if (prefersReducedMotion()) {
-    instance.track.style.scrollBehavior = 'auto';
+    instance.track!.style.scrollBehavior = 'auto';
   }
 
   // Set semantic roles on track and items (only if not already set by author)
-  if (!instance.track.hasAttribute('role')) {
-    instance.track.setAttribute('role', 'list');
+  if (!instance.track!.hasAttribute('role')) {
+    instance.track!.setAttribute('role', 'list');
   }
   instance.items.forEach((item) => {
     if (!item.hasAttribute('role')) {
@@ -299,7 +309,7 @@ function init(instance) {
     }
     container.style.setProperty(CSS_VARS.AUTOPLAY_DURATION, config.autoplayDuration + 'ms');
     setupAutoplay(instance, handleNext);
-    instance.autoplay.onStop = () => updateUI(instance);
+    instance.autoplay!.onStop = () => updateUI(instance);
     startAutoplay(instance);
   }
 
@@ -311,12 +321,36 @@ function init(instance) {
 
 // Main Carousel class
 export class Carousel {
-  constructor(container) {
+  container!: HTMLElement;
+  id!: string;
+  config!: CarouselConfig;
+  state!: CarouselState;
+  rafPending!: boolean;
+  boundHandlers!: BoundHandlers | null;
+  debouncedScrollHandler!: DebouncedFunction | null;
+  track!: HTMLElement | null;
+  liveRegion!: HTMLElement | null;
+  markerGroup!: HTMLElement | null;
+  items!: HTMLElement[];
+  prevBtns!: HTMLElement[];
+  nextBtns!: HTMLElement[];
+  markers!: HTMLElement[];
+  playPauseBtns!: HTMLElement[];
+  restartBtns!: HTMLElement[];
+  counterCurrentEls!: HTMLElement[];
+  counterTotalEls!: HTMLElement[];
+  snapAlign!: 'start' | 'center' | 'end';
+  debouncedResizeHandler!: DebouncedFunction | null;
+  resizeObserver!: ResizeObserver | null;
+  boundMarkerHandlers!: BoundMarkerHandler[];
+  autoplay!: AutoplayState | null;
+
+  constructor(container: HTMLElement) {
     const id = generateUniqueId();
     const config = parseConfig(container);
 
     // Initialize state object with all tracking properties
-    const state = {
+    const state: CarouselState = {
       currentIndex: 0,
       itemPositions: [],
       gap: 0,
@@ -342,8 +376,8 @@ export class Carousel {
     });
 
     // Initialize the carousel
-    const initialized = init(this);
-    container._carousel = this;
+    const initialized = init(this as unknown as CarouselInstance);
+    (container as CarouselHTMLElement)._carousel = this;
     if (!initialized) {
       console.warn(
         `Carousel ${id}: Initialization failed due to missing required elements.`
@@ -352,26 +386,26 @@ export class Carousel {
   }
 
   // Navigates to the next item
-  next() {
-    if (this.autoplay) stopAutoplay(this, 'user');
-    handleNext(this);
+  next(): this {
+    if (this.autoplay) stopAutoplay(this as unknown as CarouselInstance, 'user');
+    handleNext(this as unknown as CarouselInstance);
     return this;
   }
 
   // Navigates to the previous item
-  prev() {
-    if (this.autoplay) stopAutoplay(this, 'user');
-    handlePrev(this);
+  prev(): this {
+    if (this.autoplay) stopAutoplay(this as unknown as CarouselInstance, 'user');
+    handlePrev(this as unknown as CarouselInstance);
     return this;
   }
 
   // Navigates to a specific item by index
-  goTo(index) {
+  goTo(targetIndex: number): this {
     const { items, state } = this;
 
-    if (index < 0 || index >= items.length) {
+    if (targetIndex < 0 || targetIndex >= items.length) {
       console.warn(
-        `Carousel ${this.id}: Invalid index ${index}. Must be between 0 and ${
+        `Carousel ${this.id}: Invalid index ${targetIndex}. Must be between 0 and ${
           items.length - 1
         }.`
       );
@@ -379,26 +413,27 @@ export class Carousel {
     }
 
     // Clamp to maxReachableIndex (indices beyond it share the last snap position)
+    let index = targetIndex;
     if (index > state.maxReachableIndex) {
       index = state.maxReachableIndex;
     }
 
-    if (this.autoplay) stopAutoplay(this, 'user');
+    if (this.autoplay) stopAutoplay(this as unknown as CarouselInstance, 'user');
 
     // Set index directly (decoupled)
     if (index !== state.currentIndex) {
       state.currentIndex = index;
-      updateUI(this);
-      emit(this, EVENTS.SNAPCHANGE, { index });
+      updateUI(this as unknown as CarouselInstance);
+      emit(this as unknown as CarouselInstance, EVENTS.SNAPCHANGE, { index });
     }
 
     // Scroll as visual effect
-    scrollToItem(this, index);
+    scrollToItem(this as unknown as CarouselInstance, index);
     return this;
   }
 
   // Starts autoplay fresh (always full duration)
-  play() {
+  play(): this {
     if (!this.config.autoplay) {
       console.warn(
         `Carousel ${this.id}: Autoplay is not enabled. Add data-carousel-autoplay to the container.`
@@ -407,34 +442,34 @@ export class Carousel {
     }
     if (prefersReducedMotion()) return this;
     if (!this.autoplay) {
-      setupAutoplay(this, handleNext);
-      this.autoplay.onStop = () => updateUI(this);
+      setupAutoplay(this as unknown as CarouselInstance, handleNext);
+      this.autoplay!.onStop = () => updateUI(this as unknown as CarouselInstance);
     }
     this.container.style.setProperty(CSS_VARS.AUTOPLAY_DURATION, this.config.autoplayDuration + 'ms');
-    startAutoplay(this);
+    startAutoplay(this as unknown as CarouselInstance);
     return this;
   }
 
   // Stops autoplay completely
-  stop() {
-    stopAutoplay(this, 'user');
+  stop(): this {
+    stopAutoplay(this as unknown as CarouselInstance, 'user');
     return this;
   }
 
   // Returns the current active item index
-  getActiveIndex() {
+  getActiveIndex(): number {
     return this.state.currentIndex;
   }
 
   // Manually recalculates dimensions and updates UI
-  refresh() {
+  refresh(): this {
     const prevTotalPositions = this.state.totalPositions;
 
-    calculateDimensions(this);
+    calculateDimensions(this as unknown as CarouselInstance);
 
     // Re-setup markers if snap group count changed
     if (this.state.totalPositions !== prevTotalPositions) {
-      setupMarkers(this);
+      setupMarkers(this as unknown as CarouselInstance);
     }
 
     // Clamp currentIndex
@@ -442,21 +477,21 @@ export class Carousel {
       this.state.currentIndex = this.state.maxReachableIndex;
     }
 
-    detectActiveItem(this);
-    updateUI(this);
+    detectActiveItem(this as unknown as CarouselInstance);
+    updateUI(this as unknown as CarouselInstance);
     return this;
   }
 
   // Destroys the carousel instance and cleans up all resources
-  destroy() {
-    cleanup(this);
+  destroy(): null {
+    cleanup(this as unknown as CarouselInstance);
     return null;
   }
 
   // Static method for manual initialization
-  static init(container) {
+  static init(container: string | HTMLElement): Carousel {
     if (typeof container === 'string') {
-      container = document.querySelector(container);
+      container = document.querySelector(container) as HTMLElement;
     }
     if (!container) {
       throw new Error('Carousel.init(): Container element not found');

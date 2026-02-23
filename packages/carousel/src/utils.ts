@@ -1,24 +1,25 @@
 // Pure utility functions for the carousel library
 
-import { DEFAULTS, CSS_VARS, SELECTORS, SELECTOR_ATTRS, ATTRIBUTES } from './config.js';
+import { DEFAULTS, CSS_VARS, SELECTORS, SELECTOR_ATTRS, ATTRIBUTES } from './config';
+import type { CarouselConfig, CarouselInstance, ItemPosition, DebouncedFunction, FindActiveIndexOptions } from './types';
 
 // Counter for generating unique carousel IDs
 let idCounter = 0;
 
 // Generates a unique ID for each carousel instance
-export function generateUniqueId() {
+export function generateUniqueId(): string {
   idCounter += 1;
   return `carousel-${idCounter}`;
 }
 
 // Parses configuration from data attributes on the container element
-export function parseConfig(container) {
-  const align = container.getAttribute(ATTRIBUTES.ALIGN) || DEFAULTS.ALIGN;
+export function parseConfig(container: HTMLElement): CarouselConfig {
+  const align = (container.getAttribute(ATTRIBUTES.ALIGN) || DEFAULTS.ALIGN) as CarouselConfig['align'];
   const keyboard = container.matches(SELECTORS.KEYBOARD);
   const loop = container.matches(SELECTORS.LOOP);
-  const scrollBy = container.getAttribute(ATTRIBUTES.SCROLL_BY) || DEFAULTS.SCROLL_BY;
+  const scrollBy = (container.getAttribute(ATTRIBUTES.SCROLL_BY) || DEFAULTS.SCROLL_BY) as CarouselConfig['scrollBy'];
   const autoplay = container.matches(SELECTORS.AUTOPLAY);
-  const autoplayDuration = parseInt(container.getAttribute(ATTRIBUTES.AUTOPLAY_DURATION), 10) || DEFAULTS.AUTOPLAY_DURATION;
+  const autoplayDuration = parseInt(container.getAttribute(ATTRIBUTES.AUTOPLAY_DURATION) as string, 10) || DEFAULTS.AUTOPLAY_DURATION;
   const autoplayPauseHover = container.matches(SELECTORS.AUTOPLAY_PAUSE_HOVER);
   const autoplayPauseFocus = container.getAttribute(SELECTOR_ATTRS.AUTOPLAY_PAUSE_FOCUS) !== 'false';
 
@@ -26,15 +27,15 @@ export function parseConfig(container) {
 }
 
 // Checks if the user prefers reduced motion
-export function prefersReducedMotion() {
+export function prefersReducedMotion(): boolean {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
 // Creates a debounced version of a function
-export function debounce(func, wait) {
-  let timeout;
+export function debounce(func: (...args: unknown[]) => void, wait: number): DebouncedFunction {
+  let timeout: ReturnType<typeof setTimeout> | undefined;
 
-  const debounced = (...args) => {
+  const debounced = (...args: unknown[]) => {
     clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
   };
@@ -45,11 +46,11 @@ export function debounce(func, wait) {
 
 // Calculates the reference point for snap alignment detection
 function calculateReferencePoint(
-  scrollLeft,
-  containerWidth,
-  snapAlign,
-  offsets = {}
-) {
+  scrollLeft: number,
+  containerWidth: number,
+  snapAlign: string,
+  offsets: FindActiveIndexOptions = {}
+): number {
   const { startInset = 0, endInset = 0 } = offsets;
   switch (snapAlign) {
     case 'center':
@@ -62,7 +63,7 @@ function calculateReferencePoint(
 }
 
 // Gets the alignment point for a specific item based on snap alignment
-function getItemAlignmentPoint(item, snapAlign) {
+function getItemAlignmentPoint(item: ItemPosition, snapAlign: string): number {
   const marginStart = item.marginStart || 0;
   const marginEnd = item.marginEnd || 0;
   switch (snapAlign) {
@@ -77,12 +78,12 @@ function getItemAlignmentPoint(item, snapAlign) {
 
 // Finds the index of the active item based on scroll position
 export function findActiveIndex(
-  itemPositions,
-  scrollLeft,
-  containerWidth,
-  snapAlign,
-  options = {}
-) {
+  itemPositions: ItemPosition[],
+  scrollLeft: number,
+  containerWidth: number,
+  snapAlign: string,
+  options: FindActiveIndexOptions = {}
+): number {
   const { startInset = 0, endInset = 0 } = options;
   const referencePoint = calculateReferencePoint(
     scrollLeft,
@@ -108,10 +109,10 @@ export function findActiveIndex(
 }
 
 // Finds the target index when scrolling forward by one container width
-export function findNextPageIndex(instance) {
+export function findNextPageIndex(instance: CarouselInstance): number {
   const { track, state, config } = instance;
   const { itemPositions, containerWidth, maxReachableIndex } = state;
-  const targetLeft = track.scrollLeft + containerWidth;
+  const targetLeft = track!.scrollLeft + containerWidth;
 
   for (let i = state.currentIndex + 1; i < itemPositions.length; i++) {
     if (i > maxReachableIndex) return config.loop ? 0 : maxReachableIndex;
@@ -123,10 +124,10 @@ export function findNextPageIndex(instance) {
 }
 
 // Finds the target index when scrolling backward by one container width
-export function findPrevPageIndex(instance) {
+export function findPrevPageIndex(instance: CarouselInstance): number {
   const { track, state, config } = instance;
   const { itemPositions, containerWidth, maxReachableIndex } = state;
-  const targetLeft = track.scrollLeft - containerWidth;
+  const targetLeft = track!.scrollLeft - containerWidth;
 
   for (let i = state.currentIndex - 1; i >= 0; i--) {
     if (itemPositions[i].left <= targetLeft) return i;
@@ -137,7 +138,7 @@ export function findPrevPageIndex(instance) {
 }
 
 // Emits a DOM CustomEvent on the carousel container
-export function emit(instance, event, data = {}) {
+export function emit(instance: CarouselInstance, event: string, data: Record<string, unknown> = {}): void {
   const customEvent = new CustomEvent(`carousel:${event}`, {
     detail: { carousel: instance, ...data },
     bubbles: true,
@@ -146,13 +147,13 @@ export function emit(instance, event, data = {}) {
 }
 
 // Calculates and stores all dimensional measurements for the carousel
-export function calculateDimensions(instance) {
+export function calculateDimensions(instance: CarouselInstance): void {
   const { track, items, state, config } = instance;
 
   // Get computed styles to read CSS properties
-  const trackStyle = getComputedStyle(track);
+  const trackStyle = getComputedStyle(track!);
 
-  const parseOffset = (value) => {
+  const parseOffset = (value: string) => {
     if (!value || value === 'auto') {
       return { value: 0, specified: false };
     }
@@ -187,11 +188,11 @@ export function calculateDimensions(instance) {
     : paddingInlineEnd.value;
 
   // Measure container and scroll dimensions
-  const containerWidth = track.clientWidth;
-  const scrollWidth = track.scrollWidth;
+  const containerWidth = track!.clientWidth;
+  const scrollWidth = track!.scrollWidth;
 
   // Calculate basic position data for active item detection
-  const trackRect = track.getBoundingClientRect();
+  const trackRect = track!.getBoundingClientRect();
   const itemPositions = items.map((item) => {
     const rect = item.getBoundingClientRect();
     const itemStyle = getComputedStyle(item);
@@ -207,7 +208,7 @@ export function calculateDimensions(instance) {
     const marginEnd = Number.isNaN(marginEndValue) ? 0 : marginEndValue;
 
     // Calculate left position relative to track, accounting for current scroll
-    const left = rect.left - trackRect.left + track.scrollLeft;
+    const left = rect.left - trackRect.left + track!.scrollLeft;
     const width = rect.width;
 
     return {
@@ -235,7 +236,7 @@ export function calculateDimensions(instance) {
 
   // Compute the highest index findActiveIndex can detect at max scroll
   const maxScroll = scrollWidth - containerWidth;
-  let maxReachableIndex;
+  let maxReachableIndex: number;
   if (maxScroll <= 0) {
     maxReachableIndex = 0;
   } else {
@@ -254,32 +255,32 @@ export function calculateDimensions(instance) {
 }
 
 // Updates CSS custom properties on the carousel container
-export function updateCSSProperties(instance) {
+export function updateCSSProperties(instance: CarouselInstance): void {
   const { container, track, state } = instance;
   const { currentIndex, scrollWidth, containerWidth } = state;
 
   // Set one-based index for display friendliness
-  container.style.setProperty(CSS_VARS.INDEX, currentIndex + 1);
+  container.style.setProperty(CSS_VARS.INDEX, String(currentIndex + 1));
 
   // Set total navigable positions (snap groups)
-  container.style.setProperty(CSS_VARS.TOTAL, state.totalPositions);
+  container.style.setProperty(CSS_VARS.TOTAL, String(state.totalPositions));
 
   // Calculate progress (0-1) based on scroll position
   const maxScroll = scrollWidth - containerWidth;
-  const scrollLeft = track.scrollLeft;
+  const scrollLeft = track!.scrollLeft;
   const progress =
     maxScroll > 0 ? Math.min(1, Math.max(0, scrollLeft / maxScroll)) : 0;
-  container.style.setProperty(CSS_VARS.PROGRESS, progress);
+  container.style.setProperty(CSS_VARS.PROGRESS, String(progress));
 }
 
 // Logs a console warning when loop/autoplay is enabled with unreachable items
-export function warnUnreachableItems(instance) {
+export function warnUnreachableItems(instance: CarouselInstance): void {
   const { config, state, items, id } = instance;
   if (state.maxReachableIndex >= items.length - 1) return;
   if (!config.loop && !config.autoplay) return;
 
   const unreachableCount = items.length - 1 - state.maxReachableIndex;
-  const features = [config.loop && 'loop', config.autoplay && 'autoplay'].filter(Boolean).join(' and ');
+  const features = [config.loop && 'loop', config.autoplay && 'autoplay'].filter((x): x is string => Boolean(x)).join(' and ');
   console.warn(
     `Carousel ${id}: ${unreachableCount} item(s) (indices ${state.maxReachableIndex + 1}-${items.length - 1}) ` +
     `share the same scroll position as item ${state.maxReachableIndex} and cannot be individually activated. ` +

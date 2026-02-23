@@ -1,6 +1,6 @@
 // Navigation and marker functionality
 
-import { CLASSES, TOLERANCE, TIMING, EVENTS } from './config.js';
+import { CLASSES, TOLERANCE, TIMING, EVENTS } from './config';
 import {
   findActiveIndex,
   findNextPageIndex,
@@ -10,17 +10,18 @@ import {
   emit,
   calculateDimensions,
   updateCSSProperties,
-} from './utils.js';
-import { updateActiveClasses } from './keyboard.js';
-import { stopAutoplay } from './autoplay.js';
+} from './utils';
+import { updateActiveClasses } from './keyboard';
+import { stopAutoplay } from './autoplay';
+import type { CarouselInstance } from './types';
 
 // Detects which item is currently active based on scroll position
-export function detectActiveItem(instance) {
+export function detectActiveItem(instance: CarouselInstance): void {
   const { track, state, snapAlign } = instance;
   const { itemPositions, currentIndex, startInset = 0, endInset = 0 } = state;
 
   // Find the active index using scroll position
-  const scrollLeft = track.scrollLeft;
+  const scrollLeft = track!.scrollLeft;
   const activeIndex = findActiveIndex(
     itemPositions,
     scrollLeft,
@@ -42,10 +43,10 @@ export function detectActiveItem(instance) {
 }
 
 // Updates the disabled state of navigation buttons based on current index
-export function updateButtonStates(instance) {
+export function updateButtonStates(instance: CarouselInstance): void {
   const { track, prevBtns, nextBtns, state, config } = instance;
   // Edge detection still uses physical scroll position (for reach-start/reach-end events)
-  const scrollLeft = track.scrollLeft;
+  const scrollLeft = track!.scrollLeft;
   const maxScroll = state.scrollWidth - state.containerWidth;
   const atStart = scrollLeft <= TOLERANCE.EDGE_DETECTION;
   const atEnd = scrollLeft >= maxScroll - TOLERANCE.EDGE_DETECTION;
@@ -55,11 +56,11 @@ export function updateButtonStates(instance) {
   const atLastPosition = state.currentIndex >= state.maxReachableIndex;
 
   if (config.loop) {
-    prevBtns.forEach(btn => { btn.classList.remove(CLASSES.DISABLED); btn.disabled = false; });
-    nextBtns.forEach(btn => { btn.classList.remove(CLASSES.DISABLED); btn.disabled = false; });
+    prevBtns.forEach(btn => { btn.classList.remove(CLASSES.DISABLED); (btn as HTMLButtonElement).disabled = false; });
+    nextBtns.forEach(btn => { btn.classList.remove(CLASSES.DISABLED); (btn as HTMLButtonElement).disabled = false; });
   } else {
-    prevBtns.forEach(btn => { btn.classList.toggle(CLASSES.DISABLED, atFirstPosition); btn.disabled = atFirstPosition; });
-    nextBtns.forEach(btn => { btn.classList.toggle(CLASSES.DISABLED, atLastPosition); btn.disabled = atLastPosition; });
+    prevBtns.forEach(btn => { btn.classList.toggle(CLASSES.DISABLED, atFirstPosition); (btn as HTMLButtonElement).disabled = atFirstPosition; });
+    nextBtns.forEach(btn => { btn.classList.toggle(CLASSES.DISABLED, atLastPosition); (btn as HTMLButtonElement).disabled = atLastPosition; });
   }
 
   // Toggle position classes for non-loop carousels
@@ -88,23 +89,23 @@ export function updateButtonStates(instance) {
 }
 
 // Handles scroll events on the track
-export function handleScroll(instance) {
+export function handleScroll(instance: CarouselInstance): void {
   const { track } = instance;
-  track.classList.add(CLASSES.SCROLLING);
-  emit(instance, EVENTS.SCROLL, { scrollLeft: track.scrollLeft });
+  track!.classList.add(CLASSES.SCROLLING);
+  emit(instance, EVENTS.SCROLL, { scrollLeft: track!.scrollLeft });
 
   if (!instance.debouncedScrollHandler) {
     instance.debouncedScrollHandler = debounce(() => {
       detectActiveItem(instance);
       updateButtonStates(instance);
-      track.classList.remove(CLASSES.SCROLLING);
+      track!.classList.remove(CLASSES.SCROLLING);
     }, TIMING.DEBOUNCE_SCROLL);
   }
   instance.debouncedScrollHandler();
 }
 
 // Calculates the index of the next item for navigation
-export function calculateNextIndex(instance) {
+export function calculateNextIndex(instance: CarouselInstance): number {
   const { state, config } = instance;
 
   if (config.scrollBy === 'page') return findNextPageIndex(instance);
@@ -117,7 +118,7 @@ export function calculateNextIndex(instance) {
 }
 
 // Calculates the index of the previous item for navigation
-export function calculatePrevIndex(instance) {
+export function calculatePrevIndex(instance: CarouselInstance): number {
   const { state, config } = instance;
 
   if (config.scrollBy === 'page') return findPrevPageIndex(instance);
@@ -130,7 +131,7 @@ export function calculatePrevIndex(instance) {
 }
 
 // Scrolls to a specific item index with smooth animation
-export function scrollToItem(instance, index) {
+export function scrollToItem(instance: CarouselInstance, index: number): void {
   const { items, snapAlign } = instance;
   const targetItem = items[index];
   if (!targetItem) {
@@ -146,7 +147,7 @@ export function scrollToItem(instance, index) {
 }
 
 // Handles next button click
-export function handleNext(instance) {
+export function handleNext(instance: CarouselInstance): void {
   const { state } = instance;
 
   const targetIndex = calculateNextIndex(instance);
@@ -162,7 +163,7 @@ export function handleNext(instance) {
 }
 
 // Handles previous button click
-export function handlePrev(instance) {
+export function handlePrev(instance: CarouselInstance): void {
   const { state } = instance;
 
   const targetIndex = calculatePrevIndex(instance);
@@ -176,7 +177,7 @@ export function handlePrev(instance) {
 }
 
 // Sets up ResizeObserver to handle responsive behavior
-export function setupResizeObserver(instance) {
+export function setupResizeObserver(instance: CarouselInstance): void {
   const { container, track } = instance;
   const debouncedResize = debounce(() => {
     if (container.offsetParent === null) return;
@@ -206,12 +207,12 @@ export function setupResizeObserver(instance) {
   });
 
   resizeObserver.observe(container);
-  resizeObserver.observe(track);
+  resizeObserver.observe(track!);
   instance.resizeObserver = resizeObserver;
 }
 
 // Sets up markers if any exist in the container
-export function setupMarkers(instance) {
+export function setupMarkers(instance: CarouselInstance): void {
   const { markers: existingMarkers } = instance;
 
   // Skip if no markers exist
@@ -230,7 +231,7 @@ export function setupMarkers(instance) {
   const totalPositions = instance.state.totalPositions;
 
   // Converts any provided marker into a semantic button for accessibility
-  const normalizeMarkerElement = (marker) => {
+  const normalizeMarkerElement = (marker: HTMLElement): HTMLElement => {
     if (marker.tagName && marker.tagName.toLowerCase() === 'button') {
       return marker;
     }
@@ -251,7 +252,7 @@ export function setupMarkers(instance) {
 
   // Use first marker as template
   const templateMarker = normalizeMarkerElement(existingMarkers[0]);
-  const allMarkers = [templateMarker];
+  const allMarkers: HTMLElement[] = [templateMarker];
 
   // Normalize remaining existing markers
   for (let i = 1; i < existingMarkers.length; i++) {
@@ -259,7 +260,7 @@ export function setupMarkers(instance) {
   }
 
   // Get parent from first marker for appending clones
-  const markerGroup = templateMarker.parentElement;
+  const markerGroup = templateMarker.parentElement!;
   instance.markerGroup = markerGroup;
 
   // Set semantic roles on marker group (only if not already set by author)
@@ -269,19 +270,19 @@ export function setupMarkers(instance) {
 
   // Clone template to match total positions
   while (allMarkers.length < totalPositions) {
-    const duplicate = templateMarker.cloneNode(true);
+    const duplicate = templateMarker.cloneNode(true) as HTMLElement;
     markerGroup.appendChild(duplicate);
     allMarkers.push(duplicate);
   }
 
   // Remove excess markers
   while (allMarkers.length > totalPositions) {
-    const removed = allMarkers.pop();
+    const removed = allMarkers.pop()!;
     removed.remove();
   }
 
   // Prepare each marker with attributes, aria-label, and click handler
-  const preparedMarkers = [];
+  const preparedMarkers: HTMLElement[] = [];
   allMarkers.forEach((marker, index) => {
     marker.setAttribute('type', 'button');
 
@@ -319,21 +320,21 @@ export function setupMarkers(instance) {
 }
 
 // Sets up delegated keyboard handler on marker group for roving tabindex
-function setupMarkerKeyboard(instance) {
+function setupMarkerKeyboard(instance: CarouselInstance): void {
   const { markers, markerGroup, config } = instance;
   if (!markers || markers.length <= 1) return;
 
   // Remove existing handler if present (idempotent for rebuilds)
-  if (instance.boundHandlers.markerKeydown && markerGroup) {
-    markerGroup.removeEventListener('keydown', instance.boundHandlers.markerKeydown);
+  if (instance.boundHandlers!.markerKeydown && markerGroup) {
+    markerGroup.removeEventListener('keydown', instance.boundHandlers!.markerKeydown);
   }
 
-  const handler = (event) => {
-    const currentMarkerIndex = instance.markers.indexOf(event.target);
+  const handler = (event: KeyboardEvent) => {
+    const currentMarkerIndex = instance.markers.indexOf(event.target as HTMLElement);
     if (currentMarkerIndex === -1) return;
 
     const lastIndex = instance.markers.length - 1;
-    let targetIndex = null;
+    let targetIndex: number | null = null;
 
     switch (event.key) {
       case 'ArrowRight':
@@ -365,12 +366,12 @@ function setupMarkerKeyboard(instance) {
     }
   };
 
-  markerGroup.addEventListener('keydown', handler);
-  instance.boundHandlers.markerKeydown = handler;
+  markerGroup!.addEventListener('keydown', handler);
+  instance.boundHandlers!.markerKeydown = handler;
 }
 
 // Updates markers to reflect current active item
-export function updateMarkers(instance) {
+export function updateMarkers(instance: CarouselInstance): void {
   const { markers, state } = instance;
   const { currentIndex } = state;
 
@@ -389,12 +390,12 @@ export function updateMarkers(instance) {
     }
   }
 
-  instance.counterCurrentEls.forEach(el => { el.textContent = currentIndex + 1; });
-  instance.counterTotalEls.forEach(el => { el.textContent = state.totalPositions; });
+  instance.counterCurrentEls.forEach(el => { el.textContent = String(currentIndex + 1); });
+  instance.counterTotalEls.forEach(el => { el.textContent = String(state.totalPositions); });
 }
 
 // Batches DOM updates using requestAnimationFrame for better performance
-export function updateUI(instance) {
+export function updateUI(instance: CarouselInstance): void {
   const { rafPending } = instance;
 
   // Avoid scheduling multiple RAF callbacks

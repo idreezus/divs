@@ -1,12 +1,12 @@
 // Entry point for the carousel library
 
-import { Carousel } from './core.js';
-import { SELECTORS } from './config.js';
+import { Carousel } from './core';
+import { SELECTORS } from './config';
 
 // Auto-initializes all carousels on the page when DOM is ready
-function autoInit() {
+function autoInit(): void {
   // Query new attribute, with silent fallback for legacy data-carousel="container"
-  const containers = document.querySelectorAll(
+  const containers = document.querySelectorAll<HTMLElement>(
     `${SELECTORS.CONTAINER}, [data-carousel="container"]`
   );
 
@@ -26,5 +26,5 @@ if (document.readyState === 'loading') {
 }
 
 if (typeof window !== 'undefined') {
-  window.Carousel = Carousel;
+  (window as unknown as Record<string, unknown>).Carousel = Carousel;
 }

@@ -7,7 +7,8 @@
   "scripts": {
     "build": "rollup -c",
     "build:watch": "rollup -c --watch",
-    "release": "BUILD_MODE=release rollup -c"
+    "release": "BUILD_MODE=release rollup -c",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [
     "carousel",
