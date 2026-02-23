@@ -569,74 +569,61 @@ Navigates to the given 0-based index. If the index is beyond the last navigable 
 
 ### Events
 
+The carousel dispatches DOM CustomEvents on the container element. Listen for them with `addEventListener`:
+
 ```javascript
-carousel.on('snapchange', (e) => {
-  console.log(`Active item: ${e.index}`);
+const container = document.querySelector('[data-carousel-container]');
+
+container.addEventListener('carousel:snapchange', (e) => {
+  console.log(`Active item: ${e.detail.index}`);
 });
 
-carousel.on('scroll', (e) => {
-  console.log(`Scroll position: ${e.scrollLeft}px`);
+container.addEventListener('carousel:scroll', (e) => {
+  console.log(`Scroll position: ${e.detail.scrollLeft}px`);
 });
 
-carousel.on('reach-start', () => {
+container.addEventListener('carousel:reach-start', () => {
   console.log('At first item');
 });
 
-carousel.on('reach-end', () => {
+container.addEventListener('carousel:reach-end', () => {
   console.log('At last item');
 });
 
-carousel.on('autoplay-start', (e) => {
-  console.log(`Autoplay started at index: ${e.index}`);
+container.addEventListener('carousel:autoplay-start', (e) => {
+  console.log(`Autoplay started at index: ${e.detail.index}`);
 });
 
-carousel.on('autoplay-stop', (e) => {
+container.addEventListener('carousel:autoplay-stop', (e) => {
   console.log(
-    `Autoplay stopped at index: ${e.index}, progress: ${e.progress}, reason: ${e.reason}`
+    `Autoplay stopped at index: ${e.detail.index}, progress: ${e.detail.progress}, reason: ${e.detail.reason}`
   );
-});
-
-// Remove listener
-carousel.off('snapchange', handler);
-```
-
-Or use native DOM events:
-
-```javascript
-container.addEventListener('carousel:snapchange', (e) => {
-  console.log(e.detail); // { carousel, index }
 });
 ```
 
 Available events:
 
-| Event            | Description              | Event Data                    |
-| ---------------- | ------------------------ | ----------------------------- |
-| `snapchange`     | Active item changed      | `{ index }`                   |
-| `scroll`         | Track scrolled           | `{ scrollLeft }`              |
-| `reach-start`    | Scrolled to first item   | -                             |
-| `reach-end`      | Scrolled to last item    | -                             |
-| `autoplay-start` | Autoplay started/resumed | `{ index }`                   |
-| `autoplay-stop`  | Autoplay stopped/paused  | `{ index, progress, reason }` |
+| Event                      | Description              | `e.detail`                    |
+| -------------------------- | ------------------------ | ----------------------------- |
+| `carousel:snapchange`      | Active item changed      | `{ index }`                   |
+| `carousel:scroll`          | Track scrolled           | `{ scrollLeft }`              |
+| `carousel:reach-start`     | Scrolled to first item   | -                             |
+| `carousel:reach-end`       | Scrolled to last item    | -                             |
+| `carousel:autoplay-start`  | Autoplay started/resumed | `{ index }`                   |
+| `carousel:autoplay-stop`   | Autoplay stopped/paused  | `{ index, progress, reason }` |
 
 > [!NOTE]
-> `reach-start` and `reach-end` fire based on physical scroll position, even when loop mode is enabled. They reflect the actual scroll edges, not the logical navigation boundaries.
+> `carousel:reach-start` and `carousel:reach-end` fire based on physical scroll position, even when loop mode is enabled. They reflect the actual scroll edges, not the logical navigation boundaries.
 
-### Global Registry
+### Instance Access
 
-Access all carousel instances:
+Access a carousel instance through the DOM element:
 
 ```javascript
-// Get all instances
-const instances = window.CarouselInstances;
+const container = document.querySelector('[data-carousel-container]');
+const carousel = container._carousel;
 
-// Get specific instance by ID
-const carousel = instances.get('carousel-1');
-
-// Iterate over all
-instances.forEach((carousel) => {
-  console.log(carousel.id, carousel.getActiveIndex());
-});
+carousel.next().next().refresh();
 ```
 
 ### Dynamic Content

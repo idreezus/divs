@@ -3,9 +3,6 @@
 import { Carousel } from './core.js';
 import { SELECTORS } from './config.js';
 
-// Global registry to store all initialized carousel instances
-const instances = new Map();
-
 // Auto-initializes all carousels on the page when DOM is ready
 function autoInit() {
   // Query new attribute, with silent fallback for legacy data-carousel="container"
@@ -15,18 +12,11 @@ function autoInit() {
 
   containers.forEach((container) => {
     try {
-      const carousel = new Carousel(container);
-      if (carousel.id) {
-        instances.set(carousel.id, carousel);
-      }
+      new Carousel(container);
     } catch (error) {
       console.warn('Carousel auto-initialization failed:', error);
     }
   });
-
-  if (instances.size > 0) {
-    // Carousel instances initialized
-  }
 }
 
 if (document.readyState === 'loading') {
@@ -37,5 +27,4 @@ if (document.readyState === 'loading') {
 
 if (typeof window !== 'undefined') {
   window.Carousel = Carousel;
-  window.CarouselInstances = instances;
 }

@@ -54,7 +54,8 @@
   const DEFAULTS = {
     ALIGN: 'start',
     SCROLL_BY: 'item',
-    AUTOPLAY_DURATION: 5000};
+    AUTOPLAY_DURATION: 5000,
+  };
 
   // Timing constants in milliseconds
   const TIMING = {
@@ -77,6 +78,10 @@
 
   // Event names for CustomEvents
   const EVENTS = {
+    SNAPCHANGE: 'snapchange',
+    SCROLL: 'scroll',
+    REACH_START: 'reach-start',
+    REACH_END: 'reach-end',
     AUTOPLAY_START: 'autoplay-start',
     AUTOPLAY_STOP: 'autoplay-stop',
   };
@@ -87,13 +92,6 @@
     SCROLL_BY: 'data-carousel-scroll-by',
     AUTOPLAY_DURATION: 'data-carousel-autoplay-duration',
   };
-
-  const CONFIG = {
-    SELECTORS,
-    CLASSES,
-    TIMING,
-    TOLERANCE,
-    CSS_VARS};
 
   // Pure utility functions for the carousel library
 
@@ -130,15 +128,13 @@
   function debounce(func, wait) {
     let timeout;
 
-    return function executedFunction(...args) {
-      const later = () => {
-        clearTimeout(timeout);
-        func(...args);
-      };
-
+    const debounced = (...args) => {
       clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
+      timeout = setTimeout(() => func(...args), wait);
     };
+
+    debounced.cancel = () => clearTimeout(timeout);
+    return debounced;
   }
 
   // Calculates the reference point for snap alignment detection
@@ -234,33 +230,13 @@
     return config.loop ? maxReachableIndex : 0;
   }
 
-  // Returns the total number of navigable positions (snap groups)
-  function calculateTotalPositions(instance) {
-    return instance.state.totalPositions;
-  }
-
-  // Emits custom events both through the instance event system and as DOM events
+  // Emits a DOM CustomEvent on the carousel container
   function emit(instance, event, data = {}) {
-    const { events, container } = instance;
-
-    // Call registered callbacks via instance.on()
-    if (events.has(event)) {
-      const callbacks = events.get(event);
-      callbacks.forEach((callback) => {
-        callback.call(instance, {
-          type: event,
-          target: instance,
-          ...data,
-        });
-      });
-    }
-
-    // Dispatch native DOM custom event for addEventListener compatibility
     const customEvent = new CustomEvent(`carousel:${event}`, {
       detail: { carousel: instance, ...data },
       bubbles: true,
     });
-    container.dispatchEvent(customEvent);
+    instance.container.dispatchEvent(customEvent);
   }
 
   // Calculates and stores all dimensional measurements for the carousel
@@ -310,7 +286,7 @@
 
     // Calculate basic position data for active item detection
     const trackRect = track.getBoundingClientRect();
-    const itemPositions = items.map((item, index) => {
+    const itemPositions = items.map((item) => {
       const rect = item.getBoundingClientRect();
       const itemStyle = getComputedStyle(item);
 
@@ -329,7 +305,6 @@
       const width = rect.width;
 
       return {
-        index,
         left,
         width,
         center: left + width / 2,
@@ -374,7 +349,7 @@
 
   // Updates CSS custom properties on the carousel container
   function updateCSSProperties(instance) {
-    const { container, track, items, state } = instance;
+    const { container, track, state } = instance;
     const { currentIndex, scrollWidth, containerWidth } = state;
 
     // Set one-based index for display friendliness
@@ -413,7 +388,6 @@
   // Applies the active class to the current item and removes it from others
   function updateActiveClasses(instance) {
     const { items, state } = instance;
-    const { CLASSES } = CONFIG;
     const { currentIndex } = state;
 
     items.forEach((item, index) => {
@@ -791,15 +765,13 @@
       if (instance.state.isAutoplaying) stopAutoplay(instance, 'user');
       state.currentIndex = activeIndex;
       updateUI(instance);
-      emit(instance, 'snapchange', { index: activeIndex });
+      emit(instance, EVENTS.SNAPCHANGE, { index: activeIndex });
     }
   }
 
   // Updates the disabled state of navigation buttons based on current index
   function updateButtonStates(instance) {
     const { track, prevBtns, nextBtns, state, config } = instance;
-    const { CLASSES, TOLERANCE } = CONFIG;
-
     // Edge detection still uses physical scroll position (for reach-start/reach-end events)
     const scrollLeft = track.scrollLeft;
     const maxScroll = state.scrollWidth - state.containerWidth;
@@ -829,14 +801,14 @@
 
     // Edge events still fire based on physical scroll position
     if (atStart && !state.hasEmittedStart) {
-      emit(instance, 'reach-start');
+      emit(instance, EVENTS.REACH_START);
       state.hasEmittedStart = true;
     } else if (!atStart) {
       state.hasEmittedStart = false;
     }
 
     if (atEnd && !state.hasEmittedEnd) {
-      emit(instance, 'reach-end');
+      emit(instance, EVENTS.REACH_END);
       state.hasEmittedEnd = true;
     } else if (!atEnd) {
       state.hasEmittedEnd = false;
@@ -846,10 +818,8 @@
   // Handles scroll events on the track
   function handleScroll(instance) {
     const { track } = instance;
-    const { CLASSES, TIMING } = CONFIG;
-
     track.classList.add(CLASSES.SCROLLING);
-    emit(instance, 'scroll', { scrollLeft: track.scrollLeft });
+    emit(instance, EVENTS.SCROLL, { scrollLeft: track.scrollLeft });
 
     if (!instance.debouncedScrollHandler) {
       instance.debouncedScrollHandler = debounce(() => {
@@ -897,7 +867,7 @@
     }
 
     targetItem.scrollIntoView({
-      behavior: 'smooth',
+      behavior: prefersReducedMotion() ? 'instant' : 'smooth',
       block: 'nearest',
       inline: snapAlign,
     });
@@ -913,7 +883,7 @@
     // Set index directly (decoupled from scroll detection)
     state.currentIndex = targetIndex;
     updateUI(instance);
-    emit(instance, 'snapchange', { index: targetIndex });
+    emit(instance, EVENTS.SNAPCHANGE, { index: targetIndex });
 
     // Scroll as visual effect
     scrollToItem(instance, targetIndex);
@@ -928,7 +898,7 @@
 
     state.currentIndex = targetIndex;
     updateUI(instance);
-    emit(instance, 'snapchange', { index: targetIndex });
+    emit(instance, EVENTS.SNAPCHANGE, { index: targetIndex });
 
     scrollToItem(instance, targetIndex);
   }
@@ -936,8 +906,6 @@
   // Sets up ResizeObserver to handle responsive behavior
   function setupResizeObserver(instance) {
     const { container, track } = instance;
-    const { TIMING } = CONFIG;
-
     const debouncedResize = debounce(() => {
       if (container.offsetParent === null) return;
 
@@ -972,8 +940,7 @@
 
   // Sets up markers if any exist in the container
   function setupMarkers(instance) {
-    const { markers: existingMarkers, container, items, id } = instance;
-    const { CLASSES } = CONFIG;
+    const { markers: existingMarkers } = instance;
 
     // Skip if no markers exist
     if (!existingMarkers || existingMarkers.length === 0) return;
@@ -988,7 +955,7 @@
     // Initialize handler storage
     instance.boundMarkerHandlers = [];
 
-    const totalPositions = calculateTotalPositions(instance);
+    const totalPositions = instance.state.totalPositions;
 
     // Converts any provided marker into a semantic button for accessibility
     const normalizeMarkerElement = (marker) => {
@@ -1133,7 +1100,6 @@
   // Updates markers to reflect current active item
   function updateMarkers(instance) {
     const { markers, state } = instance;
-    const { CLASSES } = CONFIG;
     const { currentIndex } = state;
 
     if (markers && markers.length > 0) {
@@ -1181,7 +1147,6 @@
   // Finds and validates all required and optional elements within the carousel container
   function findElements(instance) {
     const { container, id } = instance;
-    const { SELECTORS } = CONFIG;
 
     // Find required track element (legacy backwards compat)
     const track = container.querySelector(`${SELECTORS.TRACK}, [data-carousel="track"]`);
@@ -1353,6 +1318,13 @@
       instance.resizeObserver = null;
     }
 
+    if (instance.container) {
+      delete instance.container._carousel;
+    }
+
+    instance.debouncedScrollHandler?.cancel();
+    instance.debouncedResizeHandler?.cancel();
+
     // Clear all instance properties to help garbage collection
     Object.keys(instance).forEach((key) => {
       instance[key] = null;
@@ -1362,7 +1334,6 @@
   // Initializes the carousel instance
   function init(instance) {
     const { container, config } = instance;
-    const { CLASSES, CSS_VARS } = CONFIG;
 
     // Find and validate elements first
     const elementsFound = findElements(instance);
@@ -1439,7 +1410,7 @@
     if (config.autoplay && !prefersReducedMotion()) {
       if (instance.state.totalPositions <= 1) {
         console.warn(
-          `Carousel ${id}: Autoplay has nothing to cycle through (only 1 item). Add more items or remove data-carousel-autoplay.`
+          `Carousel ${instance.id}: Autoplay has nothing to cycle through (only 1 item). Add more items or remove data-carousel-autoplay.`
         );
       }
       container.style.setProperty(CSS_VARS.AUTOPLAY_DURATION, config.autoplayDuration + 'ms');
@@ -1481,7 +1452,6 @@
         id,
         config,
         state,
-        events: new Map(),
         rafPending: false,
         boundHandlers: null,
         debouncedScrollHandler: null,
@@ -1489,6 +1459,7 @@
 
       // Initialize the carousel
       const initialized = init(this);
+      container._carousel = this;
       if (!initialized) {
         console.warn(
           `Carousel ${id}: Initialization failed due to missing required elements.`
@@ -1534,7 +1505,7 @@
       if (index !== state.currentIndex) {
         state.currentIndex = index;
         updateUI(this);
-        emit(this, 'snapchange', { index });
+        emit(this, EVENTS.SNAPCHANGE, { index });
       }
 
       // Scroll as visual effect
@@ -1550,7 +1521,6 @@
         );
         return this;
       }
-      const { CSS_VARS } = CONFIG;
       if (prefersReducedMotion()) return this;
       if (!this.autoplay) {
         setupAutoplay(this, handleNext);
@@ -1599,29 +1569,6 @@
       return null;
     }
 
-    // Subscribes to a carousel event
-    on(event, callback) {
-      const { events } = this;
-      if (!events.has(event)) {
-        events.set(event, []);
-      }
-      events.get(event).push(callback);
-      return this;
-    }
-
-    // Unsubscribes from a carousel event
-    off(event, callback) {
-      const { events } = this;
-      if (!events.has(event)) return this;
-
-      const callbacks = events.get(event);
-      const index = callbacks.indexOf(callback);
-      if (index > -1) {
-        callbacks.splice(index, 1);
-      }
-      return this;
-    }
-
     // Static method for manual initialization
     static init(container) {
       if (typeof container === 'string') {
@@ -1637,9 +1584,6 @@
   // Entry point for the carousel library
 
 
-  // Global registry to store all initialized carousel instances
-  const instances = new Map();
-
   // Auto-initializes all carousels on the page when DOM is ready
   function autoInit() {
     // Query new attribute, with silent fallback for legacy data-carousel="container"
@@ -1649,16 +1593,11 @@
 
     containers.forEach((container) => {
       try {
-        const carousel = new Carousel(container);
-        if (carousel.id) {
-          instances.set(carousel.id, carousel);
-        }
+        new Carousel(container);
       } catch (error) {
         console.warn('Carousel auto-initialization failed:', error);
       }
     });
-
-    if (instances.size > 0) ;
   }
 
   if (document.readyState === 'loading') {
@@ -1669,7 +1608,6 @@
 
   if (typeof window !== 'undefined') {
     window.Carousel = Carousel;
-    window.CarouselInstances = instances;
   }
 
 })();

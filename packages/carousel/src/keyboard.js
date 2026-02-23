@@ -1,11 +1,10 @@
 // Keyboard navigation support
 
-import { CONFIG } from './config.js';
+import { CLASSES } from './config.js';
 
 // Applies the active class to the current item and removes it from others
 export function updateActiveClasses(instance) {
   const { items, state } = instance;
-  const { CLASSES } = CONFIG;
   const { currentIndex } = state;
 
   items.forEach((item, index) => {

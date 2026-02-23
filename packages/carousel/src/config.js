@@ -30,7 +30,6 @@ export const CLASSES = {
   SCROLLING: 'carousel-scrolling', // Applied to track while scrolling is active
   DISABLED: 'carousel-nav-disabled', // Applied to nav buttons when at start/end edges
   ACTIVE: 'carousel-item-active', // Applied to the current active item
-  VISIBLE: 'carousel-item-visible', // Applied to items currently in viewport (reserved for future use)
   MARKER_ACTIVE: 'carousel-marker-active', // Applied to the current active marker
   PLAYING: 'carousel-playing',
   AT_START: 'carousel-at-start',
@@ -40,13 +39,8 @@ export const CLASSES = {
 
 export const DEFAULTS = {
   ALIGN: 'start',
-  KEYBOARD: false,
   SCROLL_BY: 'item',
-  LOOP: false,
-  AUTOPLAY: false,
   AUTOPLAY_DURATION: 5000,
-  AUTOPLAY_PAUSE_HOVER: false,
-  AUTOPLAY_PAUSE_FOCUS: true,
 };
 
 // Timing constants in milliseconds
@@ -85,15 +79,4 @@ export const ATTRIBUTES = {
   ALIGN: 'data-carousel-align',
   SCROLL_BY: 'data-carousel-scroll-by',
   AUTOPLAY_DURATION: 'data-carousel-autoplay-duration',
-};
-
-export const CONFIG = {
-  SELECTORS,
-  CLASSES,
-  DEFAULTS,
-  TIMING,
-  TOLERANCE,
-  CSS_VARS,
-  EVENTS,
-  ATTRIBUTES,
 };

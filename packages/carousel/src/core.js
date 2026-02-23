@@ -1,6 +1,6 @@
 // Main Carousel class and core functionality
 
-import { CONFIG } from './config.js';
+import { CLASSES, CSS_VARS, EVENTS, SELECTORS } from './config.js';
 import {
   generateUniqueId,
   parseConfig,
@@ -31,7 +31,6 @@ import {
 // Finds and validates all required and optional elements within the carousel container
 function findElements(instance) {
   const { container, id } = instance;
-  const { SELECTORS } = CONFIG;
 
   // Find required track element (legacy backwards compat)
   const track = container.querySelector(`${SELECTORS.TRACK}, [data-carousel="track"]`);
@@ -203,6 +202,13 @@ function cleanup(instance) {
     instance.resizeObserver = null;
   }
 
+  if (instance.container) {
+    delete instance.container._carousel;
+  }
+
+  instance.debouncedScrollHandler?.cancel();
+  instance.debouncedResizeHandler?.cancel();
+
   // Clear all instance properties to help garbage collection
   Object.keys(instance).forEach((key) => {
     instance[key] = null;
@@ -212,7 +218,6 @@ function cleanup(instance) {
 // Initializes the carousel instance
 function init(instance) {
   const { container, config } = instance;
-  const { CLASSES, CSS_VARS } = CONFIG;
 
   // Find and validate elements first
   const elementsFound = findElements(instance);
@@ -289,7 +294,7 @@ function init(instance) {
   if (config.autoplay && !prefersReducedMotion()) {
     if (instance.state.totalPositions <= 1) {
       console.warn(
-        `Carousel ${id}: Autoplay has nothing to cycle through (only 1 item). Add more items or remove data-carousel-autoplay.`
+        `Carousel ${instance.id}: Autoplay has nothing to cycle through (only 1 item). Add more items or remove data-carousel-autoplay.`
       );
     }
     container.style.setProperty(CSS_VARS.AUTOPLAY_DURATION, config.autoplayDuration + 'ms');
@@ -331,7 +336,6 @@ export class Carousel {
       id,
       config,
       state,
-      events: new Map(),
       rafPending: false,
       boundHandlers: null,
       debouncedScrollHandler: null,
@@ -339,6 +343,7 @@ export class Carousel {
 
     // Initialize the carousel
     const initialized = init(this);
+    container._carousel = this;
     if (!initialized) {
       console.warn(
         `Carousel ${id}: Initialization failed due to missing required elements.`
@@ -384,7 +389,7 @@ export class Carousel {
     if (index !== state.currentIndex) {
       state.currentIndex = index;
       updateUI(this);
-      emit(this, 'snapchange', { index });
+      emit(this, EVENTS.SNAPCHANGE, { index });
     }
 
     // Scroll as visual effect
@@ -400,7 +405,6 @@ export class Carousel {
       );
       return this;
     }
-    const { CSS_VARS } = CONFIG;
     if (prefersReducedMotion()) return this;
     if (!this.autoplay) {
       setupAutoplay(this, handleNext);
@@ -447,29 +451,6 @@ export class Carousel {
   destroy() {
     cleanup(this);
     return null;
-  }
-
-  // Subscribes to a carousel event
-  on(event, callback) {
-    const { events } = this;
-    if (!events.has(event)) {
-      events.set(event, []);
-    }
-    events.get(event).push(callback);
-    return this;
-  }
-
-  // Unsubscribes from a carousel event
-  off(event, callback) {
-    const { events } = this;
-    if (!events.has(event)) return this;
-
-    const callbacks = events.get(event);
-    const index = callbacks.indexOf(callback);
-    if (index > -1) {
-      callbacks.splice(index, 1);
-    }
-    return this;
   }
 
   // Static method for manual initialization

@@ -34,15 +34,13 @@ export function prefersReducedMotion() {
 export function debounce(func, wait) {
   let timeout;
 
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-
+  const debounced = (...args) => {
     clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
+    timeout = setTimeout(() => func(...args), wait);
   };
+
+  debounced.cancel = () => clearTimeout(timeout);
+  return debounced;
 }
 
 // Calculates the reference point for snap alignment detection
@@ -95,13 +93,10 @@ export function findActiveIndex(
 
   let closestIndex = 0;
   let minDistance = Infinity;
-  const distances = [];
 
   itemPositions.forEach((item, index) => {
     const itemPoint = getItemAlignmentPoint(item, snapAlign);
     const distance = Math.abs(itemPoint - referencePoint);
-
-    distances.push({ index, itemPoint, distance });
 
     if (distance < minDistance) {
       minDistance = distance;
@@ -141,33 +136,13 @@ export function findPrevPageIndex(instance) {
   return config.loop ? maxReachableIndex : 0;
 }
 
-// Returns the total number of navigable positions (snap groups)
-export function calculateTotalPositions(instance) {
-  return instance.state.totalPositions;
-}
-
-// Emits custom events both through the instance event system and as DOM events
+// Emits a DOM CustomEvent on the carousel container
 export function emit(instance, event, data = {}) {
-  const { events, container } = instance;
-
-  // Call registered callbacks via instance.on()
-  if (events.has(event)) {
-    const callbacks = events.get(event);
-    callbacks.forEach((callback) => {
-      callback.call(instance, {
-        type: event,
-        target: instance,
-        ...data,
-      });
-    });
-  }
-
-  // Dispatch native DOM custom event for addEventListener compatibility
   const customEvent = new CustomEvent(`carousel:${event}`, {
     detail: { carousel: instance, ...data },
     bubbles: true,
   });
-  container.dispatchEvent(customEvent);
+  instance.container.dispatchEvent(customEvent);
 }
 
 // Calculates and stores all dimensional measurements for the carousel
@@ -217,7 +192,7 @@ export function calculateDimensions(instance) {
 
   // Calculate basic position data for active item detection
   const trackRect = track.getBoundingClientRect();
-  const itemPositions = items.map((item, index) => {
+  const itemPositions = items.map((item) => {
     const rect = item.getBoundingClientRect();
     const itemStyle = getComputedStyle(item);
 
@@ -236,7 +211,6 @@ export function calculateDimensions(instance) {
     const width = rect.width;
 
     return {
-      index,
       left,
       width,
       center: left + width / 2,
@@ -281,7 +255,7 @@ export function calculateDimensions(instance) {
 
 // Updates CSS custom properties on the carousel container
 export function updateCSSProperties(instance) {
-  const { container, track, items, state } = instance;
+  const { container, track, state } = instance;
   const { currentIndex, scrollWidth, containerWidth } = state;
 
   // Set one-based index for display friendliness

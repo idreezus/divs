@@ -1,12 +1,12 @@
 // Navigation and marker functionality
 
-import { CONFIG } from './config.js';
+import { CLASSES, TOLERANCE, TIMING, EVENTS } from './config.js';
 import {
   findActiveIndex,
   findNextPageIndex,
   findPrevPageIndex,
   debounce,
-  calculateTotalPositions,
+  prefersReducedMotion,
   emit,
   calculateDimensions,
   updateCSSProperties,
@@ -37,15 +37,13 @@ export function detectActiveItem(instance) {
     if (instance.state.isAutoplaying) stopAutoplay(instance, 'user');
     state.currentIndex = activeIndex;
     updateUI(instance);
-    emit(instance, 'snapchange', { index: activeIndex });
+    emit(instance, EVENTS.SNAPCHANGE, { index: activeIndex });
   }
 }
 
 // Updates the disabled state of navigation buttons based on current index
 export function updateButtonStates(instance) {
   const { track, prevBtns, nextBtns, state, config } = instance;
-  const { CLASSES, TOLERANCE } = CONFIG;
-
   // Edge detection still uses physical scroll position (for reach-start/reach-end events)
   const scrollLeft = track.scrollLeft;
   const maxScroll = state.scrollWidth - state.containerWidth;
@@ -75,14 +73,14 @@ export function updateButtonStates(instance) {
 
   // Edge events still fire based on physical scroll position
   if (atStart && !state.hasEmittedStart) {
-    emit(instance, 'reach-start');
+    emit(instance, EVENTS.REACH_START);
     state.hasEmittedStart = true;
   } else if (!atStart) {
     state.hasEmittedStart = false;
   }
 
   if (atEnd && !state.hasEmittedEnd) {
-    emit(instance, 'reach-end');
+    emit(instance, EVENTS.REACH_END);
     state.hasEmittedEnd = true;
   } else if (!atEnd) {
     state.hasEmittedEnd = false;
@@ -92,10 +90,8 @@ export function updateButtonStates(instance) {
 // Handles scroll events on the track
 export function handleScroll(instance) {
   const { track } = instance;
-  const { CLASSES, TIMING } = CONFIG;
-
   track.classList.add(CLASSES.SCROLLING);
-  emit(instance, 'scroll', { scrollLeft: track.scrollLeft });
+  emit(instance, EVENTS.SCROLL, { scrollLeft: track.scrollLeft });
 
   if (!instance.debouncedScrollHandler) {
     instance.debouncedScrollHandler = debounce(() => {
@@ -143,7 +139,7 @@ export function scrollToItem(instance, index) {
   }
 
   targetItem.scrollIntoView({
-    behavior: 'smooth',
+    behavior: prefersReducedMotion() ? 'instant' : 'smooth',
     block: 'nearest',
     inline: snapAlign,
   });
@@ -159,7 +155,7 @@ export function handleNext(instance) {
   // Set index directly (decoupled from scroll detection)
   state.currentIndex = targetIndex;
   updateUI(instance);
-  emit(instance, 'snapchange', { index: targetIndex });
+  emit(instance, EVENTS.SNAPCHANGE, { index: targetIndex });
 
   // Scroll as visual effect
   scrollToItem(instance, targetIndex);
@@ -174,7 +170,7 @@ export function handlePrev(instance) {
 
   state.currentIndex = targetIndex;
   updateUI(instance);
-  emit(instance, 'snapchange', { index: targetIndex });
+  emit(instance, EVENTS.SNAPCHANGE, { index: targetIndex });
 
   scrollToItem(instance, targetIndex);
 }
@@ -182,8 +178,6 @@ export function handlePrev(instance) {
 // Sets up ResizeObserver to handle responsive behavior
 export function setupResizeObserver(instance) {
   const { container, track } = instance;
-  const { TIMING } = CONFIG;
-
   const debouncedResize = debounce(() => {
     if (container.offsetParent === null) return;
 
@@ -218,8 +212,7 @@ export function setupResizeObserver(instance) {
 
 // Sets up markers if any exist in the container
 export function setupMarkers(instance) {
-  const { markers: existingMarkers, container, items, id } = instance;
-  const { CLASSES } = CONFIG;
+  const { markers: existingMarkers } = instance;
 
   // Skip if no markers exist
   if (!existingMarkers || existingMarkers.length === 0) return;
@@ -234,7 +227,7 @@ export function setupMarkers(instance) {
   // Initialize handler storage
   instance.boundMarkerHandlers = [];
 
-  const totalPositions = calculateTotalPositions(instance);
+  const totalPositions = instance.state.totalPositions;
 
   // Converts any provided marker into a semantic button for accessibility
   const normalizeMarkerElement = (marker) => {
@@ -379,7 +372,6 @@ function setupMarkerKeyboard(instance) {
 // Updates markers to reflect current active item
 export function updateMarkers(instance) {
   const { markers, state } = instance;
-  const { CLASSES } = CONFIG;
   const { currentIndex } = state;
 
   if (markers && markers.length > 0) {
