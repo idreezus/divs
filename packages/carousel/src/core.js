@@ -123,16 +123,6 @@ function attachEventListeners(instance) {
 
   // Autoplay-specific listeners (only when autoplay is configured)
   if (instance.config.autoplay) {
-    // Stop autoplay on direct user interaction with the track
-    instance.boundHandlers.trackPointerDown = () => {
-      if (instance.state.isAutoplaying) stopAutoplay(instance, 'user');
-    };
-    instance.boundHandlers.trackWheel = () => {
-      if (instance.state.isAutoplaying) stopAutoplay(instance, 'user');
-    };
-    track.addEventListener('pointerdown', instance.boundHandlers.trackPointerDown);
-    track.addEventListener('wheel', instance.boundHandlers.trackWheel, { passive: true });
-
     if (instance.playPauseBtn) {
       instance.boundHandlers.playPause = () => {
         if (instance.state.isAutoplaying) {
@@ -172,13 +162,6 @@ function cleanup(instance) {
   // Remove event listeners using stored bound handlers
   if (instance.boundHandlers) {
     track.removeEventListener('scroll', instance.boundHandlers.scroll);
-
-    if (instance.boundHandlers.trackPointerDown) {
-      track.removeEventListener('pointerdown', instance.boundHandlers.trackPointerDown);
-    }
-    if (instance.boundHandlers.trackWheel) {
-      track.removeEventListener('wheel', instance.boundHandlers.trackWheel);
-    }
 
     if (prevBtn) {
       prevBtn.removeEventListener('click', instance.boundHandlers.prev);

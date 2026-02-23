@@ -32,49 +32,31 @@ Copy & paste this in an embed element or your Page Settings **Inside `<head>` ta
 
 ```html
 <style>
-  /* Things you could change */
-  :root {
-    --site-max-width: 80rem; /* your site's container width here */
-    --site-padding: 2.5rem; /* your site's padding here */
-  }
+  [data-carousel-container] {
+    --site-max-width: 80rem;
+    --site-padding: 2.5rem;
 
-  @media (max-width: 767px) {
-    :root {
-      --site-padding: 1.25rem; /* your site's padding on mobile (landscape) and below */
-    }
-  }
-
-  /*
-*	Things for nerds
-*/
-
-  /* Variables used in the `.carousel_track` `.carousel_track.is-breakout` classes */
-  :root {
-    --carousel-scroll-padding: calc(
-      (100% - min(var(--site-max-width), 100% - var(--site-padding) * 2)) / 2
+    /* How wide the site content area is (capped at max-width, minus padding) */
+    --content-width: min(
+      var(--site-max-width),
+      100vw - var(--site-padding) * 2
     );
-    --carousel-scroll-padding-breakout: calc(
-      (100vw - min(var(--site-max-width), 100vw - var(--site-padding) * 2)) / 2
-    );
+
+    /* Space between viewport edge and content area, per side */
+    --carousel-gutter: calc((100vw - var(--content-width)) / 2);
   }
 
+  /* Mobile landscape and below */
   @media (max-width: 767px) {
-    :root {
-      --carousel-scroll-padding: calc(
-        (100% - min(var(--site-max-width), 100% - var(--site-padding) * 2)) / 2
-      );
-      --carousel-scroll-padding-breakout: calc(
-        (100vw - min(var(--site-max-width), 100vw - var(--site-padding) * 2)) /
-          2
-      );
+    [data-carousel-container] {
+      --site-padding: 1.25rem;
     }
   }
 
   /* Hide scrollbar in WebKit browsers */
-  [data-carousel='track']::-webkit-scrollbar {
+  [data-carousel-track]::-webkit-scrollbar {
     display: none;
   }
-
 </style>
 ```
 
@@ -230,15 +212,15 @@ className="-md:mt-6 -lg:mt-8 -mt-4 mb-4 text-center text-muted-foreground md:mb-
 
 Configure the carousel with data attributes on the container element:
 
-| Attribute                | Values                           | Default   | Description                   |
-| ------------------------ | -------------------------------- | --------- | ----------------------------- |
-| `data-carousel-container`| presence (skip with `"false"`)   | -         | Required on container element |
-| `data-carousel-track`   | presence (skip with `"false"`)   | -         | Required on track element     |
-| `data-carousel-item`    | presence (skip with `"false"`)   | -         | Required on each item element |
-| `data-carousel-align`    | `"start"` / `"center"` / `"end"` | `"start"` | Snap alignment of items       |
-| `data-carousel-keyboard` | presence (skip with `"false"`)   | -         | Enable keyboard navigation    |
-| `data-carousel-loop`     | presence (skip with `"false"`)   | -         | Loop from last item to first (and vice versa) |
-| `data-carousel-scroll-by`| `"item"` / `"page"`              | `"item"`  | Navigate by single item or full page of visible items |
+| Attribute                 | Values                           | Default   | Description                                           |
+| ------------------------- | -------------------------------- | --------- | ----------------------------------------------------- |
+| `data-carousel-container` | presence (skip with `"false"`)   | -         | Required on container element                         |
+| `data-carousel-track`     | presence (skip with `"false"`)   | -         | Required on track element                             |
+| `data-carousel-item`      | presence (skip with `"false"`)   | -         | Required on each item element                         |
+| `data-carousel-align`     | `"start"` / `"center"` / `"end"` | `"start"` | Snap alignment of items                               |
+| `data-carousel-keyboard`  | presence (skip with `"false"`)   | -         | Enable keyboard navigation                            |
+| `data-carousel-loop`      | presence (skip with `"false"`)   | -         | Loop from last item to first (and vice versa)         |
+| `data-carousel-scroll-by` | `"item"` / `"page"`              | `"item"`  | Navigate by single item or full page of visible items |
 
 ### Loop
 
@@ -268,10 +250,10 @@ The page calculation uses the actual container width, so it works correctly with
 
 Optional navigation controls that work automatically when placed inside the container:
 
-| Attribute              | Description     |
-| ---------------------- | --------------- |
-| `data-carousel-prev`    | Previous button |
-| `data-carousel-next`    | Next button     |
+| Attribute               | Description                              |
+| ----------------------- | ---------------------------------------- |
+| `data-carousel-prev`    | Previous button                          |
+| `data-carousel-next`    | Next button                              |
 | `data-carousel-restart` | Restart button (go to first item + play) |
 
 ### Scroll Markers
@@ -294,11 +276,11 @@ Add scroll markers anywhere inside the carousel container. The library finds all
 </div>
 ```
 
-| Attribute                          | Description                                            |
-| ---------------------------------- | ------------------------------------------------------ |
-| `data-carousel-marker`             | Individual marker element (first one is used as template) |
-| `data-carousel-counter-current`    | Element that displays current item number (1-based)    |
-| `data-carousel-counter-total`      | Element that displays total navigable positions        |
+| Attribute                       | Description                                               |
+| ------------------------------- | --------------------------------------------------------- |
+| `data-carousel-marker`          | Individual marker element (first one is used as template) |
+| `data-carousel-counter-current` | Element that displays current item number (1-based)       |
+| `data-carousel-counter-total`   | Element that displays total navigable positions           |
 
 For custom counter displays like "2 of 5":
 
@@ -334,23 +316,19 @@ To enable keyboard navigation:
 Automatically advance items on a timer. Combine with `data-carousel-loop` for continuous cycling. Without loop, autoplay advances through all items, completes the progress animation on the last item, then stops cleanly — the container will have both `.carousel-at-end` (position) and not `.carousel-playing` (stopped).
 
 ```html
-<div
-  data-carousel-container
-  data-carousel-loop
-  data-carousel-autoplay
->
+<div data-carousel-container data-carousel-loop data-carousel-autoplay>
   <!-- ... -->
 </div>
 ```
 
 #### Autoplay Attributes
 
-| Attribute                              | Values             | Default  | Description                          |
-| -------------------------------------- | ------------------ | -------- | ------------------------------------ |
-| `data-carousel-autoplay`               | presence (skip with `"false"`) | -        | Enable timed autoplay               |
-| `data-carousel-autoplay-duration`      | number (ms)        | `5000`   | Time per item in milliseconds        |
-| `data-carousel-autoplay-pause-hover`   | presence (skip with `"false"`) | -        | Temporarily pause autoplay on track hover |
-| `data-carousel-autoplay-pause-focus`   | `"true"` / `"false"` | `"true"`  | Temporarily pause autoplay on track focus |
+| Attribute                            | Values                         | Default  | Description                               |
+| ------------------------------------ | ------------------------------ | -------- | ----------------------------------------- |
+| `data-carousel-autoplay`             | presence (skip with `"false"`) | -        | Enable timed autoplay                     |
+| `data-carousel-autoplay-duration`    | number (ms)                    | `5000`   | Time per item in milliseconds             |
+| `data-carousel-autoplay-pause-hover` | presence (skip with `"false"`) | -        | Temporarily pause autoplay on track hover |
+| `data-carousel-autoplay-pause-focus` | `"true"` / `"false"`           | `"true"` | Temporarily pause autoplay on track focus |
 
 #### Autoplay with Custom Duration
 
@@ -370,11 +348,7 @@ Automatically advance items on a timer. Combine with `data-carousel-loop` for co
 Add a toggle button inside the container to let users control autoplay. The library toggles `aria-label` between "Stop autoplay" and "Start autoplay" automatically.
 
 ```html
-<div
-  data-carousel-container
-  data-carousel-loop
-  data-carousel-autoplay
->
+<div data-carousel-container data-carousel-loop data-carousel-autoplay>
   <div data-carousel="track">
     <div data-carousel="item">...</div>
     <div data-carousel="item">...</div>
@@ -389,10 +363,7 @@ Add a toggle button inside the container to let users control autoplay. The libr
 Add a restart button to let users go back to the first item and start autoplay again. Useful for non-loop carousels where autoplay has completed.
 
 ```html
-<div
-  data-carousel-container
-  data-carousel-autoplay
->
+<div data-carousel-container data-carousel-autoplay>
   <div data-carousel="track">
     <div data-carousel="item">...</div>
     <div data-carousel="item">...</div>
@@ -413,7 +384,7 @@ Autoplay uses a **stop-on-action** model. Any intentional user interaction fully
 - **Navigation buttons (prev/next):** Clicking prev/next stops autoplay.
 - **Marker clicks:** Clicking a marker stops autoplay.
 - **Keyboard navigation:** Arrow keys, Home, and End stop autoplay.
-- **Dragging/swiping:** Manually scrolling the track stops autoplay.
+- **Dragging/swiping:** Manually scrolling the track to a different item stops autoplay.
 - **JavaScript API:** Calling `next()`, `prev()`, `goTo()`, or `stop()` stops autoplay.
 
 **Temporary pauses (autoplay resumes automatically):**
@@ -436,13 +407,13 @@ The library also works with CSS [`scroll-padding`](https://developer.mozilla.org
 
 The library exposes state as CSS custom properties on the container element. Use these for dynamic styling without JavaScript.
 
-| Property                        | Values     | Set On              | Description                                 |
-| ------------------------------- | ---------- | ------------------- | ------------------------------------------- |
-| `--carousel-index`              | `1, 2, 3…` | Container           | Current item number (1-based)               |
-| `--carousel-total`              | `1, 2, 3…` | Container           | Total navigable positions (may be fewer than item count in multi-item carousels) |
-| `--carousel-progress`           | `0` – `1`  | Container           | Scroll progress through the carousel        |
-| `--carousel-autoplay-progress`  | `0` – `1`  | Container + active marker | Per-item autoplay timer progress           |
-| `--carousel-autoplay-duration`  | e.g. `5000ms` | Container        | Configured autoplay duration                |
+| Property                       | Values        | Set On                    | Description                                                                      |
+| ------------------------------ | ------------- | ------------------------- | -------------------------------------------------------------------------------- |
+| `--carousel-index`             | `1, 2, 3…`    | Container                 | Current item number (1-based)                                                    |
+| `--carousel-total`             | `1, 2, 3…`    | Container                 | Total navigable positions (may be fewer than item count in multi-item carousels) |
+| `--carousel-progress`          | `0` – `1`     | Container                 | Scroll progress through the carousel                                             |
+| `--carousel-autoplay-progress` | `0` – `1`     | Container + active marker | Per-item autoplay timer progress                                                 |
+| `--carousel-autoplay-duration` | e.g. `5000ms` | Container                 | Configured autoplay duration                                                     |
 
 Example: a progress bar that fills as you scroll through the carousel.
 
@@ -469,16 +440,16 @@ Example: an autoplay progress indicator on each marker. Since `--carousel-autopl
 
 The library applies state classes that you can style however you want.
 
-| Class                         | Applied to                                                            |
-| ----------------------------- | --------------------------------------------------------------------- |
-| `.carousel-item-active`       | The item that is currently active (i.e. aligned)                      |
-| `.carousel-nav-disabled`   | Navigation buttons at start/end boundaries (never applied when looping) |
-| `.carousel-scrolling`         | The track while scrolling is active                                   |
-| `.carousel-marker-active`     | The active scroll marker                                              |
-| `.carousel-playing`           | The container while autoplay is actively running                      |
-| `.carousel-at-start`          | The container when at the first navigable position (never applied when looping) |
-| `.carousel-at-end`            | The container when at the last navigable position (never applied when looping)  |
-| `.carousel-reduced-motion`    | The container when `prefers-reduced-motion: reduce` is active         |
+| Class                      | Applied to                                                                      |
+| -------------------------- | ------------------------------------------------------------------------------- |
+| `.carousel-item-active`    | The item that is currently active (i.e. aligned)                                |
+| `.carousel-nav-disabled`   | Navigation buttons at start/end boundaries (never applied when looping)         |
+| `.carousel-scrolling`      | The track while scrolling is active                                             |
+| `.carousel-marker-active`  | The active scroll marker                                                        |
+| `.carousel-playing`        | The container while autoplay is actively running                                |
+| `.carousel-at-start`       | The container when at the first navigable position (never applied when looping) |
+| `.carousel-at-end`         | The container when at the last navigable position (never applied when looping)  |
+| `.carousel-reduced-motion` | The container when `prefers-reduced-motion: reduce` is active                   |
 
 Example: gradient edge fades that hide when there's no more content to scroll to.
 
@@ -618,7 +589,9 @@ carousel.on('autoplay-start', (e) => {
 });
 
 carousel.on('autoplay-stop', (e) => {
-  console.log(`Autoplay stopped at index: ${e.index}, progress: ${e.progress}, reason: ${e.reason}`);
+  console.log(
+    `Autoplay stopped at index: ${e.index}, progress: ${e.progress}, reason: ${e.reason}`
+  );
 });
 
 // Remove listener
@@ -635,14 +608,14 @@ container.addEventListener('carousel:snapchange', (e) => {
 
 Available events:
 
-| Event            | Description             | Event Data              |
-| ---------------- | ----------------------- | ----------------------- |
-| `snapchange`     | Active item changed     | `{ index }`             |
-| `scroll`         | Track scrolled          | `{ scrollLeft }`        |
-| `reach-start`    | Scrolled to first item  | -                       |
-| `reach-end`      | Scrolled to last item   | -                       |
-| `autoplay-start` | Autoplay started/resumed | `{ index }`                    |
-| `autoplay-stop`  | Autoplay stopped/paused  | `{ index, progress, reason }`  |
+| Event            | Description              | Event Data                    |
+| ---------------- | ------------------------ | ----------------------------- |
+| `snapchange`     | Active item changed      | `{ index }`                   |
+| `scroll`         | Track scrolled           | `{ scrollLeft }`              |
+| `reach-start`    | Scrolled to first item   | -                             |
+| `reach-end`      | Scrolled to last item    | -                             |
+| `autoplay-start` | Autoplay started/resumed | `{ index }`                   |
+| `autoplay-stop`  | Autoplay stopped/paused  | `{ index, progress, reason }` |
 
 > [!NOTE]
 > `reach-start` and `reach-end` fire based on physical scroll position, even when loop mode is enabled. They reflect the actual scroll edges, not the logical navigation boundaries.
@@ -689,15 +662,15 @@ const newCarousel = new Carousel(container);
 
 The library adds semantic ARIA attributes automatically. You don't need to add any of these yourself — they're listed here so you know what to expect in the DOM.
 
-| Feature | What the library does |
-| --- | --- |
-| **Track & items** | Sets `role="list"` on the track and `role="listitem"` on each item |
-| **Markers** | Sets `role="tablist"` on the marker group and `role="tab"` on each marker. The active marker gets `aria-selected="true"` |
-| **Live region** | Injects a visually hidden `<div>` with `aria-live="polite"` that announces "Item X of Y" on slide changes |
-| **Autoplay suppression** | Switches the live region to `aria-live="off"` while autoplay is running so screen readers aren't flooded with updates |
-| **Play/pause button** | Toggles `aria-label` between "Stop autoplay" and "Start autoplay" |
-| **Restart button** | Adds `aria-label="Restart autoplay"` |
-| **Reduced motion** | Autoplay is blocked entirely when `prefers-reduced-motion: reduce` is active |
+| Feature                  | What the library does                                                                                                    |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| **Track & items**        | Sets `role="list"` on the track and `role="listitem"` on each item                                                       |
+| **Markers**              | Sets `role="tablist"` on the marker group and `role="tab"` on each marker. The active marker gets `aria-selected="true"` |
+| **Live region**          | Injects a visually hidden `<div>` with `aria-live="polite"` that announces "Item X of Y" on slide changes                |
+| **Autoplay suppression** | Switches the live region to `aria-live="off"` while autoplay is running so screen readers aren't flooded with updates    |
+| **Play/pause button**    | Toggles `aria-label` between "Stop autoplay" and "Start autoplay"                                                        |
+| **Restart button**       | Adds `aria-label="Restart autoplay"`                                                                                     |
+| **Reduced motion**       | Autoplay is blocked entirely when `prefers-reduced-motion: reduce` is active                                             |
 
 All role attributes respect existing values — if you set a `role` on the track or markers in your HTML, the library won't override it.
 
@@ -748,7 +721,7 @@ carousel.refresh();
 </Accordion>
 
 <Accordion title="Do navigation buttons stop autoplay?">
-  Yes. Any user interaction — prev/next buttons, markers, keyboard, or drag/swipe — stops autoplay. This is by design: autoplay is a "first impression" feature that runs until the user takes control. To restart, click the play/pause button or call `play()` via JavaScript.
+  Yes. Any user navigation — prev/next buttons, markers, keyboard, or drag/swipe to a different item — stops autoplay. This is by design: autoplay is a "first impression" feature that runs until the user takes control. To restart, click the play/pause button or call `play()` via JavaScript.
 </Accordion>
 
 <Accordion title="Why do you call it 'Carousel' instead of 'Slider'?">

@@ -12,6 +12,7 @@ import {
   updateCSSProperties,
 } from './utils.js';
 import { updateActiveClasses } from './keyboard.js';
+import { stopAutoplay } from './autoplay.js';
 
 // Detects which item is currently active based on scroll position
 export function detectActiveItem(instance) {
@@ -33,6 +34,7 @@ export function detectActiveItem(instance) {
 
   // Only update if the active item has changed
   if (activeIndex !== currentIndex) {
+    if (instance.state.isAutoplaying) stopAutoplay(instance, 'user');
     state.currentIndex = activeIndex;
     updateUI(instance);
     emit(instance, 'snapchange', { index: activeIndex });
