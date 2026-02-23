@@ -4,7 +4,7 @@
 const sel = (attr) => `[${attr}]:not([${attr}="false"])`;
 
 // Raw attribute names for marker (presence-based) elements
-export const selectorAttrs = {
+const selectorAttrs = {
   container: 'data-tabs-container',
   prevBtn: 'data-tabs-prev',
   nextBtn: 'data-tabs-next',
@@ -71,19 +71,12 @@ export const cssProps = {
   activeIndex: '--tabs-active-index',
   autoplayDuration: '--tabs-autoplay-duration',
   direction: '--tabs-direction',
-  transitionDuration: '--tabs-transition-duration',
 };
 
 // Default configuration values
 export const defaults = {
   orientation: 'horizontal',
-  activateOnFocus: true,
-  loop: false,
-  keyboard: true,
-  autoplay: false,
   autoplayDuration: 5000,
-  autoplayPauseHover: false,
-  autoplayPauseFocus: true,
   transitionDuration: 200,
 };
 

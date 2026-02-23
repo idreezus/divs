@@ -21,7 +21,12 @@ function runAutoplayTick(instance) {
   }
 
   if (progress >= 1) {
+    const prevValue = state.activeValue;
     autoplay.advanceFn(instance);
+    if (state.activeValue === prevValue && !instance.config.loop) {
+      stopAutoplay(instance, 'complete');
+      return;
+    }
     state.autoplayStartTime = performance.now();
   }
 
@@ -133,7 +138,7 @@ export function startAutoplay(instance) {
 }
 
 // Pauses autoplay temporarily (hover, focus, visibility)
-export function pauseAutoplay(instance, reason = 'user') {
+function pauseAutoplay(instance, reason = 'user') {
   const { state, container } = instance;
 
   if (!state.isAutoplaying || state.isPaused) return;
@@ -167,7 +172,7 @@ export function pauseAutoplay(instance, reason = 'user') {
 }
 
 // Resumes autoplay from where it was paused
-export function resumeAutoplay(instance) {
+function resumeAutoplay(instance) {
   const { state, container } = instance;
 
   if (!state.isAutoplaying || !state.isPaused) return;

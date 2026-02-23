@@ -84,7 +84,8 @@ var Tabs = (function (exports) {
     tabIndex: '--tabs-index',
     activeIndex: '--tabs-active-index',
     autoplayDuration: '--tabs-autoplay-duration',
-    direction: '--tabs-direction'};
+    direction: '--tabs-direction',
+  };
 
   // Default configuration values
   const defaults = {
@@ -168,7 +169,12 @@ var Tabs = (function (exports) {
     }
 
     if (progress >= 1) {
+      const prevValue = state.activeValue;
       autoplay.advanceFn(instance);
+      if (state.activeValue === prevValue && !instance.config.loop) {
+        stopAutoplay(instance, 'complete');
+        return;
+      }
       state.autoplayStartTime = performance.now();
     }
 
@@ -412,17 +418,11 @@ var Tabs = (function (exports) {
   // Core tabs library with Tabs class and initialization logic
 
 
-  // Internal registry for instance lookup (used by destroy)
-  const instances = new Map();
-
   // Finds the index of a trigger by its normalized value
   function findTriggerIndex(triggers, targetValue) {
-    return triggers.findIndex((trigger) => {
-      const value = normalizeValue(
-        trigger.getAttribute(attributes.triggerId)
-      );
-      return value === targetValue;
-    });
+    return triggers.findIndex(
+      (trigger) => trigger._tabValue === targetValue
+    );
   }
 
   // Parses configuration from data attributes on the container
@@ -491,10 +491,12 @@ var Tabs = (function (exports) {
         return;
       }
 
+      trigger._tabValue = value;
+
       // Warn if trigger is an <a> tag
       if (trigger.tagName.toLowerCase() === 'a') {
         console.warn(
-          `Tabs ${id}: Trigger "${value}" is an <a> tag. Consider using <button> for better accessibility.`
+          `Tabs ${id}: Trigger "${value}" is an <a> tag. Use <button> for keyboard and ARIA support.`
         );
       }
 
@@ -514,6 +516,7 @@ var Tabs = (function (exports) {
         return;
       }
 
+      panel._tabValue = value;
       panelMap.set(value, panel);
     });
 
@@ -565,7 +568,7 @@ var Tabs = (function (exports) {
     instance.container.setAttribute('aria-orientation', config.orientation);
 
     triggers.forEach((trigger) => {
-      const value = normalizeValue(trigger.getAttribute(attributes.triggerId));
+      const value = trigger._tabValue;
       const triggerId = trigger.id || `${id}-trigger-${value}`;
       const panelId = `${id}-panel-${value}`;
 
@@ -575,7 +578,7 @@ var Tabs = (function (exports) {
     });
 
     panels.forEach((panel) => {
-      const value = normalizeValue(panel.getAttribute(attributes.panelId));
+      const value = panel._tabValue;
       const panelId = panel.id || `${id}-panel-${value}`;
       const triggerId = `${id}-trigger-${value}`;
 
@@ -591,16 +594,14 @@ var Tabs = (function (exports) {
     const { triggers, panels, state } = instance;
 
     triggers.forEach((trigger) => {
-      const value = normalizeValue(trigger.getAttribute(attributes.triggerId));
-      const isActive = value === state.activeValue;
+      const isActive = trigger._tabValue === state.activeValue;
 
       trigger.setAttribute('aria-selected', isActive.toString());
       trigger.setAttribute('tabindex', isActive ? '0' : '-1');
     });
 
     panels.forEach((panel) => {
-      const value = normalizeValue(panel.getAttribute(attributes.panelId));
-      const isActive = value === state.activeValue;
+      const isActive = panel._tabValue === state.activeValue;
 
       panel.setAttribute('aria-hidden', (!isActive).toString());
     });
@@ -650,8 +651,7 @@ var Tabs = (function (exports) {
           // Only needed if activate-on-focus is false
           if (!config.activateOnFocus) {
             e.preventDefault();
-            const value = focusedTrigger.getAttribute(attributes.triggerId);
-            activate(instance, value);
+            activate(instance, focusedTrigger._tabValue);
           }
           break;
       }
@@ -685,8 +685,7 @@ var Tabs = (function (exports) {
 
     // Activate if activate-on-focus is true
     if (config.activateOnFocus) {
-      const value = triggers[nextIndex].getAttribute(attributes.triggerId);
-      activate(instance, value);
+      activate(instance, triggers[nextIndex]._tabValue);
     }
   }
 
@@ -701,8 +700,7 @@ var Tabs = (function (exports) {
     }
 
     if (config.activateOnFocus) {
-      const value = triggers[index].getAttribute(attributes.triggerId);
-      activate(instance, value);
+      activate(instance, triggers[index]._tabValue);
     }
   }
 
@@ -733,8 +731,7 @@ var Tabs = (function (exports) {
     }
 
     // Priority 3: First trigger
-    const firstValue = triggers[0].getAttribute(attributes.triggerId);
-    return normalizeValue(firstValue);
+    return triggers[0]._tabValue;
   }
 
   // Activates a tab by its value
@@ -775,15 +772,16 @@ var Tabs = (function (exports) {
       setUrlParam(config.groupName, normalized);
     }
 
+    // Clear any pending transition cleanup
+    clearTimeout(instance._transitionTimer);
+
     // Add transitioning class
     container.classList.add(classes.transitioning);
 
     // Update trigger states
     triggers.forEach((trigger) => {
-      const value = normalizeValue(
-        trigger.getAttribute(attributes.triggerId)
-      );
-      const isActive = value === normalized;
+      const triggerValue = trigger._tabValue;
+      const isActive = triggerValue === normalized;
 
       trigger.classList.toggle(classes.active, isActive);
       trigger.classList.toggle(classes.inactive, !isActive);
@@ -796,9 +794,9 @@ var Tabs = (function (exports) {
 
     // Update panel states
     panels.forEach((panel) => {
-      const value = normalizeValue(panel.getAttribute(attributes.panelId));
-      const isActive = value === normalized;
-      const wasActive = value === previousValue;
+      const panelValue = panel._tabValue;
+      const isActive = panelValue === normalized;
+      const wasActive = panelValue === previousValue;
 
       // Remove previous transition classes
       panel.classList.remove(classes.panelEntering, classes.panelLeaving);
@@ -816,7 +814,7 @@ var Tabs = (function (exports) {
     });
 
     // Remove transition classes after animation
-    setTimeout(() => {
+    instance._transitionTimer = setTimeout(() => {
       container.classList.remove(classes.transitioning);
       panels.forEach((panel) => {
         panel.classList.remove(classes.panelEntering, classes.panelLeaving);
@@ -869,26 +867,16 @@ var Tabs = (function (exports) {
   function attachEventListeners(instance) {
     const { triggers, prevBtn, nextBtn, playPauseBtn, state } = instance;
 
-    instance.boundHandlers = {
-      triggerClicks: [],
-      prev: null,
-      next: null,
-      playPause: null,
-      keyboard: null,
-    };
-
     // Trigger click handlers
     triggers.forEach((trigger) => {
       const handler = (e) => {
         e.preventDefault();
-        const value = trigger.getAttribute(attributes.triggerId);
-
         // Stop autoplay on user interaction
         if (state.isAutoplaying) {
           stopAutoplay(instance, 'user');
         }
 
-        activate(instance, value);
+        activate(instance, trigger._tabValue);
       };
 
       trigger.addEventListener('click', handler);
@@ -924,6 +912,9 @@ var Tabs = (function (exports) {
   // Cleans up all event listeners and references
   function cleanup(instance) {
     const { container, prevBtn, nextBtn, playPauseBtn, boundHandlers } = instance;
+
+    // Cancel pending transition timer
+    clearTimeout(instance._transitionTimer);
 
     // Remove trigger click handlers
     if (boundHandlers?.triggerClicks) {
@@ -985,6 +976,7 @@ var Tabs = (function (exports) {
       trigger.classList.remove(classes.active, classes.inactive);
       trigger.style.removeProperty(cssProps.tabIndex);
       trigger.style.removeProperty(cssProps.progress);
+      delete trigger._tabValue;
     });
 
     // Panels: remove ARIA, classes, CSS vars, generated IDs
@@ -1006,6 +998,7 @@ var Tabs = (function (exports) {
         classes.panelLeaving
       );
       panel.style.removeProperty(cssProps.tabIndex);
+      delete panel._tabValue;
     });
 
     // Navigation buttons: remove disabled class
@@ -1037,8 +1030,7 @@ var Tabs = (function (exports) {
       nextIndex = Math.min(nextIndex, triggers.length - 1);
     }
 
-    const nextValue = triggers[nextIndex].getAttribute(attributes.triggerId);
-    activate(instance, nextValue);
+    activate(instance, triggers[nextIndex]._tabValue);
   }
 
   // Initializes a tabs instance
@@ -1111,8 +1103,15 @@ var Tabs = (function (exports) {
         autoplayPausedOnValue: null,
       };
 
-      this.boundHandlers = null;
+      this.boundHandlers = {
+        triggerClicks: [],
+        prev: null,
+        next: null,
+        playPause: null,
+        keyboard: null,
+      };
       this.autoplay = null;
+      this._transitionTimer = null;
 
       // Element references (populated by findElements)
       this.triggers = [];
@@ -1126,7 +1125,6 @@ var Tabs = (function (exports) {
       const initialized = init(this);
       if (initialized) {
         this.container._tabs = this;
-        instances.set(this.id, this);
       } else {
         console.warn(`Tabs ${this.id}: Initialization failed.`);
       }
@@ -1160,8 +1158,7 @@ var Tabs = (function (exports) {
         prevIndex = Math.max(prevIndex, 0);
       }
 
-      const prevValue = triggers[prevIndex].getAttribute(attributes.triggerId);
-      activate(this, prevValue);
+      activate(this, triggers[prevIndex]._tabValue);
       return this;
     }
 
@@ -1204,8 +1201,15 @@ var Tabs = (function (exports) {
         autoplayElapsed: 0,
         autoplayPausedOnValue: null,
       };
-      this.boundHandlers = null;
+      this.boundHandlers = {
+        triggerClicks: [],
+        prev: null,
+        next: null,
+        playPause: null,
+        keyboard: null,
+      };
       this.autoplay = null;
+      this._transitionTimer = null;
       this.triggers = [];
       this.panels = [];
       this.triggerMap = new Map();
@@ -1223,7 +1227,6 @@ var Tabs = (function (exports) {
 
     // Destroys the instance and resets DOM to pre-init state
     destroy() {
-      instances.delete(this.id);
       cleanup(this);
       resetDOM(this);
     }
