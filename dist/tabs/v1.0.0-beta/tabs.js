@@ -27,7 +27,7 @@ var Tabs = (function (exports) {
   // Attribute names for configuration
   const attributes = {
     // Container configuration
-    groupName: 'data-tabs-group-name',
+    groupName: 'data-tabs-url-param',
     default: 'data-tabs-default',
     orientation: 'data-tabs-orientation',
     activateOnFocus: 'data-tabs-activate-on-focus',
@@ -42,8 +42,8 @@ var Tabs = (function (exports) {
     // Autoplay configuration
     autoplay: 'data-tabs-autoplay',
     autoplayDuration: 'data-tabs-autoplay-duration',
-    autoplayPauseHover: 'data-tabs-autoplay-pause-hover',
-    autoplayPauseFocus: 'data-tabs-autoplay-pause-focus',
+    autoplayPauseHover: 'data-tabs-pause-hover',
+    autoplayPauseFocus: 'data-tabs-pause-focus',
   };
 
   // CSS classes applied to elements
@@ -58,7 +58,7 @@ var Tabs = (function (exports) {
     panelLeaving: 'tabs-panel-leaving',
 
     // Button state classes
-    buttonDisabled: 'tabs-button-disabled',
+    buttonDisabled: 'tabs-nav-disabled',
 
     // Autoplay state classes
     autoplayActive: 'tabs-autoplay-active',
@@ -75,7 +75,8 @@ var Tabs = (function (exports) {
     tabIndex: '--tabs-index',
     activeIndex: '--tabs-active-index',
     autoplayDuration: '--tabs-autoplay-duration',
-    direction: '--tabs-direction'};
+    direction: '--tabs-direction',
+  };
 
   // Default configuration values
   const defaults = {
@@ -139,7 +140,6 @@ var Tabs = (function (exports) {
   }
 
   // Autoplay behavior for tabs: timer, progress updates, pause/resume
-
 
   // Shared RAF tick loop for autoplay progress
   function runAutoplayTick(instance) {
@@ -370,16 +370,13 @@ var Tabs = (function (exports) {
 
   // Core tabs library with Tabs class and initialization logic
 
-
   // Internal registry for instance lookup (used by destroy)
   const instances = new Map();
 
   // Finds the index of a trigger by its normalized value
   function findTriggerIndex(triggers, targetValue) {
     return triggers.findIndex((trigger) => {
-      const value = normalizeValue(
-        trigger.getAttribute(attributes.triggerId)
-      );
+      const value = normalizeValue(trigger.getAttribute(attributes.triggerId));
       return value === targetValue;
     });
   }
@@ -744,9 +741,7 @@ var Tabs = (function (exports) {
 
     // Update trigger states
     triggers.forEach((trigger) => {
-      const value = normalizeValue(
-        trigger.getAttribute(attributes.triggerId)
-      );
+      const value = normalizeValue(trigger.getAttribute(attributes.triggerId));
       const isActive = value === normalized;
 
       trigger.classList.toggle(classes.active, isActive);
@@ -887,7 +882,8 @@ var Tabs = (function (exports) {
 
   // Cleans up all event listeners and references
   function cleanup(instance) {
-    const { container, prevBtn, nextBtn, playPauseBtn, boundHandlers } = instance;
+    const { container, prevBtn, nextBtn, playPauseBtn, boundHandlers } =
+      instance;
 
     // Remove trigger click handlers
     if (boundHandlers?.triggerClicks) {
@@ -1193,7 +1189,6 @@ var Tabs = (function (exports) {
 
   // Entry point for tabs library - auto-initialization only
 
-
   // Auto-initializes all tabs containers
   function autoInit() {
     const containers = document.querySelectorAll(selectors.container);
@@ -1219,6 +1214,5 @@ var Tabs = (function (exports) {
   exports.Tabs = Tabs;
 
   return exports;
-
 })({});
 //# sourceMappingURL=tabs.js.map

@@ -6,10 +6,6 @@ import type { Tabs } from './core';
 export type TabsConfig = {
   groupName: string | null;
   defaultValue: string | null;
-  orientation: string;
-  activateOnFocus: boolean;
-  loop: boolean;
-  keyboard: boolean;
   autoplay: boolean;
   autoplayDuration: number;
   autoplayPauseHover: boolean;
@@ -19,6 +15,8 @@ export type TabsConfig = {
 // Runtime state
 export type TabsState = {
   activeValue: string | null;
+  orientation: 'horizontal' | 'vertical';
+  direction: 'ltr' | 'rtl';
   isAutoplaying: boolean;
   isPaused: boolean;
   autoplayStartTime: number | null;
@@ -43,8 +41,8 @@ export type AutoplayState = {
 // Stored event handlers
 export type BoundHandlers = {
   triggerClicks: Array<{ trigger: HTMLElement; handler: (e: Event) => void }>;
-  prev: (() => void) | null;
-  next: (() => void) | null;
+  scroll: (() => void) | null;
+  resizeObserver: ResizeObserver | null;
   playPause: (() => void) | null;
   keyboard: ((e: KeyboardEvent) => void) | null;
 };
@@ -64,12 +62,11 @@ export type TabsInstance = {
   boundHandlers: BoundHandlers;
   autoplay: AutoplayState | null;
   _transitionTimer: ReturnType<typeof setTimeout> | null;
+  tablist: HTMLElement;
   triggers: HTMLElement[];
   panels: HTMLElement[];
   triggerMap: Map<string, HTMLElement[]>;
   panelMap: Map<string, HTMLElement>;
-  prevBtn: HTMLElement | null;
-  nextBtn: HTMLElement | null;
   playPauseBtn: HTMLElement | null;
   goTo: (value: string) => TabsInstance;
   next: () => TabsInstance;

@@ -10,7 +10,6 @@ An accessible, keyboard-navigable tabs component that just works.
 - Autoplay with progress indicator and pause-on-hover/focus
 - Supports multiple triggers per panel (e.g., sidebar + content triggers)
 - Works with nested tabs without conflicts
-- Optional prev/next navigation buttons
 - CSS custom properties for powerful styling hooks
 - Native DOM events and instance API
 
@@ -69,15 +68,16 @@ In the background, the library handles all the accessibility requirements (ARIA 
 
 ### Structure
 
-Three elements are required:
+Four elements are required:
 
 - `[data-tabs-container]` – the outermost container, used for scoping
+- `[data-tabs-list]` – wraps the triggers; receives `role="tablist"` and `aria-orientation` automatically. Its CSS layout is used to auto-detect orientation and text direction
 - `[data-tabs-trigger-id="..."]` – the tab trigger buttons
 - `[data-tabs-panel-id="..."]` – the content panels
 
 ```html
 <div data-tabs-container>
-  <div role="tablist">
+  <div data-tabs-list>
     <button data-tabs-trigger-id="overview">Overview</button>
     <button data-tabs-trigger-id="features">Features</button>
     <button data-tabs-trigger-id="pricing">Pricing</button>
@@ -107,24 +107,21 @@ Since triggers and panels are matched by value rather than position, you can hav
 
 ### Container Configuration
 
-| Attribute                     | Values                         | Default        | Description                         |
-| ----------------------------- | ------------------------------ | -------------- | ----------------------------------- |
-| `data-tabs-container`         | presence (skip with `"false"`) | -              | Required on container element       |
-| `data-tabs-default`           | any value                      | first trigger  | Initial active tab value            |
-| `data-tabs-group-name`        | string                         | -              | URL parameter name for deep linking |
-| `data-tabs-orientation`       | `"horizontal"` / `"vertical"`  | `"horizontal"` | Arrow key navigation direction      |
-| `data-tabs-activate-on-focus` | `"true"` / `"false"`           | `"true"`       | Activate tab on arrow key focus     |
-| `data-tabs-loop`              | `"true"` / `"false"`           | `"false"`      | Loop keyboard navigation            |
-| `data-tabs-keyboard`          | `"true"` / `"false"`           | `"true"`       | Enable keyboard navigation          |
+| Attribute             | Values                         | Default       | Description                                    |
+| --------------------- | ------------------------------ | ------------- | ---------------------------------------------- |
+| `data-tabs-container` | presence (skip with `"false"`) | -             | Required on container element                  |
+| `data-tabs-list`      | presence                       | -             | Required on the element wrapping triggers       |
+| `data-tabs-default`   | any value                      | first trigger | Initial active tab value                       |
+| `data-tabs-url-param` | string                         | -             | URL parameter name for deep linking            |
 
 ### Autoplay Configuration
 
-| Attribute                        | Values               | Default   | Description     |
-| -------------------------------- | -------------------- | --------- | --------------- |
-| `data-tabs-autoplay`             | `"true"` / `"false"` | `"false"` | Enable autoplay |
-| `data-tabs-autoplay-duration`    | milliseconds         | `5000`    | Time per tab    |
-| `data-tabs-autoplay-pause-hover` | `"true"` / `"false"` | `"false"` | Pause on hover  |
-| `data-tabs-autoplay-pause-focus` | `"true"` / `"false"` | `"true"`  | Pause on focus  |
+| Attribute                     | Values               | Default   | Description     |
+| ----------------------------- | -------------------- | --------- | --------------- |
+| `data-tabs-autoplay`          | `"true"` / `"false"` | `"false"` | Enable autoplay |
+| `data-tabs-autoplay-duration` | milliseconds         | `5000`    | Time per tab    |
+| `data-tabs-pause-hover`       | `"true"` / `"false"` | `"false"` | Pause on hover  |
+| `data-tabs-pause-focus`       | `"true"` / `"false"` | `"true"`  | Pause on focus  |
 
 ### Content Linking
 
@@ -139,48 +136,67 @@ Optional controls that work automatically when placed inside the container:
 
 | Attribute              | Description            |
 | ---------------------- | ---------------------- |
-| `data-tabs-prev`       | Previous tab button    |
-| `data-tabs-next`       | Next tab button        |
 | `data-tabs-play-pause` | Toggle autoplay button |
 
 ```html
 <div data-tabs-container data-tabs-autoplay="true">
-  <!-- Triggers and panels here -->
-  <div>
-    <button data-tabs-prev>Previous</button>
-    <button data-tabs-next>Next</button>
-    <button data-tabs-play-pause>Pause</button>
+  <div data-tabs-list>
+    <!-- Triggers here -->
   </div>
+  <!-- Panels here -->
+  <button data-tabs-play-pause>Pause</button>
 </div>
 ```
 
+### Accessibility
+
+The library follows the [WAI-ARIA Tabs pattern](https://www.w3.org/WAI/ARIA/apg/patterns/tabs/) and handles all ARIA requirements automatically:
+
+- `role="tablist"` on the `[data-tabs-list]` element
+- `role="tab"` on triggers, `role="tabpanel"` on panels
+- `aria-selected`, `aria-controls`, `aria-labelledby` linked between tabs and panels
+- `tabindex` roving focus: `0` on the active tab, `-1` on all others
+- `aria-hidden` on inactive panels
+- `aria-orientation` set on the tablist, auto-detected from CSS
+
+No configuration is needed — the library determines everything from the DOM.
+
+### Orientation & Direction Detection
+
+The library reads the CSS `flex-direction` of the `[data-tabs-list]` element to determine orientation:
+
+- `row` or `row-reverse` → **horizontal** (Arrow Left / Arrow Right)
+- `column` or `column-reverse` → **vertical** (Arrow Up / Arrow Down)
+
+RTL text direction is also auto-detected via the computed `direction` property. In RTL horizontal mode, Arrow Left moves to the next tab and Arrow Right moves to the previous tab.
+
+Both are re-detected on resize, so responsive layouts that switch between horizontal and vertical work automatically.
+
 ### Keyboard Navigation
 
-When enabled (default), arrow keys navigate between tabs based on `data-tabs-orientation`:
+| Key | Action |
+| --- | --- |
+| `Tab` | Moves focus into the tablist (lands on the active tab), then into the panel |
+| `Arrow Left` / `Arrow Right` | Navigate between tabs (horizontal orientation) |
+| `Arrow Up` / `Arrow Down` | Navigate between tabs (vertical orientation) |
+| `Home` | Jump to first tab |
+| `End` | Jump to last tab |
 
-- **Horizontal:** `Arrow Left` / `Arrow Right`
-- **Vertical:** `Arrow Up` / `Arrow Down`
-
-Additional keys:
-
-- `Home` – jump to first tab
-- `End` – jump to last tab
-- `Enter` / `Space` – activate focused tab (when `activate-on-focus` is false)
+Arrow keys always wrap (cycle) from last to first and vice versa. Tabs activate on focus (automatic activation per the WAI-ARIA tabs pattern).
 
 ## State Classes
 
 The library applies state classes that you can style however you want.
 
-| Class                   | Applied to                                 |
-| ----------------------- | ------------------------------------------ |
-| `.tabs-active`          | Active trigger and panel                   |
-| `.tabs-inactive`        | Inactive triggers and panels               |
-| `.tabs-transitioning`   | Container during tab transitions           |
-| `.tabs-panel-entering`  | Panel that is becoming active              |
-| `.tabs-panel-leaving`   | Panel that is becoming inactive            |
-| `.tabs-button-disabled` | Prev/next buttons at boundaries            |
-| `.tabs-playing`         | Container when autoplay is running         |
-| `.tabs-reduced-motion`  | Container when reduced motion is preferred |
+| Class                  | Applied to                                        |
+| ---------------------- | ------------------------------------------------- |
+| `.tabs-active`         | Active trigger and panel                          |
+| `.tabs-transitioning`  | Container during tab transitions                  |
+| `.tabs-panel-entering` | Panel that is becoming active                     |
+| `.tabs-panel-leaving`  | Panel that is becoming inactive                   |
+| `.tabs-playing`        | Container when autoplay is running                |
+| `.tabs-at-start`       | Container when tablist is scrolled to its start edge |
+| `.tabs-at-end`         | Container when tablist is scrolled to its end edge   |
 
 Here's an example styling the active trigger:
 
@@ -195,13 +211,6 @@ Here's an example styling the active trigger:
 /* Active trigger */
 .tabs_trigger.tabs-active {
   border-bottom-color: var(--primary);
-}
-
-/* Disabled navigation button */
-[data-tabs-prev].tabs-button-disabled,
-[data-tabs-next].tabs-button-disabled {
-  opacity: 0.3;
-  pointer-events: none;
 }
 ```
 
@@ -256,8 +265,8 @@ These enable powerful CSS-only effects:
 
 ```javascript
 // Auto-initializes on page load by default
-// Or manually initialize:
-const tabs = window.Tabs.init('[data-tabs-container]');
+// Or manually instantiate:
+const tabs = new Tabs(document.querySelector('[data-tabs-container]'));
 ```
 
 ### Instance Methods
@@ -307,22 +316,6 @@ Available events:
 | `tabs:autoplay-start` | Autoplay started/resumed | `{ value }`                   |
 | `tabs:autoplay-stop`  | Autoplay stopped/paused  | `{ value, progress, reason }` |
 
-### Global API
-
-```javascript
-// Get instance by selector or element
-const tabs = window.Tabs.get('.my-tabs');
-
-// Get all instances
-const allTabs = window.Tabs.getAll();
-
-// Destroy instance
-window.Tabs.destroy('.my-tabs');
-
-// Destroy all instances
-window.Tabs.destroy();
-```
-
 ### Dynamic Content
 
 When adding/removing tabs, call `refresh()`:
@@ -336,10 +329,10 @@ The refresh method attempts to maintain the current active tab if it still exist
 
 ## URL Deep Linking
 
-Enable URL syncing with the `data-tabs-group-name` attribute:
+Enable URL syncing with the `data-tabs-url-param` attribute:
 
 ```html
-<div data-tabs-container data-tabs-group-name="section">
+<div data-tabs-container data-tabs-url-param="section">
   <!-- tabs... -->
 </div>
 ```
@@ -396,15 +389,7 @@ Yes! Each container is scoped independently. Triggers and panels are matched onl
 </Accordion>
 
 <Accordion title="What about accessibility?">
-The library automatically sets:
-
-- `role="tab"` on triggers
-- `role="tabpanel"` on panels
-- `aria-selected`, `aria-controls`, `aria-labelledby`
-- Proper `tabindex` management
-- `aria-orientation` on the container
-
-Keyboard navigation follows WAI-ARIA best practices.
+Everything is handled automatically — ARIA roles, states, keyboard navigation, and focus management all follow the WAI-ARIA Tabs pattern. Orientation and RTL direction are auto-detected from CSS so keyboard navigation always matches the visual layout. See the [Accessibility](#accessibility) and [Keyboard Navigation](#keyboard-navigation) sections for full details.
 </Accordion>
 
 <Accordion title="Why does autoplay stop when I scroll away?">
@@ -412,7 +397,7 @@ The library uses IntersectionObserver to pause autoplay when the tabs are less t
 </Accordion>
 
 <Accordion title="What if the user prefers reduced motion?">
-Autoplay is automatically disabled when `prefers-reduced-motion: reduce` is set. The container also receives the `.tabs-reduced-motion` class so you can adjust your own animations accordingly.
+Autoplay is automatically disabled and CSS animations are suppressed via the `prefers-reduced-motion` media query.
 </Accordion>
 
 <Accordion title="Should I use buttons or links for triggers?">
@@ -462,7 +447,7 @@ By default, any user interaction (clicking a tab, using keyboard navigation, cal
 
 ```javascript
 const container = document.querySelector('[data-tabs-container]');
-const tabs = window.Tabs.get(container);
+const tabs = container._tabs;
 
 container.addEventListener('tabs:autoplay-stop', (e) => {
   if (e.detail.reason !== 'user') return;

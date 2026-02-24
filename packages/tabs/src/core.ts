@@ -21,6 +21,8 @@ import {
   prefersReducedMotion,
   getUrlParam,
   setUrlParam,
+  detectOrientation,
+  detectDirection,
 } from './utils';
 import type {
   TabsInstance,
@@ -45,12 +47,6 @@ function parseConfig(container: HTMLElement): TabsConfig {
   return {
     groupName: container.getAttribute(attributes.groupName) || null,
     defaultValue: container.getAttribute(attributes.default) || null,
-    orientation:
-      container.getAttribute(attributes.orientation) || defaults.orientation,
-    activateOnFocus:
-      container.getAttribute(attributes.activateOnFocus) !== 'false',
-    loop: container.getAttribute(attributes.loop) === 'true',
-    keyboard: container.getAttribute(attributes.keyboard) !== 'false',
     autoplay: container.getAttribute(attributes.autoplay) === 'true',
     autoplayDuration:
       parseInt(container.getAttribute(attributes.autoplayDuration) || '', 10) ||
@@ -60,6 +56,14 @@ function parseConfig(container: HTMLElement): TabsConfig {
     autoplayPauseFocus:
       container.getAttribute(attributes.autoplayPauseFocus) !== 'false',
   };
+}
+
+// Detects orientation and direction from CSS layout of the tablist
+function detectLayout(instance: TabsInstance): void {
+  const { tablist, state } = instance;
+  state.orientation = detectOrientation(tablist);
+  state.direction = detectDirection(tablist);
+  tablist.setAttribute('aria-orientation', state.orientation);
 }
 
 // Finds and validates all elements within the tabs container
@@ -72,6 +76,15 @@ function findElements(instance: TabsInstance): boolean {
       return el.closest(selectors.container) === container;
     }) as HTMLElement[];
   };
+
+  // Find tablist
+  const tablist = container.querySelector(selectors.list) as HTMLElement | null;
+  if (!tablist) {
+    console.error(
+      `Tabs ${id}: No tablist found. Expected an element with [data-tabs-list].`
+    );
+    return false;
+  }
 
   // Find triggers and panels
   const triggers = scopedQuery(selectors.trigger);
@@ -156,31 +169,28 @@ function findElements(instance: TabsInstance): boolean {
 
   if (hasErrors) return false;
 
-  // Find optional navigation buttons (scoped)
-  const prevBtn = container.querySelector(selectors.prevBtn);
-  const nextBtn = container.querySelector(selectors.nextBtn);
+  // Find optional play/pause button
   const playPauseBtn = container.querySelector(selectors.playPauseBtn);
 
   // Store references
   Object.assign(instance, {
+    tablist,
     triggers,
     panels,
     triggerMap,
     panelMap,
-    prevBtn,
-    nextBtn,
     playPauseBtn,
   });
 
   return true;
 }
 
-// Sets up ARIA attributes for triggers and panels
+// Sets up ARIA attributes for tablist, triggers, and panels
 function setupAccessibility(instance: TabsInstance): void {
-  const { triggers, panels, id, config } = instance;
+  const { tablist, triggers, panels, id } = instance;
 
-  // Set orientation on container
-  instance.container.setAttribute('aria-orientation', config.orientation);
+  // Set tablist role and orientation
+  tablist.setAttribute('role', 'tablist');
 
   triggers.forEach((trigger) => {
     const value = (trigger as TabElement)._tabValue;
@@ -224,7 +234,7 @@ function updateAriaStates(instance: TabsInstance): void {
 
 // Sets up keyboard navigation for triggers
 function setupKeyboardNavigation(instance: TabsInstance): void {
-  const { container, config } = instance;
+  const { container } = instance;
 
   const handleKeydown = (e: KeyboardEvent): void => {
     // Only handle if a trigger within this container has focus
@@ -236,9 +246,21 @@ function setupKeyboardNavigation(instance: TabsInstance): void {
       return;
     }
 
-    const isHorizontal = config.orientation === 'horizontal';
-    const prevKey = isHorizontal ? 'ArrowLeft' : 'ArrowUp';
-    const nextKey = isHorizontal ? 'ArrowRight' : 'ArrowDown';
+    const { orientation, direction } = instance.state;
+    const isHorizontal = orientation === 'horizontal';
+    const isRtl = direction === 'rtl';
+
+    // Determine prev/next keys based on orientation and direction
+    let prevKey: string;
+    let nextKey: string;
+
+    if (isHorizontal) {
+      prevKey = isRtl ? 'ArrowRight' : 'ArrowLeft';
+      nextKey = isRtl ? 'ArrowLeft' : 'ArrowRight';
+    } else {
+      prevKey = 'ArrowUp';
+      nextKey = 'ArrowDown';
+    }
 
     switch (e.key) {
       case prevKey:
@@ -260,15 +282,6 @@ function setupKeyboardNavigation(instance: TabsInstance): void {
         e.preventDefault();
         focusTriggerAt(instance, instance.triggers.length - 1);
         break;
-
-      case 'Enter':
-      case ' ':
-        // Only needed if activate-on-focus is false
-        if (!config.activateOnFocus) {
-          e.preventDefault();
-          activate(instance, (focusedTrigger as TabElement)._tabValue!);
-        }
-        break;
     }
   };
 
@@ -276,20 +289,14 @@ function setupKeyboardNavigation(instance: TabsInstance): void {
   container.addEventListener('keydown', handleKeydown);
 }
 
-// Moves focus by a given direction (-1 or +1)
+// Moves focus by a given direction (-1 or +1), always wrapping
 function moveFocus(instance: TabsInstance, direction: number): void {
-  const { triggers, config, state } = instance;
+  const { triggers, state } = instance;
   const currentIndex = triggers.indexOf(document.activeElement as HTMLElement);
 
   if (currentIndex === -1) return;
 
-  let nextIndex = currentIndex + direction;
-
-  if (config.loop) {
-    nextIndex = (nextIndex + triggers.length) % triggers.length;
-  } else {
-    nextIndex = Math.max(0, Math.min(nextIndex, triggers.length - 1));
-  }
+  const nextIndex = (currentIndex + direction + triggers.length) % triggers.length;
 
   triggers[nextIndex].focus();
 
@@ -298,15 +305,13 @@ function moveFocus(instance: TabsInstance, direction: number): void {
     stopAutoplay(instance, 'user');
   }
 
-  // Activate if activate-on-focus is true
-  if (config.activateOnFocus) {
-    activate(instance, (triggers[nextIndex] as TabElement)._tabValue!);
-  }
+  // Always activate on focus (automatic activation)
+  activate(instance, (triggers[nextIndex] as TabElement)._tabValue!);
 }
 
 // Focuses trigger at a specific index
 function focusTriggerAt(instance: TabsInstance, index: number): void {
-  const { triggers, config, state } = instance;
+  const { triggers, state } = instance;
 
   triggers[index].focus();
 
@@ -314,9 +319,8 @@ function focusTriggerAt(instance: TabsInstance, index: number): void {
     stopAutoplay(instance, 'user');
   }
 
-  if (config.activateOnFocus) {
-    activate(instance, (triggers[index] as TabElement)._tabValue!);
-  }
+  // Always activate on focus
+  activate(instance, (triggers[index] as TabElement)._tabValue!);
 }
 
 // Determines the initial active value
@@ -347,6 +351,21 @@ function determineInitialValue(instance: TabsInstance): string {
 
   // Priority 3: First trigger
   return (triggers[0] as TabElement)._tabValue!;
+}
+
+// Scrolls active trigger into view for programmatic activation
+function scrollTriggerIntoView(instance: TabsInstance, value: string): void {
+  const activeTriggers = instance.triggerMap.get(value);
+  if (!activeTriggers?.length) return;
+
+  const behavior = prefersReducedMotion() ? 'instant' : 'smooth';
+  const isVertical = instance.state.orientation === 'vertical';
+
+  activeTriggers[0].scrollIntoView({
+    behavior: behavior as ScrollBehavior,
+    block: isVertical ? 'nearest' : 'center',
+    inline: isVertical ? 'center' : 'nearest',
+  });
 }
 
 // Activates a tab by its value
@@ -399,7 +418,6 @@ function activate(instance: TabsInstance, value: string, options: ActivateOption
     const isActive = triggerValue === normalized;
 
     trigger.classList.toggle(classes.active, isActive);
-    trigger.classList.toggle(classes.inactive, !isActive);
 
     // Reset progress on inactive triggers
     if (!isActive) {
@@ -418,12 +436,10 @@ function activate(instance: TabsInstance, value: string, options: ActivateOption
 
     if (isActive) {
       panel.classList.add(classes.active, classes.panelEntering);
-      panel.classList.remove(classes.inactive);
     } else if (wasActive) {
-      panel.classList.add(classes.inactive, classes.panelLeaving);
+      panel.classList.add(classes.panelLeaving);
       panel.classList.remove(classes.active);
     } else {
-      panel.classList.add(classes.inactive);
       panel.classList.remove(classes.active);
     }
   });
@@ -439,8 +455,8 @@ function activate(instance: TabsInstance, value: string, options: ActivateOption
   // Update ARIA states
   updateAriaStates(instance);
 
-  // Update navigation button states
-  updateButtonStates(instance);
+  // Scroll active trigger into view for programmatic activation
+  scrollTriggerIntoView(instance, normalized);
 
   // Emit change event
   if (!silent) {
@@ -453,34 +469,47 @@ function activate(instance: TabsInstance, value: string, options: ActivateOption
   return true;
 }
 
-// Updates prev/next button disabled states
-function updateButtonStates(instance: TabsInstance): void {
-  const { triggers, prevBtn, nextBtn, config, state } = instance;
+// Checks tablist scroll position and updates classes on the container
+function updateScrollClasses(instance: TabsInstance): void {
+  const { tablist, container, state } = instance;
+  const isVertical = state.orientation === 'vertical';
 
-  if (!prevBtn && !nextBtn) return;
-  if (config.loop) {
-    // Never disabled when looping
-    prevBtn?.classList.remove(classes.buttonDisabled);
-    nextBtn?.classList.remove(classes.buttonDisabled);
-    return;
-  }
+  const scrollPos = isVertical ? tablist.scrollTop : tablist.scrollLeft;
+  const scrollSize = isVertical ? tablist.scrollHeight : tablist.scrollWidth;
+  const clientSize = isVertical ? tablist.clientHeight : tablist.clientWidth;
 
-  const currentIndex = findTriggerIndex(triggers, state.activeValue);
+  // Threshold of 1px to account for subpixel rounding
+  const atStart = scrollPos <= 1;
+  const atEnd = scrollPos + clientSize >= scrollSize - 1;
 
-  if (prevBtn) {
-    prevBtn.classList.toggle(classes.buttonDisabled, currentIndex === 0);
-  }
-  if (nextBtn) {
-    nextBtn.classList.toggle(
-      classes.buttonDisabled,
-      currentIndex === triggers.length - 1
-    );
-  }
+  container.classList.toggle(classes.atStart, atStart);
+  container.classList.toggle(classes.atEnd, atEnd);
 }
 
-// Attaches click handlers to triggers and navigation buttons
+// Sets up scroll position detection on the tablist
+function setupScrollDetection(instance: TabsInstance): void {
+  const { tablist } = instance;
+
+  const handleScroll = () => updateScrollClasses(instance);
+
+  tablist.addEventListener('scroll', handleScroll, { passive: true });
+  instance.boundHandlers.scroll = handleScroll;
+
+  // ResizeObserver for content/container size changes and layout re-detection
+  const observer = new ResizeObserver(() => {
+    detectLayout(instance);
+    updateScrollClasses(instance);
+  });
+  observer.observe(tablist);
+  instance.boundHandlers.resizeObserver = observer;
+
+  // Initial check
+  updateScrollClasses(instance);
+}
+
+// Attaches click handlers to triggers and play/pause button
 function attachEventListeners(instance: TabsInstance): void {
-  const { triggers, prevBtn, nextBtn, playPauseBtn, state } = instance;
+  const { triggers, playPauseBtn, state } = instance;
 
   // Trigger click handlers
   triggers.forEach((trigger) => {
@@ -498,18 +527,6 @@ function attachEventListeners(instance: TabsInstance): void {
     instance.boundHandlers.triggerClicks.push({ trigger, handler });
   });
 
-  // Prev button
-  if (prevBtn) {
-    instance.boundHandlers.prev = () => instance.prev();
-    prevBtn.addEventListener('click', instance.boundHandlers.prev);
-  }
-
-  // Next button
-  if (nextBtn) {
-    instance.boundHandlers.next = () => instance.next();
-    nextBtn.addEventListener('click', instance.boundHandlers.next);
-  }
-
   // Play/pause button
   if (playPauseBtn) {
     instance.boundHandlers.playPause = () => {
@@ -526,7 +543,7 @@ function attachEventListeners(instance: TabsInstance): void {
 
 // Cleans up all event listeners and references
 function cleanup(instance: TabsInstance): void {
-  const { container, prevBtn, nextBtn, playPauseBtn, boundHandlers } = instance;
+  const { container, tablist, playPauseBtn, boundHandlers } = instance;
 
   // Cancel pending transition timer
   if (instance._transitionTimer !== null) clearTimeout(instance._transitionTimer);
@@ -538,13 +555,7 @@ function cleanup(instance: TabsInstance): void {
     });
   }
 
-  // Remove navigation handlers
-  if (prevBtn && boundHandlers?.prev) {
-    prevBtn.removeEventListener('click', boundHandlers.prev);
-  }
-  if (nextBtn && boundHandlers?.next) {
-    nextBtn.removeEventListener('click', boundHandlers.next);
-  }
+  // Remove play/pause handler
   if (playPauseBtn && boundHandlers?.playPause) {
     playPauseBtn.removeEventListener('click', boundHandlers.playPause);
   }
@@ -554,27 +565,42 @@ function cleanup(instance: TabsInstance): void {
     container.removeEventListener('keydown', boundHandlers.keyboard);
   }
 
+  // Remove scroll handler
+  if (tablist && boundHandlers?.scroll) {
+    tablist.removeEventListener('scroll', boundHandlers.scroll);
+  }
+
+  // Disconnect ResizeObserver
+  if (boundHandlers?.resizeObserver) {
+    boundHandlers.resizeObserver.disconnect();
+  }
+
   // Cleanup autoplay
   cleanupAutoplay(instance);
 }
 
 // Resets DOM to pre-initialization state
 function resetDOM(instance: TabsInstance): void {
-  const { id, container, triggers, panels, prevBtn, nextBtn, playPauseBtn } =
-    instance;
+  const { id, container, tablist, triggers, panels, playPauseBtn } = instance;
 
   // Container: remove attributes and classes
   container.removeAttribute(attributes.id);
-  container.removeAttribute('aria-orientation');
   container.classList.remove(
     classes.transitioning,
     classes.playing,
-    classes.reducedMotion
+    classes.atStart,
+    classes.atEnd
   );
   container.style.removeProperty(cssProps.tabCount);
   container.style.removeProperty(cssProps.activeIndex);
   container.style.removeProperty(cssProps.direction);
   container.style.removeProperty(cssProps.autoplayDuration);
+
+  // Tablist: remove role and aria-orientation
+  if (tablist) {
+    tablist.removeAttribute('role');
+    tablist.removeAttribute('aria-orientation');
+  }
 
   // Triggers: remove ARIA, classes, CSS vars, generated IDs
   triggers.forEach((trigger) => {
@@ -588,7 +614,7 @@ function resetDOM(instance: TabsInstance): void {
       trigger.id = '';
     }
 
-    trigger.classList.remove(classes.active, classes.inactive);
+    trigger.classList.remove(classes.active);
     trigger.style.removeProperty(cssProps.tabIndex);
     trigger.style.removeProperty(cssProps.progress);
     delete (trigger as TabElement)._tabValue;
@@ -608,21 +634,12 @@ function resetDOM(instance: TabsInstance): void {
 
     panel.classList.remove(
       classes.active,
-      classes.inactive,
       classes.panelEntering,
       classes.panelLeaving
     );
     panel.style.removeProperty(cssProps.tabIndex);
     delete (panel as TabElement)._tabValue;
   });
-
-  // Navigation buttons: remove disabled class
-  if (prevBtn) {
-    prevBtn.classList.remove(classes.buttonDisabled);
-  }
-  if (nextBtn) {
-    nextBtn.classList.remove(classes.buttonDisabled);
-  }
 
   // Play/pause button: remove aria-pressed
   if (playPauseBtn) {
@@ -635,15 +652,9 @@ function resetDOM(instance: TabsInstance): void {
 
 // Advances to next tab without stopping autoplay (used by autoplay tick)
 function advanceToNextTab(instance: TabsInstance): void {
-  const { triggers, config, state } = instance;
+  const { triggers, state } = instance;
   const currentIndex = findTriggerIndex(triggers, state.activeValue);
-
-  let nextIndex = currentIndex + 1;
-  if (config.loop) {
-    nextIndex = nextIndex % triggers.length;
-  } else {
-    nextIndex = Math.min(nextIndex, triggers.length - 1);
-  }
+  const nextIndex = (currentIndex + 1) % triggers.length;
 
   activate(instance, (triggers[nextIndex] as TabElement)._tabValue!);
 }
@@ -666,6 +677,9 @@ function init(instance: TabsInstance): boolean {
     panel.style.setProperty(cssProps.tabIndex, String(index));
   });
 
+  // Detect orientation and direction from CSS
+  detectLayout(instance);
+
   // Setup accessibility
   setupAccessibility(instance);
 
@@ -676,15 +690,11 @@ function init(instance: TabsInstance): boolean {
   // Attach event listeners
   attachEventListeners(instance);
 
-  // Setup keyboard navigation
-  if (config.keyboard) {
-    setupKeyboardNavigation(instance);
-  }
+  // Setup keyboard navigation (always enabled per ARIA spec)
+  setupKeyboardNavigation(instance);
 
-  // Check for reduced motion
-  if (prefersReducedMotion()) {
-    container.classList.add(classes.reducedMotion);
-  }
+  // Setup scroll position detection on tablist
+  setupScrollDetection(instance);
 
   // Setup autoplay if enabled and reduced motion not preferred
   if (config.autoplay && !prefersReducedMotion()) {
@@ -711,12 +721,11 @@ export class Tabs {
   boundHandlers!: BoundHandlers;
   autoplay!: AutoplayState | null;
   _transitionTimer!: ReturnType<typeof setTimeout> | null;
+  tablist!: HTMLElement;
   triggers!: HTMLElement[];
   panels!: HTMLElement[];
   triggerMap!: Map<string, HTMLElement[]>;
   panelMap!: Map<string, HTMLElement>;
-  prevBtn!: HTMLElement | null;
-  nextBtn!: HTMLElement | null;
   playPauseBtn!: HTMLElement | null;
 
   constructor(container: HTMLElement) {
@@ -726,6 +735,8 @@ export class Tabs {
 
     this.state = {
       activeValue: null,
+      orientation: 'horizontal',
+      direction: 'ltr',
       isAutoplaying: false,
       isPaused: false,
       autoplayStartTime: null,
@@ -735,8 +746,8 @@ export class Tabs {
 
     this.boundHandlers = {
       triggerClicks: [],
-      prev: null,
-      next: null,
+      scroll: null,
+      resizeObserver: null,
       playPause: null,
       keyboard: null,
     };
@@ -744,12 +755,11 @@ export class Tabs {
     this._transitionTimer = null;
 
     // Element references (populated by findElements)
+    this.tablist = null as unknown as HTMLElement;
     this.triggers = [];
     this.panels = [];
     this.triggerMap = new Map();
     this.panelMap = new Map();
-    this.prevBtn = null;
-    this.nextBtn = null;
     this.playPauseBtn = null;
 
     const initialized = init(this as unknown as TabsInstance);
@@ -778,15 +788,9 @@ export class Tabs {
   prev(): this {
     if (this.state.isAutoplaying) stopAutoplay(this as unknown as TabsInstance, 'user');
 
-    const { triggers, config, state } = this;
+    const { triggers, state } = this;
     const currentIndex = findTriggerIndex(triggers, state.activeValue);
-
-    let prevIndex = currentIndex - 1;
-    if (config.loop) {
-      prevIndex = (prevIndex + triggers.length) % triggers.length;
-    } else {
-      prevIndex = Math.max(prevIndex, 0);
-    }
+    const prevIndex = (currentIndex - 1 + triggers.length) % triggers.length;
 
     activate(this as unknown as TabsInstance, (triggers[prevIndex] as TabElement)._tabValue!);
     return this;
@@ -825,6 +829,8 @@ export class Tabs {
     this.config = parseConfig(this.container);
     this.state = {
       activeValue: null,
+      orientation: 'horizontal',
+      direction: 'ltr',
       isAutoplaying: false,
       isPaused: false,
       autoplayStartTime: null,
@@ -833,13 +839,14 @@ export class Tabs {
     };
     this.boundHandlers = {
       triggerClicks: [],
-      prev: null,
-      next: null,
+      scroll: null,
+      resizeObserver: null,
       playPause: null,
       keyboard: null,
     };
     this.autoplay = null;
     this._transitionTimer = null;
+    this.tablist = null as unknown as HTMLElement;
     this.triggers = [];
     this.panels = [];
     this.triggerMap = new Map();

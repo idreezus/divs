@@ -6,8 +6,7 @@ const sel = (attr: string): string => `[${attr}]:not([${attr}="false"])`;
 // Raw attribute names for marker (presence-based) elements
 const selectorAttrs: Record<string, string> = {
   container: 'data-tabs-container',
-  prevBtn: 'data-tabs-prev',
-  nextBtn: 'data-tabs-next',
+  list: 'data-tabs-list',
   playPauseBtn: 'data-tabs-play-pause',
 };
 
@@ -23,12 +22,9 @@ export const selectors = {
 // Attribute names for configuration
 export const attributes = {
   // Container configuration
-  groupName: 'data-tabs-group-name',
+  groupName: 'data-tabs-url-param',
   default: 'data-tabs-default',
-  orientation: 'data-tabs-orientation',
-  activateOnFocus: 'data-tabs-activate-on-focus',
-  loop: 'data-tabs-loop',
-  keyboard: 'data-tabs-keyboard',
+  list: 'data-tabs-list',
   id: 'data-tabs-id',
 
   // Content linking
@@ -38,29 +34,26 @@ export const attributes = {
   // Autoplay configuration
   autoplay: 'data-tabs-autoplay',
   autoplayDuration: 'data-tabs-autoplay-duration',
-  autoplayPauseHover: 'data-tabs-autoplay-pause-hover',
-  autoplayPauseFocus: 'data-tabs-autoplay-pause-focus',
+  autoplayPauseHover: 'data-tabs-pause-hover',
+  autoplayPauseFocus: 'data-tabs-pause-focus',
 };
 
 // CSS classes applied to elements
 export const classes = {
   // State classes
   active: 'tabs-active',
-  inactive: 'tabs-inactive',
   transitioning: 'tabs-transitioning',
 
   // Panel transition classes
   panelEntering: 'tabs-panel-entering',
   panelLeaving: 'tabs-panel-leaving',
 
-  // Button state classes
-  buttonDisabled: 'tabs-button-disabled',
+  // Scroll position state classes
+  atStart: 'tabs-at-start',
+  atEnd: 'tabs-at-end',
 
   // Autoplay state classes
   playing: 'tabs-playing',
-
-  // Accessibility
-  reducedMotion: 'tabs-reduced-motion',
 };
 
 // CSS custom properties
@@ -75,7 +68,6 @@ export const cssProps = {
 
 // Default configuration values
 export const defaults = {
-  orientation: 'horizontal',
   autoplayDuration: 5000,
   transitionDuration: 200,
 };

@@ -25,7 +25,7 @@ function runAutoplayTick(instance: TabsInstance): void {
   if (progress >= 1) {
     const prevValue = state.activeValue;
     autoplay.advanceFn(instance);
-    if (state.activeValue === prevValue && !instance.config.loop) {
+    if (state.activeValue === prevValue) {
       stopAutoplay(instance, 'complete');
       return;
     }

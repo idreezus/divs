@@ -50,13 +50,6 @@
   outline-offset: 2px;
 }
 
-/* Navigation button disabled state */
-[data-tabs-prev].tabs-button-disabled,
-[data-tabs-next].tabs-button-disabled {
-  opacity: 0.5;
-  pointer-events: none;
-}
-
 /* Screen reader only utility */
 .tabs-sr-only {
   position: absolute;

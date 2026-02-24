@@ -46,3 +46,14 @@ export function setUrlParam(key: string, value: string): void {
   url.searchParams.set(key, value);
   window.history.replaceState({}, '', url.toString());
 }
+
+// Detects layout orientation from flex-direction
+export function detectOrientation(el: HTMLElement): 'horizontal' | 'vertical' {
+  const dir = getComputedStyle(el).flexDirection;
+  return dir === 'column' || dir === 'column-reverse' ? 'vertical' : 'horizontal';
+}
+
+// Detects text direction from computed style
+export function detectDirection(el: HTMLElement): 'ltr' | 'rtl' {
+  return getComputedStyle(el).direction === 'rtl' ? 'rtl' : 'ltr';
+}
